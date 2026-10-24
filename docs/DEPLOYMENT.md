@@ -21,3 +21,7 @@ docker compose up --build
 
 > [!IMPORTANT]
 > Le dépôt ne configure pas automatiquement ton compte Railway. Les instructions décrivent une procédure à exécuter et contrôler.
+
+## Frontend reproductible
+
+Le Dockerfile web utilise `npm ci` et le lockfile versionné. `.dockerignore` exclut les modules natifs de l’hôte, les builds et les fichiers d’environnement du contexte Docker. Le build Docker doit être vérifié séparément avant staging ; aucun déploiement n’est réalisé dans la mission frontend.

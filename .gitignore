@@ -9,3 +9,7 @@ __pycache__/
 .venv/
 staticfiles/
 .DS_Store
+
+*.tsbuildinfo
+apps/web/test-results/
+apps/web/playwright-report/
