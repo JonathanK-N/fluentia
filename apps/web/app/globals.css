@@ -19,6 +19,13 @@
   --danger: #a12535;
   --tint: #eaf1fc;
   --radius: 0.9rem;
+  --button-radius: 0.6rem;
+  --input-radius: 0.5rem;
+  --button-py: 0.8rem;
+  --button-px: 1.25rem;
+  --button-gap: 0.75rem;
+  --card-padding: 1.6rem;
+  --input-padding: 0.7rem;
   --shadow: 0 12px 40px #081b3509;
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -169,11 +176,11 @@ p {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
+  gap: var(--button-gap);
   min-height: 46px;
-  padding: 0.8rem 1.25rem;
+  padding: var(--button-py) var(--button-px);
   border: 1px solid transparent;
-  border-radius: 0.6rem;
+  border-radius: var(--button-radius);
   font-size: 0.82rem;
   font-weight: 600;
   line-height: 1.5;
@@ -457,7 +464,7 @@ p {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 1.6rem;
+  padding: var(--card-padding);
   box-shadow: var(--shadow);
   min-width: 0;
 }
@@ -610,11 +617,11 @@ p {
 .field input {
   min-width: 0;
   width: 100%;
-  border: 1px solid var(--border);
-  border-radius: 0.5rem;
+  border: 1px solid var(--control-border);
+  border-radius: var(--input-radius);
   background: var(--bg);
   color: var(--text);
-  padding: 0.7rem;
+  padding: var(--input-padding);
 }
 .field input[aria-invalid="true"] {
   border-color: var(--danger);
@@ -970,5 +977,7 @@ thead {
 }
 
 /* Les limites des champs gardent un contraste supérieur à 3:1. */
-.field input { border-color: var(--control-border); }
-.field input:disabled { opacity: .6; cursor: not-allowed; }
+.field input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
