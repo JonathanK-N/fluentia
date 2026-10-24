@@ -3,7 +3,7 @@ const catalogue = await fetch('catalogue.json').then(r => { if (!r.ok) throw new
 const app = document.querySelector('#app');
 const notice = document.querySelector('#notice');
 const dialog = document.querySelector('#confirm');
-let current, confirmAction, returnFocus, noticeTimer;
+let current, confirmAction, returnFocus, noticeTimer, initialized=false;
 let draft = '', voiceState = 'idle', voicePrevious = 'idle';
 const labels = { public:'Site public',auth:'Authentification',student:'Application étudiante',teacher:'Enseignants',school:'Établissements',admin:'Administration' };
 const esc = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -19,6 +19,7 @@ function navigate(id) { if(location.hash==='#'+id) render(); else location.hash=
 function ask(message,callback) { returnFocus=document.activeElement;confirmAction=callback;document.querySelector('#confirm-description').textContent=message;dialog.showModal();document.querySelector('#cancel-dialog').focus(); }
 document.querySelector('#cancel-dialog').addEventListener('click',()=>dialog.close());
 document.querySelector('#accept-dialog').addEventListener('click',()=>{const fn=confirmAction;dialog.close();fn?.();});
+document.querySelector('.skip').addEventListener('click',e=>{e.preventDefault();const main=document.querySelector('#contenu');if(main){main.tabIndex=-1;main.focus();}});
 dialog.addEventListener('close',()=>{if(returnFocus?.isConnected)returnFocus.focus();});
 function navigation(screen) {
  const dark=screen?.universe!=='Learn';
@@ -99,7 +100,7 @@ function render(){const [id='index',state='default']=location.hash.slice(1).spli
  const main=`<main id="contenu" class="${isPublic||isAuth?'public-main':'main'}">${intro}${body}${stateChooser()}</main>`;
  app.innerHTML=navigation(current)+(isPublic||isAuth?main:`<div class="workspace">${sidebar(current)}${main}</div>`)+`<footer class="footer"><span>© 2026 Fluentia · Jonathan Kakesa</span><span>Référence locale · ${esc(current.route)} · Aucun service métier connecté</span></footer>`;
  document.querySelector('#view-state').value=state;
- document.querySelector('h1')?.focus({preventScroll:true});window.scrollTo(0,0);
+ if(initialized)document.querySelector('h1')?.focus({preventScroll:true});initialized=true;window.scrollTo(0,0);
 }
 window.addEventListener('hashchange',render);
 app.addEventListener('input',e=>{if(e.target.id==='writing'){draft=e.target.value;document.querySelector('#word-count').textContent=`${draft.trim()?draft.trim().split(/\s+/).length:0} mots`;}if(e.target.id==='filter'){const q=e.target.value.toLocaleLowerCase('fr');let visible=0;document.querySelectorAll('tbody tr').forEach(row=>{row.hidden=!row.textContent.toLocaleLowerCase('fr').includes(q);if(!row.hidden)visible++;});document.querySelector('#filter-empty').hidden=visible>0;}});
