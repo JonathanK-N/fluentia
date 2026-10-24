@@ -1,6 +1,14 @@
-# Consolidation des PR #1 et #2 — audit préalable
+# Consolidation des PR #1 et #2
 
-Responsable : Jonathan Kakesa. 24 octobre 2026. Aucune fusion réalisée.
+Responsable : Jonathan Kakesa. 24 octobre 2026.
+
+## État après autorisation du point A
+
+Jonathan Kakesa a autorisé la fusion de la PR #1. Fusion GitHub effectuée vers dev au commit `62f6ff43dcd0e03e006849e317b20a4c4795adfc`, depuis le HEAD approuvé `826f08d198b6ba9d861e5eeb01851300d22e6650`. Aucun squash, rebase, force push ou suppression de branche.
+
+Sur `design/ux-ui-02`, une fusion ordinaire de ce dev a produit `32ed8a5b8cdc40acf985596232a5c0b66c733e66`. Les deux conflits prévus ont été résolus : ci.yml garde tous les contrôles frontend/API/Docker de la PR #1 ; .gitignore réunit les exclusions des deux lots. Le workflow UX/UI autonome est conservé. Les dossiers apps/ et ci.yml sont identiques à dev ; les références UX/UI ne remplacent pas le frontend React. README conserve les deux guides et indique la stratégie Code-First approuvée.
+
+Le [rapport de validation PR #2](VALIDATION_PR_02.md) documente les exécutions sur l’ensemble intégré. La PR #2 reste non fusionnée, en attente de sa propre autorisation au point B. tests et main sont inchangés. L’audit initial ci-dessous reste conservé avec ses références historiques.
 
 ## Références relues
 
@@ -35,6 +43,6 @@ Sur `dc151f766cc5498e64efe9591f736ea69db8c232`, [UX/UI PR 40107493479](https://g
 
 Le [rapport UX/UI](https://github.com/JonathanK-N/fluentia/blob/dc151f766cc5498e64efe9591f736ea69db8c232/docs/ux-ui-02/REPORT.md) garde sa valeur historique : références légales et éditeurs partiels, synchronisation native absente, capture zoom partielle, recette humaine non effectuée. Le dépassement local Windows n’est pas un succès. L’ADR 002 lève seulement le blocage de progression dû au quota Figma.
 
-## État et prochaine étape
+## État au terme de l’audit initial, avant autorisation
 
 **dev non consolidé.** Rapport technique de la PR #1 disponible dans [VALIDATION_PR_01.md](VALIDATION_PR_01.md). L’intégration et la validation combinée de la PR #2 ne sont pas exécutées avant le point A. La branche `frontend/mission-02-landing` et l’accueil Frontend 02 ne sont pas créés. Le second rapport de validation et les livrables d’accueil restent à produire après les étapes autorisées.

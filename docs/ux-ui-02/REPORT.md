@@ -2,6 +2,8 @@
 
 Responsable : Jonathan Kakesa. 24 octobre 2026. Branche `design/ux-ui-02`, issue de dev `6fe83c281d9b2d94499a0208f8bd4ef3251edc5a`. [PR #2](https://github.com/JonathanK-N/fluentia/pull/2) en brouillon ; PR #1 non écrasée et non fusionnée.
 
+**Statut historique ci-dessous :** ce rapport concerne la livraison UX/UI avant la mission Frontend 02. Depuis, la stratégie [Code-First](../DECISIONS/002-code-first-et-consolidation.md) a été explicitement approuvée et la PR #1 fusionnée vers dev avec autorisation au commit `62f6ff43dcd0e03e006849e317b20a4c4795adfc`. Ce dev est intégré dans la branche de la PR #2. Le [rapport du point B](../VALIDATION_PR_02.md) donne le statut technique actuel et les nouveaux SHA/tests. Le NO-GO de conception native complète et les limites ci-dessous restent vrais ; le quota Figma seul n’empêche plus l’avancement technique autorisé.
+
 ## État initial et état final
 
 La PR #1 reste sur `82c5a0ecff25bc81cdf0366a274024d578fbf7a5`, avec ses derniers runs réussis et un NO-GO Figma. Les branches permanentes ont été relues. La lecture Figma actuelle a été tentée puis refusée pour quota Starter ; le contrôle de compte retourne un siège View. L’édition effective n’a donc pas pu être confirmée. [Audit détaillé](AUDIT.md).

@@ -2,6 +2,8 @@
 
 Responsable et propriétaire : Jonathan Kakesa. 24 octobre 2026.
 
+**Mise à jour après le point A :** Jonathan Kakesa a explicitement autorisé la fusion. La PR #1 est fusionnée vers dev au commit `62f6ff43dcd0e03e006849e317b20a4c4795adfc`, avec conservation de l’historique. Le HEAD approuvé était `826f08d198b6ba9d861e5eeb01851300d22e6650` ; ses deux CI [40112949813](https://github.com/JonathanK-N/fluentia/actions/runs/40112949813) et [40112945620](https://github.com/JonathanK-N/fluentia/actions/runs/40112945620) étaient réussies. Les formulations d’attente ci-dessous décrivent le rapport présenté avant cette autorisation. Voir le [point B](VALIDATION_PR_02.md).
+
 ## Décision proposée
 
 **GO technique pour intégration de la PR #1 vers dev, sous autorisation explicite du propriétaire.** La stratégie [Code-First approuvée](DECISIONS/002-code-first-et-consolidation.md) permet de différer la synchronisation Figma. Aucun autre défaut bloquant n’a été identifié dans le périmètre audité. Ce GO n’est ni une certification d’accessibilité, ni une validation de production, ni une autorisation de fusion.

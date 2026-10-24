@@ -4,7 +4,7 @@ Propriétaire et responsable : Jonathan Kakesa. Spécifications v2.0 reçues le 
 
 Documents fournis : [cahier UX/UI v2](sources/CAHIER_UX_UI_V2.md) et [mission UX/UI 02](sources/MISSION_UX_UI_02.md). Les statuts du présent dossier distinguent la demande, les réalisations locales et les opérations Figma bloquées.
 
-**Mission de conception, sans implémentation Frontend 02.** La [PR #2 vers dev](https://github.com/JonathanK-N/fluentia/pull/2) est indépendante de la [PR #1](https://github.com/JonathanK-N/fluentia/pull/1), non fusionnée. Le verdict de livraison complète reste NO-GO tant que Figma et la recette finale sont bloqués.
+**Mission de conception, sans implémentation Frontend 02.** La [PR #1](https://github.com/JonathanK-N/fluentia/pull/1) est désormais fusionnée dans dev après autorisation ; ce dev est intégré dans la branche de la [PR #2](https://github.com/JonathanK-N/fluentia/pull/2). La [validation technique du point B](../VALIDATION_PR_02.md) distingue la préparation à l’intégration de la livraison de conception complète. La stratégie [Code-First approuvée](../DECISIONS/002-code-first-et-consolidation.md) permet de différer Figma, qui reste incomplet dans le [backlog](../FIGMA_SYNC_BACKLOG.md). La PR #2 attend sa propre autorisation de fusion.
 
 | Livrable | Référence | Statut |
 |---|---|---|
@@ -33,4 +33,4 @@ Le prototype écoute uniquement 127.0.0.1. Il affiche des données fictives et n
 
 ## Gouvernance
 
-Aucune nouvelle identité, aucun SVG de substitution, aucun témoignage ni résultat officiel inventé. Les métadonnées Git existantes sont conservées ; aucune signature promotionnelle ajoutée. Aucun forfait payant, merge ou déploiement. La stratégie dev → tests → main demeure applicable. La mission Frontend 02 nécessite une décision explicite de Jonathan Kakesa.
+Aucune nouvelle identité, aucun SVG de substitution, aucun témoignage ni résultat officiel inventé. Les métadonnées Git existantes sont conservées ; aucune signature promotionnelle ajoutée. Aucun forfait payant ni déploiement. La fusion de la PR #1 est autorisée et effectuée ; celle de la PR #2 attend le point B. La stratégie dev → tests → main demeure applicable. Le développement Frontend 02 commence après la consolidation autorisée et validée de dev.
