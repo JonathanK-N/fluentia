@@ -11,3 +11,4 @@ staticfiles/
 .DS_Store
 design/ux-ui-02/test-results/
 design/ux-ui-02/playwright-report/
+*.tsbuildinfo
