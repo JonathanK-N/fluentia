@@ -13,6 +13,7 @@ const config = [
       "next-env.d.ts",
       "test-results/**",
       "playwright-report/**",
+      "tests/fixtures/zoom/background.js",
     ],
   },
   ...compat.extends("next/core-web-vitals", "next/typescript"),

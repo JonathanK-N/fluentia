@@ -2,7 +2,7 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 for (const width of [375, 768, 1440]) {
-  test(`accueil et catalogue à ${width}px`, async ({ page }) => {
+  test(`accueil et catalogue à ${width}px`, async ({ page }, info) => {
     const errors: string[] = [];
     page.on("pageerror", (error) => errors.push(error.message));
     await page.setViewportSize({ width, height: 900 });
@@ -15,10 +15,11 @@ for (const width of [375, 768, 1440]) {
     ).toBe(true);
     expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
     await page.screenshot({
-      path: `test-results/accueil-${width}.png`,
+      path: info.outputPath(`accueil-${width}.png`),
       fullPage: true,
     });
     await page.goto("/design-system");
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.getByRole("button", { name: "Ouvrir la fenêtre" }).click();
     await expect(page.getByRole("dialog")).toBeVisible();
     await page.keyboard.press("Escape");
@@ -27,7 +28,7 @@ for (const width of [375, 768, 1440]) {
     ).toBeFocused();
     expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
     await page.screenshot({
-      path: `test-results/catalogue-${width}.png`,
+      path: info.outputPath(`catalogue-${width}.png`),
       fullPage: true,
     });
     expect(errors).toEqual([]);

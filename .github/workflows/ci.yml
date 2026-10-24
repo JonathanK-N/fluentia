@@ -24,7 +24,7 @@ jobs:
       - run: npm run typecheck
       - run: npm run test
       - run: npm run build
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install --with-deps chromium firefox webkit
       - run: npm run test:e2e
       - uses: actions/upload-artifact@v4
         if: always()
@@ -47,3 +47,25 @@ jobs:
       - run: pip install -r requirements.txt
       - run: python manage.py check
       - run: python manage.py test
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker version
+      - name: Construire le frontend
+        run: docker build --tag fluentia-web:validation apps/web
+      - name: Démarrer et contrôler le conteneur
+        shell: bash
+        run: |
+          docker run --detach --name fluentia-web-validation -p 127.0.0.1:3200:3000 fluentia-web:validation
+          trap 'docker logs fluentia-web-validation; docker rm -f fluentia-web-validation' EXIT
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:3200/ > /tmp/fluentia-home.html; then break; fi
+            sleep 1
+          done
+          grep -q 'Fluentia' /tmp/fluentia-home.html
+          curl --fail --silent http://127.0.0.1:3200/design-system > /tmp/fluentia-catalogue.html
+          grep -q 'Couleurs' /tmp/fluentia-catalogue.html
+          curl --fail --silent http://127.0.0.1:3200/manifest.webmanifest
+          curl --fail --silent http://127.0.0.1:3200/branding/02_Icons_PWA/icon-192x192.png > /tmp/fluentia-icon.png

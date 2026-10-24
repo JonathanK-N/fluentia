@@ -11,6 +11,7 @@
   --text: #081b35;
   --muted: #52647a;
   --border: #c9d4e3;
+  --control-border: #71829a;
   --action: #1769e0;
   --on-action: #fff;
   --accent: #086b82;
@@ -35,6 +36,7 @@
   --text: #f7faff;
   --muted: #b7c9df;
   --border: #526982;
+  --control-border: #7e94ae;
   --action: #21d4f4;
   --on-action: #081b35;
   --accent: #21d4f4;
@@ -50,6 +52,7 @@
     --text: #f7faff;
     --muted: #b7c9df;
     --border: #526982;
+  --control-border: #7e94ae;
     --action: #21d4f4;
     --on-action: #081b35;
     --accent: #21d4f4;
@@ -965,3 +968,7 @@ thead {
 .card-label {
   margin-top: auto;
 }
+
+/* Les limites des champs gardent un contraste supérieur à 3:1. */
+.field input { border-color: var(--control-border); }
+.field input:disabled { opacity: .6; cursor: not-allowed; }
