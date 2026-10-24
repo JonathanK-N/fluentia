@@ -26,7 +26,7 @@ Documents : [audit préalable et référence ergonomique](HUMAN_CENTERED_UX.md),
 | PR de livraison | [#3, branche frontend/mission-02-landing](https://github.com/JonathanK-N/fluentia/pull/3) | Brouillon vers dev ; aucune fusion |
 | main et tests | `6fe83c281d9b2d94499a0208f8bd4ef3251edc5a` | Inchangés par ce lot |
 
-Ce rapport référence le **SHA du code mesuré**, sans lui substituer le commit documentaire qui ajoute les preuves. Le HEAD documentaire et ses contrôles sont identifiés dans la PR. Les résultats au SHA `d8abfa06e3403d7069d26656b77c8c31feff4ab9` restent archivés dans [frontend-02.json](evidence/frontend-02.json) ; ils ne sont pas la validation de v3.
+Ce rapport référence le **SHA source de la recette figée et des captures**, sans lui substituer le commit qui ajoute les preuves ou une correction ultérieure. Le HEAD livré et ses contrôles sont identifiés dans la PR. Les résultats au SHA `d8abfa06e3403d7069d26656b77c8c31feff4ab9` restent archivés dans [frontend-02.json](evidence/frontend-02.json) ; ils ne sont pas la validation de v3.
 
 ## Recette technique
 
@@ -57,6 +57,8 @@ Les dépendances de développement locales Windows sont incomplètes : aucune r�
 Le premier cycle v3 [40136190302](https://github.com/JonathanK-N/fluentia/actions/runs/40136190302) a produit 55 réussites / 6 échecs / 2 exclusions : lien actif à 4,47:1. Son texte utilise maintenant `#1358BD` sur `#EAF1FC`, soit **5,853:1**. Le cycle [40136744840](https://github.com/JonathanK-N/fluentia/actions/runs/40136744840) a produit 58 réussites / 3 échecs / 2 exclusions : le sélecteur d’erreur rencontrait aussi l’annonceur Next.js, corrigé en ciblant le main du pilote.
 
 L’inspection locale a révélé la perte du focus après Réessayer lorsque les options étaient refermées : le focus retourne désormais au résumé visible. L’inspection Firefox a révélé le symbole du coach non chargé hors écran : le PNG officiel est chargé immédiatement, avec vérification de décodage avant capture.
+
+La relecture après le checkpoint figé a étendu la teinte accessible au survol du bouton des compétences, lui aussi sur fond bleuté. La recette actuelle ajoute un contrôle Axe avec ce bouton survolé. Ce complément ne doit pas être attribué au SHA source des captures ; son résultat et son SHA sont ceux du HEAD livré dans la PR.
 
 Les cycles [40137179226](https://github.com/JonathanK-N/fluentia/actions/runs/40137179226) et [40137325440](https://github.com/JonathanK-N/fluentia/actions/runs/40137325440) ont produit 60 réussites / 1 échec / 2 exclusions. La trace WebKit montre la sphère hors écran après le clic automatisé ; sa suspension est attendue. Le test la place maintenant dans le viewport avant de vérifier sa réaction, sans désactiver la garde. Les deux Quality au SHA source ci-dessus sont ensuite réussies.
 

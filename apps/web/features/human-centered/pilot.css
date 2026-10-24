@@ -639,6 +639,9 @@
   font-weight: 500;
   color: var(--action);
 }
+.student-skill-grid .student-action:hover {
+  color: var(--action-on-tint);
+}
 .student-next-grid {
   display: grid;
   grid-template-columns: 1.1fr 1fr;

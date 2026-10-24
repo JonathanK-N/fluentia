@@ -97,6 +97,8 @@ test("dashboard : exemple rempli, erreur et dialogue sans fonction fictivement o
   await page.getByRole("button", { name: "Réessayer", exact: true }).click();
   await expect(options).toBeFocused();
   await page.setViewportSize({ width: 375, height: 900 });
+  await page.locator(".student-skill-grid .student-action").first().hover();
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
