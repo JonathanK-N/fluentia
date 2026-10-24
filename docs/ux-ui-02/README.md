@@ -33,4 +33,6 @@ Le prototype écoute uniquement 127.0.0.1. Il affiche des données fictives et n
 
 ## Gouvernance
 
+Mise à jour de consolidation : la PR #2 est désormais fusionnée après sa propre autorisation. L’accueil React est développé séparément dans la [PR #3](https://github.com/JonathanK-N/fluentia/pull/3) ; les références locales restent des documents de conception et Figma reste incomplet. Les formulations d’attente ci-dessus concernent les étapes antérieures à cette décision.
+
 Aucune nouvelle identité, aucun SVG de substitution, aucun témoignage ni résultat officiel inventé. Les métadonnées Git existantes sont conservées ; aucune signature promotionnelle ajoutée. Aucun forfait payant ni déploiement. La fusion de la PR #1 est autorisée et effectuée ; celle de la PR #2 attend le point B. La stratégie dev → tests → main demeure applicable. Le développement Frontend 02 commence après la consolidation autorisée et validée de dev.

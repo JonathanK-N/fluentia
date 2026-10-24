@@ -24,6 +24,8 @@ L’inscription et la connexion pointent vers l’explication de disponibilité,
 
 `app/page.tsx` compose des modules dans `features/landing/`. Seuls les comportements nécessitent des composants client. Le contenu SSR reste visible ; sans JavaScript, la FAQ et les ancres fonctionnent, la sphère est statique et un message explique la limite de la démo.
 
+Le repli de chargement est conservé dans `app/design-system/loading.tsx` plutôt qu’à la racine : la page publique ne dépend plus d’un script de révélation de la frontière de chargement pour être lue. Le repli d’erreur global reste en place. La préférence de mouvement est observée de façon réactive et partagée via Providers ; le bouton de pause a un pictogramme SVG décoratif distinct de son libellé visible/accessibilité.
+
 Les primitives, tokens, PNG et Poppins existants sont réutilisés. Les sélecteurs Discover et Learn réemploient les mêmes déclarations sémantiques de globals.css, sans copie de palette. L’accueil Discover reste sombre ; le sélecteur système/manuel reste disponible dans `/design-system`. Le logo officiel sombre est sélectionné explicitement pour Discover. Le footer détaillé remplace le footer générique uniquement sur l’accueil.
 
 ## Mouvement et poids

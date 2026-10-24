@@ -6,7 +6,9 @@ Responsable : Jonathan Kakesa.
 
 Le hero utilise une apparition ponctuelle de 650 ms, sans masquer le HTML initial. Le repère de lecture suit useScroll ; les sections réutilisent Reveal. VoiceOrb anime seulement rotation/échelle avec Motion, sur une sphère CSS. useInView et visibilitychange suspendent les boucles hors écran/page masquée. Les états pause/fin/erreur arrêtent également la sphère.
 
-`Providers` expose une pause globale ; MotionConfig passe à always et les animations/transitions/défilements CSS sont neutralisés. `prefers-reduced-motion` garde les sphères statiques et supprime le repère de lecture. Texte et commandes expliquent les états sans dépendre du mouvement. Aucun WebGL ni média à charger ; aucun gain de performance chiffré non mesuré. Sources et arbitrages dans [ADR 003](DECISIONS/003-accueil-discover.md). La recette est en cours, résultats dans [FRONTEND_02.md](FRONTEND_02.md).
+`Providers` expose une pause globale et observe la media query avec useSyncExternalStore, y compris ses changements à chaud. MotionConfig reçoit always si réduction ou pause, sinon never ; la politique système est centralisée. Le hook useReducedMotion de la version installée conserve sa valeur initiale et ne réactualise pas React sur changement système : cette limite a été constatée en recette, d’où l’abonnement explicite. Le snapshot serveur false et le DOM initial stable évitent une divergence d’hydratation ; CSS applique aussi la media query.
+
+Les animations/transitions/défilements CSS sont neutralisés sous réduction/pause. Le repère reste dans le HTML et est masqué par CSS, sans retirer conditionnellement un nœud au premier rendu client. Texte et commandes expliquent les états sans dépendre du mouvement. Aucun WebGL ni média à charger ; aucun gain de performance chiffré non mesuré. Sources et arbitrages dans [ADR 003](DECISIONS/003-accueil-discover.md). Résultats dans [FRONTEND_02.md](FRONTEND_02.md).
 
 ## Socle initial, conservé ci-dessous
 

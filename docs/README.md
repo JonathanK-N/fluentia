@@ -4,7 +4,7 @@ Responsable : Jonathan Kakesa.
 
 Mission en cours : [Frontend 02](FRONTEND_02.md). [Validation PR #1 — point A](VALIDATION_PR_01.md), [audit de consolidation](CONSOLIDATION_PR_01_02.md), [décision Code-First](DECISIONS/002-code-first-et-consolidation.md) et [backlog Figma](FIGMA_SYNC_BACKLOG.md).
 
-La PR #1 est intégrée après autorisation ; [validation PR #2 — point B](VALIDATION_PR_02.md).
+Les PR #1 et #2 sont intégrées après autorisations successives ; [validation PR #2 — point B](VALIDATION_PR_02.md). [Accueil Discover Frontend 02](LANDING_PAGE.md), [rapport actuel](FRONTEND_02.md) et [ADR 003](DECISIONS/003-accueil-discover.md).
 
 | Sujet | Référence |
 |---|---|

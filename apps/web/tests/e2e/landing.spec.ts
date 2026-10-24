@@ -115,7 +115,15 @@ test("mouvement réduit et pause manuelle conservent les contenus", async ({
   await expect(pause).toHaveAttribute("aria-pressed", "true");
   await expect(orb).toHaveAttribute("data-animated", "false");
   await expect(page.locator("html")).toHaveCSS("scroll-behavior", "auto");
+  const card = page.locator(".skill-card").first();
+  await card.hover();
+  await expect(card).toHaveCSS("transform", "none");
+  await page.evaluate(() => window.scrollTo(0, 0));
   await pause.click();
+  await expect(orb).toHaveAttribute("data-animated", "true");
+  await page.locator("#voice").scrollIntoViewIfNeeded();
+  await expect(orb).toHaveAttribute("data-animated", "false");
+  await page.evaluate(() => window.scrollTo(0, 0));
   await expect(orb).toHaveAttribute("data-animated", "true");
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(orb).toHaveAttribute("data-animated", "false");

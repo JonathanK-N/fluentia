@@ -862,6 +862,10 @@ html[data-motion="paused"] {
 html[data-motion="paused"] .reading-progress {
   display: none;
 }
+html[data-motion="paused"] .skill-card:hover,
+html[data-motion="paused"] .competency:hover {
+  transform: none;
+}
 html[data-motion="paused"] *,
 html[data-motion="paused"] *::before,
 html[data-motion="paused"] *::after {

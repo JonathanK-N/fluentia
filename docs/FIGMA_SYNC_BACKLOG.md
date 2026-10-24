@@ -8,6 +8,8 @@ Les créations et captures historiques de Frontend 01 ne constituent pas une bib
 
 ## Priorités
 
+L’accueil React Frontend 02 est désormais implémenté ; sa synchronisation native reste à effectuer à partir du SHA et des captures réellement validés dans [FRONTEND_02.md](FRONTEND_02.md). Aucun nouveau nœud Figma n’est obtenu dans ce lot. Inclure la sphère statique/animée, les sept états Voice, le menu/pause, les offres non commerciales et le dashboard fictif, en conservant leurs avertissements de disponibilité.
+
 | Priorité | Travail restant | Preuve attendue |
 |---|---|---|
 | P1 | Corriger les auto-layouts, contraintes, navigation et champs des compositions Frontend 01 | Captures inspectées des six formats et absence de chevauchements |
