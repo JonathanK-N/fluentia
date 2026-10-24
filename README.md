@@ -11,6 +11,8 @@
 
 ## Mission UX/UI 02 — conception
 
+**Pilotes Human-Centered v3 :** accueil clair sur `/` et tableau de bord sans compte sur `/apercu/etudiant`. Consulter [la direction proposée](docs/DESIGN_DIRECTION_V3.md), [l’audit](docs/HUMAN_CENTERED_UX.md) et [la revue avec captures et contrôles](docs/UX_REVIEW.md). La [PR #3](https://github.com/JonathanK-N/fluentia/pull/3) reste en brouillon vers `dev`. Les 62 références historiques ne sont pas refondues ; généralisation, fusion et déploiement attendent une décision explicite.
+
 Les [spécifications et références locales](docs/ux-ui-02/README.md) couvrent Discover, Learn et Voice. Le [rapport GO/NO-GO](docs/ux-ui-02/REPORT.md) distingue les livrables locaux, les éléments partiels et la conception native Figma bloquée par le quota. Ces références ne sont pas des pages métier implémentées ni des maquettes Figma enregistrées. Aucune fusion ni mise en production automatique.
 
 > [!IMPORTANT]

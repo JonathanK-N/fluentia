@@ -5,7 +5,8 @@ Responsable : Jonathan Kakesa. Proposition de conception, pas une migration glob
 | Rôle | Valeur pilote | Usage |
 |---|---|---|
 | Marque principale | #081B35 | Texte, identité |
-| Action | #1769E0 | Bouton principal et navigation active |
+| Action | #1769E0 | Bouton principal sur blanc |
+| Action sur teinte | #1358BD | Navigation active sur #EAF1FC ; correction du contraste initial à 4,47:1 |
 | Cyan | #21D4F4 | Accent vocal ponctuel, pas de texte courant sur blanc |
 | Fond | #F8FAFC | Zone de travail |
 | Surface | #FFFFFF | Cartes, navigation |

@@ -4,6 +4,8 @@ Responsable : Jonathan Kakesa.
 
 ## Accueil Frontend 02 — recette ajoutée
 
+**Pilotes v3 :** accueil clair sur `/`, dashboard interactif de conception sur `/apercu/etudiant`. La nouvelle sidebar réelle est remplacée par un menu natif sous 900 px ; compétences 4/2/1 colonnes. L’historique rempli possède son propre défilement focalisable. La nouvelle recette à sept largeurs, trois moteurs et zoom Chromium est suivie dans [UX_REVIEW.md](UX_REVIEW.md). La description du dashboard décoratif ci-dessous est historique.
+
 Les tests ciblent 320, 375, 390, 768, 1024, 1440 et 1920 px, et les grilles à 600/900/1280 en complément. Navigation compacte sous 900 ; hero sur une colonne sous 600 ; compétences 4/2/1 colonnes ; parcours 5/3/1 ; offres 3/1. Aucun écran n’impose une scène 3D ou une largeur fixe. Les contrôles vérifient débordement et intersections des cartes. Le dashboard est une référence non interactive dont la barre latérale décorative disparaît sur petit écran. Les valeurs historiques ci-dessous concernent la mission 01 ; la nouvelle recette et son inspection sont suivies dans [FRONTEND_02.md](FRONTEND_02.md).
 
 Conteneur : maximum 1240 px, marges de 32 px puis 20 px sur mobile. La grille des compétences passe de quatre à deux colonnes sous 1000 px et à une sous 700 px. La navigation mobile utilise un panneau `details` ; les liens restent accessibles au clavier. La composition hero et les démonstrations passent à une colonne sous 700 px. La décoration est contenue dans le hero ; les tableaux défilent dans leur propre conteneur.

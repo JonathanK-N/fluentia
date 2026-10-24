@@ -40,6 +40,12 @@ test("dashboard aux sept largeurs sans données réelles", async ({
     checks.push({ width, overflow: false, scenario: "empty" });
   }
   expect(errors).toEqual([]);
+  await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
+  await expect(page.locator(".student-preview")).toHaveCSS(
+    "color-scheme",
+    "light",
+  );
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   await writeFile(
     info.outputPath("responsive.json"),
     JSON.stringify(checks, null, 2),
@@ -70,6 +76,10 @@ test("dashboard : exemple rempli, erreur et dialogue sans fonction fictivement o
   await error.click();
   await expect(page.getByRole("alert")).toBeVisible();
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await page.screenshot({
+    path: info.outputPath("etudiant-indisponible.png"),
+    fullPage: true,
+  });
   await page.getByRole("button", { name: "Réessayer", exact: true }).click();
   await expect(error).toBeFocused();
   const resume = page.getByRole("button", {
@@ -81,6 +91,22 @@ test("dashboard : exemple rempli, erreur et dialogue sans fonction fictivement o
   );
   await page.keyboard.press("Escape");
   await expect(resume).toBeFocused();
+  await page.setViewportSize({ width: 375, height: 900 });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  const history = page.getByRole("region", {
+    name: "Historique des activités de démonstration",
+  });
+  await history.focus();
+  await expect(history).toBeFocused();
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await page.screenshot({
+    path: info.outputPath("etudiant-exemple-mobile.png"),
+    fullPage: true,
+  });
   expect(await page.locator("audio,video,canvas,iframe").count()).toBe(0);
 });
 test("dashboard : navigation mobile et lien d’évitement", async ({ page }) => {
