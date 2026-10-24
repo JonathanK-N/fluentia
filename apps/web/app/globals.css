@@ -948,3 +948,20 @@ thead {
     scroll-behavior: auto !important;
   }
 }
+
+/* Le lien reste focalisable mais ne fuit pas dans les captures de page entière. */
+.skip-link {
+  opacity: 0;
+  pointer-events: none;
+}
+.skip-link:focus {
+  opacity: 1;
+  pointer-events: auto;
+}
+.competency {
+  display: flex;
+  flex-direction: column;
+}
+.card-label {
+  margin-top: auto;
+}

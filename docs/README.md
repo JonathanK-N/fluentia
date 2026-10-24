@@ -22,3 +22,5 @@ Responsable : Jonathan Kakesa.
 | Accueil | [LANDING_PLAN.md](LANDING_PLAN.md) |
 
 Conception : [FIGMA.md](FIGMA.md).
+
+Dépendances et licences : [DEPENDENCIES.md](DEPENDENCIES.md).
