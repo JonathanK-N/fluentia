@@ -6,5 +6,5 @@ export default defineConfig({
     setupFiles: ["./tests/setup.ts"],
     include: ["tests/**/*.test.tsx"],
   },
-  esbuild: { jsx: "automatic" },
+  oxc: { jsx: { runtime: "automatic" } },
 });

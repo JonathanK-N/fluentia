@@ -6,7 +6,9 @@ import { Logo } from "../branding/logo";
 import { Button } from "../ui/primitives";
 export function Header() {
   const menuRef = useRef<HTMLDetailsElement>(null);
-  function closeMenu() { if (menuRef.current) menuRef.current.open = false; }
+  function closeMenu() {
+    if (menuRef.current) menuRef.current.open = false;
+  }
   const [theme, setTheme] = useState<"light" | "dark" | null>(null);
   function toggleTheme() {
     const current =
@@ -37,9 +39,15 @@ export function Header() {
           <details ref={menuRef} className="mobile-menu">
             <summary>Menu</summary>
             <nav aria-label="Navigation mobile">
-              <Link onClick={closeMenu} href="/#modules">Les compétences</Link>
-              <Link onClick={closeMenu} href="/#approche">Notre approche</Link>
-              <Link onClick={closeMenu} href="/design-system">Design system</Link>
+              <Link onClick={closeMenu} href="/#modules">
+                Les compétences
+              </Link>
+              <Link onClick={closeMenu} href="/#approche">
+                Notre approche
+              </Link>
+              <Link onClick={closeMenu} href="/design-system">
+                Design system
+              </Link>
             </nav>
           </details>
         </div>

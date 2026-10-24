@@ -1,6 +1,6 @@
 # Développement frontend
 
-Responsable : Jonathan Kakesa. Prérequis de référence : Node.js 22 et npm.
+Responsable : Jonathan Kakesa. Prérequis de référence : Node.js 22.12 minimum (22 LTS de référence) et npm.
 
 ```bash
 cd apps/web
