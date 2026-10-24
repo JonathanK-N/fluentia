@@ -3,7 +3,7 @@ import {test,expect} from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import {readFileSync,writeFileSync} from 'node:fs';
 const catalogue=JSON.parse(readFileSync(new URL('../catalogue.json',import.meta.url)));
-async function go(page,id){await page.goto('/#'+id);await expect(page.locator('h1')).toBeVisible();await page.evaluate(()=>document.fonts.ready);}
+async function go(page,id){await page.goto('/#'+id);const screen=catalogue.screens.find(s=>s.id===id.split(':')[0]);if(screen)await expect(page).toHaveTitle(`${screen.title} · Référence Fluentia`);await expect(page.locator('h1')).toBeVisible();await page.evaluate(async()=>{await document.fonts.ready;await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));});if(screen&&await page.locator('.card').count())await expect(page.locator('.card').first()).toHaveCSS('background-color',screen.universe==='Learn'?'rgb(255, 255, 255)':'rgb(16, 41, 68)');}
 async function at(page,id){await expect(page).toHaveURL(new RegExp('#'+id+'$'));}
 for(const width of [375,768,1440])test(`62 écrans à ${width}px`,async({page},info)=>{
  await page.setViewportSize({width,height:1000});const errors=[];page.on('pageerror',e=>errors.push(e.message));const checks=[];
