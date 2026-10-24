@@ -14,6 +14,7 @@ for (const width of [375, 768, 1440]) {
       ),
     ).toBe(true);
     expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+    await page.screenshot({ path: `test-results/accueil-${width}.png`, fullPage: true });
     await page.goto("/design-system");
     await page.getByRole("button", { name: "Ouvrir la fenêtre" }).click();
     await expect(page.getByRole("dialog")).toBeVisible();
@@ -22,6 +23,7 @@ for (const width of [375, 768, 1440]) {
       page.getByRole("button", { name: "Ouvrir la fenêtre" }),
     ).toBeFocused();
     expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+    await page.screenshot({ path: `test-results/catalogue-${width}.png`, fullPage: true });
     expect(errors).toEqual([]);
   });
 }

@@ -149,14 +149,14 @@ export function Showcase() {
                 variant="secondary"
                 onClick={() => setValue(Math.max(0, value - 10))}
                 disabled={value === 0}
-                aria-label="Diminuer la progression"
+                aria-label="− 10 : diminuer la progression"
               >
                 − 10
               </Button>
               <Button
                 onClick={() => setValue(Math.min(100, value + 10))}
                 disabled={value === 100}
-                aria-label="Augmenter la progression"
+                aria-label="+ 10 : augmenter la progression"
               >
                 + 10
               </Button>
