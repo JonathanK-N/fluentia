@@ -1,0 +1,120 @@
+{
+  "screens": 62,
+  "flows": 8,
+  "assets": 3,
+  "contrastPairs": [
+    {
+      "theme": "Learn",
+      "foreground": "text",
+      "background": "bg",
+      "ratio": 16.474,
+      "minimum": 4.5
+    },
+    {
+      "theme": "Learn",
+      "foreground": "muted",
+      "background": "surface",
+      "ratio": 6.065,
+      "minimum": 4.5
+    },
+    {
+      "theme": "Learn",
+      "foreground": "on-action",
+      "background": "action",
+      "ratio": 5.081,
+      "minimum": 4.5
+    },
+    {
+      "theme": "Learn",
+      "foreground": "accent",
+      "background": "tint",
+      "ratio": 5.381,
+      "minimum": 4.5
+    },
+    {
+      "theme": "Learn",
+      "foreground": "danger",
+      "background": "surface",
+      "ratio": 7.417,
+      "minimum": 4.5
+    },
+    {
+      "theme": "Learn",
+      "foreground": "control-border",
+      "background": "bg",
+      "ratio": 3.744,
+      "minimum": 3
+    },
+    {
+      "theme": "Learn",
+      "foreground": "control-border",
+      "background": "surface",
+      "ratio": 3.917,
+      "minimum": 3
+    },
+    {
+      "theme": "Learn",
+      "foreground": "focus",
+      "background": "bg",
+      "ratio": 4.856,
+      "minimum": 3
+    },
+    {
+      "theme": "Discover/Voice",
+      "foreground": "text",
+      "background": "bg",
+      "ratio": 16.474,
+      "minimum": 4.5
+    },
+    {
+      "theme": "Discover/Voice",
+      "foreground": "muted",
+      "background": "surface",
+      "ratio": 8.74,
+      "minimum": 4.5
+    },
+    {
+      "theme": "Discover/Voice",
+      "foreground": "on-action",
+      "background": "action",
+      "ratio": 9.674,
+      "minimum": 4.5
+    },
+    {
+      "theme": "Discover/Voice",
+      "foreground": "accent",
+      "background": "tint",
+      "ratio": 6.923,
+      "minimum": 4.5
+    },
+    {
+      "theme": "Discover/Voice",
+      "foreground": "danger",
+      "background": "surface",
+      "ratio": 8.604,
+      "minimum": 4.5
+    },
+    {
+      "theme": "Discover/Voice",
+      "foreground": "control-border",
+      "background": "bg",
+      "ratio": 5.527,
+      "minimum": 3
+    },
+    {
+      "theme": "Discover/Voice",
+      "foreground": "control-border",
+      "background": "surface",
+      "ratio": 4.734,
+      "minimum": 3
+    },
+    {
+      "theme": "Discover/Voice",
+      "foreground": "focus",
+      "background": "bg",
+      "ratio": 9.674,
+      "minimum": 3
+    }
+  ],
+  "figmaNativeDelivered": false
+}
