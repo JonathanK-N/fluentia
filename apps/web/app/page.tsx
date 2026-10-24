@@ -14,7 +14,7 @@ import {
 } from "../features/landing/pricing-faq";
 export default function Home() {
   return (
-    <main id="contenu" tabIndex={-1} className="landing discover">
+    <main id="contenu" tabIndex={-1} className="landing human-pilot">
       <Hero />
       <Competencies />
       <Coach />

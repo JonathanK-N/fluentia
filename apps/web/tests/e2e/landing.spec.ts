@@ -64,9 +64,7 @@ test("navigation mobile, Échap et destinations réelles", async ({ page }) => {
     .getByRole("link", { name: /Connexion et inscription/ })
     .click();
   await expect(page).toHaveURL(/#disponibilite$/);
-  await expect(
-    page.getByRole("heading", { name: /Une voix qui s’affirme/ }),
-  ).toBeVisible();
+  await expect(page.locator("#availability-title")).toBeVisible();
   expect(
     await page
       .locator('a[href^="#"]')
@@ -105,8 +103,10 @@ test("mouvement réduit et pause manuelle conservent les contenus", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
-  await page.goto("/");
-  const orb = page.locator(".hero-visual .fluentia-orb");
+  await page.goto("/#voice");
+  const orb = page.locator(".voice-stage .fluentia-orb");
+  await expect(orb).toHaveAttribute("data-animated", "false");
+  await page.getByRole("button", { name: /Lancer la démo/ }).click();
   await expect(orb).toHaveAttribute("data-animated", "true");
   const pause = page.getByRole("button", {
     name: "Mouvement — suspendre les animations",
@@ -118,17 +118,16 @@ test("mouvement réduit et pause manuelle conservent les contenus", async ({
   const card = page.locator(".skill-card").first();
   await card.hover();
   await expect(card).toHaveCSS("transform", "none");
-  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.locator("#voice").scrollIntoViewIfNeeded();
   await pause.click();
   await expect(orb).toHaveAttribute("data-animated", "true");
-  await page.locator("#voice").scrollIntoViewIfNeeded();
-  await expect(orb).toHaveAttribute("data-animated", "false");
   await page.evaluate(() => window.scrollTo(0, 0));
+  await expect(orb).toHaveAttribute("data-animated", "false");
+  await page.locator("#voice").scrollIntoViewIfNeeded();
   await expect(orb).toHaveAttribute("data-animated", "true");
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(orb).toHaveAttribute("data-animated", "false");
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-  await page.getByRole("button", { name: /Lancer la démo/ }).click();
   await expect(page.locator("[data-voice-state]")).toHaveAttribute(
     "data-voice-state",
     "listening",
@@ -146,7 +145,7 @@ test("lecture et FAQ disponibles sans JavaScript", async ({
       "Maîtrisez",
     );
     await expect(
-      page.getByRole("heading", { name: "Les bonnes questions." }),
+      page.getByRole("heading", { name: "Questions fréquentes." }),
     ).toBeVisible();
     await page.locator(".faq-list summary").first().click();
     await expect(page.locator(".faq-list details[open]")).toContainText("TCF");

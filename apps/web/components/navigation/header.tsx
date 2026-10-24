@@ -21,6 +21,7 @@ export function Header() {
     document.documentElement.dataset.theme = next;
     setTheme(next);
   }
+  if (pathname.startsWith("/apercu/etudiant")) return null;
   if (pathname === "/") return <LandingNavigation />;
   return (
     <header className="site-header">

@@ -10,10 +10,10 @@ export function Pricing() {
       aria-labelledby="pricing-title"
     >
       <div className="container">
-        <Reveal>
+        <Reveal subtle>
           <div className="landing-section-heading">
             <div>
-              <p className="eyebrow">06 / UNE PLACE POUR CHAQUE AMBITION</p>
+              <p className="eyebrow">Des offres en préparation</p>
               <h2 id="pricing-title">
                 Choisir votre rythme.
                 <br />
@@ -76,12 +76,8 @@ export function Faq() {
     >
       <div className="container faq-grid">
         <div>
-          <p className="eyebrow">07 / EN TOUTE CLARTÉ</p>
-          <h2 id="faq-title">
-            Les bonnes
-            <br />
-            <span>questions.</span>
-          </h2>
+          <p className="eyebrow">Questions fréquentes</p>
+          <h2 id="faq-title">Questions fréquentes.</h2>
           <p>
             Quelques repères pour découvrir Fluentia, ses ambitions et ses
             limites actuelles.
@@ -110,11 +106,11 @@ export function FinalCallToAction() {
       aria-labelledby="availability-title"
     >
       <div className="container">
-        <p className="eyebrow">VOTRE PROCHAIN CHAPITRE COMMENCE ICI</p>
+        <p className="eyebrow">Et ensuite ?</p>
         <h2 id="availability-title">
-          Une voix qui s’affirme.
+          Fluentia se prépare.
           <br />
-          <span>Un horizon qui s’ouvre.</span>
+          <span>Vous pouvez déjà explorer.</span>
         </h2>
         <p className="lead">
           Fluentia prend forme. Explorez l’expérience aujourd’hui ;

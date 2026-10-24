@@ -18,9 +18,9 @@ export function LandingNavigation() {
     if (menu.current) menu.current.open = false;
   }
   return (
-    <header className="landing-nav discover">
+    <header className="landing-nav human-pilot">
       <div className="container landing-nav-inner">
-        <Logo dark />
+        <Logo appearance="light" />
         <nav aria-label="Navigation principale" className="landing-desktop-nav">
           {links.map(([label, href]) => (
             <a key={href} href={href}>
@@ -78,6 +78,9 @@ export function LandingNavigation() {
           >
             <summary>Menu</summary>
             <nav aria-label="Navigation mobile">
+              <Link href="/apercu/etudiant" onClick={close}>
+                Aperçu étudiant
+              </Link>
               {links.map(([label, href]) => (
                 <a key={href} href={href} onClick={close}>
                   {label}

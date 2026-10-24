@@ -61,7 +61,7 @@ export function VoiceDemo() {
     >
       <div className="container voice-layout">
         <div className="voice-description">
-          <p className="eyebrow">03 / FLUENTIA VOICE</p>
+          <p className="eyebrow">Pratiquer à l’oral</p>
           <h2 id="voice-title">
             La confiance
             <br />
@@ -94,7 +94,7 @@ export function VoiceDemo() {
           </noscript>
           <div className="stage-meta">
             <span className="badge">Démonstration interactive</span>
-            <span>MICROPHONE INACTIF</span>
+            <span>Microphone inactif</span>
           </div>
           <VoiceOrb state={state} />
           <div

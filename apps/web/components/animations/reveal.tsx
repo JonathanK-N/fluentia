@@ -3,16 +3,26 @@
 import { motion } from "motion/react";
 import type { ReactNode } from "react";
 import { useMotionPreferences } from "../layout/providers";
-export function Reveal({ children }: { children: ReactNode }) {
+export function Reveal({
+  children,
+  subtle = false,
+}: {
+  children: ReactNode;
+  subtle?: boolean;
+}) {
   const { paused, reduced } = useMotionPreferences();
   return (
     <motion.div
       initial={false}
       whileInView={
-        reduced || paused ? undefined : { y: [12, 0], opacity: [0.8, 1] }
+        reduced || paused
+          ? undefined
+          : subtle
+            ? { opacity: [0.97, 1] }
+            : { y: [12, 0], opacity: [0.8, 1] }
       }
       viewport={{ once: true, amount: 0.15 }}
-      transition={{ duration: 0.35 }}
+      transition={{ duration: subtle ? 0.18 : 0.35 }}
     >
       {children}
     </motion.div>

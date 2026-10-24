@@ -19,7 +19,7 @@ export function VoiceOrb({ state = "idle" }: { state?: string }) {
     pageVisible &&
     !paused &&
     !reduced &&
-    !["paused", "ended", "error"].includes(state);
+    ["listening", "speaking"].includes(state);
   return (
     <div
       ref={ref}
@@ -34,15 +34,13 @@ export function VoiceOrb({ state = "idle" }: { state?: string }) {
         className="orb-body"
         initial={false}
         animate={
-          active
-            ? { rotate: [-9, 9, -9], scale: [1, 1.035, 1] }
-            : { rotate: 0, scale: 1 }
+          active ? { rotate: 0, scale: [1, 1.018, 1] } : { rotate: 0, scale: 1 }
         }
         transition={
           active
             ? {
-                duration: state === "listening" ? 5 : 12,
-                repeat: Infinity,
+                duration: 0.18,
+                repeat: 0,
                 ease: "easeInOut",
               }
             : { duration: 0 }

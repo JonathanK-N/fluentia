@@ -1,47 +1,10 @@
+import { SkillIcon } from "../../components/ui/skill-icon";
 /** Sections éditoriales et cartes réutilisables. Propriétaire : Jonathan Kakesa. */
 import { competencies } from "../../lib/brand";
-import Image from "next/image";
-import { Card, Badge, Progress } from "../../components/ui/primitives";
+import { Card } from "../../components/ui/primitives";
 import { Reveal } from "../../components/animations/reveal";
 import { CoachDemo } from "./coach-demo";
 import { journey } from "./content";
-function SkillIcon({ id }: { id: string }) {
-  return (
-    <svg
-      width="28"
-      height="28"
-      viewBox="0 0 28 28"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.4"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      {id === "ecoute" ? (
-        <>
-          <path d="M7 16v-5a7 7 0 0 1 14 0c0 5-5 5-5 9a3 3 0 0 1-6 0" />
-          <path d="M11 12a3 3 0 0 1 6 0c0 2-3 2-3 5" />
-        </>
-      ) : id === "lecture" ? (
-        <>
-          <path d="M3 5c4-1 8 0 11 2 3-2 7-3 11-2v17c-4-1-8 0-11 2-3-2-7-3-11-2Z" />
-          <path d="M14 7v17M7 10l3 1M18 11l3-1M7 15l3 1M18 16l3-1" />
-        </>
-      ) : id === "parole" ? (
-        <>
-          <rect x="10" y="3" width="8" height="14" rx="4" />
-          <path d="M6 12v2a8 8 0 0 0 16 0v-2M14 22v4M10 26h8" />
-        </>
-      ) : (
-        <>
-          <path d="m5 19-1 6 6-1L24 10l-5-5ZM16 8l5 5M5 19l5 5" />
-          <path d="M15 25h10" />
-        </>
-      )}
-    </svg>
-  );
-}
 export function CompetencyCard({
   item,
   order,
@@ -57,10 +20,7 @@ export function CompetencyCard({
       </div>
       <h3>{item.title}</h3>
       <p>{item.detail}</p>
-      <span className="skill-bottom">
-        {item.label}
-        <span aria-hidden="true">↗</span>
-      </span>
+      <span className="skill-bottom">{item.label}</span>
     </Card>
   );
 }
@@ -72,10 +32,10 @@ export function Competencies() {
       aria-labelledby="skills-title"
     >
       <div className="container" id="modules">
-        <Reveal>
+        <Reveal subtle>
           <div className="landing-section-heading">
             <div>
-              <p className="eyebrow">01 / LES QUATRE COMPÉTENCES</p>
+              <p className="eyebrow">Les quatre compétences</p>
               <h2 id="skills-title">
                 Le français dans
                 <br />
@@ -115,19 +75,20 @@ export function Coach() {
   return (
     <section
       className="landing-section coach-section"
+      id="coach"
       aria-labelledby="coach-title"
     >
       <div className="container coach-grid">
-        <Reveal>
-          <p className="eyebrow">02 / VOTRE COACH INTELLIGENT</p>
+        <Reveal subtle>
+          <p className="eyebrow">Un accompagnement pensé pour vous</p>
           <h2 id="coach-title">
-            Une direction claire.
+            Comprendre vos erreurs.
             <br />
-            <span>Votre propre élan.</span>
+            <span>Essayer autrement.</span>
           </h2>
           <p className="lead">
-            Pas seulement des exercices. Un accompagnement pensé pour comprendre
-            où vous en êtes et vous aider à choisir la suite.
+            Des repères pour savoir quoi retravailler. Découvrez le type
+            d’accompagnement envisagé, avec un exemple concret.
           </p>
           <ul className="editorial-list">
             <li>Des objectifs lisibles, une étape à la fois.</li>
@@ -139,7 +100,7 @@ export function Coach() {
             fonctionne localement.
           </p>
         </Reveal>
-        <Reveal>
+        <Reveal subtle>
           <CoachDemo />
         </Reveal>
       </div>
@@ -154,14 +115,14 @@ export function Journey() {
       aria-labelledby="journey-title"
     >
       <div className="container">
-        <Reveal>
+        <Reveal subtle>
           <div className="landing-section-heading">
             <div>
-              <p className="eyebrow">04 / UN PARCOURS QUI A DU SENS</p>
+              <p className="eyebrow">Une méthode progressive</p>
               <h2 id="journey-title">
-                Un cap.
+                Un parcours simple,
                 <br />
-                <span>Des petites victoires.</span>
+                <span>étape par étape.</span>
               </h2>
             </div>
             <p>
@@ -195,94 +156,4 @@ export function Journey() {
     </section>
   );
 }
-export function DashboardPreview() {
-  return (
-    <section
-      className="landing-section preview-section"
-      id="apercu"
-      aria-labelledby="preview-title"
-    >
-      <div className="container">
-        <Reveal>
-          <div className="landing-section-heading">
-            <div>
-              <p className="eyebrow">05 / VOTRE ESPACE, VOTRE RYTHME</p>
-              <h2 id="preview-title">
-                Moins de dispersion.
-                <br />
-                <span>Plus de place pour vous.</span>
-              </h2>
-            </div>
-            <p>
-              Un espace lisible pour retrouver votre objectif et reprendre là où
-              vous en étiez. Aperçu visuel avec données fictives.
-            </p>
-          </div>
-          <div className="dashboard-preview learn-preview">
-            <div className="preview-sidebar" aria-hidden="true">
-              <span className="preview-symbol">
-                <Image
-                  src="/branding/01_Logos_PNG/fluentia-symbole-transparent-256.png"
-                  alt=""
-                  width={34}
-                  height={34}
-                  unoptimized
-                />
-              </span>
-              <span className="preview-nav-active">Vue d’ensemble</span>
-              <span>Mon parcours</span>
-              <span>Mes entraînements</span>
-              <span>Fluentia Voice</span>
-              <span>Ma progression</span>
-              <span className="preview-sidebar-foot">LEARN / APERÇU</span>
-            </div>
-            <div className="preview-content">
-              <div className="preview-topline">
-                <span>VOTRE ESPACE D’APPRENTISSAGE</span>
-                <Badge>Données fictives</Badge>
-              </div>
-              <h3>Une petite étape, chaque jour.</h3>
-              <p>Votre prochaine séance vous attend.</p>
-              <div className="preview-stats">
-                <div>
-                  <span>Objectif de la semaine</span>
-                  <strong>3 séances</strong>
-                </div>
-                <div>
-                  <span>Rythme illustratif</span>
-                  <strong>15 min</strong>
-                </div>
-                <div>
-                  <span>Prochaine étape</span>
-                  <strong>Écouter</strong>
-                </div>
-              </div>
-              <div className="preview-cards">
-                <Card>
-                  <span className="eyebrow">
-                    VOTRE PROCHAINE PETITE VICTOIRE
-                  </span>
-                  <h4>Prendre le temps d’écouter.</h4>
-                  <p>
-                    Une activité de compréhension orale pour retrouver votre
-                    élan.
-                  </p>
-                  <span className="preview-action">
-                    Séance illustrative <span aria-hidden="true">↗</span>
-                  </span>
-                </Card>
-                <Card>
-                  <h4>Votre progression illustrative</h4>
-                  <Progress value={35} label="Objectif de démonstration" />
-                  <p className="landing-small">
-                    Aucune estimation de niveau ou de score officiel.
-                  </p>
-                </Card>
-              </div>
-            </div>
-          </div>
-        </Reveal>
-      </div>
-    </section>
-  );
-}
+export { DashboardPreview } from "../human-centered/learning-preview";

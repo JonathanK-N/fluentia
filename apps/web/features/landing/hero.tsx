@@ -1,80 +1,69 @@
-"use client";
-import { motion, useScroll } from "motion/react";
-import { VoiceOrb } from "./orb";
-import { useMotionPreferences } from "../../components/layout/providers";
-/** Entrée Discover et repère de lecture. Propriétaire : Jonathan Kakesa. */
+/** Entrée publique du pilote v3, sans décor animé. Propriétaire : Jonathan Kakesa. */
+import Link from "next/link";
 export function Hero() {
-  const { paused, reduced } = useMotionPreferences();
-  const { scrollYProgress } = useScroll();
   return (
     <section className="landing-hero" aria-labelledby="hero-title">
-      <motion.div
-        aria-hidden="true"
-        className="reading-progress"
-        style={{ scaleX: scrollYProgress }}
-      />
       <div className="container landing-hero-grid">
         <div className="hero-copy">
-          <p className="eyebrow">
-            <span className="status-dot" /> LE FRANÇAIS OUVRE DES PORTES
-          </p>
-          <motion.h1
-            id="hero-title"
-            initial={false}
-            whileInView={
-              paused || reduced ? undefined : { opacity: [0.7, 1], y: [10, 0] }
-            }
-            transition={{ duration: 0.65 }}
-            viewport={{ once: true }}
-          >
-            Maîtrisez
-            <br />
-            le français,
+          <p className="eyebrow">Préparer le TCF pour votre projet au Québec</p>
+          <h1 id="hero-title">
+            Maîtrisez le français,
             <br />
             <span>allez plus loin.</span>
-          </motion.h1>
+          </h1>
           <p className="lead">
-            Votre projet au Québec commence par une voix qui prend confiance.
-            Découvrez une préparation au TCF pensée pour avancer avec vous.
+            Une préparation pour comprendre, pratiquer et prendre confiance.
+            Retrouvez vos compétences et votre prochaine étape dans un espace
+            simple.
           </p>
           <div className="actions">
-            <a href="#fonctionnalites" className="button button-primary">
-              Découvrir Fluentia <span aria-hidden="true">↗</span>
-            </a>
-            <a href="#voice" className="landing-text-link">
-              Essayer la démo Voice <span aria-hidden="true">↓</span>
+            <Link href="/apercu/etudiant" className="button button-primary">
+              Voir le tableau de bord
+            </Link>
+            <a href="#approche" className="landing-text-link">
+              Découvrir la méthode
             </a>
           </div>
           <p className="landing-small">
-            Plateforme en développement · Démonstrations accessibles sans
-            compte.
+            Fluentia est en développement. Les aperçus et démonstrations sont
+            accessibles sans compte.
           </p>
         </div>
-        <div className="hero-visual">
-          <div className="hero-visual-heading">
-            <span>FLUENTIA / VOICE</span>
-            <span>APERÇU VISUEL</span>
+        <aside
+          className="learning-preview"
+          aria-label="Exemple d’organisation du parcours"
+        >
+          <div className="learning-preview-header">
+            <strong>Une séance, une intention</strong>
+            <span className="badge">Exemple de parcours</span>
           </div>
-          <VoiceOrb />
-          <p className="orb-caption">
-            Une voix.
-            <br />
-            <strong>De nouvelles possibilités.</strong>
+          <ol>
+            <li>
+              <span>1</span>
+              <div>
+                <h2>Choisir une compétence</h2>
+                <p>Écouter, lire, écrire ou prendre la parole.</p>
+              </div>
+            </li>
+            <li>
+              <span>2</span>
+              <div>
+                <h2>Pratiquer à votre rythme</h2>
+                <p>Se concentrer sur une activité et ses consignes.</p>
+              </div>
+            </li>
+            <li>
+              <span>3</span>
+              <div>
+                <h2>Préparer la prochaine étape</h2>
+                <p>Revenir sur vos acquis et garder un cap.</p>
+              </div>
+            </li>
+          </ol>
+          <p className="landing-small">
+            Aucun score ni résultat personnel dans cet aperçu.
           </p>
-          <div className="hero-signal" aria-hidden="true">
-            {[12, 22, 16, 32, 42, 26, 52, 36, 20, 40, 28, 14, 22].map(
-              (height, index) => (
-                <i key={index} style={{ height }} />
-              ),
-            )}
-          </div>
-        </div>
-      </div>
-      <div className="container hero-index">
-        <span>UNE PRÉPARATION, QUATRE COMPÉTENCES</span>
-        <a href="#fonctionnalites">
-          Écouter · Lire · Parler · Écrire <span aria-hidden="true">↓</span>
-        </a>
+        </aside>
       </div>
     </section>
   );

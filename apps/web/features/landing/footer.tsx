@@ -5,7 +5,9 @@ import { usePathname } from "next/navigation";
 import { brand } from "../../lib/brand";
 import { Logo } from "../../components/branding/logo";
 export function Footer() {
-  const landing = usePathname() === "/";
+  const pathname = usePathname();
+  const landing = pathname === "/";
+  if (pathname.startsWith("/apercu/etudiant")) return null;
   if (!landing)
     return (
       <footer className="site-footer container">
@@ -16,15 +18,15 @@ export function Footer() {
       </footer>
     );
   return (
-    <footer className="landing-footer discover">
+    <footer className="landing-footer human-pilot">
       <div className="container">
         <div className="footer-grid">
           <div>
-            <Logo dark />
+            <Logo appearance="light" />
             <p>
-              Le français, pour ouvrir
+              Apprendre avec clarté.
               <br />
-              votre prochain chapitre.
+              Pratiquer avec confiance.
             </p>
           </div>
           <nav aria-label="Navigation de pied de page">
@@ -33,6 +35,7 @@ export function Footer() {
             <a href="#voice">Fluentia Voice</a>
             <a href="#approche">Notre méthode</a>
             <Link href="/design-system">Design system</Link>
+            <Link href="/apercu/etudiant">Aperçu étudiant</Link>
           </nav>
           <div>
             <h2>Informations</h2>
