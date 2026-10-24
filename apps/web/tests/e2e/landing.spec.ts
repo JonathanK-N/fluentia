@@ -107,6 +107,8 @@ test("mouvement réduit et pause manuelle conservent les contenus", async ({
   const orb = page.locator(".voice-stage .fluentia-orb");
   await expect(orb).toHaveAttribute("data-animated", "false");
   await page.getByRole("button", { name: /Lancer la démo/ }).click();
+  await orb.scrollIntoViewIfNeeded();
+  await expect(orb).toBeInViewport();
   await expect(orb).toHaveAttribute("data-animated", "true");
   const pause = page.getByRole("button", {
     name: "Mouvement — suspendre les animations",
@@ -118,12 +120,13 @@ test("mouvement réduit et pause manuelle conservent les contenus", async ({
   const card = page.locator(".skill-card").first();
   await card.hover();
   await expect(card).toHaveCSS("transform", "none");
-  await page.locator("#voice").scrollIntoViewIfNeeded();
   await pause.click();
+  await orb.scrollIntoViewIfNeeded();
+  await expect(orb).toBeInViewport();
   await expect(orb).toHaveAttribute("data-animated", "true");
   await page.evaluate(() => window.scrollTo(0, 0));
   await expect(orb).toHaveAttribute("data-animated", "false");
-  await page.locator("#voice").scrollIntoViewIfNeeded();
+  await orb.scrollIntoViewIfNeeded();
   await expect(orb).toHaveAttribute("data-animated", "true");
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(orb).toHaveAttribute("data-animated", "false");
