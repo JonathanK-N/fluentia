@@ -9,7 +9,7 @@ for(const width of [375,768,1440])test(`62 écrans à ${width}px`,async({page},i
  await page.setViewportSize({width,height:1000});const errors=[];page.on('pageerror',e=>errors.push(e.message));const checks=[];
  for(const s of catalogue.screens){await go(page,s.id);const geometry=await page.evaluate(()=>({innerWidth,scrollWidth:document.documentElement.scrollWidth}));expect(geometry.scrollWidth,s.id).toBeLessThanOrEqual(width);checks.push({id:s.id,...geometry});
   const overlaps=await page.locator('.grid,.index-grid').evaluateAll(grids=>grids.flatMap(grid=>{const boxes=[...grid.children].filter(n=>n.getClientRects().length).map(n=>n.getBoundingClientRect());return boxes.flatMap((a,i)=>boxes.slice(i+1).filter(b=>Math.min(a.right,b.right)-Math.max(a.left,b.left)>1&&Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)>1));}).length);expect(overlaps,s.id+' : chevauchement de cartes').toBe(0);
-  if(info.project.name==='chromium'&&['P01','A01','S01','S13','T01','E01','M01'].includes(s.id))await page.screenshot({path:info.outputPath(`${s.id}-${width}.png`),fullPage:true});
+  if((info.project.name==='chromium'&&['P01','A01','S01','S13','T01','E01','M01'].includes(s.id))||(info.project.name==='webkit'&&['P01','S01','S13'].includes(s.id)))await page.screenshot({path:info.outputPath(`${s.id}-${width}.png`),fullPage:true});
  }
  expect(errors).toEqual([]);writeFileSync(info.outputPath(`geometry-${width}.json`),JSON.stringify(checks,null,2));
 });
