@@ -9,6 +9,7 @@
   --border: #e5eaf0;
   --control-border: #71829a;
   --action: #1769e0;
+  --action-on-tint: #1358bd;
   --on-action: #fff;
   --accent: #086b82;
   --focus: #1769e0;
@@ -509,7 +510,7 @@
   background: var(--tint);
 }
 .student-navigation [aria-current="page"] {
-  color: var(--action);
+  color: var(--action-on-tint);
   background: var(--tint);
   font-weight: 500;
 }

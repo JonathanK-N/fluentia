@@ -355,7 +355,12 @@ export function StudentDashboard() {
                   {example && <span>Données fictives</span>}
                 </div>
                 {example ? (
-                  <div className="table-scroll">
+                  <div
+                    className="table-scroll"
+                    tabIndex={0}
+                    role="region"
+                    aria-label="Historique des activités de démonstration"
+                  >
                     <table>
                       <caption>
                         Activités de démonstration — aucun résultat personnel
