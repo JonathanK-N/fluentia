@@ -12,3 +12,5 @@ staticfiles/
 design/ux-ui-02/test-results/
 design/ux-ui-02/playwright-report/
 *.tsbuildinfo
+apps/web/test-results/
+apps/web/playwright-report/

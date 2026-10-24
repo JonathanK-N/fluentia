@@ -1,9 +1,9 @@
 <div align="center">
 
 # 🌊 Fluentia
-### La maîtrise du français, intelligemment.
+### Maîtrisez le français, allez plus loin.
 
-![Statut](https://img.shields.io/badge/Statut-Socle%20initial-1769E0) ![Identité](https://img.shields.io/badge/Design-Cognito%20Inc.-21D4F4)
+![Statut](https://img.shields.io/badge/Statut-Fondations%20frontend-1769E0) ![Identité](https://img.shields.io/badge/Design-Cognito%20Inc.-21D4F4)
 
 **Propriétaire du projet : Jonathan Kakesa** · [Dépôt](https://github.com/JonathanK-N/fluentia)
 
@@ -51,3 +51,15 @@ docs/                 Spécifications et guides
 ## Attribution
 
 Projet et responsabilité éditoriale : **Jonathan Kakesa**. Les commits doivent être créés avec le compte GitHub et l'identité Git configurés par le propriétaire. L'importation de ce projet ne modifie pas rétroactivement les auteurs des commits existants.
+
+## Frontend — Mission 01
+
+Vitrine et catalogue `/design-system`, thèmes clair/sombre, logos officiels et Poppins locale. Les interactions sont locales : examens, comptes, coach et paiements restent à développer.
+
+Démarrage : `cd apps/web`, `npm ci`, `npm run dev`.
+
+Voir [la documentation](docs/README.md), [l’audit](docs/AUDIT_FRONTEND_01.md), [les tests](docs/TESTING.md) et [les contributions](CONTRIBUTING.md).
+
+Premier lot : [rapport détaillé](docs/RAPPORT_FRONTEND_01.md) · [PR #1 vers dev](https://github.com/JonathanK-N/fluentia/pull/1) · [aperçu desktop](docs/images/accueil-1440.png).
+
+La PR #1 a été fusionnée vers `dev` après validation technique et autorisation explicite de Jonathan Kakesa. La [stratégie Code-First approuvée](docs/DECISIONS/002-code-first-et-consolidation.md) permet de poursuivre avec une [synchronisation Figma différée](docs/FIGMA_SYNC_BACKLOG.md). Les défauts natifs et limites PWA restent documentés. La PR #2 est en cours de validation sur ce socle intégré ; sa fusion exige une deuxième autorisation. Voir [le suivi Frontend 02](docs/FRONTEND_02.md).
