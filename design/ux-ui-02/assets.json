@@ -1,0 +1,32 @@
+{
+  "archive": "Fluentia_Logo_Assets_PWA_Complet.zip",
+  "assets": [
+    {
+      "file": "logo-horizontal-light.png",
+      "source": "Fluentia_Brand_Assets/01_Logos_PNG/logo-horizontal-light.png",
+      "sha256": "dd8c35465c681317efa91ee71d8e5ef1943f43e97ab883e776d6cf20850602ec"
+    },
+    {
+      "file": "logo-horizontal-dark.png",
+      "source": "Fluentia_Brand_Assets/01_Logos_PNG/logo-horizontal-dark.png",
+      "sha256": "90d50a821f8590d5094d12629fad31ef88315d19d41cf859439a0ae14f044471"
+    },
+    {
+      "file": "fluentia-symbole-transparent-256.png",
+      "source": "Fluentia_Brand_Assets/01_Logos_PNG/fluentia-symbole-transparent-256.png",
+      "sha256": "43d10a61939e856239dc857b4ddb87d7bbbf7fabf27b19150e32f918e0d681d6"
+    }
+  ],
+  "font": {
+    "family": "Poppins",
+    "package": "@fontsource/poppins",
+    "version": "5.3.0",
+    "license": "OFL-1.1",
+    "weights": [
+      400,
+      500,
+      600,
+      700
+    ]
+  }
+}

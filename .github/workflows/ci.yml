@@ -16,6 +16,8 @@ jobs:
       - run: npm run build
   api:
     runs-on: ubuntu-latest
+    env:
+      DJANGO_DEBUG: '1'
     defaults:
       run:
         working-directory: apps/api

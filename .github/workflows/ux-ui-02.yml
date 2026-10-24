@@ -1,0 +1,32 @@
+name: UX UI 02 — références locales
+on:
+  push:
+    branches: [design/ux-ui-02]
+  pull_request:
+    paths: ['design/ux-ui-02/**', 'docs/ux-ui-02/**', '.github/workflows/ux-ui-02.yml']
+permissions:
+  contents: read
+jobs:
+  references:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: design/ux-ui-02
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts
+      - run: npm audit --audit-level=moderate
+      - run: node --check prototype.js
+      - run: node --check serve.mjs
+      - run: python verify.py
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: npm test
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ux-ui-02-references
+          path: design/ux-ui-02/test-results
+          retention-days: 14
