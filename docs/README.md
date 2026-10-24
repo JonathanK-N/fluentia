@@ -24,3 +24,5 @@ Responsable : Jonathan Kakesa.
 Conception : [FIGMA.md](FIGMA.md).
 
 Dépendances et licences : [DEPENDENCIES.md](DEPENDENCIES.md).
+
+Rapport du lot : [RAPPORT_FRONTEND_01.md](RAPPORT_FRONTEND_01.md).

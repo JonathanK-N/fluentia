@@ -1,6 +1,6 @@
 # Historique
 
-## Mission Frontend 01 — en cours de validation
+## Mission Frontend 01 — premier lot validé en CI, mission globale partielle
 
 - Audit du socle initial et séparation des composants frontend.
 - Tokens sémantiques clair/sombre, Poppins locale, logos officiels et manifest.
