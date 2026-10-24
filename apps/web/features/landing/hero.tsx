@@ -9,13 +9,11 @@ export function Hero() {
   const { scrollYProgress } = useScroll();
   return (
     <section className="landing-hero" aria-labelledby="hero-title">
-      {!paused && !reduced && (
-        <motion.div
-          aria-hidden="true"
-          className="reading-progress"
-          style={{ scaleX: scrollYProgress }}
-        />
-      )}
+      <motion.div
+        aria-hidden="true"
+        className="reading-progress"
+        style={{ scaleX: scrollYProgress }}
+      />
       <div className="container landing-hero-grid">
         <div className="hero-copy">
           <p className="eyebrow">
@@ -24,10 +22,11 @@ export function Hero() {
           <motion.h1
             id="hero-title"
             initial={false}
-            animate={
+            whileInView={
               paused || reduced ? undefined : { opacity: [0.7, 1], y: [10, 0] }
             }
             transition={{ duration: 0.65 }}
+            viewport={{ once: true }}
           >
             Maîtrisez
             <br />
