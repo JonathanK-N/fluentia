@@ -30,6 +30,11 @@ it("retourne de l’indisponibilité et garde les fonctions de démonstration", 
   await user.click(screen.getByRole("button", { name: "Réessayer" }));
   expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   expect(trigger).toHaveFocus();
+  await user.click(trigger);
+  const options = screen.getByText("Options de l’aperçu");
+  await user.click(options);
+  await user.click(screen.getByRole("button", { name: "Réessayer" }));
+  expect(options).toHaveFocus();
   const main = within(screen.getByRole("main"));
   const activity = main.getByRole("button", {
     name: "Voir les activités — Compréhension écrite",

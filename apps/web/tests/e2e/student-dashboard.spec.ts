@@ -74,7 +74,7 @@ test("dashboard : exemple rempli, erreur et dialogue sans fonction fictivement o
     name: "Afficher l’état indisponible",
   });
   await error.click();
-  await expect(page.getByRole("alert")).toBeVisible();
+  await expect(page.getByRole("main").getByRole("alert")).toBeVisible();
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   await page.screenshot({
     path: info.outputPath("etudiant-indisponible.png"),
@@ -91,6 +91,11 @@ test("dashboard : exemple rempli, erreur et dialogue sans fonction fictivement o
   );
   await page.keyboard.press("Escape");
   await expect(resume).toBeFocused();
+  await error.click();
+  const options = page.getByText("Options de l’aperçu", { exact: true });
+  await options.click();
+  await page.getByRole("button", { name: "Réessayer", exact: true }).click();
+  await expect(options).toBeFocused();
   await page.setViewportSize({ width: 375, height: 900 });
   expect(
     await page.evaluate(

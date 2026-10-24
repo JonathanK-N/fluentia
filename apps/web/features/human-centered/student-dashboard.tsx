@@ -137,6 +137,7 @@ export function StudentDashboard() {
   const [example, setExample] = useState(false);
   const [unavailable, setUnavailable] = useState(false);
   const menu = useRef<HTMLDetailsElement>(null);
+  const options = useRef<HTMLDetailsElement>(null);
   const errorTrigger = useRef<HTMLButtonElement>(null);
   function closeMenu() {
     if (menu.current) menu.current.open = false;
@@ -169,7 +170,15 @@ export function StudentDashboard() {
           <strong>Maquette de conception</strong>
           <span>Aucune donnée personnelle, aucun compte connecté.</span>
         </div>
-        <details>
+        <details
+          ref={options}
+          onKeyDown={(event) => {
+            if (event.key === "Escape" && options.current) {
+              options.current.open = false;
+              options.current.querySelector("summary")?.focus();
+            }
+          }}
+        >
           <summary>Options de l’aperçu</summary>
           <div className="student-review-options">
             <div role="group" aria-label="Scénario étudiant">
@@ -232,7 +241,8 @@ export function StudentDashboard() {
               <Button
                 onClick={() => {
                   setUnavailable(false);
-                  errorTrigger.current?.focus();
+                  if (options.current?.open) errorTrigger.current?.focus();
+                  else options.current?.querySelector("summary")?.focus();
                 }}
               >
                 Réessayer
