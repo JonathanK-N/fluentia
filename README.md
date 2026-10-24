@@ -9,6 +9,10 @@
 
 </div>
 
+## Mission UX/UI 02 — conception
+
+Les [spécifications et références locales](docs/ux-ui-02/README.md) couvrent Discover, Learn et Voice. Le [rapport GO/NO-GO](docs/ux-ui-02/REPORT.md) distingue les livrables locaux, les éléments partiels et la conception native Figma bloquée par le quota. Ces références ne sont pas des pages métier implémentées ni des maquettes Figma enregistrées. Aucune fusion ni mise en production automatique.
+
 > [!IMPORTANT]
 > Le présent dépôt constitue les fondations du produit. Il n'est pas encore une plateforme TCF complète. Les évaluations futures devront être validées pédagogiquement.
 
@@ -58,4 +62,4 @@ Voir [la documentation](docs/README.md), [l’audit](docs/AUDIT_FRONTEND_01.md),
 
 Premier lot : [rapport détaillé](docs/RAPPORT_FRONTEND_01.md) · [PR #1 vers dev](https://github.com/JonathanK-N/fluentia/pull/1) · [aperçu desktop](docs/images/accueil-1440.png).
 
-Finalisation : **NO-GO pour fusion**. La CI couvre les trois moteurs de navigateur et Docker ; les maquettes Figma présentent encore des défauts et le quota Starter bloque leur correction. Voir [les résultats exacts](docs/TESTING.md), [l’état Figma](docs/FIGMA.md) et [les limites PWA](docs/PWA.md). Aucune fusion ni mise en production n’est autorisée automatiquement.
+La PR #1 a été fusionnée vers `dev` après validation technique et autorisation explicite de Jonathan Kakesa. La [stratégie Code-First approuvée](docs/DECISIONS/002-code-first-et-consolidation.md) permet de poursuivre avec une [synchronisation Figma différée](docs/FIGMA_SYNC_BACKLOG.md). Les défauts natifs et limites PWA restent documentés. La PR #2 est en cours de validation sur ce socle intégré ; sa fusion exige une deuxième autorisation. Voir [le suivi Frontend 02](docs/FRONTEND_02.md).

@@ -4,12 +4,12 @@ Responsable : Jonathan Kakesa. 24 octobre 2026.
 
 ## État actuel
 
-Audit préalable réalisé, [validation technique PR #1](VALIDATION_PR_01.md) proposée au point A. [Consolidation PR #1/#2](CONSOLIDATION_PR_01_02.md) préparée par simulation ; aucune fusion réalisée. Le développement de l’accueil reste en attente du dev intégré et validé exigé par la feuille de route.
+Le point A a été explicitement autorisé par Jonathan Kakesa. La PR #1 est fusionnée dans dev au commit `62f6ff43dcd0e03e006849e317b20a4c4795adfc`. Ce dev a été intégré dans la branche de la PR #2 par une fusion ordinaire, sans réécriture. Voir le [rapport du point B](VALIDATION_PR_02.md) et la [consolidation](CONSOLIDATION_PR_01_02.md). L’accueil attend l’autorisation de fusion de la PR #2 et la validation du dev consolidé.
 
 | Étape | État |
 |---|---|
-| A — audit et rapport PR #1 | Réalisés ; autorisation de fusion attendue |
-| B — PR #2 après intégration de #1 | Non exécutée ; conflits identifiés, plan de conservation documenté |
+| A — audit et rapport PR #1 | Autorisés ; PR #1 fusionnée vers dev |
+| B — PR #2 après intégration de #1 | Branche actualisée, conflits résolus, recettes réussies et captures inspectées ; autorisation de fusion attendue |
 | C — branche et accueil immersif | Non commencés ; branche prévue `frontend/mission-02-landing` depuis le futur dev consolidé |
 | D — présentation et décision propriétaire | À venir |
 

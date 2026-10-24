@@ -1,0 +1,135 @@
+{
+  "date": "2026-10-24",
+  "owner": "Jonathan Kakesa",
+  "uiReferenceSha": "d41589c91c86b0d7f89950542cc5b65e2f9c6196",
+  "note": "Captures locales avant le déplacement de l’attribut de thème vers html. Le correctif WebKit doit être contrôlé par des captures CI séparées. Ne pas attribuer ces images locales aux runs CI.",
+  "inspected": [
+    {
+      "file": "images/A01-375.png",
+      "sha256": "edda92bc4f02d7d07e562444e9a2eaf3d0a85c49e2f57dd13b5374bc9cb765d8",
+      "inspection": "visuelle effectuée",
+      "kind": "capture de référence locale, pas Figma"
+    },
+    {
+      "file": "images/E01-1440.png",
+      "sha256": "9ee4ad644d071a0d09667f0ee9489dc640086f629087b181fbc9e93a78871a63",
+      "inspection": "visuelle effectuée",
+      "kind": "capture de référence locale, pas Figma"
+    },
+    {
+      "file": "images/M01-1440.png",
+      "sha256": "32bd0b4eef1702b383447108224909338602195b4cf7d6a0df331cf231f436c1",
+      "inspection": "visuelle effectuée",
+      "kind": "capture de référence locale, pas Figma"
+    },
+    {
+      "file": "images/P01-1440.png",
+      "sha256": "13a6dfae9fd11094276387390d94cd510441c466a92a68f0efb277d4c62d742e",
+      "inspection": "visuelle effectuée",
+      "kind": "capture de référence locale, pas Figma"
+    },
+    {
+      "file": "images/P01-375.png",
+      "sha256": "8b846fccb28fcabfdadc4f0b7086fcc607ad3cce16b8e3bffd744d153c3063dd",
+      "inspection": "visuelle effectuée",
+      "kind": "capture de référence locale, pas Figma"
+    },
+    {
+      "file": "images/P01-768.png",
+      "sha256": "a212e0177b7643cc674f452f28b622f1f1b2e0e05e55d5509cd20a8fd942d6e8",
+      "inspection": "visuelle effectuée",
+      "kind": "capture de référence locale, pas Figma"
+    },
+    {
+      "file": "images/S01-1440.png",
+      "sha256": "7cde7a7af0264be5cb98da8c2a822502df59ef3e9d26191cf23e0187eea72818",
+      "inspection": "visuelle effectuée",
+      "kind": "capture de référence locale, pas Figma"
+    },
+    {
+      "file": "images/S01-375.png",
+      "sha256": "0b6397305476044aabfc9c066b9764f7d3d47eea298e1a83a99b188404ab9c1e",
+      "inspection": "visuelle effectuée",
+      "kind": "capture de référence locale, pas Figma"
+    },
+    {
+      "file": "images/S01-768.png",
+      "sha256": "dc83a030a975e4b1b041bee60919cf821aa78f53c8894061a3b3c45e5bd7083d",
+      "inspection": "visuelle effectuée",
+      "kind": "capture de référence locale, pas Figma"
+    },
+    {
+      "file": "images/S13-1440.png",
+      "sha256": "eacea7ea5c4fdfb60585a7b3db35927adb52d4e34f268c9ee482fb03186e709c",
+      "inspection": "visuelle effectuée",
+      "kind": "capture de référence locale, pas Figma"
+    },
+    {
+      "file": "images/S13-375.png",
+      "sha256": "4e1d1035e21e1b5942f1520a1cf70e84b24ec8afb29b181f71bd1c11913fe53b",
+      "inspection": "visuelle effectuée",
+      "kind": "capture de référence locale, pas Figma"
+    },
+    {
+      "file": "images/S13-768.png",
+      "sha256": "7690d6f93961ae1838581888ef14f14e7b278d278e1dad1e6166857f3be7db2f",
+      "inspection": "visuelle effectuée",
+      "kind": "capture de référence locale, pas Figma"
+    },
+    {
+      "file": "images/T01-1440.png",
+      "sha256": "46ab6ee5d72a99540951cf65b83b98abbdcec0789bde19c3308c2ef1843bacb6",
+      "inspection": "visuelle effectuée",
+      "kind": "capture de référence locale, pas Figma"
+    }
+  ],
+  "uninspected": "Les autres écrans ne sont pas déclarés inspectés visuellement individuellement.",
+  "figma": {
+    "fileKey": "SIjNphVU1NHimwwImszGbE",
+    "sessionId": "7fdcabd1-4bb5-4eee-b14a-84b25fb5a92a",
+    "plan": "starter",
+    "seat": "View",
+    "teamRole": "admin",
+    "readAttempt": "refusée pour quota atteint",
+    "nativeNodeIdsCreated": [],
+    "editingConfirmed": false,
+    "paidActivation": false
+  },
+  "ciInspected": [
+    {
+      "file": "images/webkit-P01-1440.png",
+      "sha256": "b91c17de0e6f071dfde3d53b795c4618cbbfc9c3240d71971bc15f8e0627f415",
+      "runId": 40106734251,
+      "codeSha": "99966b921857e2bae03da87f8f57dedffcc4933a",
+      "inspection": "inspection visuelle effectuée après correction WebKit"
+    },
+    {
+      "file": "images/webkit-S01-1440.png",
+      "sha256": "517489eeac9e28bc26e40f6d0a8a4b90e956f0b476ddcb054422c44088d023e9",
+      "runId": 40106734251,
+      "codeSha": "99966b921857e2bae03da87f8f57dedffcc4933a",
+      "inspection": "inspection visuelle effectuée après correction WebKit"
+    },
+    {
+      "file": "images/webkit-S13-1440.png",
+      "sha256": "65644715899236cc015a4f5997f82c01f932674c533cddb80a9f346578d5b484",
+      "runId": 40106734251,
+      "codeSha": "99966b921857e2bae03da87f8f57dedffcc4933a",
+      "inspection": "inspection visuelle effectuée après correction WebKit"
+    },
+    {
+      "file": "images/webkit-S13-375.png",
+      "sha256": "160329bf4806e937aab8574030d15edfb30a665f06c9b943eea133375fab6926",
+      "runId": 40106734251,
+      "codeSha": "99966b921857e2bae03da87f8f57dedffcc4933a",
+      "inspection": "inspection visuelle effectuée après correction WebKit"
+    },
+    {
+      "file": "images/chromium-S13-zoom-200-capture-partielle.png",
+      "sha256": "55828cf1588c4f1342469c210fd35247c5969c76a9dd30fca3144f7fc66aeddd",
+      "runId": 40106734251,
+      "codeSha": "99966b921857e2bae03da87f8f57dedffcc4933a",
+      "inspection": "export partiel, ne valide pas visuellement tout le zoom"
+    }
+  ]
+}

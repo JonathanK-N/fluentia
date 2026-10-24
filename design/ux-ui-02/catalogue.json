@@ -1,0 +1,1897 @@
+{
+  "version": "2.0-proposition",
+  "owner": "Jonathan Kakesa",
+  "notice": "Références locales : ni maquettes Figma enregistrées ni pages métier implémentées.",
+  "screens": [
+    {
+      "id": "P01",
+      "title": "Accueil",
+      "route": "/",
+      "type": "landing",
+      "headline": "Maîtrisez le français, allez plus loin.",
+      "task": "Choisir un premier parcours sans pression.",
+      "group": "public",
+      "role": "visiteur",
+      "universe": "Discover",
+      "figmaPage": "05 — Public Website",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "P02",
+      "title": "Fonctionnalités",
+      "route": "/fonctionnalites",
+      "type": "features",
+      "headline": "Quatre compétences, un parcours cohérent.",
+      "task": "Explorer les outils sans promettre de résultats officiels.",
+      "group": "public",
+      "role": "visiteur",
+      "universe": "Discover",
+      "figmaPage": "05 — Public Website",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "P03",
+      "title": "Notre méthode",
+      "route": "/methode",
+      "type": "method",
+      "headline": "Un rythme qui vous ressemble.",
+      "task": "Comprendre diagnostic, entraînement et révision.",
+      "group": "public",
+      "role": "visiteur",
+      "universe": "Discover",
+      "figmaPage": "05 — Public Website",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "P04",
+      "title": "Examens",
+      "route": "/examens",
+      "type": "exams",
+      "headline": "Se préparer avec des repères clairs.",
+      "task": "Distinguer entraînement, examen blanc et épreuve officielle.",
+      "group": "public",
+      "role": "visiteur",
+      "universe": "Discover",
+      "figmaPage": "05 — Public Website",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "P05",
+      "title": "Tarifs",
+      "route": "/tarifs",
+      "type": "pricing",
+      "headline": "Choisir votre accompagnement.",
+      "task": "Comparer des formules de démonstration ; prix à valider.",
+      "group": "public",
+      "role": "visiteur",
+      "universe": "Discover",
+      "figmaPage": "05 — Public Website",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "P06",
+      "title": "Démonstration",
+      "route": "/demo",
+      "type": "demo",
+      "headline": "Essayez une séance guidée.",
+      "task": "Découvrir une simulation sans compte ni microphone.",
+      "group": "public",
+      "role": "visiteur",
+      "universe": "Discover",
+      "figmaPage": "05 — Public Website",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "P07",
+      "title": "Questions fréquentes",
+      "route": "/faq",
+      "type": "faq",
+      "headline": "Les réponses, simplement.",
+      "task": "Trouver une réponse et contacter le support.",
+      "group": "public",
+      "role": "visiteur",
+      "universe": "Discover",
+      "figmaPage": "05 — Public Website",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "P08",
+      "title": "Contact",
+      "route": "/contact",
+      "type": "contact",
+      "headline": "Parlons de votre projet.",
+      "task": "Simuler une demande sans transmission de données.",
+      "group": "public",
+      "role": "visiteur",
+      "universe": "Discover",
+      "figmaPage": "05 — Public Website",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "P09",
+      "title": "Confidentialité",
+      "route": "/confidentialite",
+      "type": "legal",
+      "headline": "Vos données, vos choix.",
+      "task": "Structure de notice à faire valider ; aucun texte juridique approuvé.",
+      "group": "public",
+      "role": "visiteur",
+      "universe": "Discover",
+      "figmaPage": "05 — Public Website",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "P10",
+      "title": "Conditions d’utilisation",
+      "route": "/conditions",
+      "type": "legal",
+      "headline": "Un cadre d’utilisation clair.",
+      "task": "Structure contractuelle à faire valider avant publication.",
+      "group": "public",
+      "role": "visiteur",
+      "universe": "Discover",
+      "figmaPage": "05 — Public Website",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "P11",
+      "title": "Accessibilité",
+      "route": "/accessibilite",
+      "type": "legal",
+      "headline": "Une préparation ouverte à chacun.",
+      "task": "Présenter objectif, limites connues et canal de signalement.",
+      "group": "public",
+      "role": "visiteur",
+      "universe": "Discover",
+      "figmaPage": "05 — Public Website",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "A01",
+      "title": "Inscription",
+      "route": "/inscription",
+      "type": "signup",
+      "headline": "Votre prochain chapitre commence ici.",
+      "task": "Créer un compte simulé avec consentement explicite.",
+      "group": "auth",
+      "role": "visiteur",
+      "universe": "Learn",
+      "figmaPage": "06 — Authentication",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "A02",
+      "title": "Connexion",
+      "route": "/connexion",
+      "type": "login",
+      "headline": "Heureux de vous retrouver.",
+      "task": "Accéder à un espace fictif sans authentification réelle.",
+      "group": "auth",
+      "role": "visiteur",
+      "universe": "Learn",
+      "figmaPage": "06 — Authentication",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "A03",
+      "title": "Mot de passe oublié",
+      "route": "/mot-de-passe-oublie",
+      "type": "recover",
+      "headline": "Retrouver votre espace.",
+      "task": "Présenter une confirmation neutre, sans révéler un compte existant.",
+      "group": "auth",
+      "role": "visiteur",
+      "universe": "Learn",
+      "figmaPage": "06 — Authentication",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "A04",
+      "title": "Réinitialisation",
+      "route": "/reinitialisation",
+      "type": "reset",
+      "headline": "Un nouveau départ sécurisé.",
+      "task": "Gérer lien expiré et confirmation de mot de passe.",
+      "group": "auth",
+      "role": "visiteur",
+      "universe": "Learn",
+      "figmaPage": "06 — Authentication",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "A05",
+      "title": "Vérification du courriel",
+      "route": "/verification-courriel",
+      "type": "verify",
+      "headline": "Vérifiez votre courriel.",
+      "task": "Simuler renvoi, lien expiré et vérification.",
+      "group": "auth",
+      "role": "visiteur",
+      "universe": "Learn",
+      "figmaPage": "06 — Authentication",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "A06",
+      "title": "Bienvenue",
+      "route": "/bienvenue",
+      "type": "onboarding",
+      "headline": "Construisons votre rythme.",
+      "task": "Choisir objectif, disponibilité et diagnostic facultatif.",
+      "group": "auth",
+      "role": "visiteur",
+      "universe": "Learn",
+      "figmaPage": "06 — Authentication",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "S01",
+      "title": "Tableau de bord",
+      "route": "/app",
+      "type": "dashboard",
+      "headline": "Une petite étape, chaque jour.",
+      "task": "Choisir une action utile et reprendre une séance.",
+      "group": "student",
+      "role": "étudiant",
+      "universe": "Learn",
+      "figmaPage": "07 — Student App",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "S02",
+      "title": "Diagnostic",
+      "route": "/app/diagnostic",
+      "type": "diagnostic",
+      "headline": "Trouvons votre point de départ.",
+      "task": "Diagnostic illustratif sans prédiction de score officiel.",
+      "group": "student",
+      "role": "étudiant",
+      "universe": "Learn",
+      "figmaPage": "07 — Student App",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "S03",
+      "title": "Plan d’étude",
+      "route": "/app/plan",
+      "type": "plan",
+      "headline": "Votre semaine, à votre rythme.",
+      "task": "Ajuster la charge et déplacer une séance.",
+      "group": "student",
+      "role": "étudiant",
+      "universe": "Learn",
+      "figmaPage": "07 — Student App",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "S04",
+      "title": "Catalogue",
+      "route": "/app/catalogue",
+      "type": "catalog",
+      "headline": "La bonne séance, au bon moment.",
+      "task": "Filtrer par compétence et durée illustrative.",
+      "group": "student",
+      "role": "étudiant",
+      "universe": "Learn",
+      "figmaPage": "07 — Student App",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "S05",
+      "title": "Compréhension orale",
+      "route": "/app/oral",
+      "type": "audio-question",
+      "headline": "Écouter, comprendre, choisir.",
+      "task": "QCM fictif avec transcription de démonstration.",
+      "group": "student",
+      "role": "étudiant",
+      "universe": "Learn",
+      "figmaPage": "07 — Student App",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "S06",
+      "title": "Compréhension écrite",
+      "route": "/app/lecture",
+      "type": "reading",
+      "headline": "Lire avec intention.",
+      "task": "Texte fictif, question et correction expliquée.",
+      "group": "student",
+      "role": "étudiant",
+      "universe": "Learn",
+      "figmaPage": "07 — Student App",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "S07",
+      "title": "Expression écrite",
+      "route": "/app/ecriture",
+      "type": "writing",
+      "headline": "Faire entendre vos idées.",
+      "task": "Rédiger un texte fictif et demander un retour simulé.",
+      "group": "student",
+      "role": "étudiant",
+      "universe": "Learn",
+      "figmaPage": "07 — Student App",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "S08",
+      "title": "Expression orale",
+      "route": "/app/expression-orale",
+      "type": "speaking",
+      "headline": "Prendre la parole avec confiance.",
+      "task": "Choisir une tâche et entrer dans le studio simulé.",
+      "group": "student",
+      "role": "étudiant",
+      "universe": "Learn",
+      "figmaPage": "07 — Student App",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "S09",
+      "title": "Examens blancs",
+      "route": "/app/examens",
+      "type": "mock-list",
+      "headline": "Vous préparer au jour J.",
+      "task": "Choisir une simulation sans prétendre reproduire un examen certifié.",
+      "group": "student",
+      "role": "étudiant",
+      "universe": "Learn",
+      "figmaPage": "07 — Student App",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "S10",
+      "title": "Session d’examen",
+      "route": "/app/examens/session",
+      "type": "exam",
+      "headline": "Une question à la fois.",
+      "task": "Durée illustrative ; quitter exige confirmation.",
+      "group": "student",
+      "role": "étudiant",
+      "universe": "Learn",
+      "figmaPage": "07 — Student App",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "S11",
+      "title": "Résultats",
+      "route": "/app/resultats",
+      "type": "results",
+      "headline": "Comprendre pour avancer.",
+      "task": "Afficher des repères fictifs, jamais un niveau TCF certifié.",
+      "group": "student",
+      "role": "étudiant",
+      "universe": "Learn",
+      "figmaPage": "07 — Student App",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "S12",
+      "title": "Coach",
+      "route": "/app/coach",
+      "type": "coach",
+      "headline": "Une piste claire pour la suite.",
+      "task": "Conseils prédéfinis, aucune IA connectée.",
+      "group": "student",
+      "role": "étudiant",
+      "universe": "Learn",
+      "figmaPage": "07 — Student App",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "S13",
+      "title": "Studio vocal",
+      "route": "/app/studio",
+      "type": "voice",
+      "headline": "Votre voix a de l’avenir.",
+      "task": "Simulation graphique ; aucun accès au microphone.",
+      "group": "student",
+      "role": "étudiant",
+      "universe": "Voice",
+      "figmaPage": "08 — Voice Studio",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "S14",
+      "title": "Rédaction et brouillons",
+      "route": "/app/redaction",
+      "type": "drafts",
+      "headline": "Laissez vos idées prendre forme.",
+      "task": "Brouillon temporaire en mémoire, perdu au rechargement.",
+      "group": "student",
+      "role": "étudiant",
+      "universe": "Learn",
+      "figmaPage": "07 — Student App",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "S15",
+      "title": "Progression",
+      "route": "/app/progression",
+      "type": "progress",
+      "headline": "Voir le chemin parcouru.",
+      "task": "Données fictives, tableau équivalent au graphique.",
+      "group": "student",
+      "role": "étudiant",
+      "universe": "Learn",
+      "figmaPage": "07 — Student App",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "S16",
+      "title": "Historique",
+      "route": "/app/historique",
+      "type": "history",
+      "headline": "Retrouver vos apprentissages.",
+      "task": "Consulter les séances fictives et leurs retours.",
+      "group": "student",
+      "role": "étudiant",
+      "universe": "Learn",
+      "figmaPage": "07 — Student App",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "S17",
+      "title": "Calendrier",
+      "route": "/app/calendrier",
+      "type": "calendar",
+      "headline": "Un rendez-vous avec vous-même.",
+      "task": "Agenda en liste utilisable au clavier.",
+      "group": "student",
+      "role": "étudiant",
+      "universe": "Learn",
+      "figmaPage": "07 — Student App",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "S18",
+      "title": "Notifications",
+      "route": "/app/notifications",
+      "type": "notifications",
+      "headline": "L’essentiel, au bon moment.",
+      "task": "Marquer comme lu et régler les préférences simulées.",
+      "group": "student",
+      "role": "étudiant",
+      "universe": "Learn",
+      "figmaPage": "07 — Student App",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "S19",
+      "title": "Abonnement",
+      "route": "/app/abonnement",
+      "type": "billing",
+      "headline": "Garder la maîtrise de votre formule.",
+      "task": "Changement et annulation simulés, aucun paiement.",
+      "group": "student",
+      "role": "étudiant",
+      "universe": "Learn",
+      "figmaPage": "07 — Student App",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "S20",
+      "title": "Profil",
+      "route": "/app/profil",
+      "type": "profile",
+      "headline": "Un espace qui vous ressemble.",
+      "task": "Modifier un profil fictif sans données sensibles.",
+      "group": "student",
+      "role": "étudiant",
+      "universe": "Learn",
+      "figmaPage": "07 — Student App",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "S21",
+      "title": "Paramètres",
+      "route": "/app/parametres",
+      "type": "settings",
+      "headline": "Votre confort, vos préférences.",
+      "task": "Préférences locales temporaires et suppression simulée.",
+      "group": "student",
+      "role": "étudiant",
+      "universe": "Learn",
+      "figmaPage": "07 — Student App",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "S22",
+      "title": "Correction",
+      "route": "/app/correction",
+      "type": "correction",
+      "headline": "Chaque réponse ouvre une piste.",
+      "task": "Expliquer une réponse de démonstration.",
+      "group": "student",
+      "role": "étudiant",
+      "universe": "Learn",
+      "figmaPage": "07 — Student App",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "S23",
+      "title": "Retour sur la rédaction",
+      "route": "/app/feedback",
+      "type": "feedback",
+      "headline": "Une idée, puis une amélioration.",
+      "task": "Retour prédéfini et explicitement non évalué par une IA.",
+      "group": "student",
+      "role": "étudiant",
+      "universe": "Learn",
+      "figmaPage": "07 — Student App",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "S24",
+      "title": "Rapport de séance orale",
+      "route": "/app/rapport-oral",
+      "type": "oral-report",
+      "headline": "Faire le point, sereinement.",
+      "task": "Rapport fictif sans analyse ni enregistrement audio.",
+      "group": "student",
+      "role": "étudiant",
+      "universe": "Learn",
+      "figmaPage": "07 — Student App",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "T01",
+      "title": "Espace enseignant",
+      "route": "/enseignant",
+      "type": "teacher-dashboard",
+      "headline": "Accompagner chaque progression.",
+      "task": "Accéder aux classes et corrections en attente.",
+      "group": "teacher",
+      "role": "enseignant",
+      "universe": "Learn",
+      "figmaPage": "09 — Teachers & Schools",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "T02",
+      "title": "Classes",
+      "route": "/enseignant/classes",
+      "type": "classes",
+      "headline": "Votre classe, en un regard.",
+      "task": "Ouvrir une classe fictive, sans données d’élèves réels.",
+      "group": "teacher",
+      "role": "enseignant",
+      "universe": "Learn",
+      "figmaPage": "09 — Teachers & Schools",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "T03",
+      "title": "Étudiants",
+      "route": "/enseignant/etudiants",
+      "type": "students",
+      "headline": "Un suivi attentif et structuré.",
+      "task": "État des apprentissages et filtres simulés.",
+      "group": "teacher",
+      "role": "enseignant",
+      "universe": "Learn",
+      "figmaPage": "09 — Teachers & Schools",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "T04",
+      "title": "Devoirs",
+      "route": "/enseignant/devoirs",
+      "type": "assignment",
+      "headline": "Donner du sens à l’entraînement.",
+      "task": "Préparer et attribuer un devoir fictif.",
+      "group": "teacher",
+      "role": "enseignant",
+      "universe": "Learn",
+      "figmaPage": "09 — Teachers & Schools",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "T05",
+      "title": "Corrections",
+      "route": "/enseignant/corrections",
+      "type": "review",
+      "headline": "Un retour qui fait progresser.",
+      "task": "Commentaire et publication simulés, sans note officielle.",
+      "group": "teacher",
+      "role": "enseignant",
+      "universe": "Learn",
+      "figmaPage": "09 — Teachers & Schools",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "T06",
+      "title": "Statistiques de classe",
+      "route": "/enseignant/statistiques",
+      "type": "teacher-stats",
+      "headline": "Repérer les besoins du groupe.",
+      "task": "Agrégats fictifs, aucun classement nominatif réel.",
+      "group": "teacher",
+      "role": "enseignant",
+      "universe": "Learn",
+      "figmaPage": "09 — Teachers & Schools",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "E01",
+      "title": "Établissement",
+      "route": "/etablissement",
+      "type": "school-dashboard",
+      "headline": "Un cadre pour apprendre ensemble.",
+      "task": "Synthèse des accès et groupes fictifs.",
+      "group": "school",
+      "role": "gestionnaire",
+      "universe": "Learn",
+      "figmaPage": "09 — Teachers & Schools",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "E02",
+      "title": "Membres",
+      "route": "/etablissement/membres",
+      "type": "members",
+      "headline": "Les bonnes personnes, les bons accès.",
+      "task": "Invitation et révocation simulées.",
+      "group": "school",
+      "role": "gestionnaire",
+      "universe": "Learn",
+      "figmaPage": "09 — Teachers & Schools",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "E03",
+      "title": "Groupes",
+      "route": "/etablissement/groupes",
+      "type": "groups",
+      "headline": "Organiser les apprentissages.",
+      "task": "Affectation d’un groupe avec vérification de périmètre.",
+      "group": "school",
+      "role": "gestionnaire",
+      "universe": "Learn",
+      "figmaPage": "09 — Teachers & Schools",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "E04",
+      "title": "Licences",
+      "route": "/etablissement/licences",
+      "type": "licenses",
+      "headline": "Des accès lisibles et maîtrisés.",
+      "task": "Attribution fictive, sans achat.",
+      "group": "school",
+      "role": "gestionnaire",
+      "universe": "Learn",
+      "figmaPage": "09 — Teachers & Schools",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "E05",
+      "title": "Facturation établissement",
+      "route": "/etablissement/facturation",
+      "type": "school-billing",
+      "headline": "Votre facturation, en toute clarté.",
+      "task": "Factures fictives, aucune donnée bancaire ni transaction.",
+      "group": "school",
+      "role": "gestionnaire",
+      "universe": "Learn",
+      "figmaPage": "09 — Teachers & Schools",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "M01",
+      "title": "Administration",
+      "route": "/admin",
+      "type": "admin-dashboard",
+      "headline": "Piloter avec précision.",
+      "task": "Supervision fictive et accès aux validations.",
+      "group": "admin",
+      "role": "administrateur",
+      "universe": "Learn",
+      "figmaPage": "10 — Administration",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "M02",
+      "title": "Utilisateurs",
+      "route": "/admin/utilisateurs",
+      "type": "users",
+      "headline": "Gérer les accès avec discernement.",
+      "task": "Rôles fictifs et confirmation des actions sensibles.",
+      "group": "admin",
+      "role": "administrateur",
+      "universe": "Learn",
+      "figmaPage": "10 — Administration",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "M03",
+      "title": "Contenus",
+      "route": "/admin/contenus",
+      "type": "content",
+      "headline": "Des ressources prêtes à apprendre.",
+      "task": "Brouillon, relecture et publication simulée.",
+      "group": "admin",
+      "role": "administrateur",
+      "universe": "Learn",
+      "figmaPage": "10 — Administration",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "M04",
+      "title": "Questions",
+      "route": "/admin/questions",
+      "type": "questions",
+      "headline": "La qualité commence par une question.",
+      "task": "Versionner consigne, distracteurs et explication fictifs.",
+      "group": "admin",
+      "role": "administrateur",
+      "universe": "Learn",
+      "figmaPage": "10 — Administration",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "M05",
+      "title": "Examens",
+      "route": "/admin/examens",
+      "type": "admin-exams",
+      "headline": "Assembler un parcours cohérent.",
+      "task": "Structure fictive et vérification de complétude.",
+      "group": "admin",
+      "role": "administrateur",
+      "universe": "Learn",
+      "figmaPage": "10 — Administration",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "M06",
+      "title": "Validations",
+      "route": "/admin/validations",
+      "type": "approval",
+      "headline": "Relire avant de publier.",
+      "task": "Accepter ou renvoyer un contenu avec commentaire.",
+      "group": "admin",
+      "role": "administrateur",
+      "universe": "Learn",
+      "figmaPage": "10 — Administration",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "M07",
+      "title": "Modèles d’évaluation",
+      "route": "/admin/modeles",
+      "type": "rubric",
+      "headline": "Des critères explicites.",
+      "task": "Critères de travail, non calibrés et non officiels.",
+      "group": "admin",
+      "role": "administrateur",
+      "universe": "Learn",
+      "figmaPage": "10 — Administration",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "M08",
+      "title": "Paiements",
+      "route": "/admin/paiements",
+      "type": "payments",
+      "headline": "Comprendre chaque opération.",
+      "task": "Données fictives ; aucune opération de remboursement réelle.",
+      "group": "admin",
+      "role": "administrateur",
+      "universe": "Learn",
+      "figmaPage": "10 — Administration",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "M09",
+      "title": "Support",
+      "route": "/admin/support",
+      "type": "support",
+      "headline": "Une réponse attentive.",
+      "task": "Ticket fictif, sans coordonnées personnelles.",
+      "group": "admin",
+      "role": "administrateur",
+      "universe": "Learn",
+      "figmaPage": "10 — Administration",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    },
+    {
+      "id": "M10",
+      "title": "Paramètres administration",
+      "route": "/admin/parametres",
+      "type": "admin-settings",
+      "headline": "Un fonctionnement sous contrôle.",
+      "task": "Paramètres simulés ; secrets et clés exclus de la maquette.",
+      "group": "admin",
+      "role": "administrateur",
+      "universe": "Learn",
+      "figmaPage": "10 — Administration",
+      "formats": [
+        375,
+        768,
+        1440
+      ],
+      "figmaId": null,
+      "localReference": "prototype",
+      "status": "référence locale à vérifier",
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "offline"
+      ],
+      "data": "fictives"
+    }
+  ],
+  "flows": [
+    {
+      "id": "F01",
+      "title": "Découverte → inscription → dashboard",
+      "screens": [
+        "P01",
+        "A01",
+        "A05",
+        "A06",
+        "S01"
+      ],
+      "error": "Courriel invalide, consentement absent, lien expiré",
+      "interruption": "Revenir sans création de compte ni conservation des mots de passe"
+    },
+    {
+      "id": "F02",
+      "title": "Compréhension orale → correction",
+      "screens": [
+        "S01",
+        "S05",
+        "S22"
+      ],
+      "error": "Aucune réponse, média indisponible",
+      "interruption": "Quitter via confirmation ; transcription disponible hors examen réel"
+    },
+    {
+      "id": "F03",
+      "title": "Expression écrite → feedback",
+      "screens": [
+        "S01",
+        "S07",
+        "S23"
+      ],
+      "error": "Texte trop court pour la démonstration, analyse indisponible",
+      "interruption": "Confirmation avant perte du brouillon temporaire"
+    },
+    {
+      "id": "F04",
+      "title": "Studio oral → simulation → rapport",
+      "screens": [
+        "S01",
+        "S13",
+        "S24"
+      ],
+      "error": "Permission refusée simulée, déconnexion, délai dépassé",
+      "interruption": "Pause, reprise et fin confirmée ; aucune capture audio"
+    },
+    {
+      "id": "F05",
+      "title": "Examen blanc → résultats",
+      "screens": [
+        "S01",
+        "S09",
+        "S10",
+        "S11"
+      ],
+      "error": "Réponse manquante, délai fictif expiré",
+      "interruption": "Confirmation de sortie et fin de session"
+    },
+    {
+      "id": "F06",
+      "title": "Gestion d’abonnement",
+      "screens": [
+        "S01",
+        "S19"
+      ],
+      "error": "Paiement refusé simulé, formule indisponible",
+      "interruption": "Annulation de dialogue sans changement ; aucun paiement"
+    },
+    {
+      "id": "F07",
+      "title": "Enseignant → classe → devoir",
+      "screens": [
+        "T01",
+        "T02",
+        "T04"
+      ],
+      "error": "Classe sans étudiants, date absente",
+      "interruption": "Abandonner le brouillon ou revenir à la classe"
+    },
+    {
+      "id": "F08",
+      "title": "Administrateur → contenu → validation",
+      "screens": [
+        "M01",
+        "M03",
+        "M06"
+      ],
+      "error": "Champs incomplets, contenu refusé",
+      "interruption": "Retour au brouillon et confirmation avant publication simulée"
+    }
+  ]
+}

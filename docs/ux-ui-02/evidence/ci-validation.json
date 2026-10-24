@@ -1,0 +1,528 @@
+{
+  "owner": "Jonathan Kakesa",
+  "date": "2026-10-24",
+  "codeSha": "99966b921857e2bae03da87f8f57dedffcc4933a",
+  "baseDevSha": "6fe83c281d9b2d94499a0208f8bd4ef3251edc5a",
+  "frontend01PrHeadUnchanged": "82c5a0ecff25bc81cdf0366a274024d578fbf7a5",
+  "browserRuns": [
+    {
+      "id": 40106734251,
+      "url": "https://github.com/JonathanK-N/fluentia/actions/runs/40106734251",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 120909863863,
+          "name": "references",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 40106734251,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run npm ci --ignore-scripts",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run npm audit --audit-level=moderate",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run node --check prototype.js",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Run node --check serve.mjs",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Run python verify.py",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Run npx playwright install --with-deps chromium firefox webkit",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Run npm test",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 21
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 22
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 23
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 40106729481,
+      "url": "https://github.com/JonathanK-N/fluentia/actions/runs/40106729481",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 120909850159,
+          "name": "references",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 40106729481,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run npm ci --ignore-scripts",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run npm audit --audit-level=moderate",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run node --check prototype.js",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Run node --check serve.mjs",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Run python verify.py",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Run npx playwright install --with-deps chromium firefox webkit",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Run npm test",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 21
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 22
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 23
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "baselineRuns": [
+    {
+      "id": 40106734269,
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 120909864057,
+          "name": "web",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 40106734269,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run npm install",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run npm run typecheck",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run npm run build",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 12
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13
+            }
+          ]
+        },
+        {
+          "id": 120909864242,
+          "name": "api",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 40106734269,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run pip install -r requirements.txt",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run python manage.py check",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run python manage.py test",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 12
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 40106729428,
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 120909849955,
+          "name": "web",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 40106729428,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run npm install",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run npm run typecheck",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run npm run build",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 12
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13
+            }
+          ]
+        },
+        {
+          "id": 120909850181,
+          "name": "api",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 40106729428,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run pip install -r requirements.txt",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run python manage.py check",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run python manage.py test",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 12
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "results": {
+    "passed": 58,
+    "skipped": 2,
+    "unexpected": 0,
+    "skippedScope": "Zoom d’extension Firefox/WebKit ; aucune réussite revendiquée pour ces deux cas.",
+    "screens": 62,
+    "widths": [
+      375,
+      768,
+      1440
+    ],
+    "engines": [
+      "chromium",
+      "firefox",
+      "webkit"
+    ],
+    "geometryCombinations": 558,
+    "axeScreensPerEngine": 62,
+    "audit": "Zéro vulnérabilité signalée pour le package de recette",
+    "contrastPairs": 16,
+    "officialAssets": 3
+  },
+  "artifact": {
+    "id": 12565081965,
+    "name": "ux-ui-02-references",
+    "size_in_bytes": 4549375,
+    "url": "https://api.github.com/repos/JonathanK-N/fluentia/actions/artifacts/12565081965",
+    "archive_download_url": "https://api.github.com/repos/JonathanK-N/fluentia/actions/artifacts/12565081965/zip",
+    "expired": false,
+    "created_at": "2026-10-24T15:26:32Z",
+    "expires_at": "2026-11-07T15:26:31Z",
+    "updated_at": "2026-10-24T15:26:32Z",
+    "digest": "sha256:01a921b91db515c8392df84d7980e96de27a64ae98146a083466a25e08853855",
+    "workflow_run": {
+      "id": 40106734251,
+      "repository_id": 1431900179,
+      "head_repository_id": 1431900179,
+      "head_branch": "design/ux-ui-02",
+      "head_sha": "99966b921857e2bae03da87f8f57dedffcc4933a"
+    }
+  },
+  "figma": {
+    "newNodeIds": [],
+    "nativeDelivery": false,
+    "reason": "Quota Starter atteint, lecture refusée."
+  },
+  "status": "NO-GO pour livraison UX/UI complète"
+}
