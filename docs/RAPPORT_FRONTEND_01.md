@@ -2,7 +2,11 @@
 
 Responsable et propriétaire : Jonathan Kakesa. 24 octobre 2026.
 
-## Décision : NO-GO pour la fusion vers dev
+## Décision historique et réévaluation Code-First
+
+La feuille de route Frontend 02 approuve désormais une stratégie Code-First. Le [rapport de validation au point A](VALIDATION_PR_01.md) propose un **GO technique pour intégration vers dev, sous autorisation explicite**, avec synchronisation Figma différée dans le [backlog](FIGMA_SYNC_BACKLOG.md). Il remplace les conditions Figma préalables à la fusion figurant plus bas. Aucune fusion n’a été effectuée. Les constats et résultats historiques suivants restent conservés.
+
+### Décision historique : NO-GO pour la livraison Figma complète
 
 La validation automatisée du frontend est positive. Le Design System complet n’est cependant **pas validé** : la revue de la maquette tablette Figma montre des débordements et des chevauchements. Le quota Starter bloque les corrections et les nouvelles captures. La [PR #1 vers dev](https://github.com/JonathanK-N/fluentia/pull/1) reste en brouillon jusqu’à correction et revue. Aucun forfait payant n’a été activé.
 
