@@ -8,6 +8,8 @@ import "./globals.css";
 import { brand } from "../lib/brand";
 import { Providers } from "../components/layout/providers";
 import { Header } from "../components/navigation/header";
+import { Footer } from "../features/landing/footer";
+import "../features/landing/landing.css";
 export const metadata: Metadata = {
   title: {
     default: "Fluentia — Préparation au TCF",
@@ -35,12 +37,7 @@ export default function RootLayout({
           </a>
           <Header />
           {children}
-          <footer className="site-footer container">
-            <span>
-              © {new Date().getFullYear()} Fluentia · {brand.owner}
-            </span>
-            <span>Maîtriser aujourd’hui. Avancer demain.</span>
-          </footer>
+          <Footer />
         </Providers>
       </body>
     </html>

@@ -1,5 +1,5 @@
 /* Fluentia — tokens, composants et responsive. Propriétaire : Jonathan Kakesa. */
-:root {
+:root, .learn-preview {
   color-scheme: light;
   --brand-navy: #081b35;
   --brand-blue: #1769e0;
@@ -36,7 +36,7 @@
   --duration: 180ms;
   --ease: cubic-bezier(0.2, 0.7, 0.3, 1);
 }
-:root[data-theme="dark"] {
+:root[data-theme="dark"], .discover {
   color-scheme: dark;
   --bg: #081b35;
   --surface: #102944;

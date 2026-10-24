@@ -1,12 +1,13 @@
 /** Responsive, clavier, axe et ressources. Propriétaire : Jonathan Kakesa. */
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
-for (const width of [375, 768, 1440]) {
+for (const width of [320, 375, 390, 768, 1024, 1440, 1920]) {
   test(`accueil et catalogue à ${width}px`, async ({ page }, info) => {
     const errors: string[] = [];
     page.on("pageerror", (error) => errors.push(error.message));
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/");
+    await page.evaluate(() => document.fonts.ready);
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     expect(
       await page.evaluate(
@@ -19,7 +20,11 @@ for (const width of [375, 768, 1440]) {
       fullPage: true,
     });
     await page.goto("/design-system");
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
     await page.getByRole("button", { name: "Ouvrir la fenêtre" }).click();
     await expect(page.getByRole("dialog")).toBeVisible();
     await page.keyboard.press("Escape");
@@ -40,10 +45,11 @@ test("thème, menu mobile, mouvement réduit et manifest", async ({
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce", colorScheme: "light" });
   await page.setViewportSize({ width: 375, height: 850 });
-  await page.goto("/");
+  await page.goto("/design-system");
   await page.getByRole("button", { name: "Changer le thème" }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await page.goto("/");
   await page.getByText("Menu", { exact: true }).click();
   await page
     .getByRole("navigation", { name: "Navigation mobile" })

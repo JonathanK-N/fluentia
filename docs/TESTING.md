@@ -1,4 +1,12 @@
-# Vérification frontend — Mission 01
+# Vérification frontend
+
+## Frontend 02 — recette ajoutée
+
+Le lot d’accueil étend les formats aux sept largeurs demandées, ajoute des parcours Voice, menu, FAQ/conseil, mouvement/pause, sans JavaScript et géométrie intermédiaire. Les tests DOM supplémentaires vérifient reprise après pause, erreur, redémarrage et focus. Les résultats sont consignés dans [FRONTEND_02.md](FRONTEND_02.md) après exécution ; les réussites historiques ci-dessous ne leur sont pas attribuées.
+
+Pour une recette locale contre le serveur de développement déjà lancé, `FLUENTIA_PREVIEW_URL=http://127.0.0.1:3000` désactive le serveur automatique uniquement hors CI. `FLUENTIA_CHROMIUM_EXECUTABLE` permet un exécutable Chromium local explicite. La CI conserve le build de production et ses trois moteurs ; la recette de zoom conserve le port 3100 et son extension dédiée.
+
+## Mission 01 — historique
 
 Responsable : Jonathan Kakesa. Référence : CI Ubuntu, Node 22 et Python 3.12. Aucun build Windows local réussi n’est revendiqué.
 

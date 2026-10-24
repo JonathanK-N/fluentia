@@ -1,20 +1,22 @@
 /** Logos PNG officiels fournis, sans reconstruction. Propriétaire : Jonathan Kakesa. */
 import Image from "next/image";
 import Link from "next/link";
-export function Logo() {
+export function Logo({ dark = false }: { dark?: boolean }) {
   return (
     <Link href="/" className="brand" aria-label="Fluentia — accueil">
+      {!dark && (
+        <Image
+          className="logo-light"
+          src="/branding/01_Logos_PNG/logo-horizontal-light.png"
+          alt="Fluentia"
+          width={183}
+          height={48}
+          priority
+          unoptimized
+        />
+      )}
       <Image
-        className="logo-light"
-        src="/branding/01_Logos_PNG/logo-horizontal-light.png"
-        alt="Fluentia"
-        width={183}
-        height={48}
-        priority
-        unoptimized
-      />
-      <Image
-        className="logo-dark"
+        className={dark ? "" : "logo-dark"}
         src="/branding/01_Logos_PNG/logo-horizontal-dark.png"
         alt="Fluentia"
         width={183}
