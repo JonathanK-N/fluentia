@@ -39,7 +39,7 @@ export function LandingNavigation() {
               paused ? "Reprendre les animations" : "Suspendre les animations"
             }
           >
-            <span aria-hidden="true">{paused ? "▷" : "Ⅱ"}</span>
+            <span aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6">{paused ? <path d="m4 2 7 5-7 5Z" /> : <path d="M4 2v10M10 2v10" />}</svg></span>
             <span className="motion-label">Mouvement</span>
           </Button>
           <a className="landing-login" href="#disponibilite">
