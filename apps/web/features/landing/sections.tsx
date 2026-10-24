@@ -1,5 +1,6 @@
 /** Sections éditoriales et cartes réutilisables. Propriétaire : Jonathan Kakesa. */
 import { competencies } from "../../lib/brand";
+import Image from "next/image";
 import { Card, Badge, Progress } from "../../components/ui/primitives";
 import { Reveal } from "../../components/animations/reveal";
 import { CoachDemo } from "./coach-demo";
@@ -43,14 +44,16 @@ function SkillIcon({ id }: { id: string }) {
 }
 export function CompetencyCard({
   item,
+  order,
 }: {
   item: (typeof competencies)[number];
+  order?: number;
 }) {
   return (
     <Card className="skill-card">
       <div className="skill-top">
         <SkillIcon id={item.id} />
-        <span>{item.number}</span>
+        <span>{order ? String(order).padStart(2, "0") : item.number}</span>
       </div>
       <h3>{item.title}</h3>
       <p>{item.detail}</p>
@@ -99,8 +102,8 @@ export function Competencies() {
                       ? 3
                       : Number(b.number) - 1),
               )
-              .map((item) => (
-                <CompetencyCard item={item} key={item.id} />
+              .map((item, index) => (
+                <CompetencyCard item={item} order={index + 1} key={item.id} />
               ))}
           </div>
         </Reveal>
@@ -217,7 +220,15 @@ export function DashboardPreview() {
           </div>
           <div className="dashboard-preview learn-preview">
             <div className="preview-sidebar" aria-hidden="true">
-              <span className="preview-symbol">F</span>
+              <span className="preview-symbol">
+                <Image
+                  src="/branding/01_Logos_PNG/fluentia-symbole-transparent-256.png"
+                  alt=""
+                  width={34}
+                  height={34}
+                  unoptimized
+                />
+              </span>
               <span className="preview-nav-active">Vue d’ensemble</span>
               <span>Mon parcours</span>
               <span>Mes entraînements</span>

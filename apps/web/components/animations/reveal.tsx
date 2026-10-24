@@ -1,11 +1,10 @@
 "use client";
 /** Apparition ponctuelle Motion, sans masquer le contenu SSR. Propriétaire : Jonathan Kakesa. */
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import type { ReactNode } from "react";
 import { useMotionPreferences } from "../layout/providers";
 export function Reveal({ children }: { children: ReactNode }) {
-  const reduced = useReducedMotion();
-  const { paused } = useMotionPreferences();
+  const { paused, reduced } = useMotionPreferences();
   return (
     <motion.div
       initial={false}

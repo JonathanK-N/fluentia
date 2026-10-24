@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Image from "next/image";
 import { Button } from "../../components/ui/primitives";
 /** Exemple pédagogique prédéfini, sans appel réseau. Propriétaire : Jonathan Kakesa. */
 export function CoachDemo() {
@@ -12,7 +13,13 @@ export function CoachDemo() {
       </div>
       <div className="coach-message">
         <span className="coach-avatar" aria-hidden="true">
-          F
+          <Image
+            src="/branding/01_Logos_PNG/fluentia-symbole-transparent-256.png"
+            alt=""
+            width={26}
+            height={26}
+            unoptimized
+          />
         </span>
         <div>
           <p className="landing-small">UNE INTENTION À LA FOIS</p>

@@ -108,7 +108,9 @@ test("mouvement réduit et pause manuelle conservent les contenus", async ({
   await page.goto("/");
   const orb = page.locator(".hero-visual .fluentia-orb");
   await expect(orb).toHaveAttribute("data-animated", "true");
-  const pause = page.getByRole("button", { name: "Suspendre les animations" });
+  const pause = page.getByRole("button", {
+    name: "Mouvement — suspendre les animations",
+  });
   await pause.click();
   await expect(pause).toHaveAttribute("aria-pressed", "true");
   await expect(orb).toHaveAttribute("data-animated", "false");

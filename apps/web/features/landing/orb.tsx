@@ -1,13 +1,12 @@
 "use client";
 /** Sphère décorative sans WebGL ni média. Propriétaire : Jonathan Kakesa. */
-import { motion, useInView, useReducedMotion } from "motion/react";
+import { motion, useInView } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { useMotionPreferences } from "../../components/layout/providers";
 export function VoiceOrb({ state = "idle" }: { state?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const visible = useInView(ref);
-  const reduced = useReducedMotion();
-  const { paused } = useMotionPreferences();
+  const { paused, reduced } = useMotionPreferences();
   const [pageVisible, setPageVisible] = useState(true);
   useEffect(() => {
     const update = () => setPageVisible(!document.hidden);

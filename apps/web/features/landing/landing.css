@@ -859,7 +859,9 @@
 html[data-motion="paused"] {
   scroll-behavior: auto;
 }
-html[data-motion="paused"] .reading-progress { display: none; }
+html[data-motion="paused"] .reading-progress {
+  display: none;
+}
 html[data-motion="paused"] *,
 html[data-motion="paused"] *::before,
 html[data-motion="paused"] *::after {

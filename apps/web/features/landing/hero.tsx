@@ -1,11 +1,10 @@
 "use client";
-import { motion, useReducedMotion, useScroll } from "motion/react";
+import { motion, useScroll } from "motion/react";
 import { VoiceOrb } from "./orb";
 import { useMotionPreferences } from "../../components/layout/providers";
 /** Entrée Discover et repère de lecture. Propriétaire : Jonathan Kakesa. */
 export function Hero() {
-  const { paused } = useMotionPreferences();
-  const reduced = useReducedMotion();
+  const { paused, reduced } = useMotionPreferences();
   const { scrollYProgress } = useScroll();
   return (
     <section className="landing-hero" aria-labelledby="hero-title">

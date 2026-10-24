@@ -34,7 +34,7 @@ export function LandingNavigation() {
             className="motion-toggle"
             onClick={toggle}
             aria-pressed={paused}
-            aria-label="Suspendre les animations"
+            aria-label="Mouvement — suspendre les animations"
             title={
               paused ? "Reprendre les animations" : "Suspendre les animations"
             }
