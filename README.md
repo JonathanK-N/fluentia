@@ -1,9 +1,9 @@
 <div align="center">
 
 # 🌊 Fluentia
-### La maîtrise du français, intelligemment.
+### Maîtrisez le français, allez plus loin.
 
-![Statut](https://img.shields.io/badge/Statut-Socle%20initial-1769E0) ![Identité](https://img.shields.io/badge/Design-Cognito%20Inc.-21D4F4)
+![Statut](https://img.shields.io/badge/Statut-Fondations%20frontend-1769E0) ![Identité](https://img.shields.io/badge/Design-Cognito%20Inc.-21D4F4)
 
 **Propriétaire du projet : Jonathan Kakesa** · [Dépôt](https://github.com/JonathanK-N/fluentia)
 
@@ -47,3 +47,15 @@ docs/                 Spécifications et guides
 ## Attribution
 
 Projet et responsabilité éditoriale : **Jonathan Kakesa**. Les commits doivent être créés avec le compte GitHub et l'identité Git configurés par le propriétaire. L'importation de ce projet ne modifie pas rétroactivement les auteurs des commits existants.
+
+## Frontend — Mission 01
+
+Vitrine et catalogue `/design-system`, thèmes clair/sombre, logos officiels et Poppins locale. Les interactions sont locales : examens, comptes, coach et paiements restent à développer.
+
+Démarrage : `cd apps/web`, `npm ci`, `npm run dev`.
+
+Voir [la documentation](docs/README.md), [l’audit](docs/AUDIT_FRONTEND_01.md), [les tests](docs/TESTING.md) et [les contributions](CONTRIBUTING.md).
+
+Premier lot : [rapport détaillé](docs/RAPPORT_FRONTEND_01.md) · [PR #1 vers dev](https://github.com/JonathanK-N/fluentia/pull/1) · [aperçu desktop](docs/images/accueil-1440.png).
+
+Finalisation : **NO-GO pour fusion**. La CI couvre les trois moteurs de navigateur et Docker ; les maquettes Figma présentent encore des défauts et le quota Starter bloque leur correction. Voir [les résultats exacts](docs/TESTING.md), [l’état Figma](docs/FIGMA.md) et [les limites PWA](docs/PWA.md). Aucune fusion ni mise en production n’est autorisée automatiquement.

@@ -1,0 +1,9 @@
+# Motion design
+
+Responsable : Jonathan Kakesa.
+
+`Providers` applique `MotionConfig reducedMotion="user"`. `Reveal` utilise `useReducedMotion`, un déclenchement ponctuel dans le viewport et une transition de 350 ms. Le contenu SSR reste visible avec `initial={false}`. Les transitions CSS utilisent 180 ms. Les skeletons cessent après trois cycles ; les éléments décoratifs vocaux sont statiques.
+
+`prefers-reduced-motion: reduce` désactive animations, transitions et défilement doux. Les cartes se déplacent seulement sur écran large sans réduction demandée. Aucun canvas, média automatique, 3D ou parallaxe continue n’est nécessaire. Les transitions de page élaborées et visualisations vocales branchées sur l’audio restent à développer selon des usages validés. Les écrans d’examen futurs doivent éviter la décoration animée.
+
+Référence : [Accessibilité Motion](https://motion.dev/docs/react-accessibility).
