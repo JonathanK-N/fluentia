@@ -16,6 +16,7 @@ Responsable : Jonathan Kakesa.
 | Sécurité | [SECURITY.md](SECURITY.md) |
 | API | [API_INTEGRATION.md](API_INTEGRATION.md) |
 | Tests | [TESTING.md](TESTING.md) |
+| PWA et limites réelles | [PWA.md](PWA.md) |
 | Déploiement | [DEPLOYMENT.md](DEPLOYMENT.md) |
 | Branches | [BRANCHING_STRATEGY.md](BRANCHING_STRATEGY.md) |
 | Décision initiale | [ADR 001](DECISIONS/001-frontend-foundations.md) |

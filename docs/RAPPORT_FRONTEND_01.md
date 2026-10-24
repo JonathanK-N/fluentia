@@ -1,198 +1,65 @@
-# Rapport — Mission Frontend 01, premier lot
+# Rapport de finalisation — Frontend 01
 
-Responsable et propriétaire : Jonathan Kakesa · GitHub : JonathanK-N · 24 octobre 2026.
+Responsable et propriétaire : Jonathan Kakesa. 24 octobre 2026.
 
-## Résumé exécutif
+## Décision : NO-GO pour la fusion vers dev
 
-Le dépôt existant est conservé et enrichi de fondations frontend réutilisables : design system codé v1.0, vitrine, catalogue interactif, actifs officiels, thèmes, motion et contrôles automatisés. Le premier lot est proposé dans la [PR #1 vers dev](https://github.com/JonathanK-N/fluentia/pull/1), en brouillon. La mission globale reste partiellement réalisée : la bibliothèque et les maquettes Figma complètes, la recette sur appareils réels et certaines animations avancées ne sont pas terminées.
+La validation automatisée du frontend est positive. Le Design System complet n’est cependant **pas validé** : la revue de la maquette tablette Figma montre des débordements et des chevauchements. Le quota Starter bloque les corrections et les nouvelles captures. La [PR #1 vers dev](https://github.com/JonathanK-N/fluentia/pull/1) reste en brouillon jusqu’à correction et revue. Aucun forfait payant n’a été activé.
 
-## État initial
+## Références Git et correction des SHA
 
-Référence : `6fe83c281d9b2d94499a0208f8bd4ef3251edc5a`. Les branches permanentes dev, tests et main pointaient sur cette référence et ont été vérifiées inchangées après les travaux. Le socle comprenait Next.js 15, React 19, TypeScript strict, une vitrine monolithique et un endpoint de santé Django. Voir [l’audit](AUDIT_FRONTEND_01.md).
+Référence de départ : dernier commit alors présent dans la PR, `9b4cfa902b9acc20774ec651921ac777969d0654`. Les deux derniers contrôles disponibles à ce moment ont été examinés : [40082962080, pull_request](https://github.com/JonathanK-N/fluentia/actions/runs/40082962080) et [40082958171, push](https://github.com/JonathanK-N/fluentia/actions/runs/40082958171). Tous deux sont réussis sur ce même SHA ; leurs jobs web et api ne couvraient ni Docker ni les trois moteurs.
 
-## Modifications et dépendances
+L’ancien rapport attribuait à tort le même SHA à deux commits distincts. Références exactes relues dans `git log` :
 
-- Séparation des composants génériques, de la marque et des fonctionnalités de démonstration.
-- Tokens sémantiques, thèmes système/manuel, police Poppins locale et actifs PNG officiels.
-- Boutons, champs, cartes, alertes, notifications, modales, onglets, progression, tableaux et graphiques simples.
-- Navigation responsive, replis de route, manifest et icônes.
-- Apparitions Motion ponctuelles, réduction des mouvements et décoration statique sans 3D.
-- Documentation française, diagrammes et captures contrôlées.
-- Lockfile npm, npm ci, lint et tests DOM/navigateur dans la CI ; correction du mode de test Django uniquement dans la CI.
+| Commit | Objet |
+|---|---|
+| `7f26e311a54bf9e383224bd4b21133c64d10db1b` | Verrouiller les dépendances et renforcer les validations automatisées |
+| `1703d25ce7c9b4ab4854fd5a6f0c6c91db5d3e7c` | Affiner les cartes et documenter les dépendances vérifiées |
+| `9b4cfa902b9acc20774ec651921ac777969d0654` | Consigner les validations et les captures du premier lot frontend |
+| `3480bd210d11f8f1cc9c8718bf2b5393f3121fff` | Étendre la validation aux trois moteurs, au zoom et au conteneur Docker |
+| `5967491f5f44d212a64f31b1bc309ce44cc558de` | Aligner les dimensions CSS avec les variables du Design System |
 
-Versions, licences et raisons des dépendances : [DEPENDENCIES.md](DEPENDENCIES.md). Les ajouts fonctionnels sont Motion, Radix Dialog/Tabs et Fontsource Poppins. Les autres ajouts sont les outils de lint et de test. Vitest 5 et PostCSS 8.5.31 corrigent les avis identifiés par l’audit initial. Aucun service payant n’a été activé.
+Les résultats sont rattachés à leur SHA dans [TESTING.md](TESTING.md). Un commit de documentation ultérieur ne doit pas être présenté comme le SHA d’une exécution antérieure. Le SHA final livré et ses derniers runs sont indiqués dans la description de la PR ; le présent document ne tente pas de contenir son propre SHA.
 
-## Fonctionnement réel
+## Modifications
 
-| Élément | État | Limite |
-|---|---|---|
-| Vitrine et catalogue | Fonctionnels dans les parcours testés en Chromium | Pas de compte ni d’entraînement métier |
-| Composants UI | Réutilisables et testés | Tableaux sans tri/pagination ; graphiques simples |
-| Formulaire et notifications | Fonctionnels localement | Aucune inscription ni persistance |
-| Clair/sombre | Fonctionnel | Choix manuel limité au document courant |
-| Motion | Partiellement réalisé | Apparitions et micro-interactions ; pas de transition complexe entre pages ni de parallaxe |
-| PWA | Préparée | Manifest/icônes vérifiés ; pas de service worker ni d’installation réelle validée |
-| Figma | Partiellement réalisé | Tokens, styles, spécimen, 18 variantes du bouton ; autres composants, maquettes responsive et Code Connect à compléter |
-| Examens, authentification, paiements, coach | Non implémentés | Hors de ce premier lot |
+- CI Chromium, Firefox et WebKit, résultats JSON et captures séparées par moteur.
+- Zoom **navigateur** à 200 % sur Chromium : facteur 2 et viewport CSS 1440 → 720, sans zoom CSS de substitution.
+- Contrôles des thèmes, lien d’évitement, focus, erreurs, notifications, onglets au clavier, dialogue, mouvements réduits et erreurs JavaScript.
+- Bordure des champs renforcée ; dimensions CSS exposées pour leur correspondance Figma.
+- Build et démarrage Docker en CI ; contrôles HTTP accueil, catalogue, manifest et icône.
+- 44 PNG/ICO comparés octet par octet à l’archive officielle ; aucune référence active aux SVG approximatifs. [Preuve et contrastes](evidence/brand-assets-and-contrast.json).
+- Figma enrichi : 15 ensembles totalisant 92 variantes et six compositions responsive. Instances et textes Poppins éditables, logos PNG officiels. Leur création ne constitue pas une validation visuelle.
 
-## Tests et preuves
+## Résultats et limites
 
-Le [run 40082747957](https://github.com/JonathanK-N/fluentia/actions/runs/40082747957) sur `1703d25ce7c9b4ab4854fd5a6f0c6c91db5d3e7c` valide npm ci, audit à zéro vulnérabilité signalée, lint sans avertissement, TypeScript strict, 7 tests DOM, build Next.js, 4 tests Chromium/axe et 1 test Django. Environnement : Ubuntu, Node 22.23.3, Python 3.12.15, Chromium fourni par Playwright.
+| Sujet | Résultat exact |
+|---|---|
+| Installation, audit, lint, TypeScript, DOM, build Next | Réussis en CI Linux ; 7 tests DOM, zéro vulnérabilité signalée par npm audit |
+| Navigateurs et responsive | 22 scénarios réussis ; 375/768/1440 px sur les trois moteurs |
+| Zoom | Chromium réussi à 200 % ; 2 scénarios exclus explicitement, Firefox et WebKit |
+| Contrastes | Axe sans violation dans les parcours testés ; 13 paires calculées, seuils 4,5:1 texte et 3:1 limites des champs |
+| Docker | Build et contrôles du conteneur réussis en CI ; Docker absent de cette machine Windows |
+| PWA | Manifest et dimensions PNG vérifiés ; zéro service worker ; navigation hors ligne indisponible constatée |
+| Installation PWA réelle | Non exécutée sur Android/iOS ni dans une fenêtre installée ; aucune installabilité réelle revendiquée |
+| Figma | Non validé ; défauts sur tablette et autres nouvelles compositions non inspectées visuellement |
+| Code Connect | Refus du service : siège Dev/Full et forfait Organization/Enterprise requis ; correspondances manuelles documentées |
+| Accessibilité humaine | Lecteurs d’écran, appareils physiques et compréhension des messages non testés |
 
-Les tests couvrent 375, 768 et 1440 px, les erreurs JavaScript, le dialogue et le focus, le thème sombre, le menu mobile, le mouvement réduit et les icônes du manifest. Les captures des deux pages aux trois formats sont inspectées. Les deux planches Figma sont également inspectées. Voir [TESTING.md](TESTING.md).
+WebKit Linux ne remplace pas Safari macOS/iOS. Axe ne démontre pas à lui seul une conformité complète. L’installation npm locale avait été interrompue pour lenteur ; aucun build local réussi n’est revendiqué.
 
-L’installation npm locale a été interrompue après des lenteurs anormales ; aucun build local réussi n’est revendiqué. La validation de référence est la CI Linux. Le build Docker, Safari/Firefox, les lecteurs d’écran, le zoom et l’installation PWA sur appareils réels restent non vérifiés.
+## Blocage Figma et reprise
 
-## Documentation et conception
+La [capture tablette](images/figma-tablette-a-corriger.png) montre une navigation trop large, des actions non repliées, des champs/barres dépassant leurs cartes, des libellés différents du React et des sections qui se chevauchent. Les axes d’auto-layout et les contraintes doivent être corrigés, puis les six formats et la planche de composants doivent être inspectés. Le [correctif préparé](../scripts/figma-repair-layouts.js) **n’a pas été exécuté** et ne garantit pas à lui seul la correction complète.
 
-Guides : [index](README.md), [architecture](ARCHITECTURE.md), [design system](DESIGN_SYSTEM.md), [composants](COMPONENTS.md), [motion](MOTION_DESIGN.md), [accessibilité](ACCESSIBILITY.md), [responsive](RESPONSIVE.md), [marque](BRAND_GUIDELINES.md), [API](API_INTEGRATION.md), [branches](BRANCHING_STRATEGY.md), [plan de l’accueil](LANDING_PLAN.md).
+Le service renvoie que le quota Figma Starter est atteint ; la correction et sa vérification sont impossibles avec ce quota. La capture temporaire de référence `9:11` reste à supprimer après finalisation. Le script de capture a été retiré du code applicatif avant livraison. [Détails Figma](FIGMA.md).
 
-[Fichier Figma](https://www.figma.com/design/SIjNphVU1NHimwwImszGbE) et [état détaillé](FIGMA.md). Le forfait Starter a refusé un second mode de variables ; les valeurs sombres sont documentées, sans prétendre qu’un second mode existe.
+## Conditions avant un GO
 
-## Risques, gouvernance et suite
+1. Rétablir un accès Figma permettant la correction, sans activation payante non autorisée.
+2. Corriger et inspecter les composants, variantes, thèmes et six maquettes ; terminer l’alignement React/Figma, les syntaxes WEB des primitives, scopes, ombres et focus, puis retirer la capture temporaire.
+3. Faire arbitrer par Jonathan Kakesa les limites de recette humaine et d’installation PWA, sans les transformer en tests réussis.
+4. Vérifier les contrôles du dernier SHA de la PR et obtenir une décision humaine explicite avant fusion vers `dev`.
 
-La PR reste en brouillon. Ne pas promouvoir vers tests/main avant recette humaine et revue des éléments incomplets. Les logos PNG sont conservés tels que fournis ; les SVG du pack ne sont pas des masters certifiés. Les contrôles automatiques ne prouvent pas à eux seuls une conformité d’accessibilité complète. Réévaluer la surcharge PostCSS lors de la prochaine montée de Next et planifier l’évolution de la chaîne de lint.
-
-Aucun changement de code sur main, aucune fusion, aucun force push et aucun déploiement de production. Le backend applicatif est inchangé. Le retour arrière consiste à fermer la PR avant fusion ou proposer un revert revu après intégration.
-
-La suite de la mission 01 concerne les maquettes et composants Figma manquants, la recette multi-navigateurs/appareils et l’arbitrage des animations utiles. Le plan de l’accueil décrit les étapes de raccordement futur ; aucune mission suivante n’est lancée automatiquement.
-
-## Branche et commits
-
-Branche : `frontend/mission-01`, issue de dev.
-
-```text
-1703d25ce7c9b4ab4854fd5a6f0c6c91db5d3e7c Affiner les cartes et documenter les dépendances vérifiées
-1703d25ce7c9b4ab4854fd5a6f0c6c91db5d3e7c Verrouiller les dépendances et renforcer les validations automatisées
-4f7169ff7982eeec92c05b28ed56c7e1b85a771a Corriger les libellés accessibles et les dépendances vulnérables
-cdeb0fbd170ded98043e10c3196f216c16b1982d Corriger le lint et isoler la configuration des tests en CI
-5292bcfa659821961785e27759bb93eae7dc928e Poser les fondations visuelles et les composants du frontend
-```
-
-## Fichiers créés ou modifiés
-
-<details>
-<summary>Liste des fichiers de ce lot</summary>
-
-```text
-.github/workflows/ci.yml
-.gitignore
-CHANGELOG.md
-CONTRIBUTING.md
-README.md
-apps/web/.dockerignore
-apps/web/Dockerfile
-apps/web/app/design-system/page.tsx
-apps/web/app/error.tsx
-apps/web/app/globals.css
-apps/web/app/layout.tsx
-apps/web/app/loading.tsx
-apps/web/app/manifest.ts
-apps/web/app/not-found.tsx
-apps/web/app/page.tsx
-apps/web/components/animations/reveal.tsx
-apps/web/components/branding/logo.tsx
-apps/web/components/layout/providers.tsx
-apps/web/components/navigation/header.tsx
-apps/web/components/ui/dialog.tsx
-apps/web/components/ui/notification.tsx
-apps/web/components/ui/primitives.tsx
-apps/web/components/ui/tabs.tsx
-apps/web/eslint.config.mjs
-apps/web/features/design-system/showcase.tsx
-apps/web/lib/brand.ts
-apps/web/package-lock.json
-apps/web/package.json
-apps/web/playwright.config.ts
-apps/web/public/branding/01_Logos_PNG/fluentia-symbole-fond-clair-1024.png
-apps/web/public/branding/01_Logos_PNG/fluentia-symbole-fond-clair-256.png
-apps/web/public/branding/01_Logos_PNG/fluentia-symbole-fond-clair-512.png
-apps/web/public/branding/01_Logos_PNG/fluentia-symbole-fond-sombre-1024.png
-apps/web/public/branding/01_Logos_PNG/fluentia-symbole-fond-sombre-256.png
-apps/web/public/branding/01_Logos_PNG/fluentia-symbole-fond-sombre-512.png
-apps/web/public/branding/01_Logos_PNG/fluentia-symbole-transparent-1024.png
-apps/web/public/branding/01_Logos_PNG/fluentia-symbole-transparent-256.png
-apps/web/public/branding/01_Logos_PNG/fluentia-symbole-transparent-512.png
-apps/web/public/branding/01_Logos_PNG/icon-cyan.png
-apps/web/public/branding/01_Logos_PNG/icon-gradient.png
-apps/web/public/branding/01_Logos_PNG/icon-navy.png
-apps/web/public/branding/01_Logos_PNG/icon-white.png
-apps/web/public/branding/01_Logos_PNG/logo-horizontal-dark.png
-apps/web/public/branding/01_Logos_PNG/logo-horizontal-light.png
-apps/web/public/branding/01_Logos_PNG/logo-slogan-dark.png
-apps/web/public/branding/01_Logos_PNG/logo-slogan-light.png
-apps/web/public/branding/02_Icons_PWA/apple-touch-icon-152.png
-apps/web/public/branding/02_Icons_PWA/apple-touch-icon-167.png
-apps/web/public/branding/02_Icons_PWA/apple-touch-icon-180.png
-apps/web/public/branding/02_Icons_PWA/icon-1024x1024.png
-apps/web/public/branding/02_Icons_PWA/icon-120x120.png
-apps/web/public/branding/02_Icons_PWA/icon-128x128.png
-apps/web/public/branding/02_Icons_PWA/icon-144x144.png
-apps/web/public/branding/02_Icons_PWA/icon-152x152.png
-apps/web/public/branding/02_Icons_PWA/icon-180x180.png
-apps/web/public/branding/02_Icons_PWA/icon-192x192.png
-apps/web/public/branding/02_Icons_PWA/icon-256x256.png
-apps/web/public/branding/02_Icons_PWA/icon-384x384.png
-apps/web/public/branding/02_Icons_PWA/icon-512x512.png
-apps/web/public/branding/02_Icons_PWA/icon-72x72.png
-apps/web/public/branding/02_Icons_PWA/icon-96x96.png
-apps/web/public/branding/02_Icons_PWA/icon-maskable-192x192.png
-apps/web/public/branding/02_Icons_PWA/icon-maskable-512x512.png
-apps/web/public/branding/03_Favicons/favicon-128x128.png
-apps/web/public/branding/03_Favicons/favicon-16x16.png
-apps/web/public/branding/03_Favicons/favicon-24x24.png
-apps/web/public/branding/03_Favicons/favicon-256x256.png
-apps/web/public/branding/03_Favicons/favicon-32x32.png
-apps/web/public/branding/03_Favicons/favicon-48x48.png
-apps/web/public/branding/03_Favicons/favicon-64x64.png
-apps/web/public/branding/03_Favicons/favicon-96x96.png
-apps/web/public/branding/03_Favicons/favicon-source-256.png
-apps/web/public/branding/03_Favicons/favicon.ico
-apps/web/public/branding/04_SVG/icon-cyan.svg
-apps/web/public/branding/04_SVG/icon-gradient.svg
-apps/web/public/branding/04_SVG/icon-navy.svg
-apps/web/public/branding/04_SVG/icon-white.svg
-apps/web/public/branding/04_SVG/logo-horizontal-dark.svg
-apps/web/public/branding/04_SVG/logo-horizontal-light.svg
-apps/web/public/branding/04_SVG/logo-slogan-dark.svg
-apps/web/public/branding/04_SVG/logo-slogan-light.svg
-apps/web/public/branding/05_Documentation/README.md
-apps/web/public/branding/05_Documentation/integration-nextjs.ts
-apps/web/public/branding/05_Documentation/manifest.webmanifest
-apps/web/tests/components.test.tsx
-apps/web/tests/e2e/frontend.spec.ts
-apps/web/tests/setup.ts
-apps/web/tsconfig.json
-apps/web/vitest.config.ts
-docs/ACCESSIBILITY.md
-docs/API_INTEGRATION.md
-docs/ARCHITECTURE.md
-docs/AUDIT_FRONTEND_01.md
-docs/BRANCHING_STRATEGY.md
-docs/BRAND.md
-docs/BRAND_GUIDELINES.md
-docs/COMPONENTS.md
-docs/DECISIONS/001-frontend-foundations.md
-docs/DEPENDENCIES.md
-docs/DEPLOYMENT.md
-docs/DESIGN_SYSTEM.md
-docs/FIGMA.md
-docs/FRONTEND.md
-docs/LANDING_PLAN.md
-docs/MOTION_DESIGN.md
-docs/RAPPORT_FRONTEND_01.md
-docs/README.md
-docs/RESPONSIVE.md
-docs/TESTING.md
-docs/figma-state.json
-docs/images/accueil-1440.png
-docs/images/accueil-375.png
-docs/images/accueil-768.png
-docs/images/catalogue-1440.png
-docs/images/catalogue-375.png
-docs/images/catalogue-768.png
-docs/images/figma-buttons.png
-docs/images/figma-foundations.png
-```
-
-</details>
+Branche : `frontend/mission-01`. La stratégie `dev → tests → main` est conservée. Aucune modification directe de main, aucune fusion, aucun déploiement Railway Production et aucun début de mission Frontend 02.

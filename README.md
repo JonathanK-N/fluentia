@@ -57,3 +57,5 @@ Démarrage : `cd apps/web`, `npm ci`, `npm run dev`.
 Voir [la documentation](docs/README.md), [l’audit](docs/AUDIT_FRONTEND_01.md), [les tests](docs/TESTING.md) et [les contributions](CONTRIBUTING.md).
 
 Premier lot : [rapport détaillé](docs/RAPPORT_FRONTEND_01.md) · [PR #1 vers dev](https://github.com/JonathanK-N/fluentia/pull/1) · [aperçu desktop](docs/images/accueil-1440.png).
+
+Finalisation : **NO-GO pour fusion**. La CI couvre les trois moteurs de navigateur et Docker ; les maquettes Figma présentent encore des défauts et le quota Starter bloque leur correction. Voir [les résultats exacts](docs/TESTING.md), [l’état Figma](docs/FIGMA.md) et [les limites PWA](docs/PWA.md). Aucune fusion ni mise en production n’est autorisée automatiquement.

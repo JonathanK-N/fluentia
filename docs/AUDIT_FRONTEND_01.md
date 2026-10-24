@@ -1,5 +1,7 @@
 # Audit frontend — Mission 01
 
+> État historique du socle initial. Pour les contrôles et limites actuels, voir [le rapport de finalisation](RAPPORT_FRONTEND_01.md), [TESTING.md](TESTING.md) et [FIGMA.md](FIGMA.md).
+
 Responsable : Jonathan Kakesa · Référence initiale : `6fe83c281d9b2d94499a0208f8bd4ef3251edc5a`.
 
 ## État initial vérifié

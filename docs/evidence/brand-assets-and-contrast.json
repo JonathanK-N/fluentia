@@ -1,0 +1,276 @@
+{
+  "archive": "Fluentia_Logo_Assets_PWA_Complet.zip",
+  "archiveSha256": "03945a75ca3c6af28134d47865199f2055a1961efb2ce58e9c87742f53478483",
+  "assets": [
+    {
+      "path": "01_Logos_PNG/fluentia-symbole-fond-clair-1024.png",
+      "sha256": "3c6ae47361fb501f220736aa8b04941f5d8ddb73850f584556ed02771bcdcce5"
+    },
+    {
+      "path": "01_Logos_PNG/fluentia-symbole-fond-clair-256.png",
+      "sha256": "bacc76b6351bc603ff96c205e30e64993ec7039f81d082f65dcec6dcd22f9399"
+    },
+    {
+      "path": "01_Logos_PNG/fluentia-symbole-fond-clair-512.png",
+      "sha256": "839e59084b1913829ed5c93f723f1b73291928c3752352c3088b0bdc44103ac8"
+    },
+    {
+      "path": "01_Logos_PNG/fluentia-symbole-fond-sombre-1024.png",
+      "sha256": "8b70bbdd01c7f0870caeaf33ec9c3013fe0815d9025fb261fc29d330e1123857"
+    },
+    {
+      "path": "01_Logos_PNG/fluentia-symbole-fond-sombre-256.png",
+      "sha256": "8ad70083ec8181bbf54afa1b3aba1c5f8a3fc7cb177a3fbc0b88e867dc275ebd"
+    },
+    {
+      "path": "01_Logos_PNG/fluentia-symbole-fond-sombre-512.png",
+      "sha256": "80008b84d3fd38f8bfc4c552f93325ff68dea982fb9c5a6148bccd76b28e0f50"
+    },
+    {
+      "path": "01_Logos_PNG/fluentia-symbole-transparent-1024.png",
+      "sha256": "7b91f9b2c4ec7d844a762988be25ba30ce628c7163a328a33ae44c4e89626855"
+    },
+    {
+      "path": "01_Logos_PNG/fluentia-symbole-transparent-256.png",
+      "sha256": "43d10a61939e856239dc857b4ddb87d7bbbf7fabf27b19150e32f918e0d681d6"
+    },
+    {
+      "path": "01_Logos_PNG/fluentia-symbole-transparent-512.png",
+      "sha256": "671947456ec5eed681dde367793528422b1cfa27f9b4f6cc3aebac7f26a71820"
+    },
+    {
+      "path": "01_Logos_PNG/icon-cyan.png",
+      "sha256": "24d40fa93f34948e98fa2bec824ef4d1fd88a005b8ce23e23508f46292ec88a7"
+    },
+    {
+      "path": "01_Logos_PNG/icon-gradient.png",
+      "sha256": "ec84aef0c6de526bb011058592112281b6cdf47fc0468385424607961c5d4df8"
+    },
+    {
+      "path": "01_Logos_PNG/icon-navy.png",
+      "sha256": "2a8adc4b24ecbe9030bc048de770efe4963feab2eb07cdd5fcd523851e614c71"
+    },
+    {
+      "path": "01_Logos_PNG/icon-white.png",
+      "sha256": "5db9339f66f3d7261fa46957afea8aea63bfa1eac76e8c8d500d8ee3c545b0d9"
+    },
+    {
+      "path": "01_Logos_PNG/logo-horizontal-dark.png",
+      "sha256": "90d50a821f8590d5094d12629fad31ef88315d19d41cf859439a0ae14f044471"
+    },
+    {
+      "path": "01_Logos_PNG/logo-horizontal-light.png",
+      "sha256": "dd8c35465c681317efa91ee71d8e5ef1943f43e97ab883e776d6cf20850602ec"
+    },
+    {
+      "path": "01_Logos_PNG/logo-slogan-dark.png",
+      "sha256": "d12390b6f284f6f34399f88dfbdfbdb6efa516087dba3f17afdbcfb2cd47489b"
+    },
+    {
+      "path": "01_Logos_PNG/logo-slogan-light.png",
+      "sha256": "a46670c6517729f53089c8e3d4a734c1d9cd7b5941251cc90e138a5a684723ad"
+    },
+    {
+      "path": "02_Icons_PWA/apple-touch-icon-152.png",
+      "sha256": "67fa4c80a42ae261609100a94a3e1e53f4e46d10f2f8b475f4e84bc7585e7195"
+    },
+    {
+      "path": "02_Icons_PWA/apple-touch-icon-167.png",
+      "sha256": "5793bad4e4c4c4290c10254a8d69527aced641325acafda2506a1b6e1f7bc25a"
+    },
+    {
+      "path": "02_Icons_PWA/apple-touch-icon-180.png",
+      "sha256": "f57004c94ef9d1b6e771390cd787014722d009fa02c02662f1f91cd564d99853"
+    },
+    {
+      "path": "02_Icons_PWA/icon-1024x1024.png",
+      "sha256": "8b70bbdd01c7f0870caeaf33ec9c3013fe0815d9025fb261fc29d330e1123857"
+    },
+    {
+      "path": "02_Icons_PWA/icon-120x120.png",
+      "sha256": "97d94c0dc8eaff7a9930ae860e2277fb0a4c718bf0865555d15c95f4c4988389"
+    },
+    {
+      "path": "02_Icons_PWA/icon-128x128.png",
+      "sha256": "98d584b1f68ec0897d999c9cf172852144911621c8f785602f3492b1a54ded3c"
+    },
+    {
+      "path": "02_Icons_PWA/icon-144x144.png",
+      "sha256": "1f6e92dacc4560f5691f099bd2f88c6baf4bc0136e6c39544ee69f43b317e597"
+    },
+    {
+      "path": "02_Icons_PWA/icon-152x152.png",
+      "sha256": "67fa4c80a42ae261609100a94a3e1e53f4e46d10f2f8b475f4e84bc7585e7195"
+    },
+    {
+      "path": "02_Icons_PWA/icon-180x180.png",
+      "sha256": "f57004c94ef9d1b6e771390cd787014722d009fa02c02662f1f91cd564d99853"
+    },
+    {
+      "path": "02_Icons_PWA/icon-192x192.png",
+      "sha256": "272cf355d85931ef9231930a0a40250c3f476c6f562db4cd2f604a465712dff8"
+    },
+    {
+      "path": "02_Icons_PWA/icon-256x256.png",
+      "sha256": "5fa72c9a52ce87847b888194fac3dc76b1aa048c2d5bcbb3b03c7ea09ae06344"
+    },
+    {
+      "path": "02_Icons_PWA/icon-384x384.png",
+      "sha256": "703bf85699e92cfddd2b2bbc89a949b734dbb0d1c91d5e3ec09defa5d469c1e6"
+    },
+    {
+      "path": "02_Icons_PWA/icon-512x512.png",
+      "sha256": "80008b84d3fd38f8bfc4c552f93325ff68dea982fb9c5a6148bccd76b28e0f50"
+    },
+    {
+      "path": "02_Icons_PWA/icon-72x72.png",
+      "sha256": "894acdf7f4e36be4f5de0b64db131fb234e46db184178a1e3a2a174b5d4d4819"
+    },
+    {
+      "path": "02_Icons_PWA/icon-96x96.png",
+      "sha256": "cc3aec8df7110c63b6544c2073a6a07d8c54b5f335faaac0a968339b637d775a"
+    },
+    {
+      "path": "02_Icons_PWA/icon-maskable-192x192.png",
+      "sha256": "de22e8eb0561f5840cb9ffe288494909f6b50e319ee1f3decc804d76ca7a1b5a"
+    },
+    {
+      "path": "02_Icons_PWA/icon-maskable-512x512.png",
+      "sha256": "80008b84d3fd38f8bfc4c552f93325ff68dea982fb9c5a6148bccd76b28e0f50"
+    },
+    {
+      "path": "03_Favicons/favicon-128x128.png",
+      "sha256": "08bf8cf691e1b3100057dcb20f0e9e83bca0d18a7c977be0b4e36d5ed4268f87"
+    },
+    {
+      "path": "03_Favicons/favicon-16x16.png",
+      "sha256": "8bad0dd537f36af22bdce016ffb749e52a954a16c56a9936240c071591fbd016"
+    },
+    {
+      "path": "03_Favicons/favicon-24x24.png",
+      "sha256": "8bb7753271d6f6c13c618899b5cfcead3ff53178e8936e094c831f4982cea859"
+    },
+    {
+      "path": "03_Favicons/favicon-256x256.png",
+      "sha256": "1f4c5875081d11fe1b91ea9bffbc943deea157f25e7421eaea5a90c1c4cb5d69"
+    },
+    {
+      "path": "03_Favicons/favicon-32x32.png",
+      "sha256": "fbe704b958568d119d42eb014dfe52d25df312f4a7ef4079e3d6cf2f5dfdbea4"
+    },
+    {
+      "path": "03_Favicons/favicon-48x48.png",
+      "sha256": "25b24705cc324d9ca446816ecad4b9b4614f0f174a22a9bfcb7360e54d52d804"
+    },
+    {
+      "path": "03_Favicons/favicon-64x64.png",
+      "sha256": "b7d3e82827356c9dac6895c98645bea344cf9f4dd3ce33e1bfef55f433d6f992"
+    },
+    {
+      "path": "03_Favicons/favicon-96x96.png",
+      "sha256": "857aaf7b70a0010c17dca88546019f57e086033c3166c3cabfd5f4d5adc6917a"
+    },
+    {
+      "path": "03_Favicons/favicon-source-256.png",
+      "sha256": "2519b73b4bbf1e0f73e340a3c02c34bcd366583db4075042be466eca403511df"
+    },
+    {
+      "path": "03_Favicons/favicon.ico",
+      "sha256": "6829b8c1b3398abb41b1df16afcc98e4d15e4fb89b42fd500298caf8cd438b3f"
+    }
+  ],
+  "approximateSvgReferences": [],
+  "contrasts": [
+    {
+      "name": "texte clair",
+      "foreground": "081b35",
+      "background": "f7faff",
+      "ratio": 16.474,
+      "minimum": 4.5
+    },
+    {
+      "name": "texte secondaire clair",
+      "foreground": "52647a",
+      "background": "ffffff",
+      "ratio": 6.065,
+      "minimum": 4.5
+    },
+    {
+      "name": "action claire",
+      "foreground": "ffffff",
+      "background": "1769e0",
+      "ratio": 5.081,
+      "minimum": 4.5
+    },
+    {
+      "name": "accent clair",
+      "foreground": "086b82",
+      "background": "eaf1fc",
+      "ratio": 5.381,
+      "minimum": 4.5
+    },
+    {
+      "name": "erreur claire",
+      "foreground": "a12535",
+      "background": "ffffff",
+      "ratio": 7.417,
+      "minimum": 4.5
+    },
+    {
+      "name": "champ clair",
+      "foreground": "71829a",
+      "background": "f7faff",
+      "ratio": 3.744,
+      "minimum": 3
+    },
+    {
+      "name": "champ clair sur surface",
+      "foreground": "71829a",
+      "background": "ffffff",
+      "ratio": 3.917,
+      "minimum": 3
+    },
+    {
+      "name": "texte sombre",
+      "foreground": "f7faff",
+      "background": "081b35",
+      "ratio": 16.474,
+      "minimum": 4.5
+    },
+    {
+      "name": "texte secondaire sombre",
+      "foreground": "b7c9df",
+      "background": "102944",
+      "ratio": 8.74,
+      "minimum": 4.5
+    },
+    {
+      "name": "action sombre",
+      "foreground": "081b35",
+      "background": "21d4f4",
+      "ratio": 9.674,
+      "minimum": 4.5
+    },
+    {
+      "name": "erreur sombre",
+      "foreground": "ffb1b9",
+      "background": "102944",
+      "ratio": 8.604,
+      "minimum": 4.5
+    },
+    {
+      "name": "champ sombre",
+      "foreground": "7e94ae",
+      "background": "081b35",
+      "ratio": 5.527,
+      "minimum": 3
+    },
+    {
+      "name": "champ sombre sur surface",
+      "foreground": "7e94ae",
+      "background": "102944",
+      "ratio": 4.734,
+      "minimum": 3
+    }
+  ]
+}

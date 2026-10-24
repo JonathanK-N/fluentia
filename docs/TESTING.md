@@ -1,53 +1,54 @@
 # Vérification frontend — Mission 01
 
-Responsable : Jonathan Kakesa. Validation de référence : GitHub Actions sous Ubuntu / Node 22.23.3 / Python 3.12.15.
+Responsable : Jonathan Kakesa. Référence : CI Ubuntu, Node 22 et Python 3.12. Aucun build Windows local réussi n’est revendiqué.
 
-## Résultats vérifiés
+## Références exécutées
 
-[Run 40082747957](https://github.com/JonathanK-N/fluentia/actions/runs/40082747957), commit `1703d25ce7c9b4ab4854fd5a6f0c6c91db5d3e7c`.
+| SHA | Runs examinés | Résultat |
+|---|---|---|
+| `9b4cfa902b9acc20774ec651921ac777969d0654` | [40082962080](https://github.com/JonathanK-N/fluentia/actions/runs/40082962080), [40082958171](https://github.com/JonathanK-N/fluentia/actions/runs/40082958171) | web et api réussis ; anciens contrôles limités à Chromium |
+| `3480bd210d11f8f1cc9c8718bf2b5393f3121fff` | [40086017056](https://github.com/JonathanK-N/fluentia/actions/runs/40086017056), [40086013807](https://github.com/JonathanK-N/fluentia/actions/runs/40086013807) | web, api et docker réussis ; 22 E2E réussis, 2 exclus |
+| `5967491f5f44d212a64f31b1bc309ce44cc558de` | [40086695392](https://github.com/JonathanK-N/fluentia/actions/runs/40086695392), [40086691688](https://github.com/JonathanK-N/fluentia/actions/runs/40086691688) | web, api et docker réussis ; 7 DOM, 22 E2E, 2 exclus, 1 API |
 
-| Contrôle | Résultat |
-|---|---|
-| npm ci | Réussi depuis le lockfile |
-| npm audit --audit-level=moderate | Zéro vulnérabilité signalée |
-| npm run lint | Réussi, aucun avertissement accepté |
-| npm run typecheck | Réussi, TypeScript strict |
-| npm test | 7 tests DOM réussis |
-| npm run build | Réussi, Next.js 15.5.28 |
-| npm run test:e2e | 4 tests Chromium/axe réussis |
-| python manage.py check | Réussi dans l’environnement de test CI |
-| python manage.py test | 1 test réussi |
-| Liens Markdown locaux | Contrôle réussi |
-| Revue visuelle | Deux planches Figma et pages aux trois formats inspectées |
+Les logs et toutes les étapes des six jobs du dernier commit de code ont été examinés. [Preuve structurée](evidence/frontend-01-validation.json). Le SHA de documentation final est distinct du SHA des captures.
+
+## Contrôles
+
+- `npm ci`, audit sans vulnérabilité signalée, lint sans avertissement accepté, TypeScript strict, 7 tests DOM et build Next.js.
+- 375/768/1440 px sur Chromium, Firefox et WebKit : accueil et catalogue, absence de débordement horizontal, axe et dialogue.
+- Clair et sombre sur les deux pages, lien d’évitement activé au clavier, focus visible des champs, formulaire vide puis valide, notification fermable, onglets par flèche, dialogue avec Tab/Échap et retour du focus.
+- Mouvement réduit : CSS sans animation/transition, défilement automatique ; Motion respecte la préférence.
+- Zoom réel Chromium : API `chrome.tabs.setZoom` / `getZoom`, facteur 2, largeur CSS 1440 → 720, absence de débordement et axe sur les deux routes. Le scénario est explicitement exclu sur Firefox et WebKit ; **pas de succès annoncé sur ces deux moteurs pour le zoom**.
+- Manifest : langue, display, start_url ; chargement et dimensions PNG des trois icônes déclarées. Zéro enregistrement de service worker. Navigation vers une URL non mise en cache avec réseau coupé : indisponible, conformément à l’absence de mode hors ligne.
+- Docker : construction, démarrage puis réponses HTTP accueil/catalogue/manifest/icône en CI. `docker version` a été essayé localement : commande absente.
+- Script Python exécuté : 44 PNG/ICO identiques à l’archive officielle et 13 rapports de contraste conformes aux seuils testés. [Résultats](evidence/brand-assets-and-contrast.json).
+
+Les 24 scénarios configurés donnent **22 réussites et 2 exclusions**. Une exécution exclue ne vaut pas validation.
 
 ## Commandes reproductibles
 
 ```bash
 cd apps/web
 npm ci
+npm audit --audit-level=moderate
 npm run lint
 npm run typecheck
 npm test
 npm run build
-npx playwright install chromium
+npx playwright install --with-deps chromium firefox webkit
 npm run test:e2e
-npm audit --audit-level=moderate
+docker build --tag fluentia-web:validation .
+docker run --rm -p 3200:3000 fluentia-web:validation
 ```
 
-Les tests DOM vérifient les actions pendant le chargement, les bornes de progression, la validation locale du formulaire, les dialogues et les onglets au clavier. Chromium couvre 375/768/1440 px, les erreurs JavaScript, les règles axe dont les contrastes, le dialogue et le focus, le thème, le menu mobile, la réduction des animations et les icônes du manifest. Les captures se trouvent dans images/ et dans les artefacts frontend-browser de la CI.
+Le job Docker automatise aussi les contrôles HTTP et le nettoyage. Les tests navigateur démarrent le build de production sur 127.0.0.1:3100 et refusent de réutiliser un serveur existant.
 
-## Échecs rencontrés et corrections
+## Preuves et limites
 
-1. L’installation locale npm a été interrompue après des lenteurs anormales ; le premier typecheck lancé pendant l’extraction a rencontré un fichier de dépendance incomplet. Aucun succès local n’est revendiqué ; les contrôles de référence sont exécutés en CI Linux.
-2. Le lint signalait un export anonyme de configuration : configuration nommée.
-3. Django exigeait une configuration de production dans la CI initiale : DJANGO_DEBUG=1 est limité au job de test, sans modifier les paramètres applicatifs.
-4. L’audit a signalé Vitest/tinypool et PostCSS : Vitest 5.0.5 et surcharge PostCSS 8.5.31, puis audit sans vulnérabilité signalée.
-5. Vite 8 nécessite la configuration JSX Oxc : configuration adaptée selon [le guide officiel](https://vite.dev/guide/migration.html).
-6. Axe détectait deux libellés de progression ne reprenant pas le texte visible : libellés corrigés, tests conservés.
-7. La revue des captures a révélé un lien d’évitement masqué encore peint dans une capture longue et des bas de cartes décalés : opacité/focus et disposition flex corrigés.
+Les artefacts frontend-browser contiennent results.json, les captures par moteur, zoom.json et pwa.json. L’archive du run 40086017056 a été téléchargée et son SHA-256 vérifié : `63ac0cab0447c9861d72cc6414e864ed655a2ac81236dda2e1dc3b54d7c3d2ab`. Les captures dans images/ sont des preuves du frontend ; la capture Figma « à corriger » est explicitement une preuve d’échec.
 
-Le lockfile initial a été récupéré d’un artefact CI et son archive vérifiée par SHA-256. Docker et CI utilisent désormais npm ci. Les correctifs ne sont pas validés par un contournement des règles de lint ou d’axe.
+L’archive finale du run 40086695392 a également été téléchargée et vérifiée : `45af8308aa21461e6d7636d400360d19e76e14c77f15c76ae31f13ea8e33e05f`. Les captures React dans images/ et les fichiers zoom/PWA conservés dans evidence/ proviennent de ce run sur `5967491f5f44d212a64f31b1bc309ce44cc558de`.
 
-## Limites
+Figma : capture de référence réelle inspectée ; nouvelle maquette tablette inspectée et **échouée**. Les autres nouvelles maquettes et la planche n’ont pas été inspectées, quota Starter atteint. Voir [FIGMA.md](FIGMA.md).
 
-Le build Docker, Safari/Firefox, les lecteurs d’écran, le zoom à 200 %, les performances sur mobile réel et l’installation PWA Android/iOS ne sont pas vérifiés. Axe ne démontre pas à lui seul une conformité d’accessibilité complète. Aucun déploiement n’est validé dans ce lot.
+Non exécutés : lecteurs d’écran, appareils physiques, Safari macOS/iOS, installation PWA réelle et mode standalone installé, zoom Firefox/WebKit. WebKit Linux ne remplace pas Safari sur appareil. Axe n’est pas une certification d’accessibilité complète. Aucun déploiement n’a été testé ou effectué.
