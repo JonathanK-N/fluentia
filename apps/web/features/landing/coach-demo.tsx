@@ -18,6 +18,7 @@ export function CoachDemo() {
             alt=""
             width={26}
             height={26}
+            loading="eager"
             unoptimized
           />
         </span>

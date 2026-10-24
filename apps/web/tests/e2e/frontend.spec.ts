@@ -8,13 +8,30 @@ for (const width of [320, 375, 390, 768, 1024, 1440, 1920]) {
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/");
     await page.evaluate(() => document.fonts.ready);
+    await expect
+      .poll(() =>
+        page
+          .locator(".coach-avatar img")
+          .evaluate((image) => (image as HTMLImageElement).naturalWidth),
+      )
+      .toBeGreaterThan(0);
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth,
       ),
     ).toBe(true);
-    const clipped = await page.locator("main h1,main h2,main h3,main button,main .button").evaluateAll(elements => elements.filter(element => element.getClientRects().length && element.scrollWidth > element.clientWidth + 1).map(element => element.textContent?.trim()));
+    const clipped = await page
+      .locator("main h1,main h2,main h3,main button,main .button")
+      .evaluateAll((elements) =>
+        elements
+          .filter(
+            (element) =>
+              element.getClientRects().length &&
+              element.scrollWidth > element.clientWidth + 1,
+          )
+          .map((element) => element.textContent?.trim()),
+      );
     expect(clipped, `Texte ou commande tronqués à ${width}px`).toEqual([]);
     expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
     await page.screenshot({
