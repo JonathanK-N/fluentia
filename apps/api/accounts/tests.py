@@ -118,6 +118,25 @@ class AccountTests(TestCase):
         self.assertEqual(self.request("verify", {"token": "x" * 43}).status_code, 400)
         self.assertIsNone(StudentProfile.objects.get().email_verified_at)
 
+    def test_link_is_bound_to_the_email_it_was_sent_to(self):
+        user = self.register()
+        token = self.token()
+        user.email = "changed@example.test"
+        user.save(update_fields=["email"])
+        self.assertEqual(self.request("verify", {"token": token}).status_code, 400)
+        self.assertIsNone(StudentProfile.objects.get().email_verified_at)
+
+    def test_admin_email_change_does_not_keep_verified_status(self):
+        user = self.register()
+        self.request("verify", {"token": self.token()})
+        self.signin()
+        self.assertTrue(self.client.get("/api/v1/auth/profile/").data["email_verified"])
+        user.email = "changed@example.test"
+        user.save(update_fields=["email"])
+        self.assertFalse(
+            self.client.get("/api/v1/auth/profile/").data["email_verified"]
+        )
+
     def test_session_rotation_profile_and_logout(self):
         self.register()
         session = self.client.session

@@ -55,12 +55,18 @@ class EngineAcceptanceTests(TestCase):
     def setUp(self):
         cache.clear()
         self.user = get_user_model().objects.create_user(
-            username="apprenant", password="mot-de-passe-test"
+            username="apprenant",
+            email="apprenant@example.test",
+            password="mot-de-passe-test",
         )
         self.other = get_user_model().objects.create_user(
             username="relecteur", password="mot-de-passe-test"
         )
-        StudentProfile.objects.create(user=self.user, email_verified_at=timezone.now())
+        StudentProfile.objects.create(
+            user=self.user,
+            email_verified_at=timezone.now(),
+            verified_email=self.user.email,
+        )
         self.exam = exam_fixture(self.user, self.other)
         self.question = self.exam.questions.get()
         self.correct = self.question.choices.get(is_correct=True)

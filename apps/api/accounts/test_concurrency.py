@@ -32,7 +32,9 @@ class AccountConcurrencyTests(TransactionTestCase):
             return list(pool.map(call, [0, 1]))
 
     def test_same_link_cannot_be_consumed_twice(self):
-        user = get_user_model().objects.create_user(username="token-course")
+        user = get_user_model().objects.create_user(
+            username="token-course", email="course@example.test"
+        )
         StudentProfile.objects.create(user=user)
         token = EmailVerification.issue(user)
         responses = self.parallel(

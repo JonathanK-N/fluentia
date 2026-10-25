@@ -16,12 +16,18 @@ class ExamEngineTests(TestCase):
         cache.clear()
         User = get_user_model()
         self.user = User.objects.create_user(
-            username="testlearner", password="strong-test-password"
+            username="testlearner",
+            email="learner@example.test",
+            password="strong-test-password",
         )
         self.other = User.objects.create_user(
             username="otherlearner", password="strong-test-password"
         )
-        StudentProfile.objects.create(user=self.user, email_verified_at=timezone.now())
+        StudentProfile.objects.create(
+            user=self.user,
+            email_verified_at=timezone.now(),
+            verified_email=self.user.email,
+        )
         self.exam = Exam.objects.create(
             slug="demo-original",
             title="Français pratique",

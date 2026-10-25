@@ -17,9 +17,11 @@ class StudentProfile(models.Model):
     )
     display_name = models.CharField(max_length=80, blank=True)
     email_verified_at = models.DateTimeField(null=True, blank=True, editable=False)
+    verified_email = models.EmailField(blank=True, editable=False)
 
 
 class EmailVerification(models.Model):
+    email = models.EmailField(default="")
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     digest = models.CharField(max_length=64, unique=True)
     created_at = models.DateTimeField(default=timezone.now)
@@ -34,6 +36,7 @@ class EmailVerification(models.Model):
             defaults={
                 "digest": hashlib.sha256(token.encode()).hexdigest(),
                 "created_at": now,
+                "email": user.email.strip().lower(),
                 "expires_at": now + timedelta(hours=24),
             },
         )

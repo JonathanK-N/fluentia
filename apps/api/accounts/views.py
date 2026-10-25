@@ -56,7 +56,11 @@ def account(user):
         "id": user.pk,
         "email": user.email,
         "display_name": profile.display_name,
-        "email_verified": profile.email_verified_at is not None,
+        "email_verified": bool(
+            profile.email_verified_at
+            and user.email
+            and profile.verified_email.lower() == user.email.strip().lower()
+        ),
     }
 
 
@@ -182,13 +186,20 @@ class VerifyView(SecureView):
             if tickets.update(digest=F("digest")) != 1:
                 raise ValidationError({"detail": "Lien invalide ou expiré."})
             ticket = tickets.get()
+            if (
+                not ticket.email
+                or not User.objects.filter(
+                    pk=ticket.user_id, email__iexact=ticket.email
+                ).exists()
+            ):
+                raise ValidationError({"detail": "Lien invalide ou expiré."})
             deleted, _ = EmailVerification.objects.filter(
                 pk=ticket.pk, digest=digest, expires_at__gt=timezone.now()
             ).delete()
             if not deleted:
                 raise ValidationError({"detail": "Lien invalide ou expiré."})
             StudentProfile.objects.filter(user_id=ticket.user_id).update(
-                email_verified_at=timezone.now()
+                email_verified_at=timezone.now(), verified_email=ticket.email
             )
         return Response({"detail": "Adresse vérifiée. Vous pouvez vous connecter."})
 
@@ -203,7 +214,7 @@ class ResendView(SecureView):
             user = User.objects.select_for_update().get(pk=request.user.pk)
             profile, _ = StudentProfile.objects.get_or_create(user=user)
             previous = EmailVerification.objects.filter(user=user).first()
-            if not profile.email_verified_at and (
+            if not account(user)["email_verified"] and (
                 previous is None
                 or (timezone.now() - previous.created_at).total_seconds() >= 60
             ):

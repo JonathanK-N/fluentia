@@ -56,7 +56,7 @@ Projet et responsabilité éditoriale : **Jonathan Kakesa**. Les commits doivent
 
 ## Frontend — Mission 01
 
-Vitrine et catalogue `/design-system`, thèmes clair/sombre, logos officiels et Poppins locale. Les interactions sont locales : examens, comptes, coach et paiements restent à développer.
+Vitrine et catalogue `/design-system`, thèmes clair/sombre, logos officiels et Poppins locale. Le moteur d’examens du lot 01 est intégré à dev. Le [lot 02](docs/backend/lot-02/README.md) ajoute l’espace `/etudiant`, les comptes et une première lecture connectée sur sa branche de développement ; coach et paiements restent ultérieurs.
 
 Démarrage : `cd apps/web`, `npm ci`, `npm run dev`.
 

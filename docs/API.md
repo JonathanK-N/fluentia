@@ -4,7 +4,7 @@
 
 ## Route disponible
 
-Le lot 01 ajoute le [catalogue et les tentatives privées](backend/lot-01/README.md) sur sa branche temporaire. Les contrats ci-dessous indiqués « prévus » sont l’historique du socle ; seuls les endpoints effectivement listés et testés dans ce guide de lot sont implémentés. Authentification frontend, IA et paiements restent à développer.
+Le lot 01 intégré à dev fournit le [catalogue et les tentatives privées](backend/lot-01/README.md). Le [lot 02](backend/lot-02/README.md) ajoute comptes, sessions/CSRF, vérification du courriel, profil et première lecture React connectée sur sa branche de développement. Leurs guides précisent les routes effectivement implémentées et les limites ; les contrats « prévus » ci-dessous sont un historique du socle, pas un contrat actuel. IA et paiements restent ultérieurs.
 
 | Verbe | URL | Description |
 |---|---|---|

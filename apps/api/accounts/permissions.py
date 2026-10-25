@@ -8,7 +8,10 @@ class VerifiedEmail(BasePermission):
     def has_permission(self, request, view):
         return (
             request.user.is_authenticated
+            and bool(request.user.email)
             and StudentProfile.objects.filter(
-                user=request.user, email_verified_at__isnull=False
+                user=request.user,
+                email_verified_at__isnull=False,
+                verified_email__iexact=request.user.email,
             ).exists()
         )
