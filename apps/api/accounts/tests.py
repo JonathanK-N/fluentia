@@ -129,6 +129,7 @@ class AccountTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotEqual(before, self.client.cookies["sessionid"].value)
         self.assertTrue(self.client.cookies["sessionid"]["httponly"])
+        self.assertEqual(self.client.cookies["sessionid"]["expires"], "")
         self.assertEqual(self.client.cookies["sessionid"]["samesite"], "Lax")
         self.assertEqual(
             self.request(
@@ -207,6 +208,17 @@ class AccountTests(TestCase):
         self.assertIn(
             "no-store", self.client.get("/api/v1/auth/csrf/")["Cache-Control"]
         )
+
+    def test_foreign_origin_rejected_with_valid_csrf(self):
+        csrf = self.client.get("/api/v1/auth/csrf/").data["csrf_token"]
+        response = self.client.post(
+            "/api/v1/auth/register/",
+            self.payload,
+            format="json",
+            HTTP_X_CSRFTOKEN=csrf,
+            HTTP_ORIGIN="https://foreign.example.test",
+        )
+        self.assertEqual(response.status_code, 403)
 
     def test_rate_limit_on_anonymous_auth(self):
         from .views import AuthAnonThrottle

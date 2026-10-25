@@ -2,6 +2,7 @@
 
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics, status
 from rest_framework.exceptions import ValidationError
@@ -79,6 +80,7 @@ class AttemptView(APIView):
     def get(self, request, attempt_id):
         attempt = get_attempt(attempt_id=attempt_id, user=request.user)
         payload = AttemptSerializer(attempt).data
+        payload["server_now"] = timezone.now().isoformat()
         payload["answers"] = list(attempt.answers.values("question_id", "choice_id"))
         if attempt.status == Attempt.Status.ACTIVE:
             payload["questions"] = QuestionPublicSerializer(

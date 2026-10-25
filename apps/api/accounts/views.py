@@ -137,7 +137,6 @@ class LoginView(SecureView):
         if user is None:
             raise ValidationError({"detail": "Adresse ou mot de passe incorrect."})
         login(request, user)
-        request.session.set_expiry(60 * 60 * 12)
         return Response(account(user))
 
 

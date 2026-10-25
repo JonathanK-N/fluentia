@@ -28,6 +28,7 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 PUBLIC_WEB_ORIGIN = os.getenv("PUBLIC_WEB_ORIGIN", "http://127.0.0.1:3000").rstrip("/")
+CSRF_TRUSTED_ORIGINS = [PUBLIC_WEB_ORIGIN]
 # Aucun envoi externe par défaut ; adaptateur mémoire de développement.
 EMAIL_BACKEND = os.getenv("DJANGO_EMAIL_BACKEND", "django.core.mail.backends.locmem.EmailBackend")
 EMAIL_FILE_PATH = os.getenv("DJANGO_EMAIL_FILE_PATH", str(BASE_DIR / ".local-mail"))

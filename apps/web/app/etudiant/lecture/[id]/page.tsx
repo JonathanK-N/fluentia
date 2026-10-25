@@ -15,8 +15,10 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
   const [confirm, setConfirm] = useState(false);
   const [remaining, setRemaining] = useState(0);
   const pending = useRef(false);
+  const clockOffset = useRef(0);
   const load = useCallback(async () => {
     const data = await api<Attempt>(`attempts/${id}/`);
+    clockOffset.current = Date.parse(data.server_now) - Date.now();
     setAttempt(data);
     setAnswers(Object.fromEntries(data.answers.map(a => [a.question_id, a.choice_id])));
     if (data.status === "submitted") setResults(await api<Results>(`attempts/${id}/results/`));
@@ -25,7 +27,7 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
   useEffect(() => {
     if (!attempt || attempt.status !== "active") return;
     const tick = () => {
-      const value = Math.max(0, Math.ceil((Date.parse(attempt.expires_at) - Date.now()) / 1000));
+      const value = Math.max(0, Math.ceil((Date.parse(attempt.expires_at) - Date.now() - clockOffset.current) / 1000));
       setRemaining(value);
       if (!value) load().catch(e => setError(e.message));
     };

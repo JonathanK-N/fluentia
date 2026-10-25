@@ -56,11 +56,12 @@ class AttemptSerializer(serializers.ModelSerializer):
 
 
 class AttemptReadSerializer(AttemptSerializer):
+    server_now = serializers.DateTimeField(read_only=True)
     questions = QuestionPublicSerializer(many=True, required=False, read_only=True)
     answers = SavedAnswerSerializer(many=True, read_only=True)
 
     class Meta(AttemptSerializer.Meta):
-        fields = AttemptSerializer.Meta.fields + ("questions", "answers")
+        fields = AttemptSerializer.Meta.fields + ("questions", "answers", "server_now")
 
 
 class SaveAnswerSerializer(serializers.Serializer):
