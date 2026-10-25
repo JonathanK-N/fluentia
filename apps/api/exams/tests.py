@@ -7,6 +7,7 @@ from django.core.cache import cache
 from django.utils import timezone
 from rest_framework.test import APIClient
 from .models import Exam, Question, Choice, Attempt
+from accounts.models import StudentProfile
 
 
 @override_settings(PASSWORD_HASHERS=["django.contrib.auth.hashers.MD5PasswordHasher"])
@@ -20,6 +21,7 @@ class ExamEngineTests(TestCase):
         self.other = User.objects.create_user(
             username="otherlearner", password="strong-test-password"
         )
+        StudentProfile.objects.create(user=self.user, email_verified_at=timezone.now())
         self.exam = Exam.objects.create(
             slug="demo-original",
             title="Français pratique",

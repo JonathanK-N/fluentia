@@ -80,6 +80,9 @@ class SaveAnswerResponseSerializer(SavedAnswerSerializer):
 
 
 class ResultDetailSerializer(serializers.Serializer):
+    statement = serializers.CharField(read_only=True)
+    selected_label = serializers.CharField(read_only=True, allow_null=True)
+    correct_label = serializers.CharField(read_only=True)
     question_id = serializers.UUIDField(read_only=True)
     selected_choice_id = serializers.UUIDField(read_only=True, allow_null=True)
     correct_choice_id = serializers.UUIDField(read_only=True)

@@ -9,9 +9,11 @@ from .views import (
     SaveAnswerView,
     SubmitAttemptView,
     AttemptResultsView,
+    MyAttemptsView,
 )
 
 urlpatterns = [
+    path("attempts/", MyAttemptsView.as_view(), name="my-attempts"),
     path("exams/", ExamListView.as_view(), name="exams-list"),
     path("exams/<uuid:exam_id>/", ExamDetailView.as_view(), name="exams-detail"),
     path(

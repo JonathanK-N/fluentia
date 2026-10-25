@@ -14,3 +14,4 @@ design/ux-ui-02/playwright-report/
 *.tsbuildinfo
 apps/web/test-results/
 apps/web/playwright-report/
+apps/api/.local-mail/

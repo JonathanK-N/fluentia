@@ -109,6 +109,55 @@ jobs:
           curl --fail --silent http://127.0.0.1:3300/api/v1/exams/ > /tmp/fluentia-exams.json
           python -c "import json; assert json.load(open('/tmp/fluentia-exams.json'))['count'] == 0"
 
+  student-journey:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: fluentia_e2e
+          POSTGRES_USER: fluentia
+          POSTGRES_PASSWORD: fluentia_ci
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U fluentia -d fluentia_e2e"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DJANGO_DEBUG: '1'
+      DATABASE_URL: postgresql://fluentia:fluentia_ci@127.0.0.1:5432/fluentia_e2e
+      FLUENTIA_E2E: '1'
+      DJANGO_EMAIL_BACKEND: django.core.mail.backends.filebased.EmailBackend
+      DJANGO_EMAIL_FILE_PATH: /tmp/fluentia-e2e-mail
+      PUBLIC_WEB_ORIGIN: http://127.0.0.1:3101
+      API_ORIGIN: http://127.0.0.1:8000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - run: pip install -r apps/api/requirements.txt
+      - run: python apps/api/manage.py migrate --noinput
+      - run: python scripts/seed-student-e2e.py
+      - run: npm ci
+        working-directory: apps/web
+      - run: npm run build
+        working-directory: apps/web
+      - run: npx playwright install --with-deps chromium firefox webkit
+        working-directory: apps/web
+      - run: npx playwright test --config=playwright.student.config.ts
+        working-directory: apps/web
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: parcours-etudiant-postgresql
+          path: apps/web/test-results
+          retention-days: 7
+
   docker:
     runs-on: ubuntu-latest
     steps:

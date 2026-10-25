@@ -21,6 +21,7 @@ from .serializers import (
     ResultSerializer,
 )
 from .services import create_attempt, save_answer, submit_attempt, get_attempt
+from accounts.permissions import VerifiedEmail
 
 
 class CataloguePagination(LimitOffsetPagination):
@@ -59,7 +60,7 @@ class ExamDetailView(generics.RetrieveAPIView):
 
 
 class StartAttemptView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, VerifiedEmail]
     throttle_classes = [StartThrottle]
 
     @extend_schema(request=None, responses={201: AttemptSerializer})
@@ -138,7 +139,7 @@ class AttemptResultsView(APIView):
             return Response(
                 {"detail": "Résultats disponibles après soumission."}, status=409
             )
-        answers = {a.question_id: a for a in attempt.answers.all()}
+        answers = {a.question_id: a for a in attempt.answers.select_related("choice")}
         payload = result_payload(attempt)
         payload["details"] = [
             {
@@ -150,7 +151,19 @@ class AttemptResultsView(APIView):
                     next(c.pk for c in q.choices.all() if c.is_correct)
                 ),
                 "explanation": q.explanation,
+                "statement": q.statement,
+                "selected_label": answers[q.pk].choice.label if q.pk in answers else None,
+                "correct_label": next(c.label for c in q.choices.all() if c.is_correct),
             }
             for q in attempt.exam.questions.prefetch_related("choices")
         ]
         return Response(payload)
+
+
+class MyAttemptsView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AttemptSerializer
+    pagination_class = CataloguePagination
+
+    def get_queryset(self):
+        return Attempt.objects.filter(user=self.request.user).order_by("-started_at")

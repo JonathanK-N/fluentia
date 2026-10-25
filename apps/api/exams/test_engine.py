@@ -16,6 +16,7 @@ from rest_framework.test import APIClient
 from .models import Exam, Question, Choice, Attempt, Answer
 from .services import create_attempt, save_answer, submit_attempt
 from .views import StartThrottle
+from accounts.models import StudentProfile
 
 
 def exam_fixture(author, reviewer, *, published=True, count=1):
@@ -59,6 +60,7 @@ class EngineAcceptanceTests(TestCase):
         self.other = get_user_model().objects.create_user(
             username="relecteur", password="mot-de-passe-test"
         )
+        StudentProfile.objects.create(user=self.user, email_verified_at=timezone.now())
         self.exam = exam_fixture(self.user, self.other)
         self.question = self.exam.questions.get()
         self.correct = self.question.choices.get(is_correct=True)
