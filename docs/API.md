@@ -25,4 +25,4 @@ Schéma généré : `/api/schema/` · Swagger : `/api/schema/swagger-ui/`.
 | Progression | `GET /dashboard/overview` |
 | Paiements | `POST /billing/checkout` |
 
-Les endpoints sensibles nécessiteront authentification, permissions, validation, quotas et idempotence.
+Les routes implémentées appliquent les permissions et protections décrites dans leurs guides de lot ; le [schéma actuel du lot 02](backend/lot-02/openapi.yaml) précise les corps et réponses. Les limites d’exploitation et les contrats futurs restent distincts.

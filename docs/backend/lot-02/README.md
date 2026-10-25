@@ -2,6 +2,8 @@
 
 Responsable : Jonathan Kakesa. Documentation française. Aucun service payant, envoi externe, fusion du lot 02 ou déploiement production autorisé par ce document.
 
+Livrables et preuves : [rapport GO/NO-GO](RAPPORT.md), [OpenAPI](openapi.yaml), [synthèse CI](ci-summary.json) et [captures avec provenance](captures/provenance.json).
+
 ## Provenance et portée
 
 La PR #4 a été fusionnée vers `dev` après autorisation explicite du responsable dans la conversation. Commit de fusion : `3b0a1124d6543640a52a2a45c8139afa97104b90`, sources validées : `72f6eb80455ecec771711b174eee795a7af2c9d3`. La branche `backend/lot-02-parcours-etudiant` part de ce nouveau dev. La PR #3 reste indépendante, sans fusion implicite de ses travaux UX/UI. Le point d’entrée ajouté dans la navigation existante devra être rapproché de sa navigation lors d’une intégration ultérieure.
