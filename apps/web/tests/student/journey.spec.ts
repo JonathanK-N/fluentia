@@ -51,7 +51,13 @@ test("inscription, courriel, session, lecture persistante et résultat privé su
   expect((await other.request.get(`http://127.0.0.1:3101/api/v1/attempts/${attemptId}/results/`)).status()).toBe(404);
   expect((await (await other.request.get("http://127.0.0.1:3101/api/v1/attempts/")).json()).count).toBe(0);
   await other.close();
-  await page.getByRole("radio", {name: "Les pièces à remplacer", exact: true}).check();
+  await page.route("**/api/v1/attempts/*/answers/", route => route.abort());
+  await page.getByRole("radio", {name: "Une preuve de paiement", exact: true}).click();
+  await expect(page.getByRole("alert")).toContainText("Connexion interrompue");
+  await expect(page.getByRole("radio", {name: "Une preuve de paiement", exact: true})).not.toBeChecked();
+  await page.unroute("**/api/v1/attempts/*/answers/");
+  await page.getByRole("radio", {name: "Les pièces à remplacer", exact: true}).focus();
+  await page.keyboard.press("Space");
   await expect(page.getByRole("status")).toContainText("Réponse enregistrée");
   await page.reload();
   await expect(page.getByRole("radio", {name: "Les pièces à remplacer", exact: true})).toBeChecked();

@@ -2,14 +2,18 @@ export class ApiError extends Error {
   constructor(public status: number, message: string) { super(message); }
 }
 let csrf = "";
+async function http(input: string, init: RequestInit) {
+  try { return await fetch(input, init); }
+  catch { throw new ApiError(0, "Connexion interrompue. Vérifiez votre réseau puis réessayez ; seules les réponses confirmées sont enregistrées."); }
+}
 export async function api<T>(path: string, method = "GET", body?: unknown): Promise<T> {
   if (method !== "GET") {
     // Le jeton change à la connexion : toujours prendre la valeur courante.
-    const response = await fetch("/api/v1/auth/csrf/", { credentials: "same-origin", cache: "no-store" });
+    const response = await http("/api/v1/auth/csrf/", { credentials: "same-origin", cache: "no-store" });
     if (!response.ok) throw new ApiError(response.status, "La session ne peut pas être sécurisée. Réessayez.");
     csrf = (await response.json()).csrf_token;
   }
-  const response = await fetch(`/api/v1/${path}`, {
+  const response = await http(`/api/v1/${path}`, {
     method, credentials: "same-origin", cache: "no-store",
     headers: { "Content-Type": "application/json", ...(method !== "GET" ? { "X-CSRFToken": csrf } : {}) },
     ...(body !== undefined ? { body: JSON.stringify(body) } : {}),

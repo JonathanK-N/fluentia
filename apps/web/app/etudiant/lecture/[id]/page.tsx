@@ -38,11 +38,16 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
     window.addEventListener("beforeunload", before); return () => window.removeEventListener("beforeunload", before);
   }, []);
   async function save(question: string, choice: string) {
+    const previous = answers[question];
+    setAnswers(values => ({...values, [question]: choice}));
     pending.current = true; setBusy(true); setError(""); setMessage("Enregistrement en cours…");
     try {
       await api(`attempts/${id}/answers/`, "PUT", {question_id: question, choice_id: choice});
       setAnswers(previous => ({...previous, [question]: choice})); setMessage("Réponse enregistrée. Vous pouvez reprendre depuis cet appareil ou un autre.");
-    } catch (e) { setError((e as Error).message); setMessage("Réponse non enregistrée. Sélectionnez de nouveau votre choix pour réessayer."); }
+    } catch (e) {
+      setAnswers(values => { const restored = {...values}; if (previous) restored[question] = previous; else delete restored[question]; return restored; });
+      setError((e as Error).message); setMessage("Réponse non enregistrée. Sélectionnez de nouveau votre choix pour réessayer.");
+    }
     finally { pending.current = false; setBusy(false); }
   }
   async function submit() {
@@ -64,7 +69,7 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
         <p>Réponse attendue : {detail.correct_label}</p><p>{detail.explanation}</p></article>)}
     </section>}
     {attempt?.status === "active" && <>
-      <div className="student-session"><p>Temps indicatif restant : {Math.floor(remaining / 60)} min {remaining % 60} s</p><p>{Object.keys(answers).length} / {attempt.questions?.length} réponses enregistrées</p></div>
+      <div className="student-session"><p>Temps indicatif restant : {Math.floor(remaining / 60)} min {remaining % 60} s</p><p>{Object.keys(answers).length} / {attempt.questions?.length} réponses {busy ? "(enregistrement en cours)" : "enregistrées"}</p></div>
       <p>Le délai est contrôlé par le serveur. Chaque choix confirmé est enregistré immédiatement.</p>
       <p role="status" className="student-save-status">{message}</p>
       {attempt.questions?.map((question, index) => <section className="student-card" key={question.id}>
