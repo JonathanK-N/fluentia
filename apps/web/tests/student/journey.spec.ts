@@ -41,6 +41,16 @@ test("inscription, courriel, session, lecture persistante et résultat privé su
   const outsider = await browser.newContext();
   expect((await outsider.request.get(`http://127.0.0.1:3101/api/v1/attempts/${attemptId}/`)).status()).toBe(403);
   await outsider.close();
+  const other = await browser.newContext();
+  const bootstrap = await other.request.get("http://127.0.0.1:3101/api/v1/auth/csrf/");
+  const csrf = (await bootstrap.json()).csrf_token;
+  const otherEmail = `other-${email}`;
+  expect((await other.request.post("http://127.0.0.1:3101/api/v1/auth/register/", {data: {email: otherEmail, password, display_name: "Autre compte de recette"}, headers: {"X-CSRFToken": csrf}})).status()).toBe(202);
+  expect((await other.request.post("http://127.0.0.1:3101/api/v1/auth/login/", {data: {email: otherEmail, password}, headers: {"X-CSRFToken": csrf}})).status()).toBe(200);
+  expect((await other.request.get(`http://127.0.0.1:3101/api/v1/attempts/${attemptId}/`)).status()).toBe(404);
+  expect((await other.request.get(`http://127.0.0.1:3101/api/v1/attempts/${attemptId}/results/`)).status()).toBe(404);
+  expect((await (await other.request.get("http://127.0.0.1:3101/api/v1/attempts/")).json()).count).toBe(0);
+  await other.close();
   await page.getByRole("radio", {name: "Les pièces à remplacer", exact: true}).check();
   await expect(page.getByRole("status")).toContainText("Réponse enregistrée");
   await page.reload();
@@ -61,6 +71,5 @@ test("inscription, courriel, session, lecture persistante et résultat privé su
   await page.getByRole("link", {name: "Mon compte", exact: true}).click();
   await page.getByRole("button", {name: "Se déconnecter"}).click();
   await expect(page.getByRole("heading", {name: "Content de vous retrouver"})).toBeVisible();
-  // Une nouvelle session authentifiée d'un autre étudiant reste isolée.
   expect(path.isAbsolute(process.env.DJANGO_EMAIL_FILE_PATH!)).toBe(true);
 });
