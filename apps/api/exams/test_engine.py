@@ -243,3 +243,42 @@ class EngineAcceptanceTests(TestCase):
         route = f"/admin/exams/attempt/{self.attempt.pk}/change/"
         self.assertEqual(self.client.get(route).status_code, 200)
         self.assertEqual(self.client.post(route, {"correct_count": 999}).status_code, 403)
+
+    def test_complete_reading_simulation_can_be_published(self):
+        draft = exam_fixture(self.user, self.other, published=False, count=39)
+        draft.mode = "simulation"
+        draft.duration_seconds = 3600
+        draft.is_published = True
+        draft.save()
+        response = APIClient().get(f"/api/v1/exams/{draft.pk}/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual((response.data["mode"], response.data["question_count"], response.data["duration_seconds"]), ("simulation", 39, 3600))
+
+    def test_published_content_cannot_be_inserted_or_deleted_in_bulk(self):
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            Question.objects.bulk_create([Question(exam=self.exam, position=2, statement="Insertion interdite")])
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            Choice.objects.filter(pk=self.wrong.pk).delete()
+        self.assertEqual(self.question.choices.count(), 4)
+
+    def test_no_correct_answer_or_missing_fourth_choice_prevents_publication(self):
+        draft = exam_fixture(self.user, self.other, published=False)
+        question = draft.questions.get()
+        question.choices.filter(is_correct=True).update(is_correct=False)
+        draft.is_published = True
+        with self.assertRaises(ModelValidationError):
+            draft.save()
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            Exam.objects.filter(pk=draft.pk).update(is_published=True, published_at=timezone.now())
+        question.choices.filter(position=1).update(is_correct=True)
+        question.choices.filter(position=4).delete()
+        with self.assertRaises(ModelValidationError):
+            draft.save()
+
+    def test_listening_without_authorized_audio_cannot_be_published(self):
+        draft = exam_fixture(self.user, self.other, published=False)
+        draft.skill = "listening"
+        draft.save()
+        draft.is_published = True
+        with self.assertRaises(ModelValidationError):
+            draft.save()
