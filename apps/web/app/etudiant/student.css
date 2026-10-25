@@ -1,5 +1,6 @@
 .student-space { padding-block: 2rem 4rem; max-width: 72rem; min-height: 70vh; }
 .student-nav { display: flex; flex-wrap: wrap; gap: 1rem; margin-block: 0 2rem; }
+.student-space .button { transition: box-shadow var(--duration); }
 .student-space h1 { max-width: 22ch; font-size: clamp(1.8rem, 4vw, 3rem); line-height: 1.2; }
 .student-eyebrow { color: var(--accent); font-weight: 600; }
 .student-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: clamp(1rem, 3vw, 2rem); margin-block: 1.5rem; overflow-wrap: anywhere; }

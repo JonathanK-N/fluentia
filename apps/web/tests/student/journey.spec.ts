@@ -65,6 +65,10 @@ test("inscription, courriel, session, lecture persistante et résultat privé su
   await page.getByRole("link", {name: "Retour aux exercices"}).click();
   await page.getByRole("link", {name: /Reprendre/}).click();
   await expect(page).toHaveURL(attemptUrl);
+  await expect(page.getByRole("heading", {name: "À vous de lire", exact: true})).toBeVisible();
+  await expect(page).toHaveTitle(/Compréhension écrite/);
+  await expect(page.getByRole("radio", {name: "Les pièces à remplacer", exact: true})).toBeChecked();
+  await page.evaluate(() => document.fonts.ready.then(() => undefined));
   await page.screenshot({path: info.outputPath("lecture.png"), fullPage: true});
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   expect((await new AxeBuilder({page}).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations).toEqual([]);
