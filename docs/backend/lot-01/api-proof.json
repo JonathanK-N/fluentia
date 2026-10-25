@@ -1,0 +1,181 @@
+{
+  "notice": "Preuve technique sur base SQLite dédiée ignorée, fixtures synthétiques. Aucun contenu humainement validé ni compte produit créé. APIClient session/CSRF réel ; pas de route de connexion frontend ni serveur réseau revendiqués. Aucun cookie, mot de passe ou jeton conservé dans cette preuve.",
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/api/v1/exams/",
+      "status": 200,
+      "body": {
+        "count": 1,
+        "next": null,
+        "previous": null,
+        "results": [
+          {
+            "id": "81ccedfd-5816-426b-9170-c11e01b797f2",
+            "slug": "test-a79680f4b880405fbc7443ea8d237bcf",
+            "version": 1,
+            "title": "Lecture originale de test",
+            "skill": "reading",
+            "mode": "training",
+            "description": "",
+            "duration_seconds": 120,
+            "question_count": 1,
+            "official": false
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/exams/81ccedfd-5816-426b-9170-c11e01b797f2/attempts/",
+      "status": 201,
+      "body": {
+        "id": "74573407-bf40-466f-a96f-a0ec53c3cb17",
+        "exam_id": "81ccedfd-5816-426b-9170-c11e01b797f2",
+        "status": "active",
+        "started_at": "2026-10-25T03:00:03.983534Z",
+        "expires_at": "2026-10-25T03:02:03.983534Z",
+        "submitted_at": null
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/attempts/74573407-bf40-466f-a96f-a0ec53c3cb17/results/",
+      "status": 409,
+      "body": {
+        "detail": "Résultats disponibles après soumission."
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/attempts/74573407-bf40-466f-a96f-a0ec53c3cb17/answers/",
+      "status": 200,
+      "body": {
+        "question_id": "bebf5f8c-df13-4a6f-a00e-c8bcb65163d6",
+        "choice_id": "2b1adb48-89fb-4007-ad76-a355ff91d5be",
+        "saved": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/attempts/74573407-bf40-466f-a96f-a0ec53c3cb17/",
+      "status": 200,
+      "body": {
+        "id": "74573407-bf40-466f-a96f-a0ec53c3cb17",
+        "exam_id": "81ccedfd-5816-426b-9170-c11e01b797f2",
+        "status": "active",
+        "started_at": "2026-10-25T03:00:03.983534Z",
+        "expires_at": "2026-10-25T03:02:03.983534Z",
+        "submitted_at": null,
+        "answers": [
+          {
+            "question_id": "bebf5f8c-df13-4a6f-a00e-c8bcb65163d6",
+            "choice_id": "2b1adb48-89fb-4007-ad76-a355ff91d5be"
+          }
+        ],
+        "questions": [
+          {
+            "id": "bebf5f8c-df13-4a6f-a00e-c8bcb65163d6",
+            "position": 1,
+            "statement": "Quand ouvre le musée ?",
+            "reading_passage": "Le musée ouvre mardi matin.",
+            "choices": [
+              {
+                "id": "2b1adb48-89fb-4007-ad76-a355ff91d5be",
+                "position": 1,
+                "label": "Mardi matin"
+              },
+              {
+                "id": "1934ef4d-ddaa-4f99-9339-8b9708522fff",
+                "position": 2,
+                "label": "Lundi soir"
+              },
+              {
+                "id": "01f66609-26f5-44a9-b999-67e363df5943",
+                "position": 3,
+                "label": "Vendredi midi"
+              },
+              {
+                "id": "ba97b2a2-fe7d-4f9b-a501-574cb65d73d6",
+                "position": 4,
+                "label": "Dimanche matin"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/attempts/74573407-bf40-466f-a96f-a0ec53c3cb17/submit/",
+      "status": 200,
+      "body": {
+        "attempt_id": "74573407-bf40-466f-a96f-a0ec53c3cb17",
+        "status": "submitted",
+        "correct_count": 1,
+        "question_count": 1,
+        "percentage": 100.0,
+        "official": false,
+        "disclaimer": "Résultat d’entraînement, non officiel. Aucune conversion TCF ou NCLC."
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/attempts/74573407-bf40-466f-a96f-a0ec53c3cb17/submit/",
+      "status": 200,
+      "body": {
+        "attempt_id": "74573407-bf40-466f-a96f-a0ec53c3cb17",
+        "status": "submitted",
+        "correct_count": 1,
+        "question_count": 1,
+        "percentage": 100.0,
+        "official": false,
+        "disclaimer": "Résultat d’entraînement, non officiel. Aucune conversion TCF ou NCLC."
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/attempts/74573407-bf40-466f-a96f-a0ec53c3cb17/results/",
+      "status": 200,
+      "body": {
+        "attempt_id": "74573407-bf40-466f-a96f-a0ec53c3cb17",
+        "status": "submitted",
+        "correct_count": 1,
+        "question_count": 1,
+        "percentage": 100.0,
+        "official": false,
+        "disclaimer": "Résultat d’entraînement, non officiel. Aucune conversion TCF ou NCLC.",
+        "details": [
+          {
+            "question_id": "bebf5f8c-df13-4a6f-a00e-c8bcb65163d6",
+            "selected_choice_id": "2b1adb48-89fb-4007-ad76-a355ff91d5be",
+            "correct_choice_id": "2b1adb48-89fb-4007-ad76-a355ff91d5be",
+            "explanation": "Le jour est indiqué dans le texte."
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/exams/81ccedfd-5816-426b-9170-c11e01b797f2/attempts/",
+      "status": 201,
+      "body": {
+        "id": "5abd880d-d6c2-419d-9c23-6b5d89a6fd8c",
+        "exam_id": "81ccedfd-5816-426b-9170-c11e01b797f2",
+        "status": "active",
+        "started_at": "2026-10-25T03:00:04.280321Z",
+        "expires_at": "2026-10-25T03:02:04.280321Z",
+        "submitted_at": null
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/attempts/5abd880d-d6c2-419d-9c23-6b5d89a6fd8c/submit/",
+      "status": 400,
+      "body": {
+        "attempt": "Le temps de cette tentative est écoulé."
+      }
+    }
+  ],
+  "expiredStatePersisted": "expired"
+}

@@ -34,8 +34,27 @@ jobs:
           retention-days: 7
   api:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        database: [sqlite, postgresql]
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: fluentia
+          POSTGRES_USER: fluentia
+          POSTGRES_PASSWORD: fluentia_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U fluentia -d fluentia"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     env:
       DJANGO_DEBUG: "1"
+      DATABASE_URL: ${{ matrix.database == 'postgresql' && 'postgresql://fluentia:fluentia_ci@127.0.0.1:5432/fluentia' || '' }}
     defaults:
       run:
         working-directory: apps/api
@@ -45,8 +64,50 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r requirements.txt
+      - run: pip install pip-audit==2.10.1
+      - run: python -m pip_audit -r requirements.txt --format=json --output=dependency-audit.json
       - run: python manage.py check
+      - run: python manage.py makemigrations --check --dry-run
+      - run: python manage.py migrate --noinput
+      - run: python manage.py seed_original_tcf
+      - run: python manage.py seed_original_tcf
+      - name: Vérifier la réversibilité des garde-fous sur la base CI éphémère
+        run: |
+          python manage.py migrate exams 0001 --noinput
+          python manage.py migrate exams 0002 --noinput
+      - run: python manage.py spectacular --validate --fail-on-warn --file schema.yaml
       - run: python manage.py test
+      - name: Conserver le schéma et les versions réellement installées
+        if: always()
+        run: python -m pip freeze > runtime.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-lot01-${{ matrix.database }}
+          path: |
+            apps/api/schema.yaml
+            apps/api/runtime.txt
+            apps/api/dependency-audit.json
+
+  api-container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Construire et vérifier le conteneur backend de développement
+        shell: bash
+        run: |
+          docker build --tag fluentia-api:validation apps/api
+          docker run --detach --name fluentia-api-validation -e DJANGO_DEBUG=1 -p 127.0.0.1:3300:8000 fluentia-api:validation
+          trap 'docker logs fluentia-api-validation; docker rm -f fluentia-api-validation' EXIT
+          docker exec fluentia-api-validation python manage.py migrate --noinput
+          docker exec fluentia-api-validation python manage.py seed_original_tcf
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:3300/api/v1/health/ > /tmp/fluentia-health.json; then break; fi
+            sleep 1
+          done
+          python -c "import json; assert json.load(open('/tmp/fluentia-health.json'))['status'] == 'ok'"
+          curl --fail --silent http://127.0.0.1:3300/api/v1/exams/ > /tmp/fluentia-exams.json
+          python -c "import json; assert json.load(open('/tmp/fluentia-exams.json'))['count'] == 0"
 
   docker:
     runs-on: ubuntu-latest
