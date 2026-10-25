@@ -185,6 +185,9 @@ class Question(models.Model):
         if Exam.objects.filter(pk__in=exam_ids, published_at__isnull=False).exists():
             raise ValidationError("Les questions d’une version publiée sont figées.")
         if self.validation_status == self.Review.VALIDATED:
+            exam = Exam.objects.filter(pk=self.exam_id).first()
+            if exam is None:
+                raise ValidationError({"exam": "Choisissez un examen existant."})
             if (
                 not self.author_id
                 or not self.reviewer_id
@@ -195,16 +198,16 @@ class Question(models.Model):
                     "Une validation exige un auteur et un relecteur distincts, avec date."
                 )
             if not self.explanation or (
-                self.exam.skill == Exam.Skill.READING and not self.reading_passage
+                exam.skill == Exam.Skill.READING and not self.reading_passage
             ):
                 raise ValidationError("Ajoutez le texte et l’explication pédagogique.")
             if (
-                self.origin == "licensed" or self.exam.skill == Exam.Skill.LISTENING
+                self.origin == "licensed" or exam.skill == Exam.Skill.LISTENING
             ) and not self.source_reference:
                 raise ValidationError(
                     "La provenance et l’autorisation sont nécessaires."
                 )
-            if self.exam.skill == Exam.Skill.LISTENING and not self.audio_key:
+            if exam.skill == Exam.Skill.LISTENING and not self.audio_key:
                 raise ValidationError("Le document audio autorisé est manquant.")
 
     def save(self, *args, **kwargs):

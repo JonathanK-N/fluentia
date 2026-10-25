@@ -1,4 +1,7 @@
 {
+  "sourceSha": "c79ca87372f36a35d68fccfc8ce0f0a7ad4b685b",
+  "formattedCommit": "f9bd5829160af6ae1181961d6a670a75ef098509",
+  "scope": "Comparaison du seul formatage à ce checkpoint, avant toute correction métier ultérieure.",
   "formatter": "ruff 0.17.2, outil de développement non ajouté aux dépendances applicatives",
   "astEquivalent": true,
   "files": [

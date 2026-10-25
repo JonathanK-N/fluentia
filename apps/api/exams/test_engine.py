@@ -332,6 +332,20 @@ class EngineAcceptanceTests(TestCase):
             )
 
     def test_publication_rejects_unreviewed_question_or_non_standard_simulation(self):
+        for exam_id in [None, uuid.uuid4()]:
+            question = Question(
+                exam_id=exam_id,
+                position=1,
+                statement="Question de test",
+                reading_passage="Texte original de test",
+                explanation="Explication de test",
+                author=self.user,
+                reviewer=self.other,
+                reviewed_at=timezone.now(),
+                validation_status="validated",
+            )
+            with self.assertRaises(ModelValidationError):
+                question.full_clean()
         draft = exam_fixture(self.user, self.other, published=False)
         Question.objects.filter(exam=draft).update(
             validation_status="draft", reviewer=None, reviewed_at=None

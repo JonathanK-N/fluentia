@@ -21,6 +21,8 @@ La PR #3 conserve le HEAD frontend `1d4ffbcfaa0ba7228c0951f32932eb7bf55269b7`. A
 
 Ces SHA désignent les sources mesurées ; le commit ajoutant le rapport ne remplace pas leur provenance. Le HEAD livré et ses derniers contrôles sont indiqués dans la PR. Le formatage ultérieur de treize fichiers Python a été vérifié sans changement d’AST : [preuve](format-review.json).
 
+La revue finale ajoute aussi un contrôle de saisie pédagogique : une question validée dont l’examen est absent ou inexistant doit produire une erreur de validation, sans exception de relation non gérée. Ce complément et sa non-régression appartiennent au HEAD livré dans la PR, sans être attribués au checkpoint c79ca87.
+
 ## Fonctions livrées
 
 Catalogue public limité aux versions publiées, passation privée authentifiée, choix sauvegardés pour reprise, soumission idempotente, correction déterministe et résultats privés après soumission. L’expiration est persistée avant de retourner une erreur et peut être constatée par lecture. Un retard dans la validation/correction ne prolonge pas le délai. Les requêtes concurrentes sont sérialisées autour de la tentative ; la publication est également protégée contre les mutations concurrentes de contenu.
