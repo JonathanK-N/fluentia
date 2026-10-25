@@ -34,8 +34,27 @@ jobs:
           retention-days: 7
   api:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        database: [sqlite, postgresql]
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: fluentia
+          POSTGRES_USER: fluentia
+          POSTGRES_PASSWORD: fluentia_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U fluentia -d fluentia"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     env:
       DJANGO_DEBUG: "1"
+      DATABASE_URL: ${{ matrix.database == 'postgresql' && 'postgresql://fluentia:fluentia_ci@127.0.0.1:5432/fluentia' || '' }}
     defaults:
       run:
         working-directory: apps/api
@@ -46,7 +65,22 @@ jobs:
           python-version: '3.12'
       - run: pip install -r requirements.txt
       - run: python manage.py check
+      - run: python manage.py makemigrations --check --dry-run
+      - run: python manage.py migrate --noinput
+      - run: python manage.py seed_original_tcf
+      - run: python manage.py seed_original_tcf
+      - run: python manage.py spectacular --validate --fail-on-warn --file schema.yaml
       - run: python manage.py test
+      - name: Conserver le schéma et les versions réellement installées
+        if: always()
+        run: python -m pip freeze > runtime.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-lot01-${{ matrix.database }}
+          path: |
+            apps/api/schema.yaml
+            apps/api/runtime.txt
 
   docker:
     runs-on: ubuntu-latest

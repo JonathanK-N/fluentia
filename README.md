@@ -30,6 +30,8 @@ Les [spécifications et références locales](docs/ux-ui-02/README.md) couvrent 
 
 ## Démarrage
 
+Moteur d’examens backend lot 01 en recette : [intégration, modèles, API et limites](docs/backend/lot-01/README.md), [rapport GO/NO-GO](docs/backend/lot-01/RAPPORT.md), [préparation du lot 02](docs/backend/lot-01/PREPARATION_LOT_02.md). Les questions fournies restent en brouillon jusqu’à relecture réelle ; ce moteur ne constitue pas la plateforme complète.
+
 Prérequis : Docker et Docker Compose.
 
 ```bash

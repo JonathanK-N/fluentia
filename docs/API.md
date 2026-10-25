@@ -4,6 +4,8 @@
 
 ## Route disponible
 
+Le lot 01 ajoute le [catalogue et les tentatives privées](backend/lot-01/README.md) sur sa branche temporaire. Les contrats ci-dessous indiqués « prévus » sont l’historique du socle ; seuls les endpoints effectivement listés et testés dans ce guide de lot sont implémentés. Authentification frontend, IA et paiements restent à développer.
+
 | Verbe | URL | Description |
 |---|---|---|
 | GET | `/api/v1/health/` | État minimal de l'API |
