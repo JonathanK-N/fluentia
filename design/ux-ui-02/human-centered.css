@@ -273,7 +273,7 @@ button:hover,
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .voice-stage .orb {
+  .voice-stage[data-state] .orb {
     animation: none !important;
   }
 }
