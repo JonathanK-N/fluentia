@@ -71,6 +71,10 @@ jobs:
       - run: python manage.py migrate --noinput
       - run: python manage.py seed_original_tcf
       - run: python manage.py seed_original_tcf
+      - name: Vérifier la réversibilité des garde-fous sur la base CI éphémère
+        run: |
+          python manage.py migrate exams 0001 --noinput
+          python manage.py migrate exams 0002 --noinput
       - run: python manage.py spectacular --validate --fail-on-warn --file schema.yaml
       - run: python manage.py test
       - name: Conserver le schéma et les versions réellement installées
