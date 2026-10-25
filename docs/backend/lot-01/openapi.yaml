@@ -258,13 +258,13 @@ paths:
       - name: limit
         required: false
         in: query
-        description: Number of results to return per page.
+        description: Nombre de résultats à retourner par page.
         schema:
           type: integer
       - name: offset
         required: false
         in: query
-        description: The initial index from which to return the results.
+        description: L'index initial depuis lequel retourner les résultats.
         schema:
           type: integer
       tags:

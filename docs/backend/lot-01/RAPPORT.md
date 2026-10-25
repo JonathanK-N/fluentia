@@ -10,4 +10,6 @@ Les migrations et contrôles système ont été exécutés sur SQLite local. Le 
 
 La recette complète et les courses PostgreSQL restent à vérifier avant annonce de réussite. Aucun résultat de test PostgreSQL local, build Docker local ou interface d’examen React n’est revendiqué. Le rapport sera complété avec les SHA et contrôles réellement exécutés.
 
+Premier passage CI : PostgreSQL et ses cinq courses réussis, mais SQLite bloqué par une variable DATABASE_URL vide. Le repli est corrigé dans les settings. L’audit local a détecté cinq vulnérabilités dans DRF 3.16.1 ; migration vers DRF 3.18.3 après consultation des notes officielles, nouvelle recette locale réussie (31 exécutés, cinq exclusions PostgreSQL), OpenAPI strict validé et audit sans vulnérabilité connue. La CI doit confirmer l’ensemble au dernier SHA.
+
 **NO-GO fusion à ce stade de recette ; NO-GO production.** Aucun déploiement, fusion ou activation payante. Détails d’architecture, modèles, routes, sécurité, limites et commandes : [README.md](README.md).
