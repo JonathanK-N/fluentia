@@ -38,6 +38,7 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
     window.addEventListener("beforeunload", before); return () => window.removeEventListener("beforeunload", before);
   }, []);
   async function save(question: string, choice: string) {
+    if (pending.current) return;
     const previous = answers[question];
     setAnswers(values => ({...values, [question]: choice}));
     pending.current = true; setBusy(true); setError(""); setMessage("Enregistrement en cours…");
@@ -74,9 +75,9 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
       <p role="status" className="student-save-status">{message}</p>
       {attempt.questions?.map((question, index) => <section className="student-card" key={question.id}>
         <h2>Lecture {index + 1}</h2><p className="student-passage">{question.reading_passage}</p>
-        <fieldset disabled={busy || remaining === 0}><legend>{question.statement}</legend>
+        <fieldset disabled={remaining === 0} aria-busy={busy}><legend>{question.statement}</legend>
           {question.choices.map(choice => <label className="student-choice" key={choice.id}>
-            <input type="radio" name={question.id} value={choice.id} checked={answers[question.id] === choice.id} onChange={() => save(question.id, choice.id)} />{choice.label}
+            <input type="radio" name={question.id} value={choice.id} disabled={busy && answers[question.id] !== choice.id} checked={answers[question.id] === choice.id} onChange={() => save(question.id, choice.id)} />{choice.label}
           </label>)}
         </fieldset>
       </section>)}

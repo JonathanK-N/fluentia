@@ -255,3 +255,20 @@ class AccountTests(TestCase):
                 ).status_code,
                 429,
             )
+
+    def test_public_catalogue_skill_filter_and_private_pagination(self):
+        user = self.register()
+        reviewer = User.objects.create_user(username="catalogue-reviewer")
+        exam_fixture(user, reviewer)
+        self.assertEqual(
+            self.client.get("/api/v1/exams/?skill=reading&limit=1").data["count"], 1
+        )
+        self.assertEqual(
+            self.client.get("/api/v1/exams/?skill=listening").data["count"], 0
+        )
+        self.assertEqual(
+            self.client.get("/api/v1/exams/?skill=unknown").status_code, 400
+        )
+        self.signin()
+        data = self.client.get("/api/v1/attempts/?limit=1&offset=0").data
+        self.assertEqual(data["results"], [])

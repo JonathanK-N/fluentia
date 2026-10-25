@@ -40,7 +40,7 @@ Toutes les routes ci-dessous commencent par `/api/v1/`. Pour une mutation : obte
 | POST `auth/verification/resend/` | — | Session + CSRF, message générique |
 | GET `attempts/` | — | Liste paginée des tentatives du compte connecté |
 
-Les sept routes examens du [lot 01](../lot-01/README.md) sont conservées. Démarrer nécessite désormais un courriel vérifié. Les routes privées refusent les anonymes (403 avec SessionAuthentication), les identifiants étrangers retournent 404, les résultats anticipés 409, les entrées invalides 400 et les limitations 429. Le schéma généré par `manage.py spectacular --validate --fail-on-warn` est la source exacte des DTO.
+Les sept routes examens du [lot 01](../lot-01/README.md) sont conservées. Démarrer nécessite désormais un courriel vérifié. Le catalogue accepte `skill=reading` ou `skill=listening` ; une valeur inconnue retourne 400. Catalogue et liste personnelle sont paginés (`limit`/`offset`) et l’interface permet de charger les lots suivants. Les routes privées refusent les anonymes (403 avec SessionAuthentication), les identifiants étrangers retournent 404, les résultats anticipés 409, les entrées invalides 400 et les limitations 429. Le schéma généré par `manage.py spectacular --validate --fail-on-warn` est la source exacte des DTO.
 
 ## Démarrage et courriel
 

@@ -3,7 +3,7 @@
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import generics, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.pagination import LimitOffsetPagination
@@ -40,6 +40,9 @@ class WriteThrottle(UserRateThrottle):
     rate = "120/minute"
 
 
+@extend_schema(
+    parameters=[OpenApiParameter("skill", str, enum=["reading", "listening"])]
+)
 class ExamListView(generics.ListAPIView):
     permission_classes = [AllowAny]
     authentication_classes = []
@@ -48,6 +51,15 @@ class ExamListView(generics.ListAPIView):
     queryset = Exam.objects.filter(is_published=True).annotate(
         question_count=Count("questions")
     )
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        skill = self.request.query_params.get("skill")
+        if skill:
+            if skill not in Exam.Skill.values:
+                raise ValidationError({"skill": "Compétence inconnue."})
+            queryset = queryset.filter(skill=skill)
+        return queryset
 
 
 class ExamDetailView(generics.RetrieveAPIView):
@@ -154,7 +166,9 @@ class AttemptResultsView(APIView):
                 ),
                 "explanation": q.explanation,
                 "statement": q.statement,
-                "selected_label": answers[q.pk].choice.label if q.pk in answers else None,
+                "selected_label": answers[q.pk].choice.label
+                if q.pk in answers
+                else None,
                 "correct_label": next(c.label for c in q.choices.all() if c.is_correct),
             }
             for q in attempt.exam.questions.prefetch_related("choices")

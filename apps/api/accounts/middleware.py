@@ -6,7 +6,7 @@ class PrivateApiMiddleware:
 
     def __call__(self, request):
         response = self.get_response(request)
-        if request.path.startswith(("/api/v1/auth/", "/api/v1/attempts/")):
+        if request.path.startswith("/api/v1/"):
             response["Cache-Control"] = "private, no-store"
             response["Vary"] = ", ".join(filter(None, [response.get("Vary"), "Cookie"]))
         return response
