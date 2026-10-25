@@ -1,16 +1,17 @@
 /* Fluentia — tokens, composants et responsive. Propriétaire : Jonathan Kakesa. */
-:root, .learn-preview {
+:root,
+.learn-preview {
   color-scheme: light;
   --brand-navy: #081b35;
   --brand-blue: #1769e0;
   --brand-cyan: #21d4f4;
   --brand-white: #f7faff;
   --brand-deep: #061b3d;
-  --bg: #f7faff;
+  --bg: #f8fafc;
   --surface: #fff;
   --text: #081b35;
   --muted: #52647a;
-  --border: #c9d4e3;
+  --border: #e5eaf0;
   --control-border: #71829a;
   --action: #1769e0;
   --on-action: #fff;
@@ -18,15 +19,15 @@
   --focus: #1769e0;
   --danger: #a12535;
   --tint: #eaf1fc;
-  --radius: 0.9rem;
-  --button-radius: 0.6rem;
+  --radius: 0.625rem;
+  --button-radius: 0.4375rem;
   --input-radius: 0.5rem;
   --button-py: 0.8rem;
   --button-px: 1.25rem;
   --button-gap: 0.75rem;
-  --card-padding: 1.6rem;
+  --card-padding: 1.375rem;
   --input-padding: 0.7rem;
-  --shadow: 0 12px 40px #081b3509;
+  --shadow: none;
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 1rem;
@@ -36,7 +37,8 @@
   --duration: 180ms;
   --ease: cubic-bezier(0.2, 0.7, 0.3, 1);
 }
-:root[data-theme="dark"], .discover {
+:root[data-theme="dark"],
+.discover {
   color-scheme: dark;
   --bg: #081b35;
   --surface: #102944;
@@ -59,7 +61,7 @@
     --text: #f7faff;
     --muted: #b7c9df;
     --border: #526982;
-  --control-border: #7e94ae;
+    --control-border: #7e94ae;
     --action: #21d4f4;
     --on-action: #081b35;
     --accent: #21d4f4;
@@ -117,15 +119,15 @@ h3 {
   line-height: 1.15;
 }
 h1 {
-  font-size: clamp(3rem, 6vw, 6rem);
-  letter-spacing: -0.065em;
+  font-size: clamp(2rem, 4vw, 3rem);
+  letter-spacing: -0.035em;
   font-weight: 600;
   margin-bottom: 1.5rem;
 }
 h2 {
-  font-size: clamp(2rem, 3.8vw, 3.5rem);
+  font-size: clamp(1.5rem, 3vw, 2rem);
   font-weight: 500;
-  letter-spacing: -0.05em;
+  letter-spacing: -0.025em;
   margin-bottom: 1.5rem;
 }
 h3 {
@@ -822,12 +824,9 @@ thead {
 }
 @media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
   .competency {
-    transition:
-      transform var(--duration) var(--ease),
-      border-color var(--duration);
+    transition: border-color var(--duration);
   }
   .competency:hover {
-    transform: translateY(-4px);
     border-color: var(--accent);
   }
 }

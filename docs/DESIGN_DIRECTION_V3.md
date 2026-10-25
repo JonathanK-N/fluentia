@@ -2,6 +2,8 @@
 
 Responsable : Jonathan Kakesa. Proposition limitée à deux pilotes, en attente de validation visuelle.
 
+**Actualisation :** direction des pilotes validée pour poursuite par le client (« vas-y »). Extension aux interfaces existantes dans [GENERALISATION_V3.md](GENERALISATION_V3.md). Aucun accord de fusion ou de déploiement.
+
 Un cadre de travail calme : fond clair, surfaces blanches, texte bleu nuit, action bleue, cyan réservé à la signature vocale. Poppins et les PNG officiels sont conservés. La hiérarchie doit répondre d’abord à « Où suis-je ? », « Que puis-je faire ? » et « Quelle est la prochaine étape ? ».
 
 | Avant | Proposition pilote |

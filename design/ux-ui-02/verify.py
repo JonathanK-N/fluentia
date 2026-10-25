@@ -32,9 +32,9 @@ for i,theme in enumerate(themes):
     for front,back,minimum in [('text','bg',4.5),('muted','surface',4.5),('on-action','action',4.5),('accent','tint',4.5),('danger','surface',4.5),('control-border','bg',3),('control-border','surface',3),('focus','bg',3)]:
         a,b=sorted([luminance(values[front]),luminance(values[back])]);ratio=(b+.05)/(a+.05)
         assert ratio>=minimum,(i,front,back,ratio)
-        ratios.append({'theme':'Learn' if i==0 else 'Discover/Voice','foreground':front,'background':back,'ratio':round(ratio,3),'minimum':minimum})
-assert len(ratios)==16
+        ratios.append({'theme':'Clair commun v3','foreground':front,'background':back,'ratio':round(ratio,3),'minimum':minimum})
+assert len(ratios)==8
 output={'screens':len(screens),'flows':8,'assets':3,'contrastPairs':ratios,'figmaNativeDelivered':False}
 evidence=root/'test-results';evidence.mkdir(exist_ok=True)
 (evidence/'structure.json').write_text(json.dumps(output,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
-print('62 écrans, 8 parcours, 3 assets officiels et 16 paires de contraste vérifiés.')
+print('62 écrans, 8 parcours, 3 assets officiels et 8 paires de contraste vérifiés.')

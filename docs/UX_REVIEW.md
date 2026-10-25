@@ -4,6 +4,8 @@ Responsable et propriétaire : Jonathan Kakesa. 24 octobre 2026.
 
 ## Décision proposée
 
+**Suite autorisée :** le retour « vas-y » du client valide la poursuite de la direction visuelle. La généralisation est suivie séparément dans [GENERALISATION_V3.md](GENERALISATION_V3.md), avec ses propres contrôles. Les captures et résultats ci-dessous restent ceux des deux pilotes. Aucune fusion ou mise en production n’en est déduite.
+
 **GO pour présentation et retour visuel du client. NO-GO pour généralisation, fusion ou déploiement sans décision explicite.** Les deux pilotes sont implémentés, inspectés et testés. La réussite technique ne vaut pas approbation de leur direction graphique. La PR reste en brouillon vers dev.
 
 ## Périmètre réel

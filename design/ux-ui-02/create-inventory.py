@@ -93,6 +93,6 @@ flows=[
     dict(id='F07',title='Enseignant → classe → devoir',screens=['T01','T02','T04'],error='Classe sans étudiants, date absente',interruption='Abandonner le brouillon ou revenir à la classe'),
     dict(id='F08',title='Administrateur → contenu → validation',screens=['M01','M03','M06'],error='Champs incomplets, contenu refusé',interruption='Retour au brouillon et confirmation avant publication simulée'),
 ]
-output={'version':'2.0-proposition','owner':'Jonathan Kakesa','notice':'Références locales : ni maquettes Figma enregistrées ni pages métier implémentées.','screens':screens,'flows':flows}
+output={'version':'3.0-reference-locale','owner':'Jonathan Kakesa','notice':'Références locales : ni maquettes Figma enregistrées ni pages métier implémentées.','screens':screens,'flows':flows}
 (ROOT/'catalogue.json').write_text(json.dumps(output,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 print(f'{len(screens)} écrans et {len(flows)} parcours spécifiés')

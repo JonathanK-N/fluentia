@@ -1,14 +1,13 @@
-/* Proposition v2 de conception, hors application métier. Propriétaire : Jonathan Kakesa. */
+/* Direction v3 de conception, hors application métier. Propriétaire : Jonathan Kakesa. */
 @font-face{font-family:Poppins;src:url('assets/poppins-latin-400-normal.woff2') format('woff2');font-weight:400;font-display:swap}
 @font-face{font-family:Poppins;src:url('assets/poppins-latin-500-normal.woff2') format('woff2');font-weight:500;font-display:swap}
 @font-face{font-family:Poppins;src:url('assets/poppins-latin-600-normal.woff2') format('woff2');font-weight:600;font-display:swap}
 @font-face{font-family:Poppins;src:url('assets/poppins-latin-700-normal.woff2') format('woff2');font-weight:700;font-display:swap}
 :root{
  color-scheme:light;--brand-navy:#081b35;--brand-blue:#1769e0;--brand-cyan:#21d4f4;--brand-white:#f7faff;
- --bg:#f7faff;--surface:#ffffff;--text:#081b35;--muted:#52647a;--border:#c9d4e3;--control-border:#71829a;--action:#1769e0;--on-action:#ffffff;--accent:#086b82;--focus:#1769e0;--danger:#a12535;--tint:#eaf1fc;
- --radius:16px;--radius-control:10px;--radius-pill:999px;--shadow:0 12px 40px #081b3509;
+ --bg:#f8fafc;--surface:#ffffff;--text:#081b35;--muted:#52647a;--border:#e5eaf0;--control-border:#71829a;--action:#1769e0;--action-on-tint:#1358bd;--on-action:#ffffff;--accent:#086b82;--focus:#1769e0;--danger:#a12535;--tint:#eaf1fc;
+ --radius:10px;--radius-control:7px;--radius-pill:999px;--shadow:none;
  --space-1:4px;--space-2:8px;--space-3:16px;--space-4:24px;--space-5:32px;--space-6:48px;--space-7:64px;
  --duration-fast:120ms;--duration-base:180ms;--duration-reveal:360ms;--ease:cubic-bezier(.2,.7,.3,1);
  --gradient-brand:linear-gradient(135deg,#1769e0,#21d4f4);--gradient-voice:radial-gradient(circle at 30% 25%,#21d4f4 0%,#1769e0 35%,#081b35 78%);
 }
-[data-universe="Discover"],[data-universe="Voice"]{color-scheme:dark;--bg:#081b35;--surface:#102944;--text:#f7faff;--muted:#b7c9df;--border:#526982;--control-border:#7e94ae;--action:#21d4f4;--on-action:#081b35;--accent:#21d4f4;--focus:#21d4f4;--danger:#ffb1b9;--tint:#163658}
