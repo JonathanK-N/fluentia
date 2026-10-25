@@ -26,15 +26,18 @@ dialog.addEventListener('close',()=>{if(returnFocus?.isConnected)returnFocus.foc
 // Groupes communs aux navigations desktop et mobile, sans supprimer les routes de conception.
 function spaceGroups(screen) {
  const group=screen.group==='auth'?'student':screen.group;
- if(group==='student')return [['Général',['S01','S15','S20','S21']],['Compréhension',['S06','S05']],['Expression',['S07','S08','S13','S14']],['Apprentissage',['S12','S09','S03','S02','S04']],['Suivi',['S16','S17','S18','S19']],['Séances et retours',['S10','S11','S22','S23','S24']]];
+ if(group==='student')return [['Général',['S01','S15','S20']],['Compréhension',['S06','S05']],['Expression',['S07','S08']],['Apprentissage',['S12','S09','S03']],['Outils et organisation',['S02','S04','S13','S14','S16','S17','S18','S19','S21']],['Séances et retours',['S10','S11','S22','S23','S24']]];
  const ids={teacher:['T01','T02','T03','T04','T05','T06'],school:['E01','E02','E03','E04','E05'],admin:['M01','M02','M03','M04','M05','M06','M07','M08','M09','M10']}[group]||[];
  return [[labels[group]||'Votre espace',ids]];
 }
-function spaceLinks(screen){return spaceGroups(screen).map(([title,ids])=>`<section><h2>${esc(title)}</h2>${ids.map(id=>{const item=catalogue.screens.find(s=>s.id===id);return `<a href="#${id}" ${id===screen.id?'aria-current="page"':''}>${esc(item.title)}</a>`;}).join('')}</section>`).join('');}
+function spaceLinks(screen){return spaceGroups(screen).map(([title,ids],index)=>{
+ const items=ids.map(id=>{const item=catalogue.screens.find(s=>s.id===id);return `<a href="#${id}" ${id===screen.id?'aria-current="page"':''}>${esc(item.title)}</a>`;}).join('');
+ return index<4?`<section><h2>${esc(title)}</h2>${items}</section>`:`<details class="navigation-group" ${ids.includes(screen.id)?'open':''}><summary>${esc(title)}</summary>${items}</details>`;
+}).join('');}
 function navigation(screen) {
  const dark=false; // Les trois contextes partagent désormais le thème clair validé.
  const publicScreen=!screen||screen.group==='public';
- const links=publicScreen?[['P02','Fonctionnalités'],['P03','Méthode'],['P04','Examens'],['P05','Tarifs'],['A02','Connexion']]:[['S01','Mon espace'],['S04','Catalogue'],['S19','Abonnement'],['index','Tous les écrans']];
+ const links=publicScreen?[['P02','Fonctionnalités'],['P03','Méthode'],['P04','Examens'],['P05','Tarifs'],['A02','Connexion']]:screen.group==='student'||screen.group==='auth'?[['S01','Mon espace'],['S04','Catalogue'],['S19','Abonnement'],['index','Tous les écrans']]:[[spaceGroups(screen)[0][1][0],'Mon espace'],['index','Tous les écrans']];
  return `<header class="header"><a class="brand" href="#${publicScreen?'P01':'S01'}" aria-label="Fluentia — accueil"><img src="assets/logo-horizontal-${dark?'dark':'light'}.png" width="170" height="44" alt="Fluentia"></a><nav class="header-nav" aria-label="Navigation principale">${links.map(([id,title])=>`<a href="#${id}">${title}</a>`).join('')}</nav><details class="mobile-nav"><summary>Menu</summary><nav aria-label="Navigation mobile">${links.map(([id,title])=>`<a href="#${id}">${title}</a>`).join('')}${!publicScreen?`<div class="mobile-space-navigation">${spaceLinks(screen)}</div>`:''}</nav></details></header>`;
 }
 function sidebar(screen){return `<aside class="sidebar"><nav aria-label="Navigation de l’espace">${spaceLinks(screen)}</nav><div class="section"><span class="badge">Espace fictif</span><p class="small">Aucun accès à des comptes ou données réels.</p><a href="#index">Changer d’espace</a></div></aside>`;}

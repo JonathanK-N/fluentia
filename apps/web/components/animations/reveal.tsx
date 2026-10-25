@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { useMotionPreferences } from "../layout/providers";
 export function Reveal({
   children,
-  subtle = false,
+  subtle = true,
 }: {
   children: ReactNode;
   subtle?: boolean;

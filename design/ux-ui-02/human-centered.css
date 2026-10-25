@@ -38,6 +38,19 @@ p {
 }
 .sidebar {
   padding: 18px 12px;
+  align-self: start;
+  position: sticky;
+  top: 0;
+  max-height: 100dvh;
+  overflow-y: auto;
+}
+.navigation-group > summary {
+  min-height: 44px;
+  padding: 10px 12px;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
 }
 .sidebar h2,
 .mobile-space-navigation h2 {

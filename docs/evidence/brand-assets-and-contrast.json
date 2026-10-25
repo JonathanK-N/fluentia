@@ -184,8 +184,8 @@
     {
       "name": "texte clair",
       "foreground": "081b35",
-      "background": "f7faff",
-      "ratio": 16.474,
+      "background": "f8fafc",
+      "ratio": 16.472,
       "minimum": 4.5
     },
     {
@@ -219,8 +219,8 @@
     {
       "name": "champ clair",
       "foreground": "71829a",
-      "background": "f7faff",
-      "ratio": 3.744,
+      "background": "f8fafc",
+      "ratio": 3.743,
       "minimum": 3
     },
     {
