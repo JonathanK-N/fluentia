@@ -64,6 +64,8 @@ python manage.py spectacular --validate --fail-on-warn --file schema.yaml
 
 Le seed est idempotent : trois questions en brouillon, sans auteur/relecteur inventé. Un personnel compétent doit renseigner les vrais auteurs/relecteurs, effectuer la relecture puis publier via l’administration. Aucun compte, mot de passe, contenu déclaré validé ou abonnement n’est créé automatiquement. Les secrets de production restent dans l’environnement, jamais dans Git. Les migrations de production sont un acte distinct soumis à autorisation, pas une étape exécutée ici.
 
+Versions vérifiées : Django 5.2.18 et DRF 3.18.3. Le minimum DRF a été relevé après audit de la version héritée ; les [notes officielles](https://www.django-rest-framework.org/community/release-notes/) et les [résultats d’audit](dependency-audit.json) sont conservés comme références. Le contrôle Django de déploiement laisse un avertissement HSTS à traiter avant production. Les contraintes d’exploitation et le périmètre exact figurent dans le rapport.
+
 ## Recette et décision
 
 Les résultats réellement exécutés, SHA, liens CI et décision finale seront consignés dans [RAPPORT.md](RAPPORT.md). Les tests PostgreSQL utilisent des connexions distinctes : double soumission, sauvegarde/soumission, double sauvegarde, expiration pendant attente du verrou et publication concurrente avec mutation d’un choix. Ils sont explicitement exclus sur SQLite ; leur succès n’y est pas simulé.
