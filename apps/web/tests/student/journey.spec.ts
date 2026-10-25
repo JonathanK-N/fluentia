@@ -53,7 +53,7 @@ test("inscription, courriel, session, lecture persistante et résultat privé su
   await other.close();
   await page.route("**/api/v1/attempts/*/answers/", route => route.abort());
   await page.getByRole("radio", {name: "Une preuve de paiement", exact: true}).click();
-  await expect(page.getByRole("alert")).toContainText("Connexion interrompue");
+  await expect(page.getByRole("main").getByRole("alert")).toContainText("Connexion interrompue");
   await expect(page.getByRole("radio", {name: "Une preuve de paiement", exact: true})).not.toBeChecked();
   await page.unroute("**/api/v1/attempts/*/answers/");
   await page.getByRole("radio", {name: "Les pièces à remplacer", exact: true}).focus();
