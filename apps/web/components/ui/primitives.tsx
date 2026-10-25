@@ -4,6 +4,7 @@ import type {
   HTMLAttributes,
   InputHTMLAttributes,
   ReactNode,
+  Ref,
 } from "react";
 export function Button({
   variant = "primary",
@@ -16,6 +17,7 @@ export function Button({
 }: ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: "primary" | "secondary" | "ghost";
   loading?: boolean;
+  ref?: Ref<HTMLButtonElement>;
 }) {
   return (
     <button

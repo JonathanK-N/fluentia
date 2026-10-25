@@ -2,6 +2,8 @@
 
 Responsable et propriétaire : Jonathan Kakesa. 24 octobre 2026.
 
+**Après autorisation du point B :** Jonathan Kakesa a autorisé la fusion de la PR #2. Elle est fusionnée vers dev au commit `2e1ed545540e8ea5fb0c540475ce7e146fcf315f`, depuis le HEAD approuvé `1100a99382f23842a3e5faa76da9c77c842771de`. La [CI du dev consolidé 40120241790](https://github.com/JonathanK-N/fluentia/actions/runs/40120241790) est réussie. Les formulations d’attente suivantes conservent l’état du rapport présenté au point B ; le suivi actuel est dans [FRONTEND_02.md](FRONTEND_02.md).
+
 ## Périmètre de la décision
 
 Ce rapport concerne l’intégration technique des références et spécifications UX/UI dans dev après la PR #1. Il ne déclare ni la conception Figma intégrale ni les fonctionnalités métier terminées. La stratégie [Code-First approuvée](DECISIONS/002-code-first-et-consolidation.md) permet de différer la synchronisation native ; les écrans légaux et certains éditeurs professionnels restent partiels.

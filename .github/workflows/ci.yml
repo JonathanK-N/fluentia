@@ -128,5 +128,7 @@ jobs:
           grep -q 'Fluentia' /tmp/fluentia-home.html
           curl --fail --silent http://127.0.0.1:3200/design-system > /tmp/fluentia-catalogue.html
           grep -q 'Couleurs' /tmp/fluentia-catalogue.html
+          curl --fail --silent http://127.0.0.1:3200/apercu/etudiant > /tmp/fluentia-etudiant.html
+          grep -q 'Bienvenue sur Fluentia' /tmp/fluentia-etudiant.html
           curl --fail --silent http://127.0.0.1:3200/manifest.webmanifest
           curl --fail --silent http://127.0.0.1:3200/branding/02_Icons_PWA/icon-192x192.png > /tmp/fluentia-icon.png

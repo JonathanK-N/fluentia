@@ -4,7 +4,10 @@ import Link from "next/link";
 import { useRef, useState } from "react";
 import { Logo } from "../branding/logo";
 import { Button } from "../ui/primitives";
+import { usePathname } from "next/navigation";
+import { LandingNavigation } from "../../features/landing/navigation";
 export function Header() {
+  const pathname = usePathname();
   const menuRef = useRef<HTMLDetailsElement>(null);
   function closeMenu() {
     if (menuRef.current) menuRef.current.open = false;
@@ -18,6 +21,8 @@ export function Header() {
     document.documentElement.dataset.theme = next;
     setTheme(next);
   }
+  if (pathname.startsWith("/apercu/etudiant")) return null;
+  if (pathname === "/") return <LandingNavigation />;
   return (
     <header className="site-header">
       <div className="container header-inner">

@@ -6,7 +6,15 @@ Responsable : Jonathan Kakesa. 24 octobre 2026. Stratégie [Code-First approuvé
 
 Les créations et captures historiques de Frontend 01 ne constituent pas une bibliothèque validée. Des débordements et chevauchements tablette sont connus. Lors de la mission UX/UI 02, la lecture a été refusée pour quota Starter et le compte indiquait un siège View. Aucun nouveau contrôle du canevas ni aucune édition Figma n’a été effectué pendant cette consolidation. Aucun forfait payant n’est activé.
 
-## Priorités
+## Direction v3 : validation préalable
+
+Les deux pilotes ont été validés pour poursuite (« vas-y »). La généralisation code-first est suivie dans [GENERALISATION_V3.md](GENERALISATION_V3.md) ; la synchronisation native ne sera revendiquée qu’après écriture et inspection réelles dans Figma.
+
+La nouvelle référence proposée est limitée à l’accueil clair et au tableau de bord étudiant : [UX_REVIEW.md](UX_REVIEW.md). Attendre leur validation visuelle explicite avant toute généralisation ou synchronisation globale. Le hero immersif et son dashboard miniature sont désormais historiques. Les futures maquettes doivent reprendre les états vide, rempli fictif, indisponible, les dialogues, la navigation mobile et la petite sphère Voice sans boucle. Aucun nouveau nœud natif Figma n’a été créé ou modifié pendant ce redesign ; synchronisation différée conformément à la décision hybride, sans forfait payant.
+
+## Priorités historiques à réévaluer après validation v3
+
+L’accueil React Frontend 02 est désormais implémenté ; sa synchronisation native reste à effectuer à partir du SHA et des captures réellement validés dans [FRONTEND_02.md](FRONTEND_02.md). Aucun nouveau nœud Figma n’est obtenu dans ce lot. Inclure la sphère statique/animée, les sept états Voice, le menu/pause, les offres non commerciales et le dashboard fictif, en conservant leurs avertissements de disponibilité.
 
 | Priorité | Travail restant | Preuve attendue |
 |---|---|---|

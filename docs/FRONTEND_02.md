@@ -4,6 +4,10 @@ Responsable : Jonathan Kakesa. 24 octobre 2026.
 
 ## État actuel
 
+**Nouvelle direction client :** la mission Human-Centered Redesign remplace l’orientation immersive par deux pilotes sobres, accueil et tableau de bord. L’ancien code au SHA `d8abfa06e3403d7069d26656b77c8c31feff4ab9` a passé ses deux CI (52 tests navigateur, 10 DOM, deux exclusions), mais ce succès technique ne vaut pas validation visuelle. Les [preuves antérieures](evidence/frontend-02.json) sont conservées avec leur source. Les assertions complémentaires ajoutées après ce checkpoint ne sont pas annoncées réussies avant exécution. Le statut actuel est dans [UX_REVIEW.md](UX_REVIEW.md), et les états d’attente ci-dessous sont historiques.
+
+**Mise à jour après le point B :** Jonathan Kakesa a explicitement autorisé la fusion de la PR #2. dev est consolidé à `2e1ed545540e8ea5fb0c540475ce7e146fcf315f`, contenu identique au HEAD validé `1100a99382f23842a3e5faa76da9c77c842771de`. Sa [CI 40120241790](https://github.com/JonathanK-N/fluentia/actions/runs/40120241790) est réussie : frontend, API et Docker, sept tests DOM et 22 tests navigateur réussis, deux exclusions. La branche `frontend/mission-02-landing` part exactement de ce dev. L’accueil décrit dans [LANDING_PAGE.md](LANDING_PAGE.md) est implémenté et entre en recette ; il n’est pas encore déclaré validé. Les états d’attente ci-dessous sont l’historique des points A/B avant autorisations.
+
 Le point A a été explicitement autorisé par Jonathan Kakesa. La PR #1 est fusionnée dans dev au commit `62f6ff43dcd0e03e006849e317b20a4c4795adfc`. Ce dev a été intégré dans la branche de la PR #2 par une fusion ordinaire, sans réécriture. Voir le [rapport du point B](VALIDATION_PR_02.md) et la [consolidation](CONSOLIDATION_PR_01_02.md). L’accueil attend l’autorisation de fusion de la PR #2 et la validation du dev consolidé.
 
 | Étape | État |

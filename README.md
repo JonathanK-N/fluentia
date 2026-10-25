@@ -11,6 +11,10 @@
 
 ## Mission UX/UI 02 — conception
 
+La direction v3 des pilotes est validée pour poursuite. La [généralisation aux interfaces existantes](docs/GENERALISATION_V3.md) est en cours de recette ; les références HTML restent des prototypes sans services métier. Fusion et déploiement ne sont pas autorisés.
+
+**Pilotes Human-Centered v3 :** accueil clair sur `/` et tableau de bord sans compte sur `/apercu/etudiant`. Consulter [la direction proposée](docs/DESIGN_DIRECTION_V3.md), [l’audit](docs/HUMAN_CENTERED_UX.md) et [la revue avec captures et contrôles](docs/UX_REVIEW.md). La [PR #3](https://github.com/JonathanK-N/fluentia/pull/3) reste en brouillon vers `dev`. Les 62 références historiques ne sont pas refondues ; généralisation, fusion et déploiement attendent une décision explicite.
+
 Les [spécifications et références locales](docs/ux-ui-02/README.md) couvrent Discover, Learn et Voice. Le [rapport GO/NO-GO](docs/ux-ui-02/REPORT.md) distingue les livrables locaux, les éléments partiels et la conception native Figma bloquée par le quota. Ces références ne sont pas des pages métier implémentées ni des maquettes Figma enregistrées. Aucune fusion ni mise en production automatique.
 
 > [!IMPORTANT]
@@ -64,4 +68,4 @@ Voir [la documentation](docs/README.md), [l’audit](docs/AUDIT_FRONTEND_01.md),
 
 Premier lot : [rapport détaillé](docs/RAPPORT_FRONTEND_01.md) · [PR #1 vers dev](https://github.com/JonathanK-N/fluentia/pull/1) · [aperçu desktop](docs/images/accueil-1440.png).
 
-La PR #1 a été fusionnée vers `dev` après validation technique et autorisation explicite de Jonathan Kakesa. La [stratégie Code-First approuvée](docs/DECISIONS/002-code-first-et-consolidation.md) permet de poursuivre avec une [synchronisation Figma différée](docs/FIGMA_SYNC_BACKLOG.md). Les défauts natifs et limites PWA restent documentés. La PR #2 est en cours de validation sur ce socle intégré ; sa fusion exige une deuxième autorisation. Voir [le suivi Frontend 02](docs/FRONTEND_02.md).
+Les PR #1 et #2 ont été fusionnées vers `dev` après validations techniques et deux autorisations explicites de Jonathan Kakesa. La [stratégie Code-First approuvée](docs/DECISIONS/002-code-first-et-consolidation.md) permet de poursuivre avec une [synchronisation Figma différée](docs/FIGMA_SYNC_BACKLOG.md). Les [pilotes v3](docs/UX_REVIEW.md) sont développés sur `frontend/mission-02-landing` depuis ce dev consolidé et validé. Le [suivi Frontend 02](docs/FRONTEND_02.md) conserve les étapes antérieures ; la [PR #3 en brouillon](https://github.com/JonathanK-N/fluentia/pull/3) porte la proposition actuelle. Sa fusion et tout déploiement restent soumis à décision explicite.
