@@ -212,3 +212,30 @@ jobs:
           grep -q 'Couleurs' /tmp/fluentia-catalogue.html
           curl --fail --silent http://127.0.0.1:3200/manifest.webmanifest
           curl --fail --silent http://127.0.0.1:3200/branding/02_Icons_PWA/icon-192x192.png > /tmp/fluentia-icon.png
+
+  compose-journey:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Vérifier le démarrage Compose et la passerelle de session
+        shell: bash
+        run: |
+          docker compose version
+          cp .env.example .env
+          trap 'docker compose -p fluentia-lot03-validation logs --tail 60; docker compose -p fluentia-lot03-validation down --volumes' EXIT
+          docker compose -p fluentia-lot03-validation build
+          docker compose -p fluentia-lot03-validation up -d db
+          docker compose -p fluentia-lot03-validation run --rm api python manage.py migrate --noinput
+          docker compose -p fluentia-lot03-validation up -d api web
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:3000/api/v1/health/ > /tmp/fluentia-compose-health.json; then break; fi
+            sleep 1
+          done
+          python3 scripts/check-compose-smoke.py > compose-results.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: compose-session-postgresql
+          path: compose-results.json
+          retention-days: 7
