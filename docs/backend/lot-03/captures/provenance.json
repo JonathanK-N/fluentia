@@ -1,0 +1,44 @@
+{
+  "sourceSha": "51a24dc0e741f7e026e8b878a10a8d4138780839",
+  "run": 40261048069,
+  "artifact": 12624534293,
+  "notice": "Captures sans retouche de fixtures techniques ; aucun contenu approuvé humainement.",
+  "files": [
+    {
+      "path": "oral-desktop.png",
+      "origin": "lot03-oral-entraînement-mé-52bd4-r-transcription-et-résultat-chromium\\oral-entrainement.png",
+      "engine": "chromium",
+      "sha256": "bc8c8b617c8d80f0a10ea511ff7f33908dabd0ca65810073982d397eaae2a28f"
+    },
+    {
+      "path": "oral-mobile.png",
+      "origin": "lot03-oral-entraînement-mé-52bd4-r-transcription-et-résultat-webkit-mobile\\oral-entrainement.png",
+      "engine": "webkit-mobile",
+      "sha256": "c44a4fafb0344f1e62dbed1d719b1bc865c5ac7bb7fd828731f98a68a65f74ed"
+    },
+    {
+      "path": "edition-desktop.png",
+      "origin": "lot03-interface-éditoriale-de40d--de-relecture-et-historique-chromium\\banque-editoriale.png",
+      "engine": "chromium",
+      "sha256": "99b88d3b1485117e16a960fe01b845c64d267fce8cef3677f5880079b99b2a2f"
+    },
+    {
+      "path": "edition-mobile.png",
+      "origin": "lot03-interface-éditoriale-de40d--de-relecture-et-historique-webkit-mobile\\banque-editoriale.png",
+      "engine": "webkit-mobile",
+      "sha256": "499827567fb43ba88657cc569aff88f4c10c51b62333293ab0a6d35ea113b3d9"
+    },
+    {
+      "path": "lecture-39-resultats-desktop.png",
+      "origin": "lot03-lecture-complète-39--a0002-t-correction-sur-PostgreSQL-chromium\\lecture-complete-resultats.png",
+      "engine": "chromium",
+      "sha256": "ee3440f61d8e3828281df4c906d11697bbe8030fb4d890135cc607ba5388cb0e"
+    },
+    {
+      "path": "oral-39-resultats-mobile.png",
+      "origin": "lot03-simulation-orale-39--356b0-elle-et-absence-de-réécoute-webkit-mobile\\oral-complet-resultats.png",
+      "engine": "webkit-mobile",
+      "sha256": "f3468d3c337426cff045791b0070a74923bbbf57d3e026f6b3edce9dd29c7e41"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "status": "draft",
+  "notice": "Voix synthétique ; aucun locuteur réel, aucune relecture ou validation pédagogique humaine.",
+  "text_origin": "Proposition originale du lot 03 ; aucune banque propriétaire copiée.",
+  "synthesis": "eSpeak NG text-to-speech: 1.51  Data at: /usr/lib/x86_64-linux-gnu/espeak-ng-data",
+  "synthesis_source": "https://github.com/espeak-ng/espeak-ng",
+  "voice": "fr",
+  "duration_seconds": 12.603083900226757,
+  "sha256": "1d3074795ab2ec0dbb0134d0a44edcdc6f29345e0c317c9443ca37f716489afb",
+  "transcript": "annonce-originale.txt"
+}

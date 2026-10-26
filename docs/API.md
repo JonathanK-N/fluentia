@@ -4,7 +4,7 @@
 
 ## Route disponible
 
-Le lot 01 intégré à dev fournit le [catalogue et les tentatives privées](backend/lot-01/README.md). Le [lot 02](backend/lot-02/README.md) ajoute comptes, sessions/CSRF, vérification du courriel, profil et première lecture React connectée sur sa branche de développement. Leurs guides précisent les routes effectivement implémentées et les limites ; les contrats « prévus » ci-dessous sont un historique du socle, pas un contrat actuel. IA et paiements restent ultérieurs.
+Les lots 01 et 02 intégrés à dev fournissent le [moteur privé](backend/lot-01/README.md) et les [comptes/lecture connectée](backend/lot-02/README.md). La branche du [lot 03](backend/lot-03/README.md) ajoute les API éditoriales, médias privés et progression ; son [OpenAPI validé](backend/lot-03/openapi.yaml) constitue le contrat actuel de cette branche. Les contrats « prévus » ci-dessous sont un historique du socle, pas une liste de fonctions opérationnelles. IA et paiements restent ultérieurs.
 
 | Verbe | URL | Description |
 |---|---|---|
@@ -25,4 +25,4 @@ Schéma généré : `/api/schema/` · Swagger : `/api/schema/swagger-ui/`.
 | Progression | `GET /dashboard/overview` |
 | Paiements | `POST /billing/checkout` |
 
-Les routes implémentées appliquent les permissions et protections décrites dans leurs guides de lot ; le [schéma actuel du lot 02](backend/lot-02/openapi.yaml) précise les corps et réponses. Les limites d’exploitation et les contrats futurs restent distincts.
+Les routes implémentées appliquent les permissions et protections décrites dans leurs guides de lot ; le [schéma du lot 03](backend/lot-03/openapi.yaml) précise les corps et réponses de la branche en revue. Les limites d’exploitation et les contrats futurs restent distincts.
