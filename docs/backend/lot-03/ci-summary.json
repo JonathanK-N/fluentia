@@ -1,0 +1,89 @@
+{
+  "sourceSha": "51a24dc0e741f7e026e8b878a10a8d4138780839",
+  "observedAt": "2026-10-26 02:59:38 UTC",
+  "runs": [
+    {
+      "id": 40261048069,
+      "event": "push",
+      "sourceSha": "51a24dc0e741f7e026e8b878a10a8d4138780839",
+      "url": "https://github.com/JonathanK-N/fluentia/actions/runs/40261048069",
+      "jobs": [
+        {
+          "id": 121373310405,
+          "name": "student-journey",
+          "conclusion": "success"
+        },
+        {
+          "id": 121373310553,
+          "name": "web",
+          "conclusion": "success"
+        },
+        {
+          "id": 121373310570,
+          "name": "api-container",
+          "conclusion": "success"
+        },
+        {
+          "id": 121373310585,
+          "name": "api (sqlite)",
+          "conclusion": "success"
+        },
+        {
+          "id": 121373310620,
+          "name": "docker",
+          "conclusion": "success"
+        },
+        {
+          "id": 121373310673,
+          "name": "api (postgresql)",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ],
+  "checks": {
+    "postgresql": {
+      "discovered": 84,
+      "passed": 84,
+      "skipped": 0
+    },
+    "sqlite": {
+      "discovered": 84,
+      "passed": 74,
+      "skipped": 10
+    },
+    "frontend": {
+      "unitPassed": 7,
+      "browserPassed": 22,
+      "browserSkipped": 2
+    },
+    "studentJourneys": {
+      "passed": 15,
+      "engines": [
+        "chromium",
+        "firefox",
+        "webkit-mobile"
+      ],
+      "database": "PostgreSQL 16",
+      "media": "signal PCM synthétique de 500 ms à 440 Hz ; pas de validation pédagogique"
+    },
+    "captures": {
+      "artifact": 12624534293,
+      "run": 40261048069
+    }
+  },
+  "compose": {
+    "sourceSha": "7b6f35baa1917109b0f1c410c787ec988e6ac151",
+    "run": 40262178301,
+    "job": 121376702838,
+    "conclusion": "success",
+    "checks": ["PostgreSQL et migrations dans Compose", "Proxy Next construit vers api:8000", "Inscription, connexion, profil, CSRF et déconnexion via le frontend", "Secrets backend absents de l'environnement du service web"],
+    "notice": "Recette Compose de développement ; aucune délivrabilité e-mail, sauvegarde/restauration ou production validée."
+  },
+  "limitations": [
+    "Aucune relecture humaine réelle ou calibration attestée par la recette.",
+    "WebKit Linux avec viewport mobile ; aucun test matériel iOS/Android.",
+    "La délivrance unique ne prouve ni l'écoute humaine ni un DRM.",
+    "Les derniers contrôles du HEAD documentaire sont indiqués dans la PR."
+  ]
+}

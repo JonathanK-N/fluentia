@@ -30,13 +30,16 @@ Les [spécifications et références locales](docs/ux-ui-02/README.md) couvrent 
 
 ## Démarrage
 
-Moteur d’examens backend lot 01 intégré à `dev` après fusion autorisée de la PR #4 : [intégration, modèles, API et limites](docs/backend/lot-01/README.md), [rapport de validation](docs/backend/lot-01/RAPPORT.md). Le [lot 02](docs/backend/lot-02/README.md) ajoute les comptes et la première lecture connectée dans la PR #5 en brouillon. Les questions fournies restent en brouillon jusqu’à relecture réelle ; ces lots ne constituent pas la plateforme complète.
+Les lots backend [01](docs/backend/lot-01/README.md) et [02](docs/backend/lot-02/README.md) sont intégrés à `dev` après les fusions autorisées des PR #4 et #5. Le [lot 03](docs/backend/lot-03/README.md), dans la PR #6 en brouillon, ajoute banque pédagogique, médias privés, compréhension orale, simulations complètes et progression. Les contenus proposés restent en brouillon jusqu’à relecture humaine réelle ; ces lots ne constituent pas la plateforme complète.
 
 Prérequis : Docker et Docker Compose.
 
 ```bash
 cp .env.example .env
-docker compose up --build
+docker compose build
+docker compose up -d db
+docker compose run --rm api python manage.py migrate --noinput
+docker compose up
 ```
 
 Frontend : http://localhost:3000 · API : http://localhost:8000/api/v1/health/ · Swagger : http://localhost:8000/api/schema/swagger-ui/
@@ -56,7 +59,7 @@ Projet et responsabilité éditoriale : **Jonathan Kakesa**. Les commits doivent
 
 ## Frontend — Mission 01
 
-Vitrine et catalogue `/design-system`, thèmes clair/sombre, logos officiels et Poppins locale. Le moteur d’examens du lot 01 est intégré à dev. Le [lot 02](docs/backend/lot-02/README.md) ajoute l’espace `/etudiant`, les comptes et une première lecture connectée sur sa branche de développement ; coach et paiements restent ultérieurs.
+Vitrine et catalogue `/design-system`, thèmes clair/sombre, logos officiels et Poppins locale. Le lot 02 intégré fournit `/etudiant`, comptes et lecture connectée. La branche du [lot 03](docs/backend/lot-03/README.md) étend le parcours à l’oral, aux simulations, à la progression et à `/edition` pour les personnes habilitées ; coach et paiements restent ultérieurs. La PR #3 Human-Centered reste indépendante.
 
 Démarrage : `cd apps/web`, `npm ci`, `npm run dev`.
 

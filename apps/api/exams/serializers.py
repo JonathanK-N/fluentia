@@ -11,11 +11,15 @@ class ChoicePublicSerializer(serializers.ModelSerializer):
 
 
 class QuestionPublicSerializer(serializers.ModelSerializer):
+    audio_available = serializers.BooleanField(read_only=True, default=False)
+    audio_state = serializers.CharField(read_only=True, default="unavailable")
+    audio_ends_at = serializers.DateTimeField(read_only=True, allow_null=True)
+    transcript = serializers.CharField(read_only=True, required=False)
     choices = ChoicePublicSerializer(many=True, read_only=True)
 
     class Meta:
         model = Question
-        fields = ("id", "position", "statement", "reading_passage", "choices")
+        fields = ("id", "position", "statement", "reading_passage", "choices", "audio_available", "audio_state", "audio_ends_at", "transcript")
 
 
 class ExamListSerializer(serializers.ModelSerializer):
@@ -48,10 +52,13 @@ class SavedAnswerSerializer(serializers.Serializer):
 
 class AttemptSerializer(serializers.ModelSerializer):
     exam_id = serializers.UUIDField(read_only=True)
+    skill = serializers.CharField(source="exam.skill", read_only=True)
+    mode = serializers.CharField(source="exam.mode", read_only=True)
+    exam_title = serializers.CharField(source="exam.title", read_only=True)
 
     class Meta:
         model = Attempt
-        fields = ("id", "exam_id", "status", "started_at", "expires_at", "submitted_at")
+        fields = ("id", "exam_id", "status", "started_at", "expires_at", "submitted_at", "skill", "mode", "exam_title")
         read_only_fields = fields
 
 
@@ -81,6 +88,7 @@ class SaveAnswerResponseSerializer(SavedAnswerSerializer):
 
 
 class ResultDetailSerializer(serializers.Serializer):
+    transcript = serializers.CharField(read_only=True, allow_blank=True)
     statement = serializers.CharField(read_only=True)
     selected_label = serializers.CharField(read_only=True, allow_null=True)
     correct_label = serializers.CharField(read_only=True)

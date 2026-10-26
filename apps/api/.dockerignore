@@ -1,0 +1,10 @@
+.env
+.env.*
+*.sqlite3
+*.sqlite3-*
+__pycache__/
+*.pyc
+.venv/
+.private-media/
+.local-mail/
+test-results/

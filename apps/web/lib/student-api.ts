@@ -27,8 +27,20 @@ export async function api<T>(path: string, method = "GET", body?: unknown): Prom
   return data as T;
 }
 export type Profile = { id: number; email: string; display_name: string; email_verified: boolean };
-export type Exam = { id: string; title: string; description: string; skill: string; question_count: number; duration_seconds: number };
-export type Question = { id: string; statement: string; reading_passage: string; choices: {id: string; label: string}[] };
-export type Attempt = {id: string; status: string; expires_at: string; server_now: string; questions?: Question[]; answers: {question_id: string; choice_id: string}[]};
-export type AttemptSummary = Pick<Attempt, "id" | "status" | "expires_at">;
-export type Results = { correct_count: number; question_count: number; percentage: number; disclaimer: string; details: {question_id: string; selected_choice_id: string | null; correct_choice_id: string; explanation: string; statement: string; selected_label: string | null; correct_label: string}[] };
+export type Exam = { id: string; title: string; description: string; skill: string; mode: string; version: number; question_count: number; duration_seconds: number };
+export type Question = { id: string; position: number; statement: string; reading_passage: string; audio_available: boolean; audio_state: string; audio_ends_at?: string; transcript?: string; choices: {id: string; label: string}[] };
+export type Attempt = {id: string; status: string; skill: string; mode: string; exam_title: string; expires_at: string; server_now: string; questions?: Question[]; answers: {question_id: string; choice_id: string}[]};
+export type AttemptSummary = Pick<Attempt, "id" | "status" | "expires_at" | "skill" | "mode" | "exam_title">;
+export type Results = { correct_count: number; question_count: number; percentage: number; disclaimer: string; details: {question_id: string; selected_choice_id: string | null; correct_choice_id: string; explanation: string; statement: string; selected_label: string | null; correct_label: string; transcript?: string}[] };
+
+export async function fileRequest(path: string, method: string, body?: FormData): Promise<Response> {
+  const csrfResponse = await http("/api/v1/auth/csrf/", {credentials: "same-origin", cache: "no-store"});
+  if (!csrfResponse.ok) throw new ApiError(csrfResponse.status, "Impossible de sécuriser la session.");
+  const token = (await csrfResponse.json()).csrf_token;
+  const response = await http(`/api/v1/${path}`, {method, credentials: "same-origin", cache: "no-store", headers: {"X-CSRFToken": token}, body});
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new ApiError(response.status, typeof data.detail === "string" ? data.detail : "Document indisponible. Vérifiez votre session et la validité de la tentative.");
+  }
+  return response;
+}
