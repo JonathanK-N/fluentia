@@ -15,8 +15,9 @@ from django.utils import timezone
 from django.db import transaction
 from exams.models import Exam, Question, Choice
 
-if os.getenv("FLUENTIA_E2E") != "1" or not settings.DEBUG:
-    raise SystemExit("Fixtures interdites hors recette explicite avec DEBUG.")
+from e2e_guard import require_disposable
+
+require_disposable(settings)
 with transaction.atomic():
     User = get_user_model()
     author, _ = User.objects.get_or_create(username="fixture-author-not-human")

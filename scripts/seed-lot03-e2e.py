@@ -16,8 +16,9 @@ from exams.models import Exam
 from pedagogy.services import create_item, transition, publish_exam, upload_media
 from pedagogy.tests import wav_upload, content
 
-if os.getenv("FLUENTIA_E2E") != "1" or not settings.DEBUG:
-    raise SystemExit("Interdit hors base jetable de recette avec DEBUG explicite.")
+from e2e_guard import require_disposable
+
+require_disposable(settings)
 with transaction.atomic():
     User = get_user_model()
     editor, _ = User.objects.get_or_create(

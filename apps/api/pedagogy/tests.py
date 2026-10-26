@@ -85,6 +85,44 @@ def approve(editor, reviewer, data=None):
 
 @override_settings(PASSWORD_HASHERS=["django.contrib.auth.hashers.MD5PasswordHasher"])
 class PedagogyTests(TestCase):
+    def test_e2e_accounts_refused_on_non_disposable_databases(self):
+        import os
+        import runpy
+        from pathlib import Path
+        from types import SimpleNamespace
+
+        guard = runpy.run_path(
+            str(Path(__file__).resolve().parents[3] / "scripts/e2e_guard.py")
+        )["require_disposable"]
+        with patch.dict(os.environ, {"FLUENTIA_E2E": "1"}):
+            for database in [
+                {
+                    "ENGINE": "django.db.backends.postgresql",
+                    "NAME": "fluentia_prod",
+                    "HOST": "127.0.0.1",
+                },
+                {
+                    "ENGINE": "django.db.backends.postgresql",
+                    "NAME": "fluentia_e2e",
+                    "HOST": "db.example.test",
+                },
+                {"ENGINE": "django.db.backends.sqlite3", "NAME": "db.sqlite3"},
+            ]:
+                with self.assertRaises(SystemExit):
+                    guard(SimpleNamespace(DEBUG=True, DATABASES={"default": database}))
+            guard(
+                SimpleNamespace(
+                    DEBUG=True,
+                    DATABASES={
+                        "default": {
+                            "ENGINE": "django.db.backends.postgresql",
+                            "NAME": "fluentia_e2e",
+                            "HOST": "127.0.0.1",
+                        }
+                    },
+                )
+            )
+
     def setUp(self):
         cache.clear()
         self.media_directory = tempfile.TemporaryDirectory()
