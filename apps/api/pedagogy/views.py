@@ -3,7 +3,7 @@
 from django.db import transaction, IntegrityError
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from drf_spectacular.utils import extend_schema, OpenApiTypes
+from drf_spectacular.utils import extend_schema, OpenApiTypes, OpenApiParameter
 from rest_framework import generics
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.exceptions import ValidationError
@@ -61,6 +61,17 @@ class EditorView(SecureView):
     throttle_classes = [EditorThrottle]
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter("skill", str, description="reading ou listening"),
+        OpenApiParameter(
+            "difficulty", str, description="Difficulté proposée : non_calibree, A1 à C2"
+        ),
+        OpenApiParameter(
+            "state", str, description="draft, review, approved ou published"
+        ),
+    ]
+)
 class BankListView(generics.ListAPIView, EditorView):
     serializer_class = BankSerializer
     pagination_class = CataloguePagination

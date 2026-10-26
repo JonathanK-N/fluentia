@@ -17,10 +17,15 @@ export default function EditorialPage() {
   const [ready, setReady] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
   const [exportOffset, setExportOffset] = useState(0);
+  const [filterSkill, setFilterSkill] = useState("");
+  const [filterState, setFilterState] = useState("");
+  const [filterDifficulty, setFilterDifficulty] = useState("");
+  const [selectionDetails, setSelectionDetails] = useState<Record<string, Item>>({});
   const refresh = useCallback(async () => {
-    const data = await api<{results: Item[]; next: string | null}>(`bank/?limit=50&offset=${offset}`);
+    const query = new URLSearchParams({limit: "50", offset: String(offset), skill: filterSkill, state: filterState, difficulty: filterDifficulty});
+    const data = await api<{results: Item[]; next: string | null}>(`bank/?${query}`);
     setItems(data.results); setMore(Boolean(data.next)); setReady(true);
-  }, [offset]);
+  }, [offset, filterSkill, filterState, filterDifficulty]);
   useEffect(() => {refresh().catch(e => setError(e.message));}, [refresh]);
   async function action(work: () => Promise<void>) {
     setBusy(true); setError(""); setMessage("");
@@ -56,9 +61,10 @@ export default function EditorialPage() {
     {!ready && !error && <p>Chargement de la banque…</p>}
     {ready && <>
       <section className="student-card"><h2>Versions de la banque</h2><Button variant="secondary" disabled={busy} onClick={() => {setItem(null); setHistory([]);}}>Nouveau brouillon</Button>
+        <div className="student-form"><label>Filtrer par compétence<select value={filterSkill} onChange={e => {setOffset(0); setFilterSkill(e.target.value);}}><option value="">Toutes</option><option value="reading">Compréhension écrite</option><option value="listening">Compréhension orale</option></select></label><label>Filtrer par état<select value={filterState} onChange={e => {setOffset(0); setFilterState(e.target.value);}}><option value="">Tous</option><option value="draft">Brouillon</option><option value="review">En révision</option><option value="approved">Approuvé</option><option value="published">Publié</option></select></label><label>Filtrer par difficulté<select value={filterDifficulty} onChange={e => {setOffset(0); setFilterDifficulty(e.target.value);}}><option value="">Toutes</option>{["non_calibree","A1","A2","B1","B2","C1","C2"].map(v => <option value={v} key={v}>{v}</option>)}</select></label></div>
         {!items.length && <p>Aucun item dans cette page.</p>}
         <ul>{items.map(value => <li key={value.id}><Button variant="ghost" disabled={busy} onClick={() => choose(value)}>{value.statement} · v{value.version} · {value.state}</Button>
-          {["approved", "published"].includes(value.state) && <label><input type="checkbox" checked={selected.includes(value.id)} onChange={e => setSelected(previous => e.target.checked ? [...previous, value.id] : previous.filter(id => id !== value.id))} /> Ajouter à l’examen</label>}
+          {["approved", "published"].includes(value.state) && <label><input type="checkbox" checked={selected.includes(value.id)} onChange={e => {setSelectionDetails(previous => ({...previous, [value.id]: value})); setSelected(previous => e.target.checked ? [...previous, value.id] : previous.filter(id => id !== value.id));}} /> Ajouter à l’examen</label>}
         </li>)}</ul>
         <div className="student-nav"><Button variant="secondary" disabled={offset === 0 || busy} onClick={() => setOffset(Math.max(0, offset - 50))}>Page précédente</Button><Button variant="secondary" disabled={!more || busy} onClick={() => setOffset(offset + 50)}>Page suivante</Button></div>
       </section>
@@ -89,6 +95,8 @@ export default function EditorialPage() {
         <label>Titre du média<input name="title" required maxLength={180} /></label><label>Document WAV<input name="file" type="file" accept="audio/wav,.wav" required /></label><label>Transcription<textarea name="transcript" required maxLength={40000} /></label><label>Provenance du média et droits<textarea name="provenance" required maxLength={10000} /></label><Button type="submit" loading={busy}>Importer le média privé</Button>
       </form></section>
       <section className="student-card"><h2>Publier une version d’examen</h2><p>{selected.length} items sélectionnés, dans l’ordre des cases cochées. Une simulation requiert 39 questions et 3600 secondes en lecture ou 2100 secondes à l’oral. Tous les items doivent être approuvés et de même compétence.</p><form className="student-form" onSubmit={publish}>
+        <Button variant="secondary" disabled={busy || !selected.length} onClick={() => setSelected(previous => [...previous].sort((a,b) => ["non_calibree","A1","A2","B1","B2","C1","C2"].indexOf(selectionDetails[a]?.difficulty) - ["non_calibree","A1","A2","B1","B2","C1","C2"].indexOf(selectionDetails[b]?.difficulty)))}>Ordonner par difficulté proposée</Button>
+        <ol>{selected.map((id,index) => <li key={id}>{selectionDetails[id]?.statement} · {selectionDetails[id]?.difficulty}<Button variant="ghost" aria-label={`Monter la question ${index+1}`} disabled={busy || index === 0} onClick={() => setSelected(previous => {const next=[...previous]; [next[index-1],next[index]]=[next[index],next[index-1]]; return next;})}>↑</Button><Button variant="ghost" aria-label={`Descendre la question ${index+1}`} disabled={busy || index === selected.length-1} onClick={() => setSelected(previous => {const next=[...previous]; [next[index],next[index+1]]=[next[index+1],next[index]]; return next;})}>↓</Button></li>)}</ol>
         <label>Identifiant stable de l’examen<input name="slug" required maxLength={120} pattern="[a-zA-Z0-9_-]+" /></label><label>Titre de l’examen<input name="title" required maxLength={180} /></label><label>Description<textarea name="description" maxLength={10000} /></label>
         <label>Compétence de l’examen<select name="skill"><option value="reading">Compréhension écrite</option><option value="listening">Compréhension orale</option></select></label><label>Mode<select name="mode"><option value="training">Entraînement</option><option value="simulation">Simulation</option></select></label><label>Durée en secondes<input type="number" name="duration_seconds" min={1} max={14400} required defaultValue={600} /></label><Button type="submit" disabled={!selected.length} loading={busy}>Publier les items sélectionnés</Button>
       </form></section>
