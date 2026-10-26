@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { api, fileRequest } from "../../lib/student-api";
 import { Button } from "../../components/ui/primitives";
 
@@ -21,19 +21,25 @@ export default function EditorialPage() {
   const [filterState, setFilterState] = useState("");
   const [filterDifficulty, setFilterDifficulty] = useState("");
   const [selectionDetails, setSelectionDetails] = useState<Record<string, Item>>({});
+  const refreshVersion = useRef(0);
+  const selectionVersion = useRef(0);
   const refresh = useCallback(async () => {
+    const version = ++refreshVersion.current;
     const query = new URLSearchParams({limit: "50", offset: String(offset), skill: filterSkill, state: filterState, difficulty: filterDifficulty});
     const data = await api<{results: Item[]; next: string | null}>(`bank/?${query}`);
+    if (version !== refreshVersion.current) return;
     setItems(data.results); setMore(Boolean(data.next)); setReady(true);
   }, [offset, filterSkill, filterState, filterDifficulty]);
   useEffect(() => {refresh().catch(e => setError(e.message));}, [refresh]);
   async function action(work: () => Promise<void>) {
+    selectionVersion.current += 1;
     setBusy(true); setError(""); setMessage("");
     try {await work(); await refresh();} catch (e) {setError((e as Error).message);} finally {setBusy(false);}
   }
   async function choose(value: Item) {
-    setItem(value); setError("");
-    try {setHistory(await api<Event[]>(`bank/${value.id}/history/`));} catch (e) {setError((e as Error).message);}
+    const version = ++selectionVersion.current;
+    setItem(value); setHistory([]); setError("");
+    try {const data = await api<Event[]>(`bank/${value.id}/history/`); if (version === selectionVersion.current) setHistory(data);} catch (e) {if (version === selectionVersion.current) setError((e as Error).message);}
   }
   function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
