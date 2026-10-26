@@ -419,6 +419,20 @@ class PedagogyTests(TestCase):
     def test_media_pcm_validation_hash_and_immutability(self):
         media = self.media()
         self.assertEqual(len(read_media(media)), media.size)
+        response = self.client.post(
+            "/api/v1/bank/media/",
+            {
+                "file": wav_upload(),
+                "title": "Import multipart de recette",
+                "transcript": "Signal synthétique, pas une voix",
+                "provenance": "Créé pour la recette HTTP",
+            },
+            format="multipart",
+        )
+        self.assertEqual(response.status_code, 201, response.data)
+        self.assertEqual(
+            MediaAsset.objects.get(pk=response.data["id"]).duration_ms, 500
+        )
         with self.assertRaises(IntegrityError), transaction.atomic():
             MediaAsset.objects.filter(pk=media.pk).update(transcript="Altération")
         media_path(media).write_bytes(b"tampered")
