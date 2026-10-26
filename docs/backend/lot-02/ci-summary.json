@@ -1,0 +1,116 @@
+{
+  "sourceSha": "80b11e804be67efa3aafdb8c53385a350183532b",
+  "observedAt": "2026-10-25 17:19:36 UTC",
+  "runs": [
+    {
+      "id": 40215597773,
+      "url": "https://github.com/JonathanK-N/fluentia/actions/runs/40215597773",
+      "event": "push",
+      "sha": "80b11e804be67efa3aafdb8c53385a350183532b",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 121235931896,
+          "name": "api-container",
+          "conclusion": "success"
+        },
+        {
+          "id": 121235931954,
+          "name": "api (sqlite)",
+          "conclusion": "success"
+        },
+        {
+          "id": 121235931981,
+          "name": "api (postgresql)",
+          "conclusion": "success"
+        },
+        {
+          "id": 121235932019,
+          "name": "docker",
+          "conclusion": "success"
+        },
+        {
+          "id": 121235932057,
+          "name": "web",
+          "conclusion": "success"
+        },
+        {
+          "id": 121235932126,
+          "name": "student-journey",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 40215602708,
+      "url": "https://github.com/JonathanK-N/fluentia/actions/runs/40215602708",
+      "event": "pull_request",
+      "sha": "80b11e804be67efa3aafdb8c53385a350183532b",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 121235945676,
+          "name": "api-container",
+          "conclusion": "success"
+        },
+        {
+          "id": 121235945806,
+          "name": "docker",
+          "conclusion": "success"
+        },
+        {
+          "id": 121235945835,
+          "name": "api (postgresql)",
+          "conclusion": "success"
+        },
+        {
+          "id": 121235945845,
+          "name": "student-journey",
+          "conclusion": "success"
+        },
+        {
+          "id": 121235945903,
+          "name": "api (sqlite)",
+          "conclusion": "success"
+        },
+        {
+          "id": 121235945950,
+          "name": "web",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ],
+  "checks": {
+    "postgresql": {
+      "tests": 60,
+      "passed": 60,
+      "skipped": 0
+    },
+    "sqlite": {
+      "tests": 60,
+      "passed": 53,
+      "skipped": 7
+    },
+    "frontend": {
+      "unitPassed": 7,
+      "browserPassed": 22,
+      "browserSkipped": 2
+    },
+    "studentJourney": {
+      "passed": 3,
+      "engines": [
+        "chromium",
+        "firefox",
+        "webkit-mobile"
+      ],
+      "database": "PostgreSQL 16",
+      "mail": "fichiers locaux privés, aucun envoi externe",
+      "capturesArtifact": 12607246976
+    }
+  },
+  "limitations": [
+    "Fixtures synthétiques : aucune validation pédagogique humaine.",
+    "Pas de délivrabilité e-mail réelle, charge, pentest ou recette production."
+  ]
+}

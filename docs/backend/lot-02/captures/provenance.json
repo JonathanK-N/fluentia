@@ -1,0 +1,38 @@
+{
+  "sourceSha": "80b11e804be67efa3aafdb8c53385a350183532b",
+  "run": 40215597773,
+  "artifact": 12607246976,
+  "notice": "Fixture technique synthétique ; aucune validation pédagogique humaine. Captures non retouchées.",
+  "files": [
+    {
+      "path": "lecture-desktop.png",
+      "engine": "chromium",
+      "sha256": "fd6a3fc0b67ff7cd1c39af4b95dcd0b99864f9d81fe7a244d984e708bdb7c436"
+    },
+    {
+      "path": "lecture-sombre-desktop.png",
+      "engine": "chromium",
+      "sha256": "415305c4ad859cbb14478fd30c2f2f9d844f081efb42b8e3153238aaaf037edc"
+    },
+    {
+      "path": "resultat-desktop.png",
+      "engine": "chromium",
+      "sha256": "2138b3b25afb03618242592aa80b1cd0b8d1b507c96ed10f909ff5389f3b3133"
+    },
+    {
+      "path": "lecture-mobile.png",
+      "engine": "webkit-mobile",
+      "sha256": "ed05cc13dd87d75ae896933ccbdc897294332f3adef267bd156c4da767f51e12"
+    },
+    {
+      "path": "lecture-sombre-mobile.png",
+      "engine": "webkit-mobile",
+      "sha256": "a581df44be57415fd44fa1afe117b375396615b8f4fcb25fa0ce0d9ef1130157"
+    },
+    {
+      "path": "resultat-mobile.png",
+      "engine": "webkit-mobile",
+      "sha256": "f674416221752215f897268b847adec0f38be86946d9be1e8bfb881aa8248df2"
+    }
+  ]
+}

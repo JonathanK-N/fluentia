@@ -2,7 +2,8 @@
 
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
-from drf_spectacular.utils import extend_schema
+from django.utils import timezone
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import generics, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.pagination import LimitOffsetPagination
@@ -21,6 +22,7 @@ from .serializers import (
     ResultSerializer,
 )
 from .services import create_attempt, save_answer, submit_attempt, get_attempt
+from accounts.permissions import VerifiedEmail
 
 
 class CataloguePagination(LimitOffsetPagination):
@@ -38,6 +40,9 @@ class WriteThrottle(UserRateThrottle):
     rate = "120/minute"
 
 
+@extend_schema(
+    parameters=[OpenApiParameter("skill", str, enum=["reading", "listening"])]
+)
 class ExamListView(generics.ListAPIView):
     permission_classes = [AllowAny]
     authentication_classes = []
@@ -46,6 +51,15 @@ class ExamListView(generics.ListAPIView):
     queryset = Exam.objects.filter(is_published=True).annotate(
         question_count=Count("questions")
     )
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        skill = self.request.query_params.get("skill")
+        if skill:
+            if skill not in Exam.Skill.values:
+                raise ValidationError({"skill": "Compétence inconnue."})
+            queryset = queryset.filter(skill=skill)
+        return queryset
 
 
 class ExamDetailView(generics.RetrieveAPIView):
@@ -59,7 +73,7 @@ class ExamDetailView(generics.RetrieveAPIView):
 
 
 class StartAttemptView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, VerifiedEmail]
     throttle_classes = [StartThrottle]
 
     @extend_schema(request=None, responses={201: AttemptSerializer})
@@ -78,6 +92,7 @@ class AttemptView(APIView):
     def get(self, request, attempt_id):
         attempt = get_attempt(attempt_id=attempt_id, user=request.user)
         payload = AttemptSerializer(attempt).data
+        payload["server_now"] = timezone.now().isoformat()
         payload["answers"] = list(attempt.answers.values("question_id", "choice_id"))
         if attempt.status == Attempt.Status.ACTIVE:
             payload["questions"] = QuestionPublicSerializer(
@@ -138,7 +153,7 @@ class AttemptResultsView(APIView):
             return Response(
                 {"detail": "Résultats disponibles après soumission."}, status=409
             )
-        answers = {a.question_id: a for a in attempt.answers.all()}
+        answers = {a.question_id: a for a in attempt.answers.select_related("choice")}
         payload = result_payload(attempt)
         payload["details"] = [
             {
@@ -150,7 +165,21 @@ class AttemptResultsView(APIView):
                     next(c.pk for c in q.choices.all() if c.is_correct)
                 ),
                 "explanation": q.explanation,
+                "statement": q.statement,
+                "selected_label": answers[q.pk].choice.label
+                if q.pk in answers
+                else None,
+                "correct_label": next(c.label for c in q.choices.all() if c.is_correct),
             }
             for q in attempt.exam.questions.prefetch_related("choices")
         ]
         return Response(payload)
+
+
+class MyAttemptsView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AttemptSerializer
+    pagination_class = CataloguePagination
+
+    def get_queryset(self):
+        return Attempt.objects.filter(user=self.request.user).order_by("-started_at")

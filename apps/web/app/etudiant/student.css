@@ -1,0 +1,23 @@
+.student-space { padding-block: 2rem 4rem; max-width: 72rem; min-height: 70vh; }
+.student-nav { display: flex; flex-wrap: wrap; gap: 1rem; margin-block: 0 2rem; }
+.student-space .button { transition: box-shadow var(--duration); }
+.student-space h1 { max-width: 22ch; font-size: clamp(1.8rem, 4vw, 3rem); line-height: 1.2; }
+.student-eyebrow { color: var(--accent); font-weight: 600; }
+.student-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: clamp(1rem, 3vw, 2rem); margin-block: 1.5rem; overflow-wrap: anywhere; }
+.account-card { max-width: 42rem; margin-inline: auto; }
+.student-form { display: grid; gap: 1rem; margin-block: 1.5rem; }
+.student-form label { display: grid; gap: .5rem; }
+.student-form input { min-width: 0; width: 100%; padding: .85rem; color: var(--text); background: var(--surface); border: 1px solid var(--control-border); border-radius: var(--input-radius); font: inherit; }
+.student-hint { color: var(--muted); font-size: .9rem; }
+.student-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: 1.5rem; }
+.student-passage { white-space: pre-line; line-height: 1.9; max-width: 70ch; border-left: 3px solid var(--accent); padding-left: 1rem; margin-block: 2rem; }
+.student-space fieldset { border: 0; padding: 0; min-width: 0; }
+.student-space legend { font-weight: 600; margin-block: 1rem; }
+.student-choice { display: flex; align-items: baseline; gap: .75rem; border: 1px solid var(--control-border); padding: 1rem; border-radius: .5rem; margin-block: .75rem; cursor: pointer; }
+.student-choice:has(:checked) { background: var(--tint); border-color: var(--action); }
+.student-choice input { accent-color: var(--action); flex-shrink: 0; }
+.student-session { display: flex; flex-wrap: wrap; gap: .5rem 2rem; border-block: 1px solid var(--border); }
+.student-save-status { min-height: 3rem; }
+.student-score { font-size: 2.5rem; font-weight: 600; color: var(--accent); }
+.student-correction { border-top: 1px solid var(--border); margin-top: 1.5rem; padding-top: 1rem; }
+.student-space [role="alert"] { color: var(--danger); border-left: 3px solid currentColor; padding: 1rem; }

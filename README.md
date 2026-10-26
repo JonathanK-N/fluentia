@@ -30,7 +30,7 @@ Les [spécifications et références locales](docs/ux-ui-02/README.md) couvrent 
 
 ## Démarrage
 
-Moteur d’examens backend lot 01 en recette : [intégration, modèles, API et limites](docs/backend/lot-01/README.md), [rapport GO/NO-GO](docs/backend/lot-01/RAPPORT.md), [préparation du lot 02](docs/backend/lot-01/PREPARATION_LOT_02.md). Les questions fournies restent en brouillon jusqu’à relecture réelle ; ce moteur ne constitue pas la plateforme complète.
+Moteur d’examens backend lot 01 intégré à `dev` après fusion autorisée de la PR #4 : [intégration, modèles, API et limites](docs/backend/lot-01/README.md), [rapport de validation](docs/backend/lot-01/RAPPORT.md). Le [lot 02](docs/backend/lot-02/README.md) ajoute les comptes et la première lecture connectée dans la PR #5 en brouillon. Les questions fournies restent en brouillon jusqu’à relecture réelle ; ces lots ne constituent pas la plateforme complète.
 
 Prérequis : Docker et Docker Compose.
 
@@ -56,7 +56,7 @@ Projet et responsabilité éditoriale : **Jonathan Kakesa**. Les commits doivent
 
 ## Frontend — Mission 01
 
-Vitrine et catalogue `/design-system`, thèmes clair/sombre, logos officiels et Poppins locale. Les interactions sont locales : examens, comptes, coach et paiements restent à développer.
+Vitrine et catalogue `/design-system`, thèmes clair/sombre, logos officiels et Poppins locale. Le moteur d’examens du lot 01 est intégré à dev. Le [lot 02](docs/backend/lot-02/README.md) ajoute l’espace `/etudiant`, les comptes et une première lecture connectée sur sa branche de développement ; coach et paiements restent ultérieurs.
 
 Démarrage : `cd apps/web`, `npm ci`, `npm run dev`.
 
@@ -64,4 +64,4 @@ Voir [la documentation](docs/README.md), [l’audit](docs/AUDIT_FRONTEND_01.md),
 
 Premier lot : [rapport détaillé](docs/RAPPORT_FRONTEND_01.md) · [PR #1 vers dev](https://github.com/JonathanK-N/fluentia/pull/1) · [aperçu desktop](docs/images/accueil-1440.png).
 
-La PR #1 a été fusionnée vers `dev` après validation technique et autorisation explicite de Jonathan Kakesa. La [stratégie Code-First approuvée](docs/DECISIONS/002-code-first-et-consolidation.md) permet de poursuivre avec une [synchronisation Figma différée](docs/FIGMA_SYNC_BACKLOG.md). Les défauts natifs et limites PWA restent documentés. La PR #2 est en cours de validation sur ce socle intégré ; sa fusion exige une deuxième autorisation. Voir [le suivi Frontend 02](docs/FRONTEND_02.md).
+Les PR #1 et #2 ont été fusionnées vers `dev` après validation technique et autorisations explicites de Jonathan Kakesa. La [stratégie Code-First approuvée](docs/DECISIONS/002-code-first-et-consolidation.md) permet de poursuivre avec une [synchronisation Figma différée](docs/FIGMA_SYNC_BACKLOG.md). Les défauts natifs et limites PWA restent documentés. La PR #3 UX/UI reste indépendante et non fusionnée. Voir [le suivi Frontend 02](docs/FRONTEND_02.md).

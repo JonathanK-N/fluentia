@@ -26,6 +26,7 @@ export function Header() {
           <Link href="/#modules">Les compétences</Link>
           <Link href="/#approche">Notre approche</Link>
           <Link href="/design-system">Design system</Link>
+          <Link href="/etudiant">Espace étudiant</Link>
         </nav>
         <div className="header-actions">
           <Button
@@ -48,6 +49,7 @@ export function Header() {
               <Link onClick={closeMenu} href="/design-system">
                 Design system
               </Link>
+              <Link onClick={closeMenu} href="/etudiant">Espace étudiant</Link>
             </nav>
           </details>
         </div>

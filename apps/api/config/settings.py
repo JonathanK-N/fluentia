@@ -20,6 +20,26 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 REST_FRAMEWORK = {"DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"], "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema"}
 SPECTACULAR_SETTINGS = {"TITLE": "Fluentia API", "VERSION": "0.1.0"}
+INSTALLED_APPS += ["accounts"]
+AUTH_PASSWORD_VALIDATORS = [
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", "OPTIONS": {"min_length": 12}},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+]
+PUBLIC_WEB_ORIGIN = os.getenv("PUBLIC_WEB_ORIGIN", "http://127.0.0.1:3000").rstrip("/")
+CSRF_TRUSTED_ORIGINS = [PUBLIC_WEB_ORIGIN]
+# Aucun envoi externe par défaut ; adaptateur mémoire de développement.
+EMAIL_BACKEND = os.getenv("DJANGO_EMAIL_BACKEND", "django.core.mail.backends.locmem.EmailBackend")
+EMAIL_FILE_PATH = os.getenv("DJANGO_EMAIL_FILE_PATH", str(BASE_DIR / ".local-mail"))
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "Fluentia <no-reply@localhost>")
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_AGE = 43200
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SECURE_REFERRER_POLICY = "same-origin"
+MIDDLEWARE.insert(1, "accounts.middleware.PrivateApiMiddleware")
 if not DEBUG:
     if SECRET_KEY == "local-dev-only-change-in-production":
         raise RuntimeError("Configure DJANGO_SECRET_KEY for production")
