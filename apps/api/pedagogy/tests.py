@@ -107,10 +107,10 @@ class PedagogyTests(TestCase):
         self.client = APIClient()
         self.client.force_authenticate(self.editor)
 
-    def media(self):
+    def media(self, seconds=0.25):
         return upload_media(
             self.editor,
-            wav_upload(),
+            wav_upload(seconds),
             title="Signal de recette uniquement",
             transcript="Fixture synthétique ; ne représente pas une parole pédagogique validée.",
             provenance="Signal technique créé pour les tests.",
@@ -329,7 +329,7 @@ class PedagogyTests(TestCase):
         self.assertEqual((result.correct_count, result.question_count), (39, 39))
 
     def test_bad_simulation_format_rolls_back_publication(self):
-        item = approve(self.editor, self.reviewer)
+        item = approve(self.editor, self.reviewer, {**content(), "difficulty": "A1"})
         with self.assertRaises(ValidationError):
             publish_exam(
                 self.editor,
@@ -343,6 +343,34 @@ class PedagogyTests(TestCase):
         item.refresh_from_db()
         self.assertEqual(item.state, "approved")
         self.assertFalse(Exam.objects.exists())
+
+    def test_listening_duration_budget_rejected_before_publication(self):
+        media = self.media(60)
+        items = [
+            approve(
+                self.editor,
+                self.reviewer,
+                {
+                    **content("listening", media),
+                    "difficulty": ["A1", "A2", "B1", "B2", "C1", "C2"][
+                        min(index // 7, 5)
+                    ],
+                },
+            )
+            for index in range(39)
+        ]
+        with self.assertRaises(ValidationError):
+            publish_exam(
+                self.editor,
+                slug="too-long-audio",
+                title="Recette",
+                skill="listening",
+                mode="simulation",
+                duration_seconds=2100,
+                item_ids=[i.pk for i in items],
+            )
+        self.assertFalse(Exam.objects.exists())
+        self.assertFalse(BankItem.objects.filter(state="published").exists())
 
     def test_media_pcm_validation_hash_and_immutability(self):
         media = self.media()

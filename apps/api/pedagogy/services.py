@@ -218,6 +218,14 @@ def publish_exam(
             raise ValidationError(
                 "Une simulation exige des difficultés proposées renseignées et ordonnées de façon croissante. Cela ne vaut pas calibration officielle."
             )
+        if skill == "listening" and (
+            any(not item.media_id for item in items.values())
+            or sum(item.media.duration_ms for item in items.values())
+            >= duration_seconds * 1000
+        ):
+            raise ValidationError(
+                "La durée cumulée des documents doit laisser du temps pour les réponses dans la durée de simulation."
+            )
     version = (Exam.objects.filter(slug=slug).aggregate(v=Max("version"))["v"] or 0) + 1
     exam = Exam(
         slug=slug,
