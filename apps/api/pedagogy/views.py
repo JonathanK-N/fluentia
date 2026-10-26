@@ -179,6 +179,8 @@ class BankExportView(EditorView):
         # Pagination explicite : l'export d'un lot ne prétend pas exporter toute la banque.
         try:
             offset = max(0, int(request.query_params.get("offset", 0)))
+            if offset > 10_000_000:
+                raise ValidationError("Offset limité à dix millions d’items.")
         except ValueError as exc:
             raise ValidationError("Offset invalide.") from exc
         rows = []

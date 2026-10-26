@@ -16,6 +16,7 @@ export default function EditorialPage() {
   const [busy, setBusy] = useState(false);
   const [ready, setReady] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
+  const [exportOffset, setExportOffset] = useState(0);
   const refresh = useCallback(async () => {
     const data = await api<{results: Item[]; next: string | null}>(`bank/?limit=50&offset=${offset}`);
     setItems(data.results); setMore(Boolean(data.next)); setReady(true);
@@ -93,7 +94,8 @@ export default function EditorialPage() {
       </form></section>
       <section className="student-card"><h2>Import et export structurés</h2><p>Format fluentia.bank.v1, 100 items et 2 Mo maximum par import. Les statuts et relecteurs ne peuvent pas être importés. Les médias doivent déjà exister dans cet environnement.</p>
         <label>Fichier JSON de brouillons<input type="file" accept="application/json,.json" disabled={busy} onChange={event => {const file = event.target.files?.[0]; if (!file) return; action(async () => {if (file.size > 2_000_000) throw new Error("Fichier limité à 2 Mo."); await api("bank/import/", "POST", JSON.parse(await file.text())); setMessage("Import en brouillon terminé ; une relecture humaine est requise.");});}} /></label>
-        <Button variant="secondary" disabled={busy} onClick={() => action(async () => {const data = await api(`bank/export/?offset=${offset}`); const url = URL.createObjectURL(new Blob([JSON.stringify(data,null,2)], {type:"application/json"})); const link = document.createElement("a"); link.href = url; link.download = `banque-lot-${offset}.json`; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); setMessage("Lot exporté (100 items maximum). Passez aux lots suivants pour exporter toute la banque.");})}>Exporter un lot de 100 items</Button>
+        <label>Début du lot exporté (offset)<input type="number" min={0} step={100} value={exportOffset} onChange={event => setExportOffset(Math.max(0, Number(event.target.value)))} /></label>
+        <Button variant="secondary" disabled={busy} onClick={() => action(async () => {const data = await api(`bank/export/?offset=${exportOffset}`); const url = URL.createObjectURL(new Blob([JSON.stringify(data,null,2)], {type:"application/json"})); const link = document.createElement("a"); link.href = url; link.download = `banque-lot-${exportOffset}.json`; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); setMessage("Lot exporté (100 items maximum). Augmentez l’offset de 100 pour le lot suivant ; l’ordre est stable tant que les données ne changent pas.");})}>Exporter un lot de 100 items</Button>
       </section>
     </>}
   </>;

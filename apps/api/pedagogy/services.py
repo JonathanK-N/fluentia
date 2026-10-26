@@ -336,12 +336,15 @@ def upload_media(actor, uploaded, *, title, transcript, provenance):
     asset.full_clean()
     path = media_path(asset)
     path.parent.mkdir(parents=True, exist_ok=True)
+    created = False
     try:
         with path.open("xb") as output:
+            created = True
             output.write(payload)
         asset.save()
     except Exception:
-        path.unlink(missing_ok=True)
+        if created:
+            path.unlink(missing_ok=True)
         raise
     return asset
 

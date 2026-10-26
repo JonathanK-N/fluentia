@@ -117,7 +117,7 @@ class MediaSerializer(serializers.ModelSerializer):
 
 class ImportSerializer(StrictSerializer):
     format = serializers.ChoiceField(choices=["fluentia.bank.v1"])
-    items = ContentSerializer(many=True, allow_empty=False)
+    items = ContentSerializer(many=True, allow_empty=False, max_length=100)
 
     def validate_items(self, value):
         if len(value) > 100:
