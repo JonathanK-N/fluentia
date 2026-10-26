@@ -47,7 +47,7 @@ test("oral entraînement : média privé, lecteur, transcription et résultat", 
   await expect(page.getByText("1 / 1", {exact: true})).toBeVisible();
   await page.getByRole("link", {name: "Ma progression", exact: true}).click();
   await expect(page.getByRole("heading", {name: "Compréhension orale", exact: true})).toBeVisible();
-  await expect(page.getByText(/1 \/ 1 réponses correctes/)).toBeVisible();
+  await expect(page.getByText("1 / 1 réponses correctes · 100 %", {exact: true})).toBeVisible();
 });
 
 test("lecture complète : 39 questions, sauvegarde et correction sur PostgreSQL", async ({page}, info) => {
