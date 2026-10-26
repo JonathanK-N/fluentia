@@ -95,7 +95,9 @@ test("interface éditoriale : création, demande de relecture et historique", as
   await page.getByLabel("Mot de passe", {exact: true}).fill("Edition!Fixture-7294");
   await page.getByRole("button", {name: "Se connecter", exact: true}).click();
   await expect(page.getByRole("heading", {name: "Mon profil étudiant"})).toBeVisible();
-  await page.goto("/edition");
+  const response = await page.goto("/edition");
+  expect(response?.headers()["x-frame-options"]).toBe("DENY");
+  expect(response?.headers()["content-security-policy"]).toContain("frame-ancestors 'none'");
   await expect(page.getByRole("heading", {name: "Créer une question originale"})).toBeVisible();
   await page.getByLabel("Question", {exact: true}).fill(`Question originale de recette ${info.project.name}`);
   await page.getByLabel("Texte de lecture", {exact: true}).fill("La réunion commence mardi à neuf heures.");

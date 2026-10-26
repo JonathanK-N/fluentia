@@ -106,9 +106,17 @@ jobs:
       - name: Construire et vérifier le conteneur backend de développement
         shell: bash
         run: |
+          test ! -e apps/api/.env
+          test ! -e apps/api/db.sqlite3
+          mkdir -p apps/api/.private-media apps/api/.local-mail
+          printf 'SENTINELLE_CI_SANS_SECRET' > apps/api/.env
+          printf 'SENTINELLE_CI_SANS_DONNEES' > apps/api/db.sqlite3
+          printf 'SENTINELLE_CI_MEDIA' > apps/api/.private-media/DO_NOT_PACKAGE.txt
+          printf 'SENTINELLE_CI_COURRIER' > apps/api/.local-mail/DO_NOT_PACKAGE.txt
           docker build --tag fluentia-api:validation apps/api
           docker run --detach --name fluentia-api-validation -e DJANGO_DEBUG=1 -p 127.0.0.1:3300:8000 fluentia-api:validation
           trap 'docker logs fluentia-api-validation; docker rm -f fluentia-api-validation' EXIT
+          docker exec fluentia-api-validation sh -c 'test ! -e /app/.env && test ! -e /app/db.sqlite3 && test ! -e /app/.private-media/DO_NOT_PACKAGE.txt && test ! -e /app/.local-mail/DO_NOT_PACKAGE.txt'
           docker exec fluentia-api-validation python manage.py migrate --noinput
           docker exec fluentia-api-validation python manage.py seed_original_tcf
           for attempt in $(seq 1 30); do
