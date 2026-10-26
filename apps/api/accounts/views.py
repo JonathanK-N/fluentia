@@ -42,7 +42,7 @@ GENERIC = (
 
 class AuthAnonThrottle(AnonRateThrottle):
     scope = "account_anon"
-    rate = "20/hour"
+    rate = getattr(settings, "ACCOUNT_ANON_RATE", "20/hour")
 
 
 class AuthUserThrottle(UserRateThrottle):

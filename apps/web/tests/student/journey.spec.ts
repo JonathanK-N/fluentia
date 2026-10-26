@@ -29,7 +29,7 @@ test("inscription, courriel, session, lecture persistante et résultat privé su
   await page.getByRole("button", {name: "Enregistrer mon profil"}).click();
   await expect(page.getByRole("status")).toContainText("profil est enregistré");
   await page.getByRole("link", {name: "Choisir un exercice"}).click();
-  await page.getByRole("button", {name: "Commencer cet exercice"}).click();
+  await page.getByRole("article").filter({has: page.getByRole("heading", {name: "Lecture de recette — atelier vélo", exact: true})}).getByRole("button", {name: "Commencer cet exercice"}).click();
   await expect(page).toHaveURL(/\/etudiant\/lecture\//);
   const attemptUrl = page.url();
   const attemptId = attemptUrl.split("/").pop();

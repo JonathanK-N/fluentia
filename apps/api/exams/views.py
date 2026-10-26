@@ -98,6 +98,9 @@ class AttemptView(APIView):
             payload["questions"] = QuestionPublicSerializer(
                 attempt.exam.questions.prefetch_related("choices"), many=True
             ).data
+            if attempt.exam.skill == "listening":
+                from pedagogy.listening import decorate_questions
+                payload["questions"] = decorate_questions(attempt, payload["questions"])
         return Response(payload)
 
 
@@ -170,10 +173,21 @@ class AttemptResultsView(APIView):
                 if q.pk in answers
                 else None,
                 "correct_label": next(c.label for c in q.choices.all() if c.is_correct),
+                "transcript": self.transcript(q),
             }
             for q in attempt.exam.questions.prefetch_related("choices")
         ]
         return Response(payload)
+
+    def transcript(self, question):
+        if question.exam.skill != "listening":
+            return ""
+        from pedagogy.services import audio_asset
+        from rest_framework.exceptions import APIException
+        try:
+            return audio_asset(question).transcript
+        except APIException:
+            return "Document historique sans transcription intégrée."
 
 
 class MyAttemptsView(generics.ListAPIView):

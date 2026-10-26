@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, use, useCallback } from "react";
 import Link from "next/link";
 import { Button } from "../../../../components/ui/primitives";
 import { api, type Attempt, type Results } from "../../../../lib/student-api";
+import { AudioPlayer } from "../../../../components/student/audio-player";
 
 export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
   const {id} = use(params);
@@ -16,11 +17,16 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
   const [remaining, setRemaining] = useState(0);
   const pending = useRef(false);
   const clockOffset = useRef(0);
+  const loadVersion = useRef(0);
+  const answerVersion = useRef(0);
   const load = useCallback(async () => {
+    const version = ++loadVersion.current;
+    const answerSnapshot = answerVersion.current;
     const data = await api<Attempt>(`attempts/${id}/`);
+    if (version !== loadVersion.current) return;
     clockOffset.current = Date.parse(data.server_now) - Date.now();
     setAttempt(data);
-    setAnswers(Object.fromEntries(data.answers.map(a => [a.question_id, a.choice_id])));
+    if (!pending.current && answerSnapshot === answerVersion.current) setAnswers(Object.fromEntries(data.answers.map(a => [a.question_id, a.choice_id])));
     if (data.status === "submitted") setResults(await api<Results>(`attempts/${id}/results/`));
   }, [id]);
   useEffect(() => { load().catch(e => setError(e.message)); }, [load]);
@@ -39,6 +45,7 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
   }, []);
   async function save(question: string, choice: string) {
     if (pending.current) return;
+    answerVersion.current += 1;
     const previous = answers[question];
     setAnswers(values => ({...values, [question]: choice}));
     pending.current = true; setBusy(true); setError(""); setMessage("Enregistrement en cours…");
@@ -49,7 +56,7 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
       setAnswers(values => { const restored = {...values}; if (previous) restored[question] = previous; else delete restored[question]; return restored; });
       setError((e as Error).message); setMessage("Réponse non enregistrée. Sélectionnez de nouveau votre choix pour réessayer.");
     }
-    finally { pending.current = false; setBusy(false); }
+    finally { answerVersion.current += 1; pending.current = false; setBusy(false); }
   }
   async function submit() {
     setBusy(true); setError("");
@@ -58,8 +65,9 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
     finally { setBusy(false); }
   }
   return <>
-    <p className="student-eyebrow">Compréhension écrite · Entraînement non officiel</p>
-    <h1>{results ? "Prenons le temps de comprendre" : "À vous de lire"}</h1>
+    <p className="student-eyebrow">{attempt?.skill === "listening" ? "Compréhension orale" : "Compréhension écrite"} · {attempt?.mode === "simulation" ? "Simulation non officielle" : "Entraînement non officiel"}</p>
+    <h1>{results ? "Prenons le temps de comprendre" : attempt?.skill === "listening" ? "À vous d’écouter" : "À vous de lire"}</h1>
+    {attempt?.exam_title && <p>{attempt.exam_title}</p>}
     <p><Link href="/etudiant">Retour aux exercices</Link></p>
     {error && <p role="alert">{error}</p>}
     {!attempt && !error && <p role="status">Chargement de votre lecture…</p>}
@@ -67,15 +75,17 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
     {results && <section className="student-card"><h2>Votre résultat</h2><p className="student-score">{results.correct_count} / {results.question_count}</p><p>{results.disclaimer}</p>
       {results.details.map((detail, index) => <article key={detail.question_id} className="student-correction"><h3>Question {index + 1}</h3>
         <p>{detail.statement}</p><p>Votre réponse : {detail.selected_label ?? "Sans réponse"}</p>
-        <p>Réponse attendue : {detail.correct_label}</p><p>{detail.explanation}</p></article>)}
+        <p>Réponse attendue : {detail.correct_label}</p><p>{detail.explanation}</p>{detail.transcript && <details><summary>Transcription du document</summary><p>{detail.transcript}</p></details>}</article>)}
     </section>}
     {attempt?.status === "active" && <>
       <div className="student-session"><p>Temps indicatif restant : {Math.floor(remaining / 60)} min {remaining % 60} s</p><p>{Object.keys(answers).length} / {attempt.questions?.length} réponses {busy ? "(enregistrement en cours)" : "enregistrées"}</p></div>
       <p>Le délai est contrôlé par le serveur. Chaque choix confirmé est enregistré immédiatement.</p>
       <p role="status" className="student-save-status">{message}</p>
-      {attempt.questions?.map((question, index) => <section className="student-card" key={question.id}>
-        <h2>Lecture {index + 1}</h2><p className="student-passage">{question.reading_passage}</p>
-        <fieldset disabled={remaining === 0} aria-busy={busy}><legend>{question.statement}</legend>
+      {attempt.questions?.filter(q => attempt.skill !== "listening" || attempt.mode !== "simulation" || !["past", "locked"].includes(q.audio_state)).map((question) => <section className="student-card" key={question.id}>
+        <h2>{attempt.skill === "listening" ? "Document" : "Lecture"} {question.position}</h2>{question.reading_passage && <p className="student-passage">{question.reading_passage}</p>}
+        {attempt.skill === "listening" && (question.audio_available ? <AudioPlayer attemptId={id} questionId={question.id} simulation={attempt.mode === "simulation"} state={question.audio_state} endsAt={question.audio_ends_at} serverOffset={clockOffset.current} refresh={load} /> : <p role="alert">Le document audio n’est pas disponible pour cette version.</p>)}
+        {question.transcript && <details><summary>Consulter la transcription</summary><p>{question.transcript}</p></details>}
+        <fieldset disabled={remaining === 0 || (attempt.skill === "listening" && attempt.mode === "simulation" && question.audio_state !== "ready")} aria-busy={busy}><legend>{question.statement}</legend>
           {question.choices.map(choice => <label className="student-choice" key={choice.id}>
             <input type="radio" name={question.id} value={choice.id} disabled={busy && answers[question.id] !== choice.id} checked={answers[question.id] === choice.id} onChange={() => save(question.id, choice.id)} />{choice.label}
           </label>)}
