@@ -3,6 +3,8 @@
 import io
 import tempfile
 import wave
+import math
+import struct
 from datetime import timedelta
 from unittest.mock import patch
 from django.contrib.auth import get_user_model
@@ -31,13 +33,17 @@ from .services import (
 )
 
 
-def wav_upload(seconds=0.25):
+def wav_upload(seconds=0.5):
     buffer = io.BytesIO()
     with wave.open(buffer, "wb") as output:
         output.setnchannels(1)
         output.setsampwidth(2)
         output.setframerate(8000)
-        output.writeframes(b"\0\0" * round(seconds * 8000))
+        samples = [
+            round(1000 * math.sin(2 * math.pi * 440 * index / 8000))
+            for index in range(round(seconds * 8000))
+        ]
+        output.writeframes(struct.pack("<" + "h" * len(samples), *samples))
     return SimpleUploadedFile(
         "fixture.wav", buffer.getvalue(), content_type="audio/wav"
     )
@@ -107,7 +113,7 @@ class PedagogyTests(TestCase):
         self.client = APIClient()
         self.client.force_authenticate(self.editor)
 
-    def media(self, seconds=0.25):
+    def media(self, seconds=0.5):
         return upload_media(
             self.editor,
             wav_upload(seconds),

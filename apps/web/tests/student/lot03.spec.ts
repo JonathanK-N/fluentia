@@ -32,7 +32,7 @@ test("oral entraînement : média privé, lecteur, transcription et résultat", 
   const audio = page.locator("audio");
   await expect(audio).toHaveAttribute("src", /^blob:/);
   await expect.poll(() => audio.evaluate((element: HTMLAudioElement) => element.readyState)).toBeGreaterThanOrEqual(1);
-  // Contrôle effectif du moteur audio, sans prétendre que la fixture silencieuse est une voix.
+  // Contrôle effectif du moteur audio, sans prétendre que le signal de test est une voix.
   await page.getByRole("button", {name: "Lire le document", exact: true}).focus();
   await page.keyboard.press("Space");
   await expect.poll(() => audio.evaluate((element: HTMLAudioElement) => element.currentTime)).toBeGreaterThan(0);
@@ -78,7 +78,7 @@ test("simulation orale : 39 documents, progression séquentielle et absence de r
     const document = page.locator("section").filter({has: page.getByRole("heading", {name: `Document ${index}`, exact: true})});
     await document.getByRole("button", {name: "Charger le document audio"}).click();
     await document.getByRole("button", {name: "Écouter le document chargé"}).click();
-    await expect.poll(() => document.locator("audio").evaluate((element: HTMLAudioElement) => element.ended)).toBe(true);
+    await expect.poll(() => document.locator("audio").evaluate((element: HTMLAudioElement) => element.ended), {timeout: 10_000}).toBe(true);
     await document.getByRole("radio", {name: "Samedi à dix heures", exact: true}).check();
     await expect(page.getByRole("status")).toContainText("Réponse enregistrée");
     await expect(document.getByRole("button", {name: "Charger le document audio"})).toHaveCount(0);

@@ -13,6 +13,7 @@ export function AudioPlayer({attemptId, questionId, simulation, state, endsAt, s
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [playing, setPlaying] = useState(false);
+  const [playable, setPlayable] = useState(false);
   useEffect(() => () => {if (objectUrl.current) URL.revokeObjectURL(objectUrl.current);}, []);
   useEffect(() => {
     if (state !== "playing" || !endsAt) return;
@@ -33,7 +34,8 @@ export function AudioPlayer({attemptId, questionId, simulation, state, endsAt, s
   }
   function play() {
     setError("");
-    player.current?.play().catch(() => setError("La lecture a été bloquée. Activez le son puis réessayez sans recharger la page."));
+    if (!player.current) {setError("Le lecteur n’est pas prêt. Réessayez sans recharger la page."); return;}
+    player.current.play().catch(() => setError("La lecture a été bloquée. Activez le son puis réessayez sans recharger la page."));
   }
   const canLoad = simulation ? state === "available" && !url : !url;
   return <div className="student-audio">
@@ -41,9 +43,9 @@ export function AudioPlayer({attemptId, questionId, simulation, state, endsAt, s
     {canLoad && <Button variant="secondary" loading={busy} onClick={load}>Charger le document audio</Button>}
     {url && <>
       {/* Le clic de lecture est explicite pour respecter les restrictions des navigateurs. */}
-      <audio ref={player} src={url} controls={!simulation} preload="metadata" aria-label="Document de compréhension orale" onPlay={() => {played.current = true; setPlaying(true);}} onEnded={() => {setPlaying(false); refresh().catch(e => setError(e.message));}} onError={() => setError("La lecture du média a échoué. En simulation, une délivrance consommée ne peut pas être rejouée.")} />
-      {simulation && !playing && !played.current && <Button onClick={play}>Écouter le document chargé</Button>}
-      {!simulation && <Button onClick={play} disabled={playing}>Lire le document</Button>}
+      <audio ref={player} src={url} controls={!simulation} preload="auto" aria-label="Document de compréhension orale" onCanPlay={() => setPlayable(true)} onPlay={() => {played.current = true; setPlaying(true);}} onPause={() => setPlaying(false)} onEnded={() => {setPlaying(false); refresh().catch(e => setError(e.message));}} onError={() => setError("La lecture du média a échoué. En simulation, une délivrance consommée ne peut pas être rejouée.")} />
+      {simulation && !playing && !played.current && <Button onClick={play} disabled={busy || !playable}>Écouter le document chargé</Button>}
+      {!simulation && <Button onClick={play} disabled={playing || busy || !playable}>Lire le document</Button>}
       {simulation && playing && <p role="status">Lecture du document…</p>}
     </>}
     {simulation && !url && ["playing", "ready", "past"].includes(state) && <p>Ce document a déjà été délivré. Sa lecture ne peut pas être restaurée après un rechargement ; les réponses enregistrées sont conservées.</p>}

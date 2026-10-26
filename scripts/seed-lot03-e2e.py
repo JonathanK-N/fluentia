@@ -71,7 +71,7 @@ with transaction.atomic():
                 wav_upload(),
                 title="Signal synthétique de test, pas une voix",
                 transcript="Signal synthétique de recette. La question de test demande le jour et l'heure : samedi à dix heures.",
-                provenance="Silence PCM de 250 ms généré pour tester le transport et la lecture. Aucune validation humaine.",
+                provenance="Signal PCM de 500 ms à 440 Hz généré pour tester le transport et la lecture. Aucune validation humaine.",
             )
         ids = []
         for index in range(count):
