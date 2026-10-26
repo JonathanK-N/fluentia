@@ -26,7 +26,8 @@ services:
       context: ./apps/web
       args:
         API_ORIGIN: ${API_ORIGIN:-http://api:8000}
-    env_file: .env
+    environment:
+      NODE_ENV: production
     ports: ["3000:3000"]
     depends_on: [api]
 volumes:
