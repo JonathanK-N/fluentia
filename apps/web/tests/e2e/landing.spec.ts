@@ -63,7 +63,8 @@ test("navigation mobile, Échap et destinations réelles", async ({ page }) => {
     .getByRole("navigation", { name: "Navigation mobile" })
     .getByRole("link", { name: /Connexion et inscription/ })
     .click();
-  await expect(page).toHaveURL(/#disponibilite$/);
+  await expect(page).toHaveURL(/\/etudiant\/compte$/);
+  await page.goto("/#disponibilite");
   await expect(page.locator("#availability-title")).toBeVisible();
   expect(
     await page

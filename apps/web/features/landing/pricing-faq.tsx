@@ -113,20 +113,19 @@ export function FinalCallToAction() {
           <span>Vous pouvez déjà explorer.</span>
         </h2>
         <p className="lead">
-          Fluentia prend forme. Explorez l’expérience aujourd’hui ;
-          l’inscription, les entraînements et les abonnements ouvriront
-          ultérieurement.
+          Fluentia prend forme. Créez votre compte et entraînez-vous dès
+          aujourd’hui ; les abonnements ouvriront ultérieurement.
         </p>
         <div className="actions">
-          <a className="button button-primary" href="#voice">
-            Explorer la démo Voice <span aria-hidden="true">↗</span>
+          <a className="button button-primary" href="/etudiant">
+            Ouvrir mon espace étudiant
           </a>
-          <a className="button button-secondary" href="#apercu">
-            Voir l’aperçu de l’application
+          <a className="button button-secondary" href="#voice">
+            Explorer la démo Voice
           </a>
         </div>
         <p className="landing-small">
-          Aucune inscription ni collecte de coordonnées sur cette page.
+          L’inscription se fait dans l’espace étudiant ; aucune coordonnée n’est collectée sur cette page.
         </p>
       </div>
     </section>

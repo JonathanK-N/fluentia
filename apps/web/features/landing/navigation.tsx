@@ -57,15 +57,15 @@ export function LandingNavigation() {
             </span>
             <span className="motion-label">Mouvement</span>
           </Button>
-          <a className="landing-login" href="#disponibilite">
-            Connexion <span className="sr-only">— pas encore ouverte</span>
-          </a>
-          <a
+          <Link className="landing-login" href="/etudiant/compte">
+            Connexion
+          </Link>
+          <Link
             className="button button-primary landing-signup"
-            href="#disponibilite"
+            href="/etudiant/compte"
           >
-            S’inscrire <span className="sr-only">— ouverture à venir</span>
-          </a>
+            S’inscrire
+          </Link>
           <details
             className="landing-mobile-menu"
             ref={menu}
@@ -78,17 +78,17 @@ export function LandingNavigation() {
           >
             <summary>Menu</summary>
             <nav aria-label="Navigation mobile">
-              <Link href="/apercu/etudiant" onClick={close}>
-                Aperçu étudiant
+              <Link href="/etudiant" onClick={close}>
+                Espace étudiant
               </Link>
               {links.map(([label, href]) => (
                 <a key={href} href={href} onClick={close}>
                   {label}
                 </a>
               ))}
-              <a href="#disponibilite" onClick={close}>
-                Connexion et inscription — à venir
-              </a>
+              <Link href="/etudiant/compte" onClick={close}>
+                Connexion et inscription
+              </Link>
               <Link href="/design-system" onClick={close}>
                 Design system
               </Link>

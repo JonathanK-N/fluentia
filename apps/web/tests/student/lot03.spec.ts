@@ -33,6 +33,8 @@ test("oral entraînement : média privé, lecteur, transcription et résultat", 
   await expect(audio).toHaveAttribute("src", /^blob:/);
   await expect.poll(() => audio.evaluate((element: HTMLAudioElement) => element.readyState)).toBeGreaterThanOrEqual(1);
   // Contrôle effectif du moteur audio, sans prétendre que le signal de test est une voix.
+  // Le lecteur n'active la commande qu'au décodage effectif (canplay), après readyState 1.
+  await expect(page.getByRole("button", {name: "Lire le document", exact: true})).toBeEnabled();
   await page.getByRole("button", {name: "Lire le document", exact: true}).focus();
   await page.keyboard.press("Space");
   await expect.poll(() => audio.evaluate((element: HTMLAudioElement) => element.currentTime)).toBeGreaterThan(0);

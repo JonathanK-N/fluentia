@@ -48,6 +48,24 @@ docker compose up
 
 Frontend : http://localhost:3000 · API : http://localhost:8000/api/v1/health/ · Swagger : http://localhost:8000/api/schema/swagger-ui/
 
+## Expérience Fluentia v2 — espace étudiant complet
+
+Branche `feature/fluentia-experience-v2` : lot 03 et pilotes v3 réunis, direction visuelle **Ivoire & Sable** (blanc et beige dominants, encre chaude, marine réservé à l’action, cyan limité à la signature vocale ; contrastes WCAG AA vérifiés en clair et en sombre). Détails dans [docs/EXPERIENCE_V2.md](docs/EXPERIENCE_V2.md).
+
+| Page | Rôle |
+|---|---|
+| `/etudiant` | Tableau de bord : accueil, indicateurs réels, accès rapide aux quatre compétences, activités, catalogue |
+| `/etudiant/comprehension-ecrite`, `/etudiant/comprehension-orale` | Format, méthode et exercices publiés par compétence |
+| `/etudiant/expression-ecrite/tache-1..3` | Studio de rédaction : sujets originaux, compteur de mots, minuteur, brouillon local, auto-évaluation |
+| `/etudiant/expression-orale/tache-1..3` | Studio oral : préparation, enregistrement local, niveau du micro, prises multiples |
+| `/etudiant/examens-blancs` | Simulations complètes chronométrées |
+| `/etudiant/progression` | Résultats soumis par compétence et par difficulté proposée |
+| `/etudiant/plan` | Plan d’étude hebdomadaire indicatif, conservé sur l’appareil |
+| `/etudiant/compte`, `/etudiant/support` | Compte et vérification ; aide et questions fréquentes |
+| `/edition` | Banque pédagogique dans la même coque de navigation |
+
+Démarrage local sans Docker (base SQLite jetable, données de recette fictives) : voir [docs/EXPERIENCE_V2.md](docs/EXPERIENCE_V2.md#démarrage-local).
+
 ## Structure
 
 ```text
@@ -58,6 +76,8 @@ docs/                 Spécifications et guides
 ```
 
 ## Attribution
+
+Co-auteur et contributeur de l’expérience v2 : **Mamadou Barry**.
 
 Projet et responsabilité éditoriale : **Jonathan Kakesa**. Les commits doivent être créés avec le compte GitHub et l'identité Git configurés par le propriétaire. L'importation de ce projet ne modifie pas rétroactivement les auteurs des commits existants.
 

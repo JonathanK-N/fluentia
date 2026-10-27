@@ -17,7 +17,7 @@ export function Hero() {
             simple.
           </p>
           <div className="actions">
-            <Link href="/apercu/etudiant" className="button button-primary">
+            <Link href="/etudiant" className="button button-primary">
               Voir le tableau de bord
             </Link>
             <a href="#approche" className="landing-text-link">

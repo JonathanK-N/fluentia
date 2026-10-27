@@ -45,7 +45,7 @@ export const faqs = [
   {
     question: "Puis-je déjà créer un compte et m’entraîner ?",
     answer:
-      "Pas encore. Vous pouvez explorer cette présentation et ses démonstrations locales. La création de compte, les entraînements et les abonnements ne sont pas ouverts ; aucune donnée personnelle n’est demandée ici.",
+      "Oui. Créez votre compte depuis l’espace étudiant pour enregistrer vos réponses en compréhension écrite et orale, retrouver vos corrigés et suivre votre progression. Les studios d’expression fonctionnent dans votre navigateur ; les abonnements ne sont pas encore ouverts.",
   },
   {
     question: "La démonstration Voice utilise-t-elle mon microphone ?",

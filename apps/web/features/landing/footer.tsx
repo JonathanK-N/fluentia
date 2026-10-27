@@ -7,7 +7,7 @@ import { Logo } from "../../components/branding/logo";
 export function Footer() {
   const pathname = usePathname();
   const landing = pathname === "/";
-  if (pathname.startsWith("/apercu/etudiant")) return null;
+  if (/^\/(apercu\/etudiant|etudiant|edition)(\/|$)/.test(pathname)) return null;
   if (!landing)
     return (
       <footer className="site-footer container">
