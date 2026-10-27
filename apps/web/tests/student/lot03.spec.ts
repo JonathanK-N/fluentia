@@ -56,16 +56,20 @@ test("oral entraînement : média privé, lecteur, transcription et résultat", 
 test("lecture complète : 39 questions, sauvegarde et correction sur PostgreSQL", async ({page}, info) => {
   await student(page, info.project.name + "-reading");
   await page.getByRole("article").filter({has: page.getByRole("heading", {name: "Lecture complète de recette — 39 questions", exact: true})}).getByRole("button", {name: "Démarrer la série"}).click();
-  await expect(page.getByRole("radio")).toHaveCount(156);
-  for (let index = 0; index < 39; index++) {
-    await page.getByRole("radio", {name: "Samedi à dix heures", exact: true}).nth(index).check();
+  // Une question à la fois : on répond, puis « Suivant ».
+  await expect(page.getByRole("radio")).toHaveCount(4);
+  const map = page.getByRole("navigation", {name: "Plan des questions"});
+  for (let index = 1; index <= 39; index++) {
+    await expect(page.getByRole("heading", {name: `Question ${index} sur 39`, exact: true})).toBeVisible();
+    await page.getByRole("radio", {name: "Samedi à dix heures", exact: true}).check();
     await expect(page.getByRole("status")).toContainText("Réponse enregistrée");
-    await expect(page.getByRole("radio").nth(index * 4 + 1)).toBeEnabled();
+    // Correction en direct active par défaut : elle s’applique aussi en simulation.
+    await expect(page.locator("label.student-choice[data-verdict=right]")).toHaveCount(1);
+    if (index < 39) await page.getByRole("button", {name: "Suivant"}).click();
   }
-  // Correction en direct active par défaut : elle s’applique aussi en simulation.
-  await expect(page.locator("label.student-choice[data-verdict=right]")).toHaveCount(39);
+  await expect(map.locator("button[data-state=answered]")).toHaveCount(39);
   await page.reload();
-  await expect(page.locator("input[type=radio]:checked")).toHaveCount(39);
+  await expect(map.locator("button[data-state=answered]")).toHaveCount(39);
   await page.getByRole("button", {name: "Terminer et vérifier mes réponses"}).click();
   await page.getByRole("button", {name: "Confirmer la soumission"}).click();
   await expect(page.getByText("39 / 39 réponses correctes", {exact: false})).toBeVisible();
@@ -80,13 +84,14 @@ test("simulation orale : 39 documents, progression séquentielle et absence de r
   await page.getByRole("article").filter({has: page.getByRole("heading", {name: "Écoute complète de recette — 39 questions", exact: true})}).getByRole("button", {name: "Démarrer la série"}).click();
   for (let index = 1; index <= 39; index++) {
     // Les sections n'ont pas de nom ARIA artificiel : sélection par structure sémantique.
-    const document = page.locator("section").filter({has: page.getByRole("heading", {name: `Document ${index}`, exact: true})});
+    const document = page.locator("section").filter({has: page.getByRole("heading", {name: `Question ${index} sur 39`, exact: true})});
     await document.getByRole("button", {name: "Charger le document audio"}).click();
     await document.getByRole("button", {name: "Écouter le document chargé"}).click();
     await expect.poll(() => document.locator("audio").evaluate((element: HTMLAudioElement) => element.ended), {timeout: 10_000}).toBe(true);
     await document.getByRole("radio", {name: "Samedi à dix heures", exact: true}).check();
     await expect(page.getByRole("status")).toContainText("Réponse enregistrée");
     await expect(document.getByRole("button", {name: "Charger le document audio"})).toHaveCount(0);
+    if (index < 39) await page.getByRole("button", {name: "Suivant"}).click();
   }
   await page.getByRole("button", {name: "Terminer et vérifier mes réponses"}).click();
   await page.getByRole("button", {name: "Confirmer la soumission"}).click();

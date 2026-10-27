@@ -139,12 +139,32 @@
 .attempt-aside { position: sticky; top: 1rem; display: grid; gap: 1rem; }
 .attempt-aside .student-card { margin: 0; }
 .question-map { display: grid; grid-template-columns: repeat(auto-fill, minmax(2.25rem, 1fr)); gap: 6px; list-style: none; padding: 0; margin: 0.5rem 0 0; }
-.student-space .question-map a { display: grid; place-items: center; height: 2.25rem; border-radius: 8px; border: 1px solid var(--control-border); font-size: 0.76rem; font-weight: 700; text-decoration: none; color: var(--text); }
-.student-space .question-map a[data-answered] { background: var(--accent); color: #fff; border-color: var(--accent); }
-.question-map a:hover { background: var(--tint); }
-@media (max-width: 1080px) { .attempt-layout { grid-template-columns: 1fr; } .attempt-aside { position: static; order: -1; } .attempt-aside .map-card { display: none; } }
+/* Plan : violet = répondue, gris = consultée sans réponse, blanc = pas encore vue. */
+.question-map button { display: grid; place-items: center; width: 100%; height: 2.25rem; border-radius: 8px; border: 1px solid var(--control-border); background: var(--surface); font: inherit; font-size: 0.76rem; font-weight: 700; color: var(--text); cursor: pointer; transition: background var(--duration), border-color var(--duration); }
+.question-map button:hover { border-color: var(--map-answered); }
+.question-map button[data-state="answered"] { background: var(--map-answered); border-color: var(--map-answered); color: #fff; }
+.question-map button[data-state="seen"] { background: var(--map-seen); border-color: var(--map-seen); color: var(--map-seen-ink); }
+.question-map button[aria-current="step"] { outline: 2px solid var(--text); outline-offset: 2px; }
+.map-card { --map-answered: #7c3aed; --map-seen: #d4d6de; --map-seen-ink: #2d3348; }
+.map-legend { display: flex; flex-wrap: wrap; gap: 0.35rem 0.9rem; list-style: none; padding: 0; margin: 0.9rem 0 0; font-size: 0.72rem; color: var(--muted); }
+.map-legend li { display: inline-flex; align-items: center; gap: 0.35rem; }
+.map-legend li::before { content: ""; width: 0.7rem; height: 0.7rem; border-radius: 3px; border: 1px solid var(--control-border); background: var(--surface); }
+.map-legend li[data-state="answered"]::before { background: var(--map-answered); border-color: var(--map-answered); }
+.map-legend li[data-state="seen"]::before { background: var(--map-seen); border-color: var(--map-seen); }
+.question-nav { display: flex; justify-content: space-between; gap: 0.75rem; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+.question-nav .button { display: inline-flex; align-items: center; gap: 0.45rem; }
+.question-of { font-size: 0.8rem; font-weight: 500; color: var(--muted); }
+.question-head h2:focus { outline: none; }
+.session-tool { display: inline-flex; align-items: center; gap: 0.4rem; min-height: 36px; padding: 0.35rem 0.8rem; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font: inherit; font-size: 0.78rem; font-weight: 600; cursor: pointer; }
+.session-tool:hover { border-color: var(--control-border); }
+@media (max-width: 1080px) { .attempt-layout { grid-template-columns: 1fr; } .attempt-aside { position: static; } }
+
+/* Séance concentrée : plus de menu ni d’en-tête, toute la largeur pour la question. */
+html[data-exam-focus] .app-shell { grid-template-columns: minmax(0, 1fr); grid-template-areas: "main"; }
+html[data-exam-focus] .shell-sidebar, html[data-exam-focus] .shell-mobilebar, html[data-exam-focus] .shell-pagehead { display: none !important; }
+html[data-exam-focus] .student-session { top: 0.75rem; }
 .student-session { position: sticky; top: 0.75rem; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1.5rem; padding: 0.75rem 1rem; margin-block: 0 1rem; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-soft); }
-@media (max-width: 960px) { .student-session { top: 70px; } }
+@media (max-width: 960px) { html:not([data-exam-focus]) .student-session { top: 70px; } }
 .student-session p { margin: 0; font-size: 0.84rem; color: var(--text); }
 .session-timer { display: inline-flex; align-items: center; gap: 0.4rem; font-variant-numeric: tabular-nums; font-weight: 700; }
 .session-progress { flex: 1; min-width: 8rem; height: 6px; border-radius: 99px; background: var(--sand-strong); overflow: hidden; }

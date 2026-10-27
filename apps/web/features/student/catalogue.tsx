@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "../../components/ui/primitives";
 import { Icon } from "../../components/app-shell/icons";
 import { api, type Exam } from "../../lib/student-api";
+import { enterFullscreen, exitFullscreen } from "../../lib/fullscreen";
 
 type Skill = "reading" | "listening";
 type Mode = "all" | "training" | "simulation";
@@ -27,9 +28,10 @@ export function Catalogue({ skill, mode: fixedMode, title = "Vos séries", empty
     return () => { active = false; };
   }, [offset, skill]);
   async function start(exam: Exam) {
+    enterFullscreen();
     setBusy(true); setError("");
     try { const attempt = await api<{ id: string }>(`exams/${exam.id}/attempts/`, "POST"); router.push(`/etudiant/${exam.skill === "listening" ? "ecoute" : "lecture"}/${attempt.id}`); }
-    catch (e) { setError((e as Error).message); setBusy(false); }
+    catch (e) { exitFullscreen(); setError((e as Error).message); setBusy(false); }
   }
   const visible = exams?.filter(exam => mode === "all" || exam.mode === mode);
   return <section aria-labelledby="series" className="series">
