@@ -2,6 +2,8 @@
 const apiOrigin = process.env.API_ORIGIN || "http://127.0.0.1:8000";
 const nextConfig = {
   skipTrailingSlashRedirect: true,
+  // Import de séries : un .zip d’audios dépasse vite les 10 Mo transmis par défaut au backend.
+  experimental: { middlewareClientMaxBodySize: "250mb" },
   async rewrites() {
     return [
       { source: "/api/v1/:path*", destination: `${apiOrigin}/api/v1/:path*/` },

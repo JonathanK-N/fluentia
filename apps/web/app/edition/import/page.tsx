@@ -26,6 +26,9 @@ const STATUS: Record<Status, { label: string; tone: string }> = {
   approved: { label: "Approuvée", tone: "lavender" }, published: { label: "Publiée", tone: "mint" },
 };
 
+const MAX_UPLOAD = 250_000_000;
+const megabytes = (size: number) => (size / 1_000_000).toLocaleString("fr-CA", { maximumFractionDigits: 1 });
+
 async function download(skill: Skill) {
   const response = await fetch(`/api/v1/bank/templates/${skill}/`, { credentials: "same-origin", cache: "no-store" });
   if (!response.ok) throw new Error("Modèle indisponible : vérifiez vos droits éditoriaux.");
@@ -56,12 +59,22 @@ export default function ImportPage() {
   function submit(event: FormEvent) {
     event.preventDefault();
     if (!file) return;
+    if (file.size > MAX_UPLOAD) {
+      setErrors([]); setSummary(`Le fichier pèse ${megabytes(file.size)} Mo : 250 Mo au plus. Compressez les audios (mono, 22050 Hz) ou séparez la série.`);
+      return;
+    }
     const form = new FormData();
     form.append("skill", skill); form.append("file", file);
     run(async () => {
       setErrors(null); setSummary("");
       const response = await postForm<Series & { detail?: string; errors?: ImportError[] }>("bank/series/import/", form);
-      if (!response.ok) { setErrors(response.data.errors ?? []); setSummary(response.data.detail ?? "Le fichier a été refusé."); return; }
+      if (!response.ok) {
+        setErrors(response.data.errors ?? []);
+        setSummary(response.data.detail ?? (response.status === 413 || response.status >= 500
+          ? `L’envoi de ce fichier (${megabytes(file.size)} Mo) a été interrompu par le serveur. Réessayez ; si cela se répète, signalez-le avec la taille du fichier.`
+          : "Le fichier a été refusé."));
+        return;
+      }
       setMessage(`« ${response.data.title} » importée : ${response.data.size} ${["reading", "listening"].includes(skill) ? "questions" : "sujets"} en brouillon. Envoyez-la en relecture.`);
       setFile(null); setOpenId(response.data.id); await refresh();
     });
@@ -105,7 +118,7 @@ export default function ImportPage() {
       <label className="import-drop" data-filled={file ? "" : undefined}>
         <Icon name="upload" size={22} />
         <strong>{file ? file.name : "Choisir le fichier .xlsx ou .zip"}</strong>
-        <small>{file ? `${(file.size / 1_000_000).toLocaleString("fr-CA", { maximumFractionDigits: 1 })} Mo · cliquez pour changer` : "Le fichier doit venir du modèle " + skillOf(skill).name}</small>
+        <small>{file ? `${megabytes(file.size)} Mo · cliquez pour changer` : "Le fichier doit venir du modèle " + skillOf(skill).name}</small>
         <input type="file" accept=".xlsx,.zip,application/zip,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={event => { setFile(event.target.files?.[0] ?? null); setErrors(null); }} />
       </label>
       <Button type="submit" loading={busy} disabled={!file}><Icon name="upload" size={15} />Importer la série {skillOf(skill).name}</Button>
