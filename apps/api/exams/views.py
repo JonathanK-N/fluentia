@@ -188,6 +188,7 @@ class AttemptResultsView(APIView):
                 "points": q.points,
                 "statement": q.statement,
                 "reading_passage": q.reading_passage,
+                "choices": [{"id": str(c.pk), "position": c.position, "label": c.label} for c in q.choices.all()],
                 "selected_label": answers[q.pk].choice.label
                 if q.pk in answers
                 else None,

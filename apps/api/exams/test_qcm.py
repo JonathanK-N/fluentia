@@ -62,6 +62,7 @@ class WeightedQcmTests(TestCase):
         details = self.client.get(f"/api/v1/attempts/{attempt}/results/").data["details"]
         self.assertEqual(details[38]["points"], 33)
         self.assertTrue(details[0]["reading_passage"].startswith("Pharmacie du Parc"))
+        self.assertEqual([c["label"] for c in details[0]["choices"]], ["Le lundi matin.", "Le samedi à 18 h.", "Le dimanche.", "Le mercredi après-midi."])
 
     def test_seed_is_idempotent(self):
         call_command("seed_qcm_lecture", author="auteur", reviewer="relecteur", stdout=StringIO())

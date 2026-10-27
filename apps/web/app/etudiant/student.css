@@ -460,3 +460,13 @@ html[data-exam-focus] .shell-content.student-space { max-width: none; padding: 0
 .bilan-box[data-tone="red"] small { color: #991b1b; }
 .student-space .section-title .section-note { margin: 0; font-size: 0.76rem !important; color: var(--accent); }
 .shell-site-link { white-space: nowrap; }
+.bilan-choices { display: grid; gap: 0.4rem; list-style: none; margin: 0.7rem 0 0; padding: 0; }
+.bilan-choices li { display: flex; align-items: center; gap: 0.7rem; padding: 0.55rem 0.8rem; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); font-size: 0.84rem; }
+.bilan-choices li[data-state="right"] { background: var(--mint); border-color: #8fd3c3; font-weight: 600; }
+.bilan-choices li[data-state="right"] .choice-letter { background: var(--mint-ink); color: #fff; }
+.bilan-choices li[data-state="wrong"] { background: #fee2e2; border-color: #f5a3a3; }
+.bilan-choices li[data-state="wrong"] .choice-letter { background: #dc2626; color: #fff; }
+.bilan-choice-tags { display: inline-flex; gap: 0.3rem; margin-left: auto; }
+.bilan-choice-tags span { padding: 0.15rem 0.5rem; border-radius: 999px; background: rgb(255 255 255 / 70%); font-size: 0.66rem; font-weight: 600; color: var(--text); white-space: nowrap; }
+.student-space .bilan-box p { display: flex; align-items: baseline; gap: 0.45rem; }
+.bilan-letter { display: inline-grid; place-items: center; flex-shrink: 0; min-width: 1.35rem; height: 1.35rem; border-radius: 6px; background: rgb(255 255 255 / 75%); font-size: 0.7rem; font-weight: 700; }

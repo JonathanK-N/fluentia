@@ -173,18 +173,27 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
           const state = ok ? "right" : detail.selected_label ? "wrong" : "empty";
           const hint = detail.explanation.startsWith(HINT) ? detail.explanation.slice(HINT.length).replace(/\.$/, "") : null;
           const source = detail.reading_passage || detail.transcript;
+          const letter = (choiceId: string | null) => { const rank = detail.choices.findIndex(c => c.id === choiceId); return rank === -1 ? null : "ABCD"[rank]; };
+          const what = source ? (detail.reading_passage ? "le texte et les choix" : "la transcription et les choix") : "les choix";
           return <li key={detail.question_id} className="student-card bilan-question">
             <div className="bilan-question-head">
               <h3><span className="bilan-num">{index + 1}</span>{detail.statement}</h3>
               <span className="bilan-tags"><span className="pill">{ok ? detail.points : 0} / {detail.points} pts</span><span className="bilan-state" data-state={state}>{ok ? "Correcte" : detail.selected_label ? "Incorrecte" : "Non répondue"}</span></span>
             </div>
-            {source && <details className="bilan-source">
-              <summary><Icon name="chevron" size={14} /><span className="when-closed">Afficher {detail.reading_passage ? "le texte" : "la transcription"}</span><span className="when-open">Masquer {detail.reading_passage ? "le texte" : "la transcription"}</span></summary>
-              <p className="student-passage">{source}</p>
-            </details>}
+            <details className="bilan-source">
+              <summary><Icon name="chevron" size={14} /><span className="when-closed">Afficher {what}</span><span className="when-open">Masquer {what}</span></summary>
+              {source && <p className="student-passage">{source}</p>}
+              <ul className="bilan-choices" aria-label="Choix proposés">{detail.choices.map((choice, rank) => {
+                const mark = choice.id === detail.correct_choice_id ? "right" : choice.id === detail.selected_choice_id ? "wrong" : undefined;
+                return <li key={choice.id} data-state={mark}>
+                  <span className="choice-letter" aria-hidden="true">{"ABCD"[rank]}</span><span className="sr-only">{"ABCD"[rank]}. </span>{choice.label}
+                  <span className="bilan-choice-tags">{choice.id === detail.selected_choice_id && <span>Votre réponse</span>}{choice.id === detail.correct_choice_id && <span>Bonne réponse</span>}</span>
+                </li>;
+              })}</ul>
+            </details>
             <div className="bilan-boxes">
-              <div className="bilan-box" data-tone={state === "right" ? "mint" : state === "wrong" ? "red" : undefined}><small>Vous avez répondu</small><p>{detail.selected_label ?? <em>Aucune réponse</em>}</p></div>
-              <div className="bilan-box" data-tone="mint"><small>Bonne réponse</small><p>{detail.correct_label}</p></div>
+              <div className="bilan-box" data-tone={state === "right" ? "mint" : state === "wrong" ? "red" : undefined}><small>Vous avez répondu</small><p>{detail.selected_label ? <><b className="bilan-letter">{letter(detail.selected_choice_id)}</b><span>{detail.selected_label}</span></> : <em>Aucune réponse</em>}</p></div>
+              <div className="bilan-box" data-tone="mint"><small>Bonne réponse</small><p><b className="bilan-letter">{letter(detail.correct_choice_id)}</b><span>{detail.correct_label}</span></p></div>
               <div className="bilan-box" data-tone="lavender"><small>{hint ? "Où le trouver" : "Explication"}</small><p>{hint ?? detail.explanation}</p></div>
             </div>
           </li>;

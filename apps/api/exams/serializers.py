@@ -95,6 +95,7 @@ class ResultDetailSerializer(serializers.Serializer):
     transcript = serializers.CharField(read_only=True, allow_blank=True)
     statement = serializers.CharField(read_only=True)
     reading_passage = serializers.CharField(read_only=True, allow_blank=True)
+    choices = ChoicePublicSerializer(many=True, read_only=True)
     selected_label = serializers.CharField(read_only=True, allow_null=True)
     correct_label = serializers.CharField(read_only=True)
     question_id = serializers.UUIDField(read_only=True)
