@@ -121,6 +121,9 @@ class Question(models.Model):
     )
     explanation = models.TextField(blank=True)
     difficulty = models.CharField(max_length=32, default="non_calibree")
+    points = models.PositiveSmallIntegerField(
+        default=1, help_text="Points gagnés pour une bonne réponse"
+    )
     origin = models.CharField(
         max_length=16,
         choices=[("original", "Original"), ("licensed", "Sous licence")],
@@ -156,6 +159,9 @@ class Question(models.Model):
             ),
             models.CheckConstraint(
                 condition=Q(position__gt=0), name="question_position_positive"
+            ),
+            models.CheckConstraint(
+                condition=Q(points__gt=0), name="question_points_positive"
             ),
             models.CheckConstraint(
                 condition=Q(validation_status__in=["draft", "validated"]),
@@ -272,6 +278,9 @@ class Attempt(models.Model):
     submitted_at = models.DateTimeField(null=True, blank=True)
     correct_count = models.PositiveIntegerField(null=True, blank=True)
     question_count = models.PositiveIntegerField(null=True, blank=True)
+    # Barème pondéré : points des bonnes réponses sur le total de l’examen.
+    score = models.PositiveIntegerField(null=True, blank=True)
+    max_score = models.PositiveIntegerField(null=True, blank=True)
     lock_version = models.PositiveBigIntegerField(default=0, editable=False)
 
     class Meta:

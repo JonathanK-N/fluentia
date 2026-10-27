@@ -22,7 +22,7 @@ export const epreuves: Record<EpreuveId, Epreuve> = {
     brief: [
       { label: "Questions", value: "39", hint: "QCM · 4 choix, 1 seule bonne réponse" },
       { label: "Chrono", value: "60 min", hint: "Durée indicative" },
-      { label: "Niveau", value: "Progressif", hint: "Estimé par l’équipe, non calibré" },
+      { label: "Barème", value: "699 pts", hint: "De 3 à 33 points par question, du niveau A1 au C2" },
     ],
     reflexes: [
       { title: "La question d’abord", text: "Lisez la question, puis cherchez la réponse dans le document." },

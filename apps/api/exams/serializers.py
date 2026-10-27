@@ -19,11 +19,12 @@ class QuestionPublicSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Question
-        fields = ("id", "position", "statement", "reading_passage", "choices", "audio_available", "audio_state", "audio_ends_at", "transcript")
+        fields = ("id", "position", "statement", "reading_passage", "points", "choices", "audio_available", "audio_state", "audio_ends_at", "transcript")
 
 
 class ExamListSerializer(serializers.ModelSerializer):
     question_count = serializers.IntegerField(read_only=True)
+    total_points = serializers.IntegerField(read_only=True)
     official = serializers.SerializerMethodField()
 
     def get_official(self, obj) -> bool:
@@ -41,6 +42,7 @@ class ExamListSerializer(serializers.ModelSerializer):
             "description",
             "duration_seconds",
             "question_count",
+            "total_points",
             "official",
         )
 
@@ -98,6 +100,7 @@ class ResultDetailSerializer(serializers.Serializer):
     selected_choice_id = serializers.UUIDField(read_only=True, allow_null=True)
     correct_choice_id = serializers.UUIDField(read_only=True)
     explanation = serializers.CharField(read_only=True)
+    points = serializers.IntegerField(read_only=True)
 
 
 class ResultSerializer(serializers.Serializer):
@@ -106,6 +109,8 @@ class ResultSerializer(serializers.Serializer):
     correct_count = serializers.IntegerField(read_only=True)
     question_count = serializers.IntegerField(read_only=True)
     percentage = serializers.FloatField(read_only=True)
+    score = serializers.IntegerField(read_only=True)
+    max_score = serializers.IntegerField(read_only=True)
     official = serializers.BooleanField(read_only=True)
     disclaimer = serializers.CharField(read_only=True)
     details = ResultDetailSerializer(many=True, read_only=True, required=False)

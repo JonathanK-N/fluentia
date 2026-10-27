@@ -50,7 +50,7 @@ export function Catalogue({ skill, mode: fixedMode, title = "Vos séries", empty
       </div>
       <h3>{exam.title}</h3>
       <p>{exam.description}</p>
-      <div className="pill-row"><span className="pill"><Icon name="exam" size={13} />{exam.question_count} {exam.question_count > 1 ? "questions" : "question"}</span><span className="pill"><Icon name="clock" size={13} />{Math.ceil(exam.duration_seconds / 60)} min</span></div>
+      <div className="pill-row"><span className="pill"><Icon name="exam" size={13} />{exam.question_count} {exam.question_count > 1 ? "questions" : "question"}</span><span className="pill"><Icon name="clock" size={13} />{Math.ceil(exam.duration_seconds / 60)} min</span>{exam.total_points > exam.question_count && <span className="pill"><Icon name="trophy" size={13} />{exam.total_points} points</span>}</div>
       <Button disabled={busy} onClick={() => start(exam)}>Démarrer la série<Icon name="arrow" size={15} /></Button>
     </article>)}</div>
     {more && <p><Button variant="secondary" loading={loading} onClick={() => { setError(""); setLoading(true); setOffset(exams?.length ?? 0); }}>Voir d’autres séries</Button></p>}

@@ -151,6 +151,9 @@
 .session-progress span { display: block; height: 100%; background: var(--accent); transition: width var(--duration); }
 .student-save-status { min-height: 1.5rem; font-size: 0.82rem !important; }
 .question-card h2 { font-size: 1rem; }
+.question-head { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+.question-head h2 { margin: 0; }
+.question-points { background: var(--lavender); color: var(--lavender-ink); font-weight: 600; }
 .student-passage { white-space: pre-line; line-height: 1.85; max-width: 70ch; border-left: 3px solid var(--tint); padding: 0.25rem 0 0.25rem 1rem; margin-block: 1rem 1.5rem; color: var(--text); font-size: 0.93rem !important; }
 .student-space fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
 .student-space legend { font-weight: 700; margin-block: 0.5rem 0.75rem; font-size: 0.93rem; }
@@ -166,7 +169,8 @@
 .score-ring { --value: 0; position: relative; display: grid; place-items: center; width: 132px; height: 132px; border-radius: 50%; background: conic-gradient(var(--accent) calc(var(--value) * 1%), var(--sand-strong) 0); }
 .score-ring::before { content: ""; position: absolute; inset: 12px; border-radius: 50%; background: var(--surface); }
 .score-ring > * { position: relative; }
-.student-score { font-size: 1.6rem !important; font-weight: 700; color: var(--text); margin: 0; font-variant-numeric: tabular-nums; }
+.student-score { display: grid; justify-items: center; font-size: 1.6rem !important; font-weight: 700; color: var(--text); margin: 0; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.student-score small { font-size: 0.72rem; font-weight: 600; color: var(--muted); }
 .student-correction { border-top: 1px solid var(--border); margin-top: 1.25rem; padding-top: 1rem; }
 
 /* Barres */

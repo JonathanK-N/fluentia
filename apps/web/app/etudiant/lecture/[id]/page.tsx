@@ -7,6 +7,7 @@ import { useSession } from "../../../../lib/session";
 import { playVerdict, primeSound } from "../../../../lib/feedback-sound";
 import { AudioPlayer } from "../../../../components/student/audio-player";
 import { Icon } from "../../../../components/app-shell/icons";
+import { formatPoints } from "../../../../features/student/content";
 
 export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
   const {id} = use(params);
@@ -93,13 +94,13 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
     {attempt?.status === "expired" && <section className="student-card"><h2>Le temps est écoulé</h2><p>Les réponses enregistrées sont conservées. Cette tentative n’a pas été soumise et aucun score n’a été calculé. Vous pouvez recommencer depuis le catalogue.</p></section>}
     {results && <>
       <section className="student-card result-hero" aria-labelledby="resultat">
-        <div className="score-ring" style={{ ["--value" as string]: results.percentage }}><p className="student-score">{results.correct_count} / {results.question_count}</p></div>
-        <div><h2 id="resultat">Votre résultat</h2><p><strong>{results.percentage} %</strong> de réponses correctes.</p><p>{results.disclaimer}</p>
+        <div className="score-ring" style={{ ["--value" as string]: results.max_score ? results.score / results.max_score * 100 : 0 }}><p className="student-score">{results.score}<small>/ {results.max_score} pts</small></p></div>
+        <div><h2 id="resultat">Votre résultat</h2><p><strong>{formatPoints(results.score)}</strong> sur {results.max_score} · {results.correct_count} / {results.question_count} réponses correctes ({results.percentage} %).</p><p>{results.disclaimer}</p>
           <div className="student-nav" style={{ margin: 0 }}><Link className="button button-secondary tile-link" href="/etudiant/progression">Voir mon évolution</Link></div></div>
       </section>
       <section className="student-card" aria-labelledby="corrige"><h2 id="corrige">Correction détaillée</h2>
         {results.details.map((detail, index) => { const ok = detail.selected_choice_id === detail.correct_choice_id; return <article key={detail.question_id} className="student-correction">
-          <div className="pill-row" style={{ justifyContent: "space-between", alignItems: "center" }}><h3 style={{ margin: 0 }}>Question {index + 1}</h3><span className={`pill ${ok ? "pill-success" : "pill-warning"}`}>{ok ? "Correct" : detail.selected_label ? "À revoir" : "Sans réponse"}</span></div>
+          <div className="pill-row" style={{ justifyContent: "space-between", alignItems: "center" }}><h3 style={{ margin: 0 }}>Question {index + 1}</h3><span className="pill-row"><span className="pill">{ok ? detail.points : 0} / {formatPoints(detail.points)}</span><span className={`pill ${ok ? "pill-success" : "pill-warning"}`}>{ok ? "Correct" : detail.selected_label ? "À revoir" : "Sans réponse"}</span></span></div>
           <p style={{ color: "var(--text)", marginTop: ".5rem" }}>{detail.statement}</p><p>Votre réponse : {detail.selected_label ?? "Sans réponse"}</p>
           <p>Réponse attendue : {detail.correct_label}</p><p>{detail.explanation}</p>{detail.transcript && <details><summary>Transcription du document</summary><p>{detail.transcript}</p></details>}</article>; })}
       </section>
@@ -115,7 +116,7 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
         <p role="status" className="student-save-status">{message}</p>
         <p className="sr-only" aria-live="polite">{spoken}</p>
         {shown.map((question) => <section className="student-card question-card" id={`q-${question.id}`} key={question.id}>
-          <h2>{attempt.skill === "listening" ? "Document" : "Lecture"} {question.position}</h2>{question.reading_passage && <p className="student-passage">{question.reading_passage}</p>}
+          <div className="question-head"><h2>{attempt.skill === "listening" ? "Document" : "Lecture"} {question.position}</h2><span className="pill question-points">{formatPoints(question.points)}</span></div>{question.reading_passage && <p className="student-passage">{question.reading_passage}</p>}
           {attempt.skill === "listening" && (question.audio_available ? <AudioPlayer attemptId={id} questionId={question.id} simulation={attempt.mode === "simulation"} state={question.audio_state} endsAt={question.audio_ends_at} serverOffset={clockOffset.current} refresh={load} /> : <p role="alert">Le document audio n’est pas disponible pour cette version.</p>)}
           {question.transcript && <details><summary>Consulter la transcription</summary><p>{question.transcript}</p></details>}
           <fieldset disabled={remaining === 0 || (attempt.skill === "listening" && attempt.mode === "simulation" && question.audio_state !== "ready")} aria-busy={busy}><legend>{question.statement}</legend>

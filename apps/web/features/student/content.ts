@@ -79,6 +79,8 @@ export const speakingTasks: SpeakingTask[] = [
 export const skillLabel = (skill: string) => skill === "listening" ? "Écoute" : "Lecture";
 export const skillTitle = (skill: string) => skill === "listening" ? "Compréhension orale" : "Compréhension écrite";
 export const attemptHref = (attempt: { id: string; skill: string }) => `/etudiant/${attempt.skill === "listening" ? "ecoute" : "lecture"}/${attempt.id}`;
+export const formatPoints = (points: number) => `${points} point${points > 1 ? "s" : ""}`;
+
 export const formatDuration = (seconds: number) => {
   const minutes = Math.floor(seconds / 60), rest = seconds % 60;
   return `${String(minutes).padStart(2, "0")}:${String(rest).padStart(2, "0")}`;

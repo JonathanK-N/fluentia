@@ -1,6 +1,6 @@
 """Catalogue public limité et tentatives privées protégées par la session Django."""
 
-from django.db.models import Count
+from django.db.models import Count, Sum
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema, OpenApiParameter
@@ -50,7 +50,7 @@ class ExamListView(generics.ListAPIView):
     serializer_class = ExamListSerializer
     pagination_class = CataloguePagination
     queryset = Exam.objects.filter(is_published=True).annotate(
-        question_count=Count("questions")
+        question_count=Count("questions"), total_points=Sum("questions__points")
     )
 
     def get_queryset(self):
@@ -69,7 +69,7 @@ class ExamDetailView(generics.RetrieveAPIView):
     serializer_class = ExamListSerializer
     lookup_url_kwarg = "exam_id"
     queryset = Exam.objects.filter(is_published=True).annotate(
-        question_count=Count("questions")
+        question_count=Count("questions"), total_points=Sum("questions__points")
     )
 
 
@@ -145,6 +145,9 @@ def result_payload(attempt: Attempt) -> dict:
         "correct_count": attempt.correct_count,
         "question_count": attempt.question_count,
         "percentage": round(100 * attempt.correct_count / attempt.question_count, 1),
+        # Tentatives antérieures au barème : un point par bonne réponse.
+        "score": attempt.correct_count if attempt.score is None else attempt.score,
+        "max_score": attempt.question_count if attempt.max_score is None else attempt.max_score,
         "official": False,
         "disclaimer": "Résultat d’entraînement, non officiel. Aucune conversion TCF ou NCLC.",
     }
@@ -182,6 +185,7 @@ class AttemptResultsView(APIView):
                     next(c.pk for c in q.choices.all() if c.is_correct)
                 ),
                 "explanation": q.explanation,
+                "points": q.points,
                 "statement": q.statement,
                 "selected_label": answers[q.pk].choice.label
                 if q.pk in answers

@@ -2,7 +2,7 @@
 
 from datetime import timedelta
 from django.db import transaction
-from django.db.models import F
+from django.db.models import F, Sum
 from django.utils import timezone
 from rest_framework.exceptions import NotFound, ValidationError
 from .models import Attempt, Answer, Choice, Question, Exam
@@ -98,9 +98,10 @@ def submit_attempt(*, attempt_id, user) -> Attempt:
         error = _active_error(attempt)
         if not error:
             total = attempt.exam.questions.count()
-            correct = Answer.objects.filter(
-                attempt=attempt, choice__is_correct=True
-            ).count()
+            max_score = attempt.exam.questions.aggregate(total=Sum("points"))["total"] or 0
+            right = Answer.objects.filter(attempt=attempt, choice__is_correct=True)
+            correct = right.count()
+            score = right.aggregate(total=Sum("question__points"))["total"] or 0
             error = _active_error(attempt)
             if not error:
                 submitted_at = timezone.now()
@@ -110,12 +111,16 @@ def submit_attempt(*, attempt_id, user) -> Attempt:
                 else:
                     attempt.correct_count = correct
                     attempt.question_count = total
+                    attempt.score = score
+                    attempt.max_score = max_score
                     attempt.submitted_at = submitted_at
                     attempt.status = Attempt.Status.SUBMITTED
                     attempt.save(
                         update_fields=[
                             "correct_count",
                             "question_count",
+                            "score",
+                            "max_score",
                             "submitted_at",
                             "status",
                         ]
