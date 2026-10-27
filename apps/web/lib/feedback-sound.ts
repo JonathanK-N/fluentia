@@ -1,9 +1,19 @@
 /** Signal sonore discret de correction en direct, généré localement (aucun fichier audio). */
 let context: AudioContext | null = null;
 
-export function playVerdict(correct: boolean) {
+/** À appeler pendant le clic : les navigateurs n’autorisent le son qu’après un geste. */
+export function primeSound() {
   try {
     context ??= new AudioContext();
+    if (context.state === "suspended") void context.resume();
+  } catch {
+    context = null;
+  }
+}
+
+export function playVerdict(correct: boolean) {
+  try {
+    if (!context) return;
     const now = context.currentTime;
     // Juste : deux notes montantes ; faux : une note grave plus courte.
     const notes = correct ? [[660, 0], [880, 0.11]] : [[220, 0]];

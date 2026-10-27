@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Button } from "../../../../components/ui/primitives";
 import { api, type Attempt, type Results, type SavedAnswer } from "../../../../lib/student-api";
 import { useSession } from "../../../../lib/session";
-import { playVerdict } from "../../../../lib/feedback-sound";
+import { playVerdict, primeSound } from "../../../../lib/feedback-sound";
 import { AudioPlayer } from "../../../../components/student/audio-player";
 import { Icon } from "../../../../components/app-shell/icons";
 
@@ -18,7 +18,7 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
   const [busy, setBusy] = useState(false);
   const [confirm, setConfirm] = useState(false);
   const [remaining, setRemaining] = useState(0);
-  const [verdicts, setVerdicts] = useState<Record<string, boolean>>({});
+  const [verdicts, setVerdicts] = useState<Record<string, {correct: boolean; answer: string}>>({});
   const { profile } = useSession();
   const pending = useRef(false);
   const clockOffset = useRef(0);
@@ -50,6 +50,7 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
   }, []);
   async function save(question: string, choice: string) {
     if (pending.current) return;
+    if (profile?.preferences.live_correction && profile.preferences.answer_sound) primeSound();
     answerVersion.current += 1;
     const previous = answers[question];
     setAnswers(values => ({...values, [question]: choice}));
@@ -58,7 +59,8 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
       const saved = await api<SavedAnswer>(`attempts/${id}/answers/`, "PUT", {question_id: question, choice_id: choice});
       setAnswers(previous => ({...previous, [question]: choice}));
       const verdict = saved.correct;
-      setVerdicts(values => { const next = {...values}; if (typeof verdict === "boolean") next[question] = verdict; else delete next[question]; return next; });
+      const answer = saved.correct_choice_id;
+      setVerdicts(values => { const next = {...values}; if (typeof verdict === "boolean" && answer) next[question] = {correct: verdict, answer}; else delete next[question]; return next; });
       if (typeof verdict === "boolean") {
         if (profile?.preferences.answer_sound) playVerdict(verdict);
         setMessage(verdict ? "Réponse enregistrée : c’est juste." : "Réponse enregistrée : ce n’est pas la bonne réponse. Réessayez si vous le souhaitez.");
@@ -114,11 +116,12 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
           {attempt.skill === "listening" && (question.audio_available ? <AudioPlayer attemptId={id} questionId={question.id} simulation={attempt.mode === "simulation"} state={question.audio_state} endsAt={question.audio_ends_at} serverOffset={clockOffset.current} refresh={load} /> : <p role="alert">Le document audio n’est pas disponible pour cette version.</p>)}
           {question.transcript && <details><summary>Consulter la transcription</summary><p>{question.transcript}</p></details>}
           <fieldset disabled={remaining === 0 || (attempt.skill === "listening" && attempt.mode === "simulation" && question.audio_state !== "ready")} aria-busy={busy}><legend>{question.statement}</legend>
-            {question.choices.map(choice => <label className="student-choice" key={choice.id}>
+            {question.choices.map(choice => { const verdict = verdicts[question.id]; const state = !verdict ? undefined : choice.id === verdict.answer ? "right" : answers[question.id] === choice.id ? "wrong" : undefined; return <label className="student-choice" data-verdict={state} key={choice.id}>
               <input type="radio" name={question.id} value={choice.id} disabled={busy && answers[question.id] !== choice.id} checked={answers[question.id] === choice.id} onChange={() => save(question.id, choice.id)} />{choice.label}
-            </label>)}
+              {state && <Icon name={state === "right" ? "check" : "close"} size={16} className="choice-mark" />}
+            </label>; })}
           </fieldset>
-          {question.id in verdicts && <p className="verdict" data-correct={verdicts[question.id]}><Icon name={verdicts[question.id] ? "check" : "close"} size={15} />{verdicts[question.id] ? "Juste" : "Faux"}</p>}
+          {verdicts[question.id] && <p className="verdict" data-correct={verdicts[question.id].correct}><Icon name={verdicts[question.id].correct ? "check" : "close"} size={15} />{verdicts[question.id].correct ? "Juste, bonne réponse." : `Faux. Bonne réponse : ${question.choices.find(c => c.id === verdicts[question.id].answer)?.label ?? ""}`}</p>}
         </section>)}
         {!confirm ? <Button disabled={busy || remaining === 0} onClick={() => setConfirm(true)}>Terminer et vérifier mes réponses</Button> :
           <section className="student-card" aria-label="Confirmation de soumission"><h2>Prêt à découvrir le corrigé ?</h2><p>{answeredCount} réponses enregistrées. Les questions sans réponse comptent pour zéro. Après la soumission, les réponses seront définitives.</p>
