@@ -187,6 +187,7 @@ class AttemptResultsView(APIView):
                 "explanation": q.explanation,
                 "points": q.points,
                 "statement": q.statement,
+                "reading_passage": q.reading_passage,
                 "selected_label": answers[q.pk].choice.label
                 if q.pk in answers
                 else None,

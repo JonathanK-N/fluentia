@@ -8,8 +8,11 @@ import { useSession } from "../../../../lib/session";
 import { playVerdict, primeSound } from "../../../../lib/feedback-sound";
 import { AudioPlayer } from "../../../../components/student/audio-player";
 import { Icon } from "../../../../components/app-shell/icons";
-import { formatPoints } from "../../../../features/student/content";
+import { Summary } from "../../../../features/student/ui";
 import { exitFullscreen, enterFullscreen } from "../../../../lib/fullscreen";
+
+// Préfixe des indices du corrigé, affichés dans « Où le trouver ».
+const HINT = "Indice dans le texte : ";
 
 export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
   const {id} = use(params);
@@ -131,7 +134,7 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
     navigated.current = true; setConfirm(false); setCurrentId(next.id);
   }
   return <>
-    {!active && <div className="page-head"><div>
+    {!active && !results && <div className="page-head"><div>
       <p className="student-eyebrow">{attempt?.skill === "listening" ? "Écoute" : "Lecture"} · {attempt?.mode === "simulation" ? "Simulation non officielle" : "Entraînement non officiel"}</p>
       <h2 className="page-title">{results ? "Prenons le temps de comprendre" : attempt?.skill === "listening" ? "À vous d’écouter" : "À vous de lire"}</h2>
       {attempt?.exam_title && <p>{attempt.exam_title}</p>}
@@ -139,18 +142,54 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
     {!active && error && <p role="alert">{error}</p>}
     {!attempt && !error && <p className="student-hint">Chargement de votre lecture…</p>}
     {attempt?.status === "expired" && <section className="student-card"><h2>Le temps est écoulé</h2><p>Les réponses enregistrées sont conservées. Cette tentative n’a pas été soumise et aucun score n’a été calculé. Vous pouvez recommencer depuis le catalogue.</p></section>}
-    {results && <>
-      <section className="student-card result-hero" aria-labelledby="resultat">
-        <div className="score-ring" style={{ ["--value" as string]: results.max_score ? results.score / results.max_score * 100 : 0 }}><p className="student-score">{results.score}<small>/ {results.max_score} pts</small></p></div>
-        <div><h2 id="resultat">Votre résultat</h2><p><strong>{formatPoints(results.score)}</strong> sur {results.max_score} · {results.correct_count} / {results.question_count} réponses correctes ({results.percentage} %).</p><p>{results.disclaimer}</p>
-          <div className="student-nav" style={{ margin: 0 }}><Link className="button button-secondary tile-link" href="/etudiant/progression">Voir mon évolution</Link></div></div>
-      </section>
-      <section className="student-card" aria-labelledby="corrige"><h2 id="corrige">Correction détaillée</h2>
-        {results.details.map((detail, index) => { const ok = detail.selected_choice_id === detail.correct_choice_id; return <article key={detail.question_id} className="student-correction">
-          <div className="pill-row" style={{ justifyContent: "space-between", alignItems: "center" }}><h3 style={{ margin: 0 }}>Question {index + 1}</h3><span className="pill-row"><span className="pill">{ok ? detail.points : 0} / {formatPoints(detail.points)}</span><span className={`pill ${ok ? "pill-success" : "pill-warning"}`}>{ok ? "Correct" : detail.selected_label ? "À revoir" : "Sans réponse"}</span></span></div>
-          <p style={{ color: "var(--text)", marginTop: ".5rem" }}>{detail.statement}</p><p>Votre réponse : {detail.selected_label ?? "Sans réponse"}</p>
-          <p>Réponse attendue : {detail.correct_label}</p><p>{detail.explanation}</p>{detail.transcript && <details><summary>Transcription du document</summary><p>{detail.transcript}</p></details>}</article>; })}
-      </section>
+    {results && attempt && <>
+      <div className="home-top bilan-top">
+        <section className="hero-card bilan-hero" aria-labelledby="resultat">
+          <div className="bilan-ring" style={{ ["--value" as string]: results.max_score ? results.score / results.max_score * 100 : 0 }}>
+            <p><strong>{results.score}</strong><small>/ {results.max_score} pts</small></p>
+          </div>
+          <div className="bilan-hero-text">
+            <p className="bilan-chips"><span>Épreuve {listening ? "02 · Écoute" : "01 · Lecture"}</span><span>{attempt.mode === "simulation" ? "Simulation non officielle" : "Entraînement non officiel"}</span></p>
+            <h1 id="resultat">Séance terminée : place au bilan.</h1>
+            <p>Score d’entraînement, sans équivalence TCF ni NCLC. Repassez chaque question ci-dessous pour comprendre où chercher.</p>
+          </div>
+        </section>
+        <section className="status-card bilan-next" aria-labelledby="et-maintenant">
+          <h2 id="et-maintenant" className="student-eyebrow">Et maintenant ?</h2>
+          <p>Comparez ce score à vos séances précédentes pour voir comment vous avancez.</p>
+          <Link className="button button-primary tile-link" href="/etudiant/progression">Suivre ma progression<Icon name="trend" size={15} /></Link>
+        </section>
+      </div>
+      <div className="section-title"><h2>Votre score en chiffres</h2></div>
+      <Summary label="Votre score en chiffres" items={[
+        { label: "Points obtenus", value: results.score, hint: `Sur ${results.max_score} possibles` },
+        { label: "Bonnes réponses", value: <>{results.correct_count}<small className="bilan-of"> / {results.question_count}</small></>, hint: "Questions justes" },
+        { label: "Taux de réussite", value: `${results.percentage.toLocaleString("fr-CA")} %`, hint: `${results.correct_count} réponse${results.correct_count > 1 ? "s" : ""} juste${results.correct_count > 1 ? "s" : ""} sur ${results.question_count}`, meter: results.percentage },
+      ]} />
+      <div className="section-title"><h2 id="corrige">Revoir chaque question</h2><p className="section-note">La bonne réponse et où la trouver dans le texte</p></div>
+      <ol className="bilan-list" aria-labelledby="corrige">
+        {results.details.map((detail, index) => {
+          const ok = detail.selected_choice_id === detail.correct_choice_id;
+          const state = ok ? "right" : detail.selected_label ? "wrong" : "empty";
+          const hint = detail.explanation.startsWith(HINT) ? detail.explanation.slice(HINT.length).replace(/\.$/, "") : null;
+          const source = detail.reading_passage || detail.transcript;
+          return <li key={detail.question_id} className="student-card bilan-question">
+            <div className="bilan-question-head">
+              <h3><span className="bilan-num">{index + 1}</span>{detail.statement}</h3>
+              <span className="bilan-tags"><span className="pill">{ok ? detail.points : 0} / {detail.points} pts</span><span className="bilan-state" data-state={state}>{ok ? "Correcte" : detail.selected_label ? "Incorrecte" : "Non répondue"}</span></span>
+            </div>
+            {source && <details className="bilan-source">
+              <summary><Icon name="chevron" size={14} /><span className="when-closed">Afficher {detail.reading_passage ? "le texte" : "la transcription"}</span><span className="when-open">Masquer {detail.reading_passage ? "le texte" : "la transcription"}</span></summary>
+              <p className="student-passage">{source}</p>
+            </details>}
+            <div className="bilan-boxes">
+              <div className="bilan-box" data-tone={state === "right" ? "mint" : state === "wrong" ? "red" : undefined}><small>Vous avez répondu</small><p>{detail.selected_label ?? <em>Aucune réponse</em>}</p></div>
+              <div className="bilan-box" data-tone="mint"><small>Bonne réponse</small><p>{detail.correct_label}</p></div>
+              <div className="bilan-box" data-tone="lavender"><small>{hint ? "Où le trouver" : "Explication"}</small><p>{hint ?? detail.explanation}</p></div>
+            </div>
+          </li>;
+        })}
+      </ol>
     </>}
     {active && attempt && <div className="seance">
       <header className="seance-bar">

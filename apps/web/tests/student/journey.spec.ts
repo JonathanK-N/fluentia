@@ -92,11 +92,11 @@ test("inscription, courriel, session, lecture persistante et résultat privé su
   await page.emulateMedia({colorScheme: "light"});
   await page.getByRole("button", {name: "Terminer la séance"}).click();
   await page.getByRole("button", {name: "Confirmer la soumission"}).click();
-  await expect(page.getByRole("heading", {name: "Votre résultat", exact: true})).toBeVisible();
-  await expect(page.getByText("1 / 1 réponses correctes", {exact: false})).toBeVisible();
-  await expect(page.getByText(/Réponse attendue : Les pièces à remplacer/)).toBeVisible();
+  await expect(page.getByRole("heading", {name: "Séance terminée : place au bilan.", exact: true})).toBeVisible();
+  await expect(page.getByText("1 réponse juste sur 1", {exact: true})).toBeVisible();
+  await expect(page.locator(".bilan-box", {hasText: "Bonne réponse"}).getByText("Les pièces à remplacer", {exact: true})).toBeVisible();
   await page.reload();
-  await expect(page.getByText("1 / 1 réponses correctes", {exact: false})).toBeVisible();
+  await expect(page.getByText("1 réponse juste sur 1", {exact: true})).toBeVisible();
   await page.screenshot({path: info.outputPath("resultat.png"), fullPage: true});
   await page.getByRole("link", {name: "Profil", exact: true}).click();
   await page.getByRole("button", {name: "Se déconnecter"}).click();

@@ -61,6 +61,7 @@ class WeightedQcmTests(TestCase):
         self.assertEqual((result["score"], result["max_score"], result["correct_count"]), (45, 699, 3))
         details = self.client.get(f"/api/v1/attempts/{attempt}/results/").data["details"]
         self.assertEqual(details[38]["points"], 33)
+        self.assertTrue(details[0]["reading_passage"].startswith("Pharmacie du Parc"))
 
     def test_seed_is_idempotent(self):
         call_command("seed_qcm_lecture", author="auteur", reviewer="relecteur", stdout=StringIO())

@@ -405,3 +405,58 @@ html[data-exam-focus] .shell-content.student-space { max-width: none; padding: 0
 .student-space .seance-tip p.badge-warn { font-size: 0.7rem !important; }
 @media (max-width: 1080px) { .seance .attempt-layout { grid-template-columns: 1fr; } }
 .seance-timer strong { color: var(--text); }
+
+/* Bilan de séance */
+.summary:has(> :nth-child(3):last-child) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 760px) { .summary:has(> :nth-child(3):last-child) { grid-template-columns: 1fr; } .summary:has(> :nth-child(3):last-child) .summary-cell { border-left: 0; border-top: 1px solid var(--border); } .summary:has(> :nth-child(3):last-child) .summary-cell:first-child { border-top: 0; } }
+.bilan-of { font-size: 0.9rem; font-weight: 500; color: var(--muted); }
+.bilan-hero { grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 1.5rem; }
+.bilan-ring { --value: 0; position: relative; display: grid; place-items: center; width: 116px; height: 116px; border-radius: 50%; background: conic-gradient(#7dd3c0 calc(var(--value) * 1%), rgb(255 255 255 / 16%) 0); }
+.bilan-ring::before { content: ""; position: absolute; inset: 10px; border-radius: 50%; background: var(--indigo); }
+.bilan-ring p { position: relative; display: grid; justify-items: center; margin: 0; line-height: 1.1; }
+.student-space .bilan-ring strong { font-size: 1.8rem; font-weight: 700; color: #fff; }
+.student-space .bilan-ring small { font-size: 0.68rem; color: #d9d6ff; }
+.bilan-hero-text { display: grid; gap: 0.6rem; }
+.bilan-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0 !important; }
+.bilan-chips span { padding: 0.2rem 0.6rem; border-radius: 999px; background: rgb(255 255 255 / 14%); color: #fff; font-size: 0.68rem; font-weight: 600; }
+.student-space .bilan-hero h1 { margin: 0; color: #fff; font-size: clamp(1.4rem, 2.6vw, 1.9rem); line-height: 1.15; letter-spacing: -0.02em; }
+.student-space .bilan-hero-text > p:last-child { margin: 0; color: #e4e2ff; font-size: 0.84rem; max-width: 34rem; }
+.bilan-next { align-content: space-between; gap: 0.9rem; }
+.student-space .bilan-next h2 { margin: 0; }
+.bilan-next p { margin: 0; font-size: 0.84rem; }
+.bilan-next .button { display: inline-flex; justify-content: center; align-items: center; gap: 0.45rem; }
+@media (max-width: 860px) { .bilan-top { grid-template-columns: 1fr; } }
+@media (max-width: 520px) { .bilan-hero { grid-template-columns: 1fr; justify-items: start; } }
+.bilan-list { display: grid; gap: 0.8rem; list-style: none; margin: 0; padding: 0; }
+.student-space .bilan-question { margin: 0; padding: 1.1rem 1.25rem; }
+.bilan-question-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem 1rem; }
+.student-space .bilan-question h3 { display: flex; align-items: center; gap: 0.7rem; margin: 0; font-size: 0.92rem; font-weight: 700; }
+.bilan-num { display: grid; place-items: center; flex-shrink: 0; width: 1.7rem; height: 1.7rem; border-radius: 8px; background: var(--sand); border: 1px solid var(--border); font-size: 0.74rem; font-weight: 700; }
+.bilan-tags { display: inline-flex; gap: 0.4rem; }
+.bilan-state { padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.7rem; font-weight: 600; }
+.bilan-state[data-state="right"] { background: var(--mint); color: var(--mint-ink); }
+.bilan-state[data-state="wrong"] { background: #fee2e2; color: #991b1b; }
+.bilan-state[data-state="empty"] { background: var(--warn-bg); color: var(--warning); }
+.bilan-source { margin-top: 0.8rem; }
+.bilan-source summary { display: inline-flex; align-items: center; gap: 0.35rem; min-height: 32px; padding: 0.25rem 0.7rem; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); font-size: 0.75rem; font-weight: 600; color: var(--indigo); cursor: pointer; list-style: none; }
+.bilan-source summary::-webkit-details-marker { display: none; }
+.bilan-source summary:hover { border-color: var(--control-border); }
+.bilan-source summary svg { transition: transform var(--duration); }
+.bilan-source[open] summary svg { transform: rotate(90deg); }
+.bilan-source .when-open, .bilan-source[open] .when-closed { display: none; }
+.bilan-source[open] .when-open { display: inline; }
+.student-space .bilan-source .student-passage { max-width: none; margin: 0.7rem 0 0; padding: 0.9rem 1.1rem; border: 0; border-radius: 12px; background: var(--sand); font-size: 0.84rem !important; }
+.bilan-boxes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.6rem; margin-top: 0.8rem; }
+@media (max-width: 760px) { .bilan-boxes { grid-template-columns: 1fr; } }
+.bilan-box { display: grid; align-content: start; gap: 0.2rem; padding: 0.65rem 0.85rem; border-radius: 10px; background: var(--sand); }
+.bilan-box small { font-size: 0.68rem; color: var(--muted); }
+.student-space .bilan-box p { margin: 0; font-size: 0.82rem; font-weight: 600; color: var(--text); }
+.bilan-box em { font-weight: 500; color: var(--muted); }
+.bilan-box[data-tone="mint"] { background: var(--mint); }
+.bilan-box[data-tone="mint"] small { color: var(--mint-ink); }
+.bilan-box[data-tone="lavender"] { background: var(--lavender); }
+.bilan-box[data-tone="lavender"] small { color: var(--indigo); }
+.bilan-box[data-tone="red"] { background: #fee2e2; }
+.bilan-box[data-tone="red"] small { color: #991b1b; }
+.student-space .section-title .section-note { margin: 0; font-size: 0.76rem !important; color: var(--accent); }
+.shell-site-link { white-space: nowrap; }

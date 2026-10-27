@@ -47,7 +47,7 @@ test("oral entraînement : média privé, lecteur, transcription et résultat", 
   await page.screenshot({path: info.outputPath("oral-entrainement.png"), fullPage: true});
   await page.getByRole("button", {name: "Terminer la séance"}).click();
   await page.getByRole("button", {name: "Confirmer la soumission"}).click();
-  await expect(page.getByText("1 / 1 réponses correctes", {exact: false})).toBeVisible();
+  await expect(page.getByText("1 réponse juste sur 1", {exact: true})).toBeVisible();
   await page.getByRole("link", {name: "Mes résultats", exact: true}).click();
   await expect(page.getByRole("heading", {name: "Écoute", exact: true})).toBeVisible();
   await expect(page.getByText("1 / 1 réponses correctes · 100 %", {exact: true})).toBeVisible();
@@ -72,8 +72,9 @@ test("lecture complète : 39 questions, sauvegarde et correction sur PostgreSQL"
   await expect(map.locator("button[data-state=answered]")).toHaveCount(39);
   await page.getByRole("button", {name: "Terminer la séance"}).click();
   await page.getByRole("button", {name: "Confirmer la soumission"}).click();
-  await expect(page.getByText("39 / 39 réponses correctes", {exact: false})).toBeVisible();
-  await expect(page.getByRole("heading", {name: /^Question \d+$/})).toHaveCount(39);
+  await expect(page.getByText("39 réponses justes sur 39", {exact: true})).toBeVisible();
+  await expect(page.locator(".bilan-question")).toHaveCount(39);
+  await expect(page.getByText("Afficher le texte")).toHaveCount(39);
   await page.screenshot({path: info.outputPath("lecture-complete-resultats.png"), fullPage: true});
 });
 
@@ -95,7 +96,7 @@ test("simulation orale : 39 documents, progression séquentielle et absence de r
   }
   await page.getByRole("button", {name: "Terminer la séance"}).click();
   await page.getByRole("button", {name: "Confirmer la soumission"}).click();
-  await expect(page.getByText("39 / 39 réponses correctes", {exact: false})).toBeVisible();
+  await expect(page.getByText("39 réponses justes sur 39", {exact: true})).toBeVisible();
   await page.screenshot({path: info.outputPath("oral-complet-resultats.png"), fullPage: true});
 });
 
