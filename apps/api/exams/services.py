@@ -68,9 +68,6 @@ def save_answer(*, attempt_id, user, question_id, choice_id) -> Answer:
                 raise ValidationError(
                     {"question_id": "Cette question ne fait pas partie de l’examen."}
                 )
-            if attempt.exam.skill == "listening" and attempt.exam.mode == "simulation":
-                from pedagogy.services import listening_guard
-                listening_guard(attempt, question)
             choice = Choice.objects.filter(
                 pk=choice_id, question_id=question.pk
             ).first()

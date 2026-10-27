@@ -30,6 +30,7 @@ const paths = {
   expand: "M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5",
   shrink: "M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5",
   play: "M7 4v16l13-8Z",
+  pause: "M8 5v14M16 5v14",
   stop: "M6 6h12v12H6Z",
   trash: "M4 7h16M10 11v6M14 11v6M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13M9 7V4h6v3",
   download: "M12 4v11M7 10l5 5 5-5M4 20h16",

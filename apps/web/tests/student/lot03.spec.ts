@@ -30,14 +30,11 @@ test("oral entraînement : média privé, lecteur, transcription et résultat", 
   await page.goto("/etudiant/comprehension-orale");
   await page.getByRole("article").filter({has: page.getByRole("heading", {name: "Écoute de recette — annonce", exact: true})}).getByRole("button", {name: "Démarrer la série"}).click();
   await expect(page.getByRole("heading", {name: "Écoutez, choisissez, avancez."})).toBeVisible();
-  await page.getByRole("button", {name: "Charger le document audio"}).click();
+  // Le document se charge dès l’affichage de la question ; ▶ le lance.
   const audio = page.locator("audio");
-  await expect(audio).toHaveAttribute("src", /^blob:/);
+  await expect(audio).toHaveAttribute("src", /\/audio\/$/);
   await expect.poll(() => audio.evaluate((element: HTMLAudioElement) => element.readyState)).toBeGreaterThanOrEqual(1);
-  // Contrôle effectif du moteur audio, sans prétendre que le signal de test est une voix.
-  // Le lecteur n'active la commande qu'au décodage effectif (canplay), après readyState 1.
-  await expect(page.getByRole("button", {name: "Lire le document", exact: true})).toBeEnabled();
-  await page.getByRole("button", {name: "Lire le document", exact: true}).focus();
+  await page.getByRole("button", {name: "Écouter le document", exact: true}).focus();
   await page.keyboard.press("Space");
   await expect.poll(() => audio.evaluate((element: HTMLAudioElement) => element.currentTime)).toBeGreaterThan(0);
   await page.getByText("Consulter la transcription", {exact: true}).click();
@@ -83,20 +80,28 @@ test("lecture complète : 39 questions, sauvegarde et correction sur PostgreSQL"
   await expect(page.locator(".question-map button[data-state=answered]")).toHaveCount(0);
 });
 
-test("simulation orale : 39 documents, progression séquentielle et absence de réécoute", async ({page}, info) => {
+test("simulation orale : 39 questions ouvertes, navigation libre et réécoute", async ({page}, info) => {
   test.setTimeout(150_000);
   await student(page, info.project.name + "-simulation");
   await page.goto("/etudiant/comprehension-orale");
   await page.getByRole("article").filter({has: page.getByRole("heading", {name: "Écoute complète de recette — 39 questions", exact: true})}).getByRole("button", {name: "Démarrer la série"}).click();
+  // Les 39 questions sont accessibles d’emblée, avec leurs choix.
+  const map = page.getByRole("navigation", {name: "Vue d’ensemble"});
+  await expect(map.locator(".question-map button:enabled")).toHaveCount(39);
+  await expect(page.getByRole("radio")).toHaveCount(4);
+  await map.getByRole("button", {name: /^Question 39,/}).click();
+  await expect(page.getByRole("heading", {name: "Question 39 / 39", exact: true})).toBeVisible();
+  await map.getByRole("button", {name: /^Question 1,/}).click();
+  // Réécoute : le document se relance après sa fin.
+  const audio = page.locator("audio");
+  for (let round = 0; round < 2; round++) {
+    await page.getByRole("button", {name: "Écouter le document", exact: true}).click();
+    await expect.poll(() => audio.evaluate((element: HTMLAudioElement) => element.ended), {timeout: 10_000}).toBe(true);
+  }
   for (let index = 1; index <= 39; index++) {
-    // Les sections n'ont pas de nom ARIA artificiel : sélection par structure sémantique.
-    const document = page.locator("section").filter({has: page.getByRole("heading", {name: `Question ${index} / 39`, exact: true})});
-    await document.getByRole("button", {name: "Charger le document audio"}).click();
-    await document.getByRole("button", {name: "Écouter le document chargé"}).click();
-    await expect.poll(() => document.locator("audio").evaluate((element: HTMLAudioElement) => element.ended), {timeout: 10_000}).toBe(true);
-    await document.getByRole("radio", {name: "Samedi à dix heures", exact: true}).check();
+    await expect(page.getByRole("heading", {name: `Question ${index} / 39`, exact: true})).toBeVisible();
+    await page.getByRole("radio", {name: "Samedi à dix heures", exact: true}).check();
     await expect(page.getByRole("status")).toContainText("Réponse enregistrée");
-    await expect(document.getByRole("button", {name: "Charger le document audio"})).toHaveCount(0);
     if (index < 39) await page.getByRole("button", {name: "Suivant"}).click();
   }
   await page.getByRole("button", {name: "Terminer la séance"}).click();

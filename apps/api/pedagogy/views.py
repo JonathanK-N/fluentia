@@ -1,5 +1,7 @@
 """API éditoriale privée et médias servis sous contrôle de la tentative."""
 
+import re
+
 from django.db import transaction, IntegrityError
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -231,11 +233,27 @@ class AudioView(SecureView):
     permission_classes = [IsAuthenticated]
     throttle_classes = [EditorThrottle]
 
-    @extend_schema(request=None, responses={(200, "audio/wav"): OpenApiTypes.BINARY})
-    def post(self, request, attempt_id, question_id):
+    @extend_schema(responses={(200, "audio/wav"): OpenApiTypes.BINARY, (206, "audio/wav"): OpenApiTypes.BINARY})
+    def get(self, request, attempt_id, question_id):
         asset, payload = claim_audio(request.user, attempt_id, question_id)
-        response = HttpResponse(payload, content_type="audio/wav")
-        response["Cache-Control"] = "private, no-store"
+        size, start, end = len(payload), 0, len(payload) - 1
+        # Plages d’octets : le navigateur lit et se déplace dans le document sans tout attendre.
+        wanted = re.fullmatch(r"bytes=(\d*)-(\d*)", request.headers.get("Range", ""))
+        if wanted and any(wanted.groups()):
+            first, last = wanted.groups()
+            if first:
+                start, end = int(first), min(int(last), end) if last else end
+            else:
+                start = max(0, size - int(last))
+            if start > end:
+                response = HttpResponse(status=416)
+                response["Content-Range"] = f"bytes */{size}"
+                return response
+        response = HttpResponse(payload[start:end + 1], content_type="audio/wav", status=206 if wanted and any(wanted.groups()) else 200)
+        if response.status_code == 206:
+            response["Content-Range"] = f"bytes {start}-{end}/{size}"
+        response["Accept-Ranges"] = "bytes"
+        response["Cache-Control"] = "private, max-age=3600"
         response["Content-Disposition"] = 'inline; filename="document.wav"'
         response["X-Content-Type-Options"] = "nosniff"
         response["X-Audio-Duration-Ms"] = str(asset.duration_ms)

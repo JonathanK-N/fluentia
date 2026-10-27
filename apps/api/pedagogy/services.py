@@ -5,7 +5,6 @@ import io
 import struct
 import uuid
 import wave
-from datetime import timedelta
 from pathlib import Path
 
 from django.conf import settings
@@ -22,7 +21,6 @@ from .models import (
     MediaAsset,
     EditorialEvent,
     PublishedItem,
-    ListeningAccess,
     ExamSeries,
 )
 
@@ -388,25 +386,10 @@ def audio_asset(question):
         raise NotFound("Document audio indisponible.") from exc
 
 
-def listening_guard(attempt, question):
-    """Autorise la réponse seulement après diffusion et avant la question suivante."""
-    access = ListeningAccess.objects.filter(attempt=attempt, question=question).first()
-    if (
-        not access
-        or timezone.now() < access.ends_at
-        or ListeningAccess.objects.filter(
-            attempt=attempt, question__position__gt=question.position
-        ).exists()
-    ):
-        raise ValidationError(
-            "Cette question ne peut pas recevoir de réponse à cet instant."
-        )
-
-
 def claim_audio(user, attempt_id, question_id):
+    """Document audio d’une question : réécoutable librement tant que la tentative est en cours."""
     from exams.services import _locked_attempt, _active_error
 
-    error = None
     with transaction.atomic():
         attempt = _locked_attempt(attempt_id, user)
         error = _active_error(attempt)
@@ -417,40 +400,9 @@ def claim_audio(user, attempt_id, question_id):
             if question is None:
                 raise NotFound()
             asset = audio_asset(question)
-            payload = read_media(asset)
-            error = _active_error(attempt)
-            if not error and attempt.exam.mode == "simulation":
-                if ListeningAccess.objects.filter(
-                    attempt=attempt, question=question
-                ).exists():
-                    raise ValidationError(
-                        "Ce document a déjà été délivré pour cette simulation."
-                    )
-                prior = list(
-                    attempt.exam.questions.filter(
-                        position__lt=question.position
-                    ).values_list("pk", flat=True)
-                )
-                if ListeningAccess.objects.filter(
-                    attempt=attempt, question_id__in=prior, ends_at__lte=timezone.now()
-                ).count() != len(prior):
-                    raise ValidationError(
-                        "Terminez l’écoute précédente avant de continuer."
-                    )
-                now = timezone.now()
-                if now + timedelta(milliseconds=asset.duration_ms) > attempt.expires_at:
-                    raise ValidationError(
-                        "Le temps restant ne permet pas de démarrer ce document."
-                    )
-                ListeningAccess.objects.create(
-                    attempt=attempt,
-                    question=question,
-                    started_at=now,
-                    ends_at=now + timedelta(milliseconds=asset.duration_ms),
-                )
     if error:
         raise ValidationError({"attempt": error})
-    return asset, payload
+    return asset, read_media(asset)
 
 
 IMAGE_MAX_BYTES = 5_000_000

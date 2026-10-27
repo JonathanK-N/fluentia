@@ -5,7 +5,6 @@ import tempfile
 import wave
 import math
 import struct
-from datetime import timedelta
 from unittest.mock import patch
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
@@ -19,7 +18,7 @@ from rest_framework.test import APIClient
 from accounts.models import StudentProfile
 from exams.models import Exam, Question, Answer, Attempt
 from exams.services import create_attempt, save_answer, submit_attempt
-from .models import BankItem, EditorialEvent, MediaAsset, ListeningAccess
+from .models import BankItem, EditorialEvent, MediaAsset
 from .services import (
     create_item,
     edit_item,
@@ -451,89 +450,52 @@ class PedagogyTests(TestCase):
                     provenance="Test",
                 )
 
-    def test_media_delivery_owner_csrf_deadline_and_training_replay(self):
+    def test_media_delivery_owner_ranges_and_deadline(self):
         exam = self.exam("listening")
         attempt = create_attempt(user=self.student, exam=exam)
         question = exam.questions.get()
         url = f"/api/v1/attempts/{attempt.pk}/questions/{question.pk}/audio/"
         self.client.force_authenticate(self.other)
-        self.assertEqual(self.client.post(url).status_code, 404)
+        self.assertEqual(self.client.get(url).status_code, 404)
         self.client.force_authenticate(self.student)
         for _ in range(2):
-            response = self.client.post(url)
+            response = self.client.get(url)
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response["Content-Type"], "audio/wav")
-            self.assertIn("no-store", response["Cache-Control"])
-        csrf_client = APIClient(enforce_csrf_checks=True)
-        csrf_client.force_authenticate(self.student)
-        self.assertEqual(csrf_client.post(url).status_code, 403)
+            self.assertEqual(response["Accept-Ranges"], "bytes")
+        size = len(response.content)
+        part = self.client.get(url, HTTP_RANGE="bytes=10-19")
+        self.assertEqual(part.status_code, 206)
+        self.assertEqual(part.content, response.content[10:20])
+        self.assertEqual(part["Content-Range"], f"bytes 10-19/{size}")
+        self.assertEqual(self.client.get(url, HTTP_RANGE="bytes=-4").content, response.content[-4:])
+        self.assertEqual(self.client.get(url, HTTP_RANGE=f"bytes={size}-").status_code, 416)
         with patch("exams.services.timezone.now", return_value=attempt.expires_at):
-            self.assertEqual(self.client.post(url).status_code, 400)
+            self.assertEqual(self.client.get(url).status_code, 400)
         attempt.refresh_from_db()
         self.assertEqual(attempt.status, "expired")
 
-    def test_audio_validation_crossing_deadline_does_not_deliver(self):
-        exam = self.exam("listening")
-        attempt = create_attempt(user=self.student, exam=exam)
-        question = exam.questions.get()
-        with patch(
-            "exams.services.timezone.now",
-            side_effect=[attempt.started_at, attempt.expires_at],
-        ):
-            with self.assertRaises(ValidationError):
-                claim_audio(self.student, attempt.pk, question.pk)
-        attempt.refresh_from_db()
-        self.assertEqual(attempt.status, "expired")
-        self.assertFalse(ListeningAccess.objects.filter(attempt=attempt).exists())
-
-    def test_complete_listening_simulation_and_single_delivery(self):
+    def test_complete_listening_simulation_is_open_and_replayable(self):
         exam = self.exam("listening", mode="simulation", count=39)
         attempt = create_attempt(user=self.student, exam=exam)
-        start = attempt.started_at
         self.client.force_authenticate(self.student)
         first_view = self.client.get(f"/api/v1/attempts/{attempt.pk}/").data
         self.assertNotIn("transcript", str(first_view))
-        self.assertEqual(first_view["questions"][0]["choices"], [])
+        # Toutes les questions sont visibles d’emblée, dans n’importe quel ordre.
+        self.assertEqual(len(first_view["questions"]), 39)
+        self.assertTrue(all(len(q["choices"]) == 4 for q in first_view["questions"]))
         questions = list(exam.questions.all())
-        with self.assertRaises(ValidationError):
-            claim_audio(self.student, attempt.pk, questions[1].pk)
-        for index, question in enumerate(questions):
-            now = start + timedelta(seconds=index * 2)
-            with patch("django.utils.timezone.now", return_value=now):
-                claim_audio(self.student, attempt.pk, question.pk)
-                with self.assertRaises(ValidationError):
-                    claim_audio(self.student, attempt.pk, question.pk)
-                with self.assertRaises(ValidationError):
-                    save_answer(
-                        user=self.student,
-                        attempt_id=attempt.pk,
-                        question_id=question.pk,
-                        choice_id=question.choices.get(is_correct=True).pk,
-                    )
-            with patch(
-                "django.utils.timezone.now", return_value=now + timedelta(seconds=1)
-            ):
-                save_answer(
-                    user=self.student,
-                    attempt_id=attempt.pk,
-                    question_id=question.pk,
-                    choice_id=question.choices.get(is_correct=True).pk,
-                )
-                if index:
-                    previous = questions[index - 1]
-                    with self.assertRaises(ValidationError):
-                        save_answer(
-                            user=self.student,
-                            attempt_id=attempt.pk,
-                            question_id=previous.pk,
-                            choice_id=previous.choices.get(is_correct=True).pk,
-                        )
-        self.assertEqual(ListeningAccess.objects.filter(attempt=attempt).count(), 39)
-        with patch(
-            "django.utils.timezone.now", return_value=start + timedelta(seconds=80)
-        ):
-            result = submit_attempt(user=self.student, attempt_id=attempt.pk)
-            detail = self.client.get(f"/api/v1/attempts/{attempt.pk}/results/").data
+        for question in reversed(questions):
+            claim_audio(self.student, attempt.pk, question.pk)
+            claim_audio(self.student, attempt.pk, question.pk)
+            save_answer(
+                user=self.student,
+                attempt_id=attempt.pk,
+                question_id=question.pk,
+                choice_id=question.choices.get(is_correct=True).pk,
+            )
+        result = submit_attempt(user=self.student, attempt_id=attempt.pk)
+        detail = self.client.get(f"/api/v1/attempts/{attempt.pk}/results/").data
         self.assertEqual((result.correct_count, result.question_count), (39, 39))
         self.assertIn("transcript", detail["details"][0])
 
