@@ -2,12 +2,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Button } from "../../components/ui/primitives";
 import { Icon } from "../../components/app-shell/icons";
 import { api, type AttemptSummary } from "../../lib/student-api";
 import { useSession } from "../../lib/session";
-import { Catalogue } from "../../features/student/catalogue";
-import { attemptHref, skillLabel } from "../../features/student/content";
+import { attemptHref } from "../../features/student/content";
 import { Notice, SectionTitle, SkillCards, Summary } from "../../features/student/ui";
 import type { Progress } from "./progression/page";
 
@@ -15,18 +13,15 @@ export default function HomePage() {
   const { profile, ready } = useSession();
   const [attempts, setAttempts] = useState<AttemptSummary[]>([]);
   const [progress, setProgress] = useState<Progress | null>(null);
-  const [offset, setOffset] = useState(0);
-  const [more, setMore] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  // Séances ouvertes : alimentent le bandeau « Reprendre ma séance » et la carte « En cours ».
   useEffect(() => {
     if (!profile) return;
     let active = true;
-    api<{ results: AttemptSummary[]; next: string | null }>(`attempts/?limit=50&offset=${offset}`).then(data => {
-      if (active) { setAttempts(previous => offset ? [...previous, ...data.results] : data.results); setMore(Boolean(data.next)); }
-    }).catch(e => { if (active && e.status !== 403) setError(e.message); }).finally(() => { if (active) setLoading(false); });
+    api<{ results: AttemptSummary[] }>("attempts/?limit=50").then(data => { if (active) setAttempts(data.results); })
+      .catch(() => { if (active) setAttempts([]); }).finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [offset, profile]);
+  }, [profile]);
   useEffect(() => {
     if (!profile) return;
     api<Progress>("progress/").then(setProgress).catch(() => setProgress(null));
@@ -69,29 +64,13 @@ export default function HomePage() {
     ]} />
     <div id="epreuves"><SectionTitle title="Choisir une épreuve" note="Les 4 épreuves du TCF, au format de l’examen" /></div>
     <SkillCards />
-    <div className="two-col" style={{ marginTop: "2rem" }}>
-      <section className="student-card" aria-labelledby="activites">
-        <h2 id="activites">Mes séances</h2>
-        {error && <p role="alert">{error}</p>}
-        {!profile && <p>Vos séances apparaîtront ici après votre connexion.</p>}
-        {profile && !loading && !attempts.length && <p>Aucune séance pour le moment. Choisissez une série ci-dessous pour commencer.</p>}
-        {attempts.length > 0 && <ul className="activity-list">{attempts.map(attempt => <li key={attempt.id}>
-          <span className="activity-title"><Link href={attemptHref(attempt)}>{attempt.exam_title} · {attempt.status === "submitted" ? "Voir ma correction" : attempt.status === "expired" ? "Temps écoulé" : "Reprendre"}</Link><small>{skillLabel(attempt.skill)} · {attempt.mode === "simulation" ? "Simulation" : "Entraînement"}</small></span>
-          <span className={`pill ${attempt.status === "submitted" ? "pill-success" : attempt.status === "active" ? "pill-warning" : ""}`}>{attempt.status === "submitted" ? "Terminée" : attempt.status === "active" ? "En cours" : "Expirée"}</span>
-        </li>)}</ul>}
-        {more && <Button variant="secondary" loading={loading} onClick={() => { setError(""); setLoading(true); setOffset(attempts.length); }}>Afficher mes séances précédentes</Button>}
-      </section>
-      <section className="student-card card-muted" aria-labelledby="methode">
-        <h2 id="methode">Votre méthode en trois temps</h2>
-        <ul className="activity-list">
-          <li><span className="activity-title"><strong>1. S’entraîner</strong><small>Séries courtes, corrections expliquées.</small></span><Icon name="book" /></li>
-          <li><span className="activity-title"><strong>2. Se mettre en condition</strong><small>Simulations complètes et chronométrées.</small></span><Icon name="timer" /></li>
-          <li><span className="activity-title"><strong>3. Analyser</strong><small>Repérez vos points forts et vos priorités.</small></span><Icon name="trend" /></li>
-        </ul>
-      </section>
-    </div>
-    <SectionTitle title="Séries disponibles" link={{ href: "/etudiant/examens-blancs", label: "Voir les simulations TCF" }} />
-    <Catalogue />
-    <p className="student-hint">Entraînements et simulations non officiels. Les difficultés affichées sont proposées par les auteurs et ne constituent pas un niveau certifié.</p>
+    <section className="student-card card-muted" aria-labelledby="methode" style={{ marginTop: "2rem" }}>
+      <h2 id="methode">Votre méthode en trois temps</h2>
+      <ul className="activity-list">
+        <li><span className="activity-title"><strong>1. S’entraîner</strong><small>Séries courtes, corrections expliquées.</small></span><Icon name="book" /></li>
+        <li><span className="activity-title"><strong>2. Se mettre en condition</strong><small>Simulations complètes et chronométrées.</small></span><Icon name="timer" /></li>
+        <li><span className="activity-title"><strong>3. Analyser</strong><small>Repérez vos points forts et vos priorités.</small></span><Icon name="trend" /></li>
+      </ul>
+    </section>
   </>;
 }

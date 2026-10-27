@@ -31,7 +31,7 @@ test("inscription, courriel, session, lecture persistante et résultat privé su
   await sound.click();
   await expect(page.getByRole("status")).toContainText("Réglage enregistré");
   await expect(sound).toHaveAttribute("aria-checked", "false");
-  await page.goto("/etudiant");
+  await page.goto("/etudiant/comprehension-ecrite");
   await page.getByRole("article").filter({has: page.getByRole("heading", {name: "Lecture de recette — atelier vélo", exact: true})}).getByRole("button", {name: "Commencer cet exercice"}).click();
   await expect(page).toHaveURL(/\/etudiant\/lecture\//);
   const attemptUrl = page.url();
@@ -74,7 +74,7 @@ test("inscription, courriel, session, lecture persistante et résultat privé su
   await page.reload();
   await expect(page.getByRole("radio", {name: "Les pièces à remplacer", exact: true})).toBeChecked();
   await page.getByRole("link", {name: "Retour aux exercices"}).click();
-  await page.getByRole("link", {name: /· Reprendre/}).click();
+  await page.getByRole("link", {name: "Reprendre ma séance"}).click();
   await expect(page).toHaveURL(attemptUrl);
   await expect(page.getByRole("heading", {name: "À vous de lire", exact: true})).toBeVisible();
   await expect(page).toHaveTitle(/Compréhension écrite/);
