@@ -28,7 +28,7 @@ test("oral entraînement : média privé, lecteur, transcription et résultat", 
   await student(page, info.project.name + "-oral");
   await page.goto("/etudiant/comprehension-orale");
   await page.getByRole("article").filter({has: page.getByRole("heading", {name: "Écoute de recette — annonce", exact: true})}).getByRole("button", {name: "Démarrer la série"}).click();
-  await expect(page.getByRole("heading", {name: "À vous d’écouter"})).toBeVisible();
+  await expect(page.getByRole("heading", {name: "Écoutez, choisissez, avancez."})).toBeVisible();
   await page.getByRole("button", {name: "Charger le document audio"}).click();
   const audio = page.locator("audio");
   await expect(audio).toHaveAttribute("src", /^blob:/);
@@ -45,7 +45,7 @@ test("oral entraînement : média privé, lecteur, transcription et résultat", 
   await expect(page.getByRole("status")).toContainText("Réponse enregistrée");
   expect((await new AxeBuilder({page}).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations).toEqual([]);
   await page.screenshot({path: info.outputPath("oral-entrainement.png"), fullPage: true});
-  await page.getByRole("button", {name: "Terminer et vérifier mes réponses"}).click();
+  await page.getByRole("button", {name: "Terminer la séance"}).click();
   await page.getByRole("button", {name: "Confirmer la soumission"}).click();
   await expect(page.getByText("1 / 1 réponses correctes", {exact: false})).toBeVisible();
   await page.getByRole("link", {name: "Mes résultats", exact: true}).click();
@@ -58,9 +58,9 @@ test("lecture complète : 39 questions, sauvegarde et correction sur PostgreSQL"
   await page.getByRole("article").filter({has: page.getByRole("heading", {name: "Lecture complète de recette — 39 questions", exact: true})}).getByRole("button", {name: "Démarrer la série"}).click();
   // Une question à la fois : on répond, puis « Suivant ».
   await expect(page.getByRole("radio")).toHaveCount(4);
-  const map = page.getByRole("navigation", {name: "Plan des questions"});
+  const map = page.getByRole("navigation", {name: "Vue d’ensemble"});
   for (let index = 1; index <= 39; index++) {
-    await expect(page.getByRole("heading", {name: `Question ${index} sur 39`, exact: true})).toBeVisible();
+    await expect(page.getByRole("heading", {name: `Question ${index} / 39`, exact: true})).toBeVisible();
     await page.getByRole("radio", {name: "Samedi à dix heures", exact: true}).check();
     await expect(page.getByRole("status")).toContainText("Réponse enregistrée");
     // Correction en direct active par défaut : elle s’applique aussi en simulation.
@@ -70,7 +70,7 @@ test("lecture complète : 39 questions, sauvegarde et correction sur PostgreSQL"
   await expect(map.locator("button[data-state=answered]")).toHaveCount(39);
   await page.reload();
   await expect(map.locator("button[data-state=answered]")).toHaveCount(39);
-  await page.getByRole("button", {name: "Terminer et vérifier mes réponses"}).click();
+  await page.getByRole("button", {name: "Terminer la séance"}).click();
   await page.getByRole("button", {name: "Confirmer la soumission"}).click();
   await expect(page.getByText("39 / 39 réponses correctes", {exact: false})).toBeVisible();
   await expect(page.getByRole("heading", {name: /^Question \d+$/})).toHaveCount(39);
@@ -84,7 +84,7 @@ test("simulation orale : 39 documents, progression séquentielle et absence de r
   await page.getByRole("article").filter({has: page.getByRole("heading", {name: "Écoute complète de recette — 39 questions", exact: true})}).getByRole("button", {name: "Démarrer la série"}).click();
   for (let index = 1; index <= 39; index++) {
     // Les sections n'ont pas de nom ARIA artificiel : sélection par structure sémantique.
-    const document = page.locator("section").filter({has: page.getByRole("heading", {name: `Question ${index} sur 39`, exact: true})});
+    const document = page.locator("section").filter({has: page.getByRole("heading", {name: `Question ${index} / 39`, exact: true})});
     await document.getByRole("button", {name: "Charger le document audio"}).click();
     await document.getByRole("button", {name: "Écouter le document chargé"}).click();
     await expect.poll(() => document.locator("audio").evaluate((element: HTMLAudioElement) => element.ended), {timeout: 10_000}).toBe(true);
@@ -93,7 +93,7 @@ test("simulation orale : 39 documents, progression séquentielle et absence de r
     await expect(document.getByRole("button", {name: "Charger le document audio"})).toHaveCount(0);
     if (index < 39) await page.getByRole("button", {name: "Suivant"}).click();
   }
-  await page.getByRole("button", {name: "Terminer et vérifier mes réponses"}).click();
+  await page.getByRole("button", {name: "Terminer la séance"}).click();
   await page.getByRole("button", {name: "Confirmer la soumission"}).click();
   await expect(page.getByText("39 / 39 réponses correctes", {exact: false})).toBeVisible();
   await page.screenshot({path: info.outputPath("oral-complet-resultats.png"), fullPage: true});

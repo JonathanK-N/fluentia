@@ -73,10 +73,12 @@ test("inscription, courriel, session, lecture persistante et résultat privé su
   await expect(page.locator("label.student-choice[data-verdict=wrong]")).toHaveCount(0);
   await page.reload();
   await expect(page.getByRole("radio", {name: "Les pièces à remplacer", exact: true})).toBeChecked();
-  await page.getByRole("link", {name: "Retour aux exercices"}).click();
+  await page.getByRole("link", {name: "Quitter la séance"}).click();
+  await expect(page).toHaveURL(/\/etudiant\/comprehension-ecrite$/);
+  await page.getByRole("navigation", {name: "Navigation de l’espace étudiant"}).getByRole("link", {name: "Accueil", exact: true}).click();
   await page.getByRole("link", {name: "Reprendre ma séance"}).click();
   await expect(page).toHaveURL(attemptUrl);
-  await expect(page.getByRole("heading", {name: "À vous de lire", exact: true})).toBeVisible();
+  await expect(page.getByRole("heading", {name: "Lisez, choisissez, avancez.", exact: true})).toBeVisible();
   await expect(page).toHaveTitle(/Compréhension écrite/);
   await expect(page.getByRole("radio", {name: "Les pièces à remplacer", exact: true})).toBeChecked();
   await page.evaluate(() => document.fonts.ready.then(() => undefined));
@@ -88,7 +90,7 @@ test("inscription, courriel, session, lecture persistante et résultat privé su
   await expect(page.locator("body")).toHaveCSS("background-color", "rgb(238, 240, 246)");
   expect((await new AxeBuilder({page}).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations).toEqual([]);
   await page.emulateMedia({colorScheme: "light"});
-  await page.getByRole("button", {name: "Terminer et vérifier mes réponses"}).click();
+  await page.getByRole("button", {name: "Terminer la séance"}).click();
   await page.getByRole("button", {name: "Confirmer la soumission"}).click();
   await expect(page.getByRole("heading", {name: "Votre résultat", exact: true})).toBeVisible();
   await expect(page.getByText("1 / 1 réponses correctes", {exact: false})).toBeVisible();
