@@ -5,7 +5,11 @@ from django.core.exceptions import ValidationError as ModelValidationError
 from rest_framework.exceptions import APIException
 from .models import (
     BankItem,
+    ImageAsset,
     MediaAsset,
+    SeriesImport,
+    TaskSet,
+    TaskSubject,
     EditorialEvent,
     PublishedItem,
     ListeningAccess,
@@ -79,3 +83,42 @@ class MediaAdmin(AuditAdmin):
 admin.site.register(PublishedItem, AuditAdmin)
 admin.site.register(ListeningAccess, AuditAdmin)
 admin.site.register(ExamSeries, AuditAdmin)
+
+
+@admin.register(SeriesImport)
+class SeriesImportAdmin(AuditAdmin):
+    list_display = ["title", "skill", "mode", "question_count", "file_name", "created_by", "created_at", "exam"]
+    list_filter = ["skill", "mode"]
+    search_fields = ["title", "file_name"]
+
+    @admin.display(description="Questions ou sujets")
+    def question_count(self, obj):
+        return obj.task_set.subjects.count() if obj.task_set_id else len(obj.item_ids)
+
+
+@admin.register(ImageAsset)
+class ImageAdmin(AuditAdmin):
+    list_display = ["title", "width", "height", "size", "content_type", "created_by", "created_at"]
+    search_fields = ["title", "provenance"]
+
+
+class TaskSubjectInline(admin.TabularInline):
+    model = TaskSubject
+    extra = 0
+    fields = ["task_number", "position", "title", "prompt"]
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(TaskSet)
+class TaskSetAdmin(AuditAdmin):
+    list_display = ["title", "skill", "state", "is_active", "editor", "reviewer", "published_at"]
+    list_filter = ["skill", "state", "is_active"]
+    inlines = [TaskSubjectInline]
