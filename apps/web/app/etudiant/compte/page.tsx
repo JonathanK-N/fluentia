@@ -9,7 +9,7 @@ import { initials, useSession } from "../../../lib/session";
 const benefits = ["Vos réponses enregistrées à chaque choix, reprise sur tous vos appareils.", "Des corrigés expliqués après chaque exercice soumis.", "Une progression calculée uniquement sur vos résultats réels."];
 
 export default function AccountPage() {
-  const { profile, ready, setProfile } = useSession();
+  const { profile, ready, setProfile, refresh } = useSession();
   const [mode, setMode] = useState<"login" | "register">("login");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -25,7 +25,7 @@ export default function AccountPage() {
   }
   async function resend() {
     setBusy(true); setError("");
-    try { const data = await api<{ detail: string }>("auth/verification/resend/", "POST"); setMessage(data.detail); }
+    try { const data = await api<{ detail: string }>("auth/verification/resend/", "POST"); setMessage(data.detail); await refresh(); }
     catch (e) { setError((e as Error).message); } finally { setBusy(false); }
   }
   async function signout() {

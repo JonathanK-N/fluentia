@@ -16,6 +16,12 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     finally { setReady(true); }
   }, []);
   useEffect(() => { refresh(); }, [refresh]);
+  // La vérification se fait souvent dans un autre onglet : relire le profil au retour.
+  useEffect(() => {
+    const onVisible = () => { if (document.visibilityState === "visible") refresh(); };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [refresh]);
   return <SessionContext.Provider value={{ profile, ready, setProfile, refresh }}>{children}</SessionContext.Provider>;
 }
 
