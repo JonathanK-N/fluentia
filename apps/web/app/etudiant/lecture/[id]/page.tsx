@@ -248,23 +248,28 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
         <div className="attempt-layout">
           <div>
             {question && <section className="student-card question-card" id={`q-${question.id}`} key={question.id} aria-labelledby="question-titre">
-              <div className="question-head"><h2 id="question-titre" ref={headingRef} tabIndex={-1}>Question {question.position} <span className="question-of">/ {total}</span></h2><span className="pill question-points">{question.points} pts</span></div>
+              <div className="question-head"><h2 id="question-titre" ref={headingRef} tabIndex={-1}>Question {question.position} <span className="question-of">/ {total}</span></h2><span className="pill question-points">{question.points} pt{question.points > 1 ? "s" : ""}</span></div>
               {question.image_available && <DocumentImage src={`/api/v1/attempts/${id}/questions/${question.id}/image/`} text={question.image_text} />}
               {question.reading_passage && <p className="student-passage">{question.reading_passage}</p>}
               {listening && (question.audio_available ? <AudioPlayer attemptId={id} questionId={question.id} simulation={attempt.mode === "simulation"} state={question.audio_state} endsAt={question.audio_ends_at} serverOffset={clockOffset.current} refresh={load} /> : <p role="alert">Le document audio n’est pas disponible pour cette version.</p>)}
               {question.transcript && <details><summary>Consulter la transcription</summary><p>{question.transcript}</p></details>}
-              <fieldset disabled={remaining === 0 || (listening && attempt.mode === "simulation" && question.audio_state !== "ready")} aria-busy={busy}><legend>{question.statement}</legend>
+              {/* Simulation d’écoute : comme le jour J, la question s’affiche une fois le document entendu. */}
+              {listening && attempt.mode === "simulation" && question.audio_state !== "ready" && <p className="listen-hint"><Icon name="headphones" size={16} />La question et ses quatre choix s’affichent à la fin de l’écoute. Lancez le document quand vous êtes prêt : il n’est diffusé qu’une fois.</p>}
+              {question.choices.length > 0 && <fieldset disabled={remaining === 0 || (listening && attempt.mode === "simulation" && question.audio_state !== "ready")} aria-busy={busy}><legend>{question.statement}</legend>
                 {question.choices.map((choice, rank) => { const verdict = verdicts[question.id]; const state = verdict?.choice === choice.id ? (verdict.correct ? "right" : "wrong") : undefined; return <label className="student-choice" data-verdict={state} key={choice.id}>
                   <input type="radio" name={question.id} value={choice.id} disabled={busy && answers[question.id] !== choice.id} checked={answers[question.id] === choice.id} onChange={() => save(question.id, choice.id)} />
                   <span className="choice-letter" aria-hidden="true">{"ABCD"[rank]}</span>{choice.label}
                   {state && <Icon name={state === "right" ? "check" : "close"} size={16} className="choice-mark" />}
                 </label>; })}
-              </fieldset>
+              </fieldset>}
               <nav className="question-nav" aria-label="Navigation entre les questions">
                 <Button variant="secondary" disabled={index === 0} onClick={() => go(index - 1)}><Icon name="back" size={15} />Retour</Button>
                 {index < shown.length - 1
                   ? <Button onClick={() => go(index + 1)}>Question suivante<Icon name="arrow" size={15} /></Button>
-                  : <Button disabled={busy || remaining === 0} onClick={() => setConfirm(true)}>Terminer<Icon name="check" size={15} /></Button>}
+                  : question.position < total
+                    // Écoute en simulation : la suivante s’ouvre à la fin du document en cours.
+                    ? <Button disabled>Question suivante<Icon name="arrow" size={15} /></Button>
+                    : <Button disabled={busy || remaining === 0} onClick={() => setConfirm(true)}>Terminer<Icon name="check" size={15} /></Button>}
               </nav>
             </section>}
             {confirm && <section className="student-card" aria-label="Confirmation de soumission"><h2>Prêt à découvrir le corrigé ?</h2><p>{answeredCount} réponses enregistrées sur {total}. Les questions sans réponse comptent pour zéro. Après la soumission, les réponses seront définitives.</p>
@@ -274,10 +279,12 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
           <aside className="attempt-aside" aria-label="Suivi de la séance">
             <nav className="student-card map-card" aria-labelledby="vue-ensemble">
               <div className="map-head"><h2 id="vue-ensemble">Vue d’ensemble</h2><p>{answeredCount}/{total} répondues</p></div>
-              <ul className="question-map">{shown.map((item, position) => {
+              <ul className="question-map">{(attempt.questions ?? []).map(item => {
                 const state = answers[item.id] ? "answered" : visited[item.id] ? "seen" : undefined;
-                return <li key={item.id}><button type="button" data-state={state} aria-current={item.id === question?.id ? "step" : undefined} onClick={() => go(position)}
-                  aria-label={`Question ${item.position}, ${state === "answered" ? "répondue" : state === "seen" ? "vue sans réponse" : "pas encore vue"}`}>{item.position}</button></li>;
+                // En écoute simulée, les documents passés ou à venir ne sont pas accessibles.
+                const position = shown.findIndex(entry => entry.id === item.id);
+                return <li key={item.id}><button type="button" data-state={state} disabled={position === -1} aria-current={item.id === question?.id ? "step" : undefined} onClick={() => go(position)}
+                  aria-label={`Question ${item.position}, ${state === "answered" ? "répondue" : state === "seen" ? "vue sans réponse" : "pas encore vue"}${position === -1 ? ", non accessible" : ""}`}>{item.position}</button></li>;
               })}</ul>
               <ul className="map-legend" aria-hidden="true"><li data-state="answered">Répondue</li><li data-state="seen">Vue</li><li>Pas encore vue</li></ul>
               <Button className="map-finish" disabled={busy || remaining === 0} onClick={() => setConfirm(true)}>Terminer la séance</Button>

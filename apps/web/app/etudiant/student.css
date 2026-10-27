@@ -560,3 +560,7 @@ html[data-exam-focus] .shell-content.student-space { max-width: none; padding: 0
 .editorial-lock { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 1rem; align-items: start; max-width: 46rem; }
 .student-space .editorial-lock h2 { margin: 0 0 0.4rem; font-size: 1.1rem; }
 .editorial-lock p { font-size: 0.88rem; }
+.student-space .listen-hint { display: flex; align-items: flex-start; gap: 0.55rem; margin: 0 0 1rem; padding: 0.8rem 1rem; border-radius: 12px; background: var(--lavender); color: var(--indigo); font-size: 0.86rem !important; font-weight: 600; }
+.listen-hint svg { flex-shrink: 0; margin-top: 0.1rem; }
+.question-map button:disabled { cursor: default; opacity: 0.55; }
+.question-map button:disabled:hover { border-color: var(--border); }
