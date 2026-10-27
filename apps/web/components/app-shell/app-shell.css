@@ -149,3 +149,9 @@
   .app-shell[data-open] .shell-sidebar > .shell-brand { display: none; }
 }
 
+.shell-breadcrumb ol { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem; margin: 0; padding: 0; list-style: none; font-size: 0.8rem; }
+.shell-breadcrumb li { display: inline-flex; align-items: center; gap: 0.35rem; color: var(--muted); }
+.shell-breadcrumb li + li::before { content: "›"; color: var(--control-border); }
+.shell-breadcrumb a { color: var(--muted); text-decoration: none; }
+.shell-breadcrumb a:hover { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+.shell-breadcrumb [aria-current="page"] { color: var(--text); font-weight: 600; }

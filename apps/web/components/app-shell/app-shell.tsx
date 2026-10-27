@@ -86,6 +86,8 @@ function Shell({ variant, children }: { variant: "student" | "edition"; children
   const groups = variant === "edition" ? editionGroups : studentGroups;
   const current = groups.flatMap(group => group.items).find(item => isActive(pathname, item));
   const title = current?.label ?? extraTitles.find(([pattern]) => pattern.test(pathname))?.[1] ?? "Espace étudiant";
+  // Pages d’épreuve : fil d’Ariane dans l’en-tête, le titre principal est porté par le bandeau.
+  const epreuve = variant === "student" && studentGroups[1]!.items.find(item => item.href === pathname);
   useEffect(() => { setOpen(false); }, [pathname]);
   useEffect(() => {
     if (!open) return;
@@ -124,10 +126,14 @@ function Shell({ variant, children }: { variant: "student" | "edition"; children
     <div className="shell-main">
       <main id="contenu" tabIndex={-1} className="shell-content student-space">
         <header className="shell-pagehead">
-          <div>
+          {epreuve ? <nav aria-label="Fil d’Ariane" className="shell-breadcrumb"><ol>
+            <li><Link className="crumb" href="/etudiant">Accueil</Link></li>
+            <li><Link className="crumb" href="/etudiant#epreuves">Les 4 épreuves</Link></li>
+            <li aria-current="page">{epreuve.label}</li>
+          </ol></nav> : <div>
             <p className="shell-eyebrow">{variant === "edition" ? "Espace éditorial" : "Espace étudiant"}</p>
             <h1>{title}</h1>
-          </div>
+          </div>}
           <Link href="/" className="shell-site-link">Voir le site<Icon name="external" size={14} /></Link>
         </header>
         {children}

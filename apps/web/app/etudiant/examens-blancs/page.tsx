@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Catalogue } from "../../../features/student/catalogue";
-import { Notice, PageHead, SectionTitle } from "../../../features/student/ui";
+import { Notice, PageHead } from "../../../features/student/ui";
 import { Icon } from "../../../components/app-shell/icons";
 export const metadata = { title: "Examens blancs" };
 const parts = [
@@ -20,7 +20,6 @@ export default function MockExamsPage() {
       </li>)}</ul>
     </section>
     <Notice icon="clock">Le délai est contrôlé par le serveur et continue même si vous fermez la page. Prévoyez un moment calme et une connexion stable avant de commencer.</Notice>
-    <SectionTitle title="Simulations disponibles" />
-    <Catalogue skill="all" mode="simulation" emptyText="Aucune simulation complète n’est publiée pour le moment. Elles apparaîtront ici après leur relecture pédagogique." />
+    <Catalogue mode="simulation" title="Simulations disponibles" emptyText="Aucune simulation complète n’est publiée pour le moment. Elles apparaîtront ici après leur relecture pédagogique." />
   </>;
 }

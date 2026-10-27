@@ -1,3 +1,3 @@
-import { ExpressionOverview } from "../../../features/student/expression";
-export const metadata = { title: "Expression écrite" };
-export default function Page() { return <ExpressionOverview kind="writing" />; }
+import { EpreuvePage } from "../../../features/student/epreuve";
+export const metadata = { title: "Rédaction" };
+export default function Page() { return <EpreuvePage id="writing" />; }

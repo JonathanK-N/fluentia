@@ -7,7 +7,7 @@
 .student-space .button-secondary { border-color: var(--border); }
 .student-space .button-secondary:hover { border-color: var(--control-border); background: var(--surface); }
 .student-space .button-primary:hover { box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 16%, transparent); }
-.student-space a:not(.button):not(.shell-link):not(.shell-sublink):not(.shell-brand):not(.shell-site-link):not(.hero-button) { color: var(--accent); text-decoration: underline; text-decoration-color: color-mix(in srgb, currentColor 35%, transparent); text-underline-offset: 3px; }
+.student-space a:not(.button):not(.shell-link):not(.shell-sublink):not(.shell-brand):not(.shell-site-link):not(.hero-button):not(.crumb) { color: var(--accent); text-decoration: underline; text-decoration-color: color-mix(in srgb, currentColor 35%, transparent); text-underline-offset: 3px; }
 .student-space a.plain, .student-space .tile-link { text-decoration: none; }
 .student-space [id] { scroll-margin-top: 84px; }
 
@@ -290,3 +290,37 @@
 .student-choice[data-verdict="right"] input { accent-color: #1d4ed8; }
 .student-choice[data-verdict="wrong"] input { accent-color: #dc2626; }
 .choice-mark { margin-left: auto; flex-shrink: 0; }
+
+/* Pages d’épreuve */
+.hero-chip-row { display: inline-flex; align-items: center; gap: 0.6rem; font-size: 0.74rem; font-weight: 600; color: #e4e2ff; }
+.student-space .epreuve-title { display: flex; align-items: center; gap: 0.6rem; margin: 0; color: #fff; font-size: clamp(1.8rem, 3.4vw, 2.4rem); font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
+.epreuve-title svg { color: #7dd3c0; flex-shrink: 0; }
+.status-head .badge-warn { margin: 0; text-transform: none; letter-spacing: 0; }
+.student-space .notice-text { max-width: none; color: var(--text); line-height: 1.65; }
+.reflexes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin: 0; padding: 0; list-style: none; }
+@media (max-width: 860px) { .reflexes { grid-template-columns: 1fr; } }
+.reflex { display: flex; gap: 0.85rem; align-items: flex-start; padding: 1.1rem 1.15rem; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--border); }
+.reflex-number { display: grid; place-items: center; flex-shrink: 0; width: 36px; height: 36px; border-radius: 10px; background: var(--lavender); color: var(--lavender-ink); font-size: 0.78rem; font-weight: 700; }
+.reflex-number[data-tone="mint"] { background: var(--mint); color: var(--mint-ink); }
+.student-space .reflex h3 { margin: 0 0 0.2rem; font-size: 0.9rem; }
+.student-space .reflex p { margin: 0; font-size: 0.8rem; color: var(--muted); }
+.series { margin-top: 2rem; }
+.series-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem 1rem; margin-bottom: 0.9rem; }
+.student-space .series-head h2 { margin: 0; font-size: 1.1rem; }
+.series-filter { display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); }
+.series-filter button { min-height: 36px; padding: 0.35rem 0.95rem; border: 0; border-radius: 999px; background: transparent; color: var(--text); font: inherit; font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: background var(--duration), color var(--duration); }
+.series-filter button:hover { background: var(--sand); }
+.series-filter button[aria-pressed="true"] { background: var(--action); color: var(--on-action); }
+.series-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); gap: 1rem; }
+.series-grid-3 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); }
+.series-card { display: flex; flex-direction: column; gap: 0.6rem; padding: 1.25rem; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--border); }
+.series-card-top { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.series-kind { padding: 0.2rem 0.65rem; border-radius: 999px; font-size: 0.7rem; font-weight: 700; background: var(--lavender); color: var(--lavender-ink); }
+.series-kind[data-mode="training"] { background: var(--mint); color: var(--mint-ink); }
+.series-version { font-size: 0.72rem; color: var(--muted); font-weight: 600; }
+.student-space .series-card h3 { margin: 0.2rem 0 0; font-size: 1rem; }
+.student-space .series-card p { margin: 0; flex: 1; font-size: 0.82rem; color: var(--muted); }
+.series-card .button { align-self: stretch; justify-content: center; margin-top: 0.4rem; }
+.student-space .status-head h2.badge-warn { text-transform: none; letter-spacing: 0; font-size: 0.72rem; color: var(--warning); }
+.student-space .shell-breadcrumb a { color: var(--muted); text-decoration: none; }
+.student-space .shell-breadcrumb a:hover { color: var(--text); text-decoration: underline; }

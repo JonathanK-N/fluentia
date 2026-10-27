@@ -1,17 +1,15 @@
 "use client";
-/** Catalogue des versions publiées : filtre de compétence et de mode, démarrage d’une tentative. */
+/** Séries publiées d’une épreuve : filtre par type et démarrage d’une tentative. */
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "../../components/ui/primitives";
 import { Icon } from "../../components/app-shell/icons";
 import { api, type Exam } from "../../lib/student-api";
-import { skillLabel } from "./content";
 
 type Skill = "reading" | "listening";
 type Mode = "all" | "training" | "simulation";
 
-export function Catalogue({ skill: fixedSkill, mode: fixedMode, emptyText }: { skill?: Skill | "all"; mode?: Exclude<Mode, "all">; emptyText?: string }) {
-  const [skill, setSkill] = useState<Skill | "all">(fixedSkill ?? "reading");
+export function Catalogue({ skill, mode: fixedMode, title = "Vos séries", emptyText }: { skill?: Skill; mode?: Exclude<Mode, "all">; title?: string; emptyText?: string }) {
   const [mode, setMode] = useState<Mode>(fixedMode ?? "all");
   const [exams, setExams] = useState<Exam[] | null>(null);
   const [error, setError] = useState("");
@@ -22,7 +20,7 @@ export function Catalogue({ skill: fixedSkill, mode: fixedMode, emptyText }: { s
   const router = useRouter();
   useEffect(() => {
     let active = true;
-    const filter = skill === "all" ? "" : `skill=${skill}&`;
+    const filter = skill ? `skill=${skill}&` : "";
     api<{ results: Exam[]; next: string | null }>(`exams/?${filter}limit=50&offset=${offset}`).then(data => {
       if (active) { setExams(previous => offset ? [...(previous ?? []), ...data.results] : data.results); setMore(Boolean(data.next)); }
     }).catch(e => { if (active) setError(e.message); }).finally(() => { if (active) setLoading(false); });
@@ -33,31 +31,28 @@ export function Catalogue({ skill: fixedSkill, mode: fixedMode, emptyText }: { s
     try { const attempt = await api<{ id: string }>(`exams/${exam.id}/attempts/`, "POST"); router.push(`/etudiant/${exam.skill === "listening" ? "ecoute" : "lecture"}/${attempt.id}`); }
     catch (e) { setError((e as Error).message); setBusy(false); }
   }
-  function chooseSkill(value: Skill) {
-    if (value === skill) return;
-    setSkill(value); setOffset(0); setExams(null); setLoading(true);
-  }
   const visible = exams?.filter(exam => mode === "all" || exam.mode === mode);
-  return <div>
-    <div className="student-nav">
-      {!fixedSkill && <div className="segmented" aria-label="Compétences" role="group">
-        {(["reading", "listening"] as const).map(value => <Button key={value} variant="ghost" aria-pressed={skill === value} disabled={busy} onClick={() => chooseSkill(value)}>{skillLabel(value)}</Button>)}
-      </div>}
-      {!fixedMode && <div className="segmented" aria-label="Type d’exercice" role="group">
-        {([["all", "Tous"], ["training", "Entraînements"], ["simulation", "Simulations"]] as const).map(([value, label]) => <Button key={value} variant="ghost" aria-pressed={mode === value} onClick={() => setMode(value)}>{label}</Button>)}
+  return <section aria-labelledby="series" className="series">
+    <div className="series-head">
+      <h2 id="series">{title}</h2>
+      {!fixedMode && <div className="series-filter" role="group" aria-label="Type de série">
+        {([["all", "Toutes"], ["training", "Entraînements"], ["simulation", "Simulations"]] as const).map(([value, label]) =>
+          <button key={value} type="button" aria-pressed={mode === value} onClick={() => setMode(value)}>{label}</button>)}
       </div>}
     </div>
     {error && <p role="alert">{error}</p>}
-    {!exams && !error && <p className="student-hint">Recherche des exercices…</p>}
-    {visible?.length === 0 && <div className="empty-block"><h3>Les prochains exercices se préparent</h3><p>{emptyText ?? "Les exercices apparaîtront ici après leur relecture pédagogique. Revenez bientôt."}</p></div>}
-    <div className="student-grid">{visible?.map(exam => <article className="student-card exam-card" key={exam.id}>
-      <div className="pill-row"><span className="pill">{skillLabel(exam.skill)}</span><span className="pill">{exam.mode === "simulation" ? "Simulation" : "Entraînement"}</span></div>
+    {!exams && !error && <p className="student-hint">Recherche des séries…</p>}
+    {visible?.length === 0 && <div className="empty-block"><h3>Les prochaines séries se préparent</h3><p>{emptyText ?? "Les séries apparaîtront ici après leur relecture pédagogique. Revenez bientôt."}</p></div>}
+    <div className="series-grid">{visible?.map(exam => <article className="series-card" key={exam.id}>
+      <div className="series-card-top">
+        <span className="series-kind" data-mode={exam.mode}>{exam.mode === "simulation" ? "Simulation complète" : "Entraînement court"}</span>
+        <span className="series-version">Version {exam.version}</span>
+      </div>
       <h3>{exam.title}</h3>
       <p>{exam.description}</p>
-      <span className="exam-spacer" />
-      <p className="exam-meta"><span><Icon name="exam" size={15} />{exam.question_count} questions</span><span><Icon name="clock" size={15} />{Math.ceil(exam.duration_seconds / 60)} minutes</span><span>Version {exam.version}</span></p>
-      <Button disabled={busy} onClick={() => start(exam)}>Commencer cet exercice</Button>
+      <div className="pill-row"><span className="pill"><Icon name="exam" size={13} />{exam.question_count} {exam.question_count > 1 ? "questions" : "question"}</span><span className="pill"><Icon name="clock" size={13} />{Math.ceil(exam.duration_seconds / 60)} min</span></div>
+      <Button disabled={busy} onClick={() => start(exam)}>Démarrer la série<Icon name="arrow" size={15} /></Button>
     </article>)}</div>
-    {more && <p><Button variant="secondary" loading={loading} onClick={() => { setError(""); setLoading(true); setOffset(exams?.length ?? 0); }}>Voir d’autres exercices</Button></p>}
-  </div>;
+    {more && <p><Button variant="secondary" loading={loading} onClick={() => { setError(""); setLoading(true); setOffset(exams?.length ?? 0); }}>Voir d’autres séries</Button></p>}
+  </section>;
 }

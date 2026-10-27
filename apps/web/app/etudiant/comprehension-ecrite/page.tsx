@@ -1,3 +1,3 @@
-import { ComprehensionPage } from "../../../features/student/comprehension";
-export const metadata = { title: "Compréhension écrite" };
-export default function Page() { return <ComprehensionPage skill="reading" />; }
+import { EpreuvePage } from "../../../features/student/epreuve";
+export const metadata = { title: "Lecture" };
+export default function Page() { return <EpreuvePage id="reading" />; }

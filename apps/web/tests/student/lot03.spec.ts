@@ -27,7 +27,7 @@ async function student(page: Page, suffix: string) {
 test("oral entraînement : média privé, lecteur, transcription et résultat", async ({page}, info) => {
   await student(page, info.project.name + "-oral");
   await page.goto("/etudiant/comprehension-orale");
-  await page.getByRole("article").filter({has: page.getByRole("heading", {name: "Écoute de recette — annonce", exact: true})}).getByRole("button", {name: "Commencer cet exercice"}).click();
+  await page.getByRole("article").filter({has: page.getByRole("heading", {name: "Écoute de recette — annonce", exact: true})}).getByRole("button", {name: "Démarrer la série"}).click();
   await expect(page.getByRole("heading", {name: "À vous d’écouter"})).toBeVisible();
   await page.getByRole("button", {name: "Charger le document audio"}).click();
   const audio = page.locator("audio");
@@ -55,7 +55,7 @@ test("oral entraînement : média privé, lecteur, transcription et résultat", 
 
 test("lecture complète : 39 questions, sauvegarde et correction sur PostgreSQL", async ({page}, info) => {
   await student(page, info.project.name + "-reading");
-  await page.getByRole("article").filter({has: page.getByRole("heading", {name: "Lecture complète de recette — 39 questions", exact: true})}).getByRole("button", {name: "Commencer cet exercice"}).click();
+  await page.getByRole("article").filter({has: page.getByRole("heading", {name: "Lecture complète de recette — 39 questions", exact: true})}).getByRole("button", {name: "Démarrer la série"}).click();
   await expect(page.getByRole("radio")).toHaveCount(156);
   for (let index = 0; index < 39; index++) {
     await page.getByRole("radio", {name: "Samedi à dix heures", exact: true}).nth(index).check();
@@ -77,7 +77,7 @@ test("simulation orale : 39 documents, progression séquentielle et absence de r
   test.setTimeout(150_000);
   await student(page, info.project.name + "-simulation");
   await page.goto("/etudiant/comprehension-orale");
-  await page.getByRole("article").filter({has: page.getByRole("heading", {name: "Écoute complète de recette — 39 questions", exact: true})}).getByRole("button", {name: "Commencer cet exercice"}).click();
+  await page.getByRole("article").filter({has: page.getByRole("heading", {name: "Écoute complète de recette — 39 questions", exact: true})}).getByRole("button", {name: "Démarrer la série"}).click();
   for (let index = 1; index <= 39; index++) {
     // Les sections n'ont pas de nom ARIA artificiel : sélection par structure sémantique.
     const document = page.locator("section").filter({has: page.getByRole("heading", {name: `Document ${index}`, exact: true})});

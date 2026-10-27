@@ -32,7 +32,7 @@ test("inscription, courriel, session, lecture persistante et résultat privé su
   await expect(page.getByRole("status")).toContainText("Réglage enregistré");
   await expect(sound).toHaveAttribute("aria-checked", "false");
   await page.goto("/etudiant/comprehension-ecrite");
-  await page.getByRole("article").filter({has: page.getByRole("heading", {name: "Lecture de recette — atelier vélo", exact: true})}).getByRole("button", {name: "Commencer cet exercice"}).click();
+  await page.getByRole("article").filter({has: page.getByRole("heading", {name: "Lecture de recette — atelier vélo", exact: true})}).getByRole("button", {name: "Démarrer la série"}).click();
   await expect(page).toHaveURL(/\/etudiant\/lecture\//);
   const attemptUrl = page.url();
   const attemptId = attemptUrl.split("/").pop();
