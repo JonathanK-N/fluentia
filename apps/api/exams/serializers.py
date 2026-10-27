@@ -87,7 +87,6 @@ class SaveAnswerResponseSerializer(SavedAnswerSerializer):
     saved = serializers.BooleanField(read_only=True)
     # Verdict immédiat en entraînement seulement, si le profil l’a activé ; null sinon.
     correct = serializers.BooleanField(read_only=True, allow_null=True)
-    correct_choice_id = serializers.UUIDField(read_only=True, allow_null=True)
 
 
 class ResultDetailSerializer(serializers.Serializer):

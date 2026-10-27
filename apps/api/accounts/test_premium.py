@@ -71,14 +71,13 @@ class PremiumTests(TestCase):
         right = question.choices.get(is_correct=True)
         path = f"attempts/{attempt.data['id']}/answers/"
         missed = self.call(path, {"question_id": str(question.pk), "choice_id": str(wrong.pk)}, "put").data
-        self.assertEqual((missed["correct"], missed["correct_choice_id"]), (False, str(right.pk)))
-        found = self.call(path, {"question_id": str(question.pk), "choice_id": str(right.pk)}, "put").data
-        self.assertEqual((found["correct"], found["correct_choice_id"]), (True, str(right.pk)))
+        self.assertIs(missed["correct"], False)
+        self.assertNotIn("correct_choice_id", missed)  # la bonne réponse n’est jamais révélée
+        self.assertIs(self.call(path, {"question_id": str(question.pk), "choice_id": str(right.pk)}, "put").data["correct"], True)
         StudentProfile.objects.filter(user=self.user).update(live_correction=False)
-        hidden = self.call(path, {"question_id": str(question.pk), "choice_id": str(right.pk)}, "put").data
-        self.assertEqual((hidden["correct"], hidden["correct_choice_id"]), (None, None))
+        self.assertIsNone(self.call(path, {"question_id": str(question.pk), "choice_id": str(right.pk)}, "put").data["correct"])
 
     def test_simulation_never_reveals_verdict(self):
         answer = SimpleNamespace(attempt=SimpleNamespace(exam=SimpleNamespace(mode=Exam.Mode.SIMULATION)), choice=SimpleNamespace(is_correct=True))
-        self.assertEqual(live_verdict(answer, self.user), {"correct": None, "correct_choice_id": None})
+        self.assertIsNone(live_verdict(answer, self.user))
         self.assertTrue(Attempt.objects.model is Attempt)

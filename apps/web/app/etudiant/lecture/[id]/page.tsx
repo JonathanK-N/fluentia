@@ -19,7 +19,7 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
   const [confirm, setConfirm] = useState(false);
   const [remaining, setRemaining] = useState(0);
   const [spoken, setSpoken] = useState("");
-  const [verdicts, setVerdicts] = useState<Record<string, {correct: boolean; answer: string}>>({});
+  const [verdicts, setVerdicts] = useState<Record<string, {correct: boolean; choice: string}>>({});
   const { profile } = useSession();
   const pending = useRef(false);
   const clockOffset = useRef(0);
@@ -60,12 +60,11 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
       const saved = await api<SavedAnswer>(`attempts/${id}/answers/`, "PUT", {question_id: question, choice_id: choice});
       setAnswers(previous => ({...previous, [question]: choice}));
       const verdict = saved.correct;
-      const answer = saved.correct_choice_id;
-      setVerdicts(values => { const next = {...values}; if (typeof verdict === "boolean" && answer) next[question] = {correct: verdict, answer}; else delete next[question]; return next; });
+      setVerdicts(values => { const next = {...values}; if (typeof verdict === "boolean") next[question] = {correct: verdict, choice}; else delete next[question]; return next; });
       if (typeof verdict === "boolean") {
         if (profile?.preferences.answer_sound) playVerdict(verdict);
         // Résultat visible par les couleurs et icônes ; annoncé seulement aux lecteurs d’écran.
-        setSpoken(verdict ? "Bonne réponse." : `Mauvaise réponse. La bonne réponse est : ${attempt?.questions?.find(q => q.id === question)?.choices.find(c => c.id === answer)?.label ?? ""}.`);
+        setSpoken(verdict ? "Bonne réponse." : "Mauvaise réponse.");
       } else setSpoken("");
       setMessage("Réponse enregistrée. Vous pouvez reprendre depuis cet appareil ou un autre.");
     } catch (e) {
@@ -120,7 +119,7 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
           {attempt.skill === "listening" && (question.audio_available ? <AudioPlayer attemptId={id} questionId={question.id} simulation={attempt.mode === "simulation"} state={question.audio_state} endsAt={question.audio_ends_at} serverOffset={clockOffset.current} refresh={load} /> : <p role="alert">Le document audio n’est pas disponible pour cette version.</p>)}
           {question.transcript && <details><summary>Consulter la transcription</summary><p>{question.transcript}</p></details>}
           <fieldset disabled={remaining === 0 || (attempt.skill === "listening" && attempt.mode === "simulation" && question.audio_state !== "ready")} aria-busy={busy}><legend>{question.statement}</legend>
-            {question.choices.map(choice => { const verdict = verdicts[question.id]; const state = !verdict ? undefined : choice.id === verdict.answer ? "right" : answers[question.id] === choice.id ? "wrong" : undefined; return <label className="student-choice" data-verdict={state} key={choice.id}>
+            {question.choices.map(choice => { const verdict = verdicts[question.id]; const state = verdict?.choice === choice.id ? (verdict.correct ? "right" : "wrong") : undefined; return <label className="student-choice" data-verdict={state} key={choice.id}>
               <input type="radio" name={question.id} value={choice.id} disabled={busy && answers[question.id] !== choice.id} checked={answers[question.id] === choice.id} onChange={() => save(question.id, choice.id)} />{choice.label}
               {state && <Icon name={state === "right" ? "check" : "close"} size={16} className="choice-mark" />}
             </label>; })}

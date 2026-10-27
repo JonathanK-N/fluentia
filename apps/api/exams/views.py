@@ -121,21 +121,19 @@ class SaveAnswerView(APIView):
                 "question_id": str(answer.question_id),
                 "choice_id": str(answer.choice_id),
                 "saved": True,
-                **live_verdict(answer, request.user),
+                "correct": live_verdict(answer, request.user),
             }
         )
 
 
 def live_verdict(answer, user):
-    """Jamais en simulation : les conditions d’examen ne révèlent rien avant la fin."""
-    hidden = {"correct": None, "correct_choice_id": None}
+    """Verdict sur le seul choix envoyé, sans révéler la bonne réponse ; jamais en simulation."""
     if answer.attempt.exam.mode != "training":
-        return hidden
+        return None
     profile = StudentProfile.objects.filter(user=user).first()
     if profile is not None and not profile.live_correction:
-        return hidden
-    right = answer.question.choices.get(is_correct=True)
-    return {"correct": answer.choice_id == right.pk, "correct_choice_id": str(right.pk)}
+        return None
+    return answer.choice.is_correct
 
 
 def result_payload(attempt: Attempt) -> dict:

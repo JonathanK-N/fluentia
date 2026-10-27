@@ -62,7 +62,8 @@ test("inscription, courriel, session, lecture persistante et résultat privé su
   // Correction en direct (entraînement) : erreur en rouge, bonne réponse en bleu.
   await page.getByRole("radio", {name: "Une preuve de paiement", exact: true}).click();
   await expect(page.locator("label.student-choice", {hasText: "Une preuve de paiement"})).toHaveAttribute("data-verdict", "wrong");
-  await expect(page.locator("label.student-choice", {hasText: "Les pièces à remplacer"})).toHaveAttribute("data-verdict", "right");
+  // La bonne réponse n’est pas révélée tant qu’elle n’est pas cochée.
+  await expect(page.locator("label.student-choice[data-verdict=right]")).toHaveCount(0);
   await expect(page.locator(".question-card")).not.toContainText("Faux");
   await page.getByRole("radio", {name: "Les pièces à remplacer", exact: true}).focus();
   await page.keyboard.press("Space");
