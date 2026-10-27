@@ -76,6 +76,10 @@ test("lecture complète : 39 questions, sauvegarde et correction sur PostgreSQL"
   await expect(page.locator(".bilan-question")).toHaveCount(39);
   await expect(page.getByText("Afficher le texte")).toHaveCount(39);
   await page.screenshot({path: info.outputPath("lecture-complete-resultats.png"), fullPage: true});
+  // Refaire la série : nouvelle tentative vierge sur la même version.
+  await page.getByRole("button", {name: "Refaire la série"}).click();
+  await expect(page.getByRole("heading", {name: "Question 1 / 39", exact: true})).toBeVisible();
+  await expect(page.locator(".question-map button[data-state=answered]")).toHaveCount(0);
 });
 
 test("simulation orale : 39 documents, progression séquentielle et absence de réécoute", async ({page}, info) => {

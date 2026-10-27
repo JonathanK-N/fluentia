@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState, use, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "../../../../components/ui/primitives";
 import { api, type Attempt, type Results, type SavedAnswer } from "../../../../lib/student-api";
 import { useSession } from "../../../../lib/session";
@@ -30,6 +31,7 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
   const [visited, setVisited] = useState<Record<string, true>>({});
   const [fullscreen, setFullscreen] = useState(false);
   const { profile } = useSession();
+  const router = useRouter();
   const headingRef = useRef<HTMLHeadingElement>(null);
   const navigated = useRef(false);
   const pending = useRef(false);
@@ -83,6 +85,16 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
       setError((e as Error).message); setMessage("Réponse non enregistrée. Sélectionnez de nouveau votre choix pour réessayer.");
     }
     finally { answerVersion.current += 1; pending.current = false; setBusy(false); }
+  }
+  // Nouvelle tentative sur la même série, ouverte directement en plein écran.
+  async function retry() {
+    if (!attempt) return;
+    enterFullscreen();
+    setBusy(true); setError("");
+    try {
+      const next = await api<{ id: string }>(`exams/${attempt.exam_id}/attempts/`, "POST");
+      router.push(`/etudiant/${attempt.skill === "listening" ? "ecoute" : "lecture"}/${next.id}`);
+    } catch (e) { exitFullscreen(); setError((e as Error).message); setBusy(false); }
   }
   async function submit() {
     setBusy(true); setError("");
@@ -152,6 +164,7 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
             <p className="bilan-chips"><span>Épreuve {listening ? "02 · Écoute" : "01 · Lecture"}</span><span>{attempt.mode === "simulation" ? "Simulation non officielle" : "Entraînement non officiel"}</span></p>
             <h1 id="resultat">Séance terminée : place au bilan.</h1>
             <p>Score d’entraînement, sans équivalence TCF ni NCLC. Repassez chaque question ci-dessous pour comprendre où chercher.</p>
+            <div><Button className="bilan-retry" loading={busy} onClick={retry}><Icon name="refresh" size={15} />Refaire la série</Button></div>
           </div>
         </section>
         <section className="status-card bilan-next" aria-labelledby="et-maintenant">

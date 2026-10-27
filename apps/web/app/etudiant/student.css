@@ -420,7 +420,7 @@ html[data-exam-focus] .shell-content.student-space { max-width: none; padding: 0
 .bilan-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0 !important; }
 .bilan-chips span { padding: 0.2rem 0.6rem; border-radius: 999px; background: rgb(255 255 255 / 14%); color: #fff; font-size: 0.68rem; font-weight: 600; }
 .student-space .bilan-hero h1 { margin: 0; color: #fff; font-size: clamp(1.4rem, 2.6vw, 1.9rem); line-height: 1.15; letter-spacing: -0.02em; }
-.student-space .bilan-hero-text > p:last-child { margin: 0; color: #e4e2ff; font-size: 0.84rem; max-width: 34rem; }
+.student-space .bilan-hero-text > p:not(.bilan-chips) { margin: 0; color: #e4e2ff; font-size: 0.84rem; max-width: 34rem; }
 .bilan-next { align-content: space-between; gap: 0.9rem; }
 .student-space .bilan-next h2 { margin: 0; }
 .bilan-next p { margin: 0; font-size: 0.84rem; }
@@ -470,3 +470,5 @@ html[data-exam-focus] .shell-content.student-space { max-width: none; padding: 0
 .bilan-choice-tags span { padding: 0.15rem 0.5rem; border-radius: 999px; background: rgb(255 255 255 / 70%); font-size: 0.66rem; font-weight: 600; color: var(--text); white-space: nowrap; }
 .student-space .bilan-box p { display: flex; align-items: baseline; gap: 0.45rem; }
 .bilan-letter { display: inline-grid; place-items: center; flex-shrink: 0; min-width: 1.35rem; height: 1.35rem; border-radius: 6px; background: rgb(255 255 255 / 75%); font-size: 0.7rem; font-weight: 700; }
+.button.bilan-retry { display: inline-flex; align-items: center; gap: 0.45rem; background: #fff; border-color: #fff; color: var(--indigo); }
+.button.bilan-retry:hover { background: var(--lavender); border-color: var(--lavender); }
