@@ -18,6 +18,7 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
   const [busy, setBusy] = useState(false);
   const [confirm, setConfirm] = useState(false);
   const [remaining, setRemaining] = useState(0);
+  const [spoken, setSpoken] = useState("");
   const [verdicts, setVerdicts] = useState<Record<string, {correct: boolean; answer: string}>>({});
   const { profile } = useSession();
   const pending = useRef(false);
@@ -63,8 +64,10 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
       setVerdicts(values => { const next = {...values}; if (typeof verdict === "boolean" && answer) next[question] = {correct: verdict, answer}; else delete next[question]; return next; });
       if (typeof verdict === "boolean") {
         if (profile?.preferences.answer_sound) playVerdict(verdict);
-        setMessage(verdict ? "Réponse enregistrée : c’est juste." : "Réponse enregistrée : ce n’est pas la bonne réponse. Réessayez si vous le souhaitez.");
-      } else setMessage("Réponse enregistrée. Vous pouvez reprendre depuis cet appareil ou un autre.");
+        // Résultat visible par les couleurs et icônes ; annoncé seulement aux lecteurs d’écran.
+        setSpoken(verdict ? "Bonne réponse." : `Mauvaise réponse. La bonne réponse est : ${attempt?.questions?.find(q => q.id === question)?.choices.find(c => c.id === answer)?.label ?? ""}.`);
+      } else setSpoken("");
+      setMessage("Réponse enregistrée. Vous pouvez reprendre depuis cet appareil ou un autre.");
     } catch (e) {
       setAnswers(values => { const restored = {...values}; if (previous) restored[question] = previous; else delete restored[question]; return restored; });
       setError((e as Error).message); setMessage("Réponse non enregistrée. Sélectionnez de nouveau votre choix pour réessayer.");
@@ -111,6 +114,7 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
         </div>
         <p className="student-hint">Le délai est contrôlé par le serveur. Chaque choix confirmé est enregistré immédiatement.</p>
         <p role="status" className="student-save-status">{message}</p>
+        <p className="sr-only" aria-live="polite">{spoken}</p>
         {shown.map((question) => <section className="student-card question-card" id={`q-${question.id}`} key={question.id}>
           <h2>{attempt.skill === "listening" ? "Document" : "Lecture"} {question.position}</h2>{question.reading_passage && <p className="student-passage">{question.reading_passage}</p>}
           {attempt.skill === "listening" && (question.audio_available ? <AudioPlayer attemptId={id} questionId={question.id} simulation={attempt.mode === "simulation"} state={question.audio_state} endsAt={question.audio_ends_at} serverOffset={clockOffset.current} refresh={load} /> : <p role="alert">Le document audio n’est pas disponible pour cette version.</p>)}
@@ -121,7 +125,6 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
               {state && <Icon name={state === "right" ? "check" : "close"} size={16} className="choice-mark" />}
             </label>; })}
           </fieldset>
-          {verdicts[question.id] && <p className="verdict" data-correct={verdicts[question.id].correct}><Icon name={verdicts[question.id].correct ? "check" : "close"} size={15} />{verdicts[question.id].correct ? "Juste, bonne réponse." : `Faux. Bonne réponse : ${question.choices.find(c => c.id === verdicts[question.id].answer)?.label ?? ""}`}</p>}
         </section>)}
         {!confirm ? <Button disabled={busy || remaining === 0} onClick={() => setConfirm(true)}>Terminer et vérifier mes réponses</Button> :
           <section className="student-card" aria-label="Confirmation de soumission"><h2>Prêt à découvrir le corrigé ?</h2><p>{answeredCount} réponses enregistrées. Les questions sans réponse comptent pour zéro. Après la soumission, les réponses seront définitives.</p>

@@ -290,6 +290,3 @@
 .student-choice[data-verdict="right"] input { accent-color: #1d4ed8; }
 .student-choice[data-verdict="wrong"] input { accent-color: #dc2626; }
 .choice-mark { margin-left: auto; flex-shrink: 0; }
-.verdict { display: inline-flex; align-items: center; gap: 0.35rem; margin-top: 0.4rem; padding: 0.3rem 0.75rem; border-radius: 999px; font-size: 0.78rem; font-weight: 700; }
-.verdict[data-correct="true"] { background: #dbeafe; color: #1e3a8a; }
-.verdict[data-correct="false"] { background: #fee2e2; color: #991b1b; }

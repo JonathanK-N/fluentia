@@ -63,12 +63,12 @@ test("inscription, courriel, session, lecture persistante et résultat privé su
   await page.getByRole("radio", {name: "Une preuve de paiement", exact: true}).click();
   await expect(page.locator("label.student-choice", {hasText: "Une preuve de paiement"})).toHaveAttribute("data-verdict", "wrong");
   await expect(page.locator("label.student-choice", {hasText: "Les pièces à remplacer"})).toHaveAttribute("data-verdict", "right");
-  await expect(page.getByText("Faux. Bonne réponse : Les pièces à remplacer")).toBeVisible();
+  await expect(page.locator(".question-card")).not.toContainText("Faux");
   await page.getByRole("radio", {name: "Les pièces à remplacer", exact: true}).focus();
   await page.keyboard.press("Space");
   await expect(page.getByRole("status")).toContainText("Réponse enregistrée");
   await expect(page.getByRole("radio", {name: "Les pièces à remplacer", exact: true})).toBeFocused();
-  await expect(page.getByText("Juste, bonne réponse.")).toBeVisible();
+  await expect(page.locator("label.student-choice", {hasText: "Les pièces à remplacer"})).toHaveAttribute("data-verdict", "right");
   await expect(page.locator("label.student-choice[data-verdict=wrong]")).toHaveCount(0);
   await page.reload();
   await expect(page.getByRole("radio", {name: "Les pièces à remplacer", exact: true})).toBeChecked();
