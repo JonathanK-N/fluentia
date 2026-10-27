@@ -10,6 +10,14 @@ from .views import (
     BankImportView,
     BankExportView,
     AudioView,
+    TemplateView,
+    SeriesImportView,
+    SeriesListView,
+    SeriesDetailView,
+    SeriesActionView,
+    BankImageView,
+    QuestionImageView,
+    TaskListView,
 )
 from .progress import ProgressView
 
@@ -20,6 +28,13 @@ urlpatterns = [
     path("bank/export/", BankExportView.as_view()),
     path("bank/publish/", PublishView.as_view()),
     path("bank/media/", MediaUploadView.as_view()),
+    path("bank/templates/<str:skill>/", TemplateView.as_view()),
+    path("bank/series/", SeriesListView.as_view()),
+    path("bank/series/import/", SeriesImportView.as_view()),
+    path("bank/series/<uuid:series_id>/", SeriesDetailView.as_view()),
+    path("bank/series/<uuid:series_id>/<str:action>/", SeriesActionView.as_view()),
+    path("bank/images/<uuid:image_id>/", BankImageView.as_view()),
+    path("tasks/<str:skill>/", TaskListView.as_view()),
     path("bank/<uuid:item_id>/", BankDetailView.as_view()),
     path("bank/<uuid:item_id>/transition/", TransitionView.as_view()),
     path("bank/<uuid:item_id>/versions/", ForkView.as_view()),
@@ -27,5 +42,9 @@ urlpatterns = [
     path(
         "attempts/<uuid:attempt_id>/questions/<uuid:question_id>/audio/",
         AudioView.as_view(),
+    ),
+    path(
+        "attempts/<uuid:attempt_id>/questions/<uuid:question_id>/image/",
+        QuestionImageView.as_view(),
     ),
 ]

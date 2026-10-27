@@ -33,6 +33,9 @@ const studentGroups: Group[] = [
 ];
 
 const editionGroups: Group[] = [
+  { title: "Séries", items: [
+    { href: "/edition/import", label: "Importer une série", icon: "upload" },
+  ] },
   { title: "Banque pédagogique", items: [
     { href: "/edition#banque", label: "Versions de la banque", icon: "library" },
     { href: "/edition#editeur", label: "Éditeur de question", icon: "pen" },
@@ -41,7 +44,7 @@ const editionGroups: Group[] = [
   { title: "Diffusion", items: [
     { href: "/edition#medias", label: "Médias audio", icon: "headphones" },
     { href: "/edition#publication", label: "Publication", icon: "send" },
-    { href: "/edition#transfert", label: "Import et export", icon: "upload" },
+    { href: "/edition#transfert", label: "Import JSON (avancé)", icon: "copy" },
   ] },
   { title: "Raccourcis", items: [
     { href: "/etudiant", label: "Espace étudiant", icon: "grid", exact: true },

@@ -16,10 +16,14 @@ class QuestionPublicSerializer(serializers.ModelSerializer):
     audio_ends_at = serializers.DateTimeField(read_only=True, allow_null=True)
     transcript = serializers.CharField(read_only=True, required=False)
     choices = ChoicePublicSerializer(many=True, read_only=True)
+    image_available = serializers.SerializerMethodField()
+
+    def get_image_available(self, obj) -> bool:
+        return bool(obj.image_key)
 
     class Meta:
         model = Question
-        fields = ("id", "position", "statement", "reading_passage", "points", "choices", "audio_available", "audio_state", "audio_ends_at", "transcript")
+        fields = ("id", "position", "statement", "reading_passage", "image_available", "image_text", "points", "choices", "audio_available", "audio_state", "audio_ends_at", "transcript")
 
 
 class ExamListSerializer(serializers.ModelSerializer):
@@ -95,6 +99,8 @@ class ResultDetailSerializer(serializers.Serializer):
     transcript = serializers.CharField(read_only=True, allow_blank=True)
     statement = serializers.CharField(read_only=True)
     reading_passage = serializers.CharField(read_only=True, allow_blank=True)
+    image_available = serializers.BooleanField(read_only=True)
+    image_text = serializers.CharField(read_only=True, allow_blank=True)
     choices = ChoicePublicSerializer(many=True, read_only=True)
     selected_label = serializers.CharField(read_only=True, allow_null=True)
     correct_label = serializers.CharField(read_only=True)

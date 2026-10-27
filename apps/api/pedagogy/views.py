@@ -6,15 +6,18 @@ from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema, OpenApiTypes, OpenApiParameter
 from rest_framework import generics
 from rest_framework.authentication import SessionAuthentication
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.parsers import MultiPartParser
-from rest_framework.permissions import BasePermission, IsAuthenticated
+from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 from accounts.views import SecureView
 from exams.serializers import ExamListSerializer
 from exams.views import CataloguePagination
-from .models import BankItem
+from .models import BankItem, ImageAsset
+from . import series as workflow
+from .importer import SKILLS, ImportRejected, build_template, import_series
+from .tasks import active_tasks
 from .serializers import (
     BankSerializer,
     ContentSerializer,
@@ -26,6 +29,11 @@ from .serializers import (
     EventSerializer,
     ImportSerializer,
     ExportSerializer,
+    SeriesImportSerializer,
+    SeriesSerializer,
+    SeriesDetailSerializer,
+    SeriesActionSerializer,
+    TaskSetSerializer,
 )
 from .services import (
     create_item,
@@ -35,6 +43,7 @@ from .services import (
     publish_exam,
     upload_media,
     claim_audio,
+    read_image,
     CONTENT_FIELDS,
     require,
 )
@@ -231,3 +240,97 @@ class AudioView(SecureView):
         response["X-Content-Type-Options"] = "nosniff"
         response["X-Audio-Duration-Ms"] = str(asset.duration_ms)
         return response
+
+
+class TemplateView(EditorView):
+    @extend_schema(responses={(200, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"): OpenApiTypes.BINARY})
+    def get(self, request, skill):
+        if skill not in SKILLS:
+            raise ValidationError({"skill": "Épreuve inconnue."})
+        response = HttpResponse(
+            build_template(skill),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        name = {"reading": "lecture", "listening": "ecoute", "writing": "redaction", "speaking": "oral"}[skill]
+        response["Content-Disposition"] = f'attachment; filename="modele-{name}-fluentia.xlsx"'
+        return response
+
+
+class SeriesImportView(EditorView):
+    parser_classes = [MultiPartParser]
+
+    @extend_schema(request=SeriesImportSerializer, responses={201: SeriesSerializer})
+    def post(self, request):
+        data = SeriesImportSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        try:
+            series = import_series(request.user, data.validated_data["skill"], data.validated_data["file"])
+        except ImportRejected as rejected:
+            return Response(rejected.payload, status=400)
+        return Response(workflow.summary(series), status=201)
+
+
+class SeriesListView(EditorView):
+    @extend_schema(responses=SeriesSerializer(many=True))
+    def get(self, request):
+        return Response([workflow.summary(s) for s in workflow.all_series()[:100]])
+
+
+class SeriesDetailView(EditorView):
+    @extend_schema(responses=SeriesDetailSerializer)
+    def get(self, request, series_id):
+        return Response(workflow.detail(get_object_or_404(workflow.all_series(), pk=series_id)))
+
+
+class SeriesActionView(EditorView):
+    @extend_schema(request=SeriesActionSerializer, responses=SeriesSerializer)
+    def post(self, request, series_id, action):
+        if action not in ("request_review", "approve", "reject", "publish"):
+            raise ValidationError({"action": "Action inconnue."})
+        data = SeriesActionSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        series = get_object_or_404(workflow.all_series(), pk=series_id)
+        workflow.act(request.user, series, action, **data.validated_data)
+        return Response(workflow.summary(workflow.all_series().get(pk=series_id)))
+
+
+def image_response(asset):
+    response = HttpResponse(read_image(asset), content_type=asset.content_type)
+    response["Cache-Control"] = "private, max-age=3600"
+    response["X-Content-Type-Options"] = "nosniff"
+    return response
+
+
+class BankImageView(EditorView):
+    @extend_schema(responses={(200, "image/png"): OpenApiTypes.BINARY})
+    def get(self, request, image_id):
+        return image_response(get_object_or_404(ImageAsset, pk=image_id))
+
+
+class QuestionImageView(SecureView):
+    """Image d’une question, réservée à la personne qui passe ou relit la tentative."""
+
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+    throttle_classes = [EditorThrottle]
+
+    @extend_schema(responses={(200, "image/png"): OpenApiTypes.BINARY})
+    def get(self, request, attempt_id, question_id):
+        from exams.models import Attempt, Question
+
+        attempt = get_object_or_404(Attempt, pk=attempt_id, user=request.user)
+        question = get_object_or_404(Question, pk=question_id, exam_id=attempt.exam_id)
+        if not question.image_key:
+            raise NotFound("Cette question n’a pas d’image.")
+        return image_response(get_object_or_404(ImageAsset, pk=question.image_key))
+
+
+class TaskListView(SecureView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
+
+    @extend_schema(responses=TaskSetSerializer)
+    def get(self, request, skill):
+        if skill not in ("writing", "speaking"):
+            raise ValidationError({"skill": "writing ou speaking."})
+        return Response(active_tasks(skill))

@@ -60,3 +60,24 @@ Chromium : `npm run typecheck`, `npm run lint`, 12 tests unitaires, 21 tests e2e
 - Correction en direct : `PUT attempts/{id}/answers/` renvoie `correct` (verdict du seul choix envoyé, sans révéler la bonne réponse) dans toutes les séries, entraînement comme simulation, lorsque le réglage « Correction en direct » est actif ; `null` sinon. Le désactiver remet l’étudiant en conditions d’examen. Seule la case cochée se colore : bleu si elle est juste, rouge sinon, avec une icône ✓ ou ✕ ; aucun texte visible, le résultat est annoncé aux lecteurs d’écran. Le signal sonore (Web Audio) est préparé au clic pour respecter les règles de lecture des navigateurs.
 - Page Profil : identité et déconnexion, abonnement, réglages d’entraînement ; le renvoi du lien de vérification n’apparaît que pour une adresse non vérifiée.
 - Tests : `accounts/test_premium.py` (7 cas, dont l’absence de verdict en simulation).
+
+## Importer une série depuis Excel
+
+Les questionnaires ne sont plus écrits dans le code : chaque série arrive par un fichier Excel,
+puis passe par la relecture humaine avant d’être visible des étudiants.
+
+1. **Édition › Importer une série** : télécharger le modèle de l’épreuve (Lecture, Écoute,
+   Rédaction ou Oral). Chaque modèle a trois onglets : « Série », « Contenu » et « Mode d’emploi ».
+2. Remplir le modèle. Lecture : texte et/ou image d’un document (journal, lettre…) avec le texte
+   de l’image pour les lecteurs d’écran. Écoute : un WAV et sa transcription par question.
+   Rédaction et Oral : une ligne par sujet, pour les tâches 1 à 3.
+3. Déposer le `.xlsx`, ou un `.zip` contenant le tableur et ses images ou audios. L’épreuve choisie
+   doit correspondre à celle du fichier ; chaque ligne est vérifiée et rien n’est enregistré tant
+   qu’une erreur subsiste (le tableau indique ligne, colonne et problème).
+4. Envoyer en relecture ; une deuxième personne approuve (note et attestation), puis publie.
+
+Les points d’une question dépendent de son niveau : A1 3, A2 9, B1 15, B2 21, C1 26, C2 33
+(699 points pour une simulation de 39 questions). Une nouvelle version d’une série remplace la
+précédente dans le catalogue ; les tentatives déjà passées restent consultables. Pour Rédaction et
+Oral, le jeu de sujets publié remplace le jeu actif. Images (PNG ou JPEG, 600 px de large minimum,
+1200 px conseillés, 5 Mo au plus) et audios restent privés et ne sont servis qu’aux tentatives.

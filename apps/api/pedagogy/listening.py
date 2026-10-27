@@ -47,6 +47,7 @@ def decorate_questions(attempt, rows):
             row["audio_state"] = state
             row["reading_passage"] = ""
             if state not in ["ready", "past"]:
+                row["image_available"], row["image_text"] = False, ""
                 row["statement"] = "Écoutez le document et la question."
                 row["choices"] = []
     return rows

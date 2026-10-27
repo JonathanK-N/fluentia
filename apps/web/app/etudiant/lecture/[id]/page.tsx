@@ -10,6 +10,7 @@ import { playVerdict, primeSound } from "../../../../lib/feedback-sound";
 import { AudioPlayer } from "../../../../components/student/audio-player";
 import { Icon } from "../../../../components/app-shell/icons";
 import { Summary } from "../../../../features/student/ui";
+import { DocumentImage } from "../../../../features/student/document-image";
 import { exitFullscreen, enterFullscreen } from "../../../../lib/fullscreen";
 
 // Préfixe des indices du corrigé, affichés dans « Où le trouver ».
@@ -187,7 +188,7 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
           const hint = detail.explanation.startsWith(HINT) ? detail.explanation.slice(HINT.length).replace(/\.$/, "") : null;
           const source = detail.reading_passage || detail.transcript;
           const letter = (choiceId: string | null) => { const rank = detail.choices.findIndex(c => c.id === choiceId); return rank === -1 ? null : "ABCD"[rank]; };
-          const what = source ? (detail.reading_passage ? "le texte et les choix" : "la transcription et les choix") : "les choix";
+          const what = detail.reading_passage || detail.image_available ? "le texte et les choix" : detail.transcript ? "la transcription et les choix" : "les choix";
           return <li key={detail.question_id} className="student-card bilan-question">
             <div className="bilan-question-head">
               <h3><span className="bilan-num">{index + 1}</span>{detail.statement}</h3>
@@ -195,6 +196,7 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
             </div>
             <details className="bilan-source">
               <summary><Icon name="chevron" size={14} /><span className="when-closed">Afficher {what}</span><span className="when-open">Masquer {what}</span></summary>
+              {detail.image_available && <DocumentImage compact src={`/api/v1/attempts/${id}/questions/${detail.question_id}/image/`} text={detail.image_text} />}
               {source && <p className="student-passage">{source}</p>}
               <ul className="bilan-choices" aria-label="Choix proposés">{detail.choices.map((choice, rank) => {
                 const mark = choice.id === detail.correct_choice_id ? "right" : choice.id === detail.selected_choice_id ? "wrong" : undefined;
@@ -247,6 +249,7 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
           <div>
             {question && <section className="student-card question-card" id={`q-${question.id}`} key={question.id} aria-labelledby="question-titre">
               <div className="question-head"><h2 id="question-titre" ref={headingRef} tabIndex={-1}>Question {question.position} <span className="question-of">/ {total}</span></h2><span className="pill question-points">{question.points} pts</span></div>
+              {question.image_available && <DocumentImage src={`/api/v1/attempts/${id}/questions/${question.id}/image/`} text={question.image_text} />}
               {question.reading_passage && <p className="student-passage">{question.reading_passage}</p>}
               {listening && (question.audio_available ? <AudioPlayer attemptId={id} questionId={question.id} simulation={attempt.mode === "simulation"} state={question.audio_state} endsAt={question.audio_ends_at} serverOffset={clockOffset.current} refresh={load} /> : <p role="alert">Le document audio n’est pas disponible pour cette version.</p>)}
               {question.transcript && <details><summary>Consulter la transcription</summary><p>{question.transcript}</p></details>}

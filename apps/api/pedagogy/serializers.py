@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import BankItem, MediaAsset, EditorialEvent
+from .models import BankItem, ImageAsset, MediaAsset, EditorialEvent
 from exams.models import Exam
 
 
@@ -21,6 +21,10 @@ class ContentSerializer(StrictSerializer):
     media = serializers.PrimaryKeyRelatedField(
         queryset=MediaAsset.objects.all(), allow_null=True, default=None
     )
+    image = serializers.PrimaryKeyRelatedField(
+        queryset=ImageAsset.objects.all(), allow_null=True, default=None
+    )
+    image_text = serializers.CharField(allow_blank=True, max_length=40000, default="")
     choices = serializers.ListField(
         child=serializers.CharField(max_length=500), min_length=4, max_length=4
     )
@@ -50,6 +54,8 @@ class BankSerializer(serializers.ModelSerializer):
             "statement",
             "passage",
             "media",
+            "image",
+            "image_text",
             "choices",
             "correct_index",
             "explanation",
@@ -128,3 +134,85 @@ class ImportSerializer(StrictSerializer):
 class ExportSerializer(StrictSerializer):
     format = serializers.CharField()
     items = ContentSerializer(many=True)
+
+
+class SeriesImportSerializer(serializers.Serializer):
+    skill = serializers.ChoiceField(choices=["reading", "listening", "writing", "speaking"])
+    file = serializers.FileField()
+
+
+class SeriesActionSerializer(StrictSerializer):
+    note = serializers.CharField(max_length=10000, allow_blank=True, default="")
+    attest = serializers.BooleanField(default=False)
+
+
+class SeriesExamSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    version = serializers.IntegerField()
+    is_published = serializers.BooleanField()
+
+
+class SeriesSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    skill = serializers.ChoiceField(choices=["reading", "listening", "writing", "speaking"])
+    title = serializers.CharField()
+    mode = serializers.CharField(allow_blank=True)
+    description = serializers.CharField(allow_blank=True)
+    file_name = serializers.CharField()
+    created_at = serializers.DateTimeField()
+    created_by = serializers.IntegerField()
+    status = serializers.ChoiceField(choices=["draft", "review", "approved", "published"])
+    counts = serializers.DictField(child=serializers.IntegerField())
+    size = serializers.IntegerField()
+    exam = SeriesExamSerializer(allow_null=True)
+    active = serializers.BooleanField()
+
+
+class SeriesQuestionSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    position = serializers.IntegerField()
+    state = serializers.CharField()
+    level = serializers.CharField()
+    points = serializers.IntegerField()
+    statement = serializers.CharField()
+    passage = serializers.CharField(allow_blank=True)
+    image = serializers.UUIDField(allow_null=True)
+    image_text = serializers.CharField(allow_blank=True)
+    transcript = serializers.CharField(allow_blank=True)
+    choices = serializers.ListField(child=serializers.CharField())
+    correct_index = serializers.IntegerField()
+    explanation = serializers.CharField()
+    review_note = serializers.CharField(allow_blank=True)
+
+
+class TaskSubjectSerializer(serializers.Serializer):
+    title = serializers.CharField()
+    prompt = serializers.CharField()
+    documents = serializers.ListField(child=serializers.DictField(), required=False)
+    cues = serializers.ListField(child=serializers.CharField(), required=False)
+
+
+class TaskSerializer(serializers.Serializer):
+    slug = serializers.CharField()
+    number = serializers.IntegerField()
+    title = serializers.CharField()
+    advice = serializers.ListField(child=serializers.CharField())
+    genre = serializers.CharField(required=False)
+    min = serializers.IntegerField(required=False)
+    max = serializers.IntegerField(required=False)
+    minutes = serializers.IntegerField(required=False)
+    goal = serializers.CharField(required=False)
+    seconds = serializers.IntegerField(required=False)
+    prepSeconds = serializers.IntegerField(required=False)
+    subjects = TaskSubjectSerializer(many=True)
+
+
+class TaskSetSerializer(serializers.Serializer):
+    title = serializers.CharField(allow_blank=True)
+    tasks = TaskSerializer(many=True)
+
+
+class SeriesDetailSerializer(SeriesSerializer):
+    questions = SeriesQuestionSerializer(many=True, required=False)
+    tasks = TaskSerializer(many=True, required=False)
+    review_note = serializers.CharField(required=False, allow_blank=True)

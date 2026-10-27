@@ -2,6 +2,7 @@
 
 import hashlib
 import io
+import struct
 import uuid
 import wave
 from datetime import timedelta
@@ -14,9 +15,10 @@ from django.db.models import F, Max
 from django.utils import timezone
 from rest_framework.exceptions import PermissionDenied, ValidationError, NotFound
 
-from exams.models import Exam, Question, Choice
+from exams.models import Exam, Question, Choice, LEVEL_POINTS
 from .models import (
     BankItem,
+    ImageAsset,
     MediaAsset,
     EditorialEvent,
     PublishedItem,
@@ -30,6 +32,8 @@ CONTENT_FIELDS = (
     "statement",
     "passage",
     "media",
+    "image",
+    "image_text",
     "choices",
     "correct_index",
     "explanation",
@@ -60,10 +64,8 @@ def snapshot(item):
         "reviewed_at": item.reviewed_at.isoformat() if item.reviewed_at else None,
         "review_note": item.review_note,
         **{
-            key: str(item.media_id)
-            if key == "media" and item.media_id
-            else None
-            if key == "media"
+            key: (str(getattr(item, key + "_id")) if getattr(item, key + "_id") else None)
+            if key in ("media", "image")
             else getattr(item, key)
             for key in CONTENT_FIELDS
         },
@@ -253,6 +255,9 @@ def publish_exam(
                 statement=item.statement,
                 reading_passage=item.passage,
                 audio_key=str(item.media_id) if item.media_id else "",
+                image_key=str(item.image_id) if item.image_id else "",
+                image_text=item.image_text,
+                points=LEVEL_POINTS.get(item.difficulty, 1),
                 explanation=item.explanation,
                 difficulty=item.difficulty,
                 origin=item.origin,
@@ -280,6 +285,10 @@ def publish_exam(
             event(item, actor, "publish_exam", {**before, "exam_id": str(exam.pk)})
         exam.is_published = True
         exam.save()
+        # La nouvelle version remplace les précédentes dans le catalogue ; leurs tentatives restent lisibles.
+        for older in Exam.objects.filter(slug=slug, is_published=True).exclude(pk=exam.pk):
+            older.is_published = False
+            older.save()
     except ModelValidationError as exc:
         raise ValidationError(exc.messages) from exc
     return exam
@@ -309,7 +318,13 @@ def upload_media(actor, uploaded, *, title, transcript, provenance):
     require(actor, "add_mediaasset")
     if uploaded.size > 20_000_000:
         raise ValidationError("Le média dépasse 20 Mo.")
-    payload = uploaded.read(20_000_001)
+    return store_audio(actor, uploaded.read(20_000_001), title=title, transcript=transcript, provenance=provenance)
+
+
+def check_audio(payload):
+    """Durée en millisecondes d’un WAV PCM intègre ; ValidationError sinon."""
+    if len(payload) > 20_000_000:
+        raise ValidationError("Le média dépasse 20 Mo.")
     try:
         with wave.open(io.BytesIO(payload), "rb") as audio:
             frames, rate, channels, width = (
@@ -332,6 +347,11 @@ def upload_media(actor, uploaded, *, title, transcript, provenance):
         raise ValidationError(
             "Un WAV PCM intègre de 15 minutes maximum est requis."
         ) from exc
+    return max(1, round(1000 * frames / rate))
+
+
+def store_audio(actor, payload, *, title, transcript, provenance):
+    duration_ms = check_audio(payload)
     asset = MediaAsset(
         title=title,
         transcript=transcript,
@@ -339,7 +359,7 @@ def upload_media(actor, uploaded, *, title, transcript, provenance):
         created_by=actor,
         size=len(payload),
         sha256=hashlib.sha256(payload).hexdigest(),
-        duration_ms=max(1, round(1000 * frames / rate)),
+        duration_ms=duration_ms,
     )
     asset.full_clean()
     path = media_path(asset)
@@ -431,3 +451,77 @@ def claim_audio(user, attempt_id, question_id):
     if error:
         raise ValidationError({"attempt": error})
     return asset, payload
+
+
+IMAGE_MAX_BYTES = 5_000_000
+IMAGE_MIN_WIDTH = 600
+PNG_SIGNATURE = bytes([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])
+JPEG_SIGNATURE = bytes([0xFF, 0xD8])
+
+
+def image_size(payload):
+    """(type, largeur, hauteur) d’un PNG ou d’un JPEG, lus dans l’en-tête du fichier."""
+    if payload[:8] == PNG_SIGNATURE and payload[12:16] == b"IHDR":
+        width, height = struct.unpack(">II", payload[16:24])
+        return "image/png", width, height
+    if payload[:2] == JPEG_SIGNATURE:
+        index = 2
+        while index + 9 < len(payload):
+            if payload[index] != 0xFF:
+                index += 1
+                continue
+            marker = payload[index + 1]
+            if marker in (0xD8, 0x01) or 0xD0 <= marker <= 0xD7:
+                index += 2
+                continue
+            length = struct.unpack(">H", payload[index + 2 : index + 4])[0]
+            if 0xC0 <= marker <= 0xCF and marker not in (0xC4, 0xC8, 0xCC):
+                height, width = struct.unpack(">HH", payload[index + 5 : index + 9])
+                return "image/jpeg", width, height
+            index += 2 + length
+    raise ValidationError("Image PNG ou JPEG lisible requise.")
+
+
+def check_image(payload):
+    if len(payload) > IMAGE_MAX_BYTES:
+        raise ValidationError("L’image dépasse 5 Mo.")
+    kind, width, height = image_size(payload)
+    if width < IMAGE_MIN_WIDTH or height < 200:
+        raise ValidationError(
+            f"Image trop petite ({width} × {height} px) : {IMAGE_MIN_WIDTH} px de large minimum, 1200 px conseillés."
+        )
+    return kind, width, height
+
+
+def image_path(asset):
+    extension = ".png" if asset.content_type == "image/png" else ".jpg"
+    return Path(settings.PRIVATE_MEDIA_ROOT) / "images" / (str(asset.pk) + extension)
+
+
+def store_image(actor, payload, *, title, provenance):
+    kind, width, height = check_image(payload)
+    asset = ImageAsset(
+        title=title[:180], provenance=provenance, created_by=actor, size=len(payload),
+        sha256=hashlib.sha256(payload).hexdigest(), width=width, height=height, content_type=kind,
+    )
+    asset.full_clean()
+    path = image_path(asset)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("xb") as output:
+        output.write(payload)
+    try:
+        asset.save()
+    except Exception:
+        path.unlink(missing_ok=True)
+        raise
+    return asset
+
+
+def read_image(asset):
+    try:
+        payload = image_path(asset).read_bytes()
+    except OSError as exc:
+        raise NotFound("Image indisponible.") from exc
+    if len(payload) != asset.size or hashlib.sha256(payload).hexdigest() != asset.sha256:
+        raise ValidationError("L’intégrité de l’image n’est plus garantie.")
+    return payload

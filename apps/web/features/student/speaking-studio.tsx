@@ -4,13 +4,13 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "../../components/ui/primitives";
 import { Icon } from "../../components/app-shell/icons";
-import { formatDuration, speakingTasks, type SpeakingTask } from "./content";
+import { formatDuration, type SpeakingTask } from "./content";
 import { Notice, PageHead } from "./ui";
 
 type Take = { url: string; seconds: number; at: string; type: string };
 type Phase = "idle" | "prep" | "recording";
 
-export function SpeakingStudio({ task }: { task: SpeakingTask }) {
+export function SpeakingStudio({ task, others }: { task: SpeakingTask; others: { slug: string; number: number; title: string }[] }) {
   const [subject, setSubject] = useState(0);
   const [phase, setPhase] = useState<Phase>("idle");
   const [clock, setClock] = useState(0);
@@ -130,7 +130,7 @@ export function SpeakingStudio({ task }: { task: SpeakingTask }) {
         </section>
         <nav aria-label="Autres tâches d’oral" className="student-card">
           <h2 className="student-eyebrow">Autres tâches</h2>
-          <ul className="checklist">{speakingTasks.filter(t => t.slug !== task.slug).map(t => <li key={t.slug}><Link href={`/etudiant/expression-orale/${t.slug}`}>Tâche {t.number} — {t.title}</Link></li>)}</ul>
+          <ul className="checklist">{others.map(t => <li key={t.slug}><Link href={`/etudiant/expression-orale/${t.slug}`}>Tâche {t.number} — {t.title}</Link></li>)}</ul>
         </nav>
       </aside>
     </div>

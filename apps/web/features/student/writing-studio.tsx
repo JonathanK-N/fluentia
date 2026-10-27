@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "../../components/ui/primitives";
 import { Icon } from "../../components/app-shell/icons";
-import { countWords, formatDuration, writingTasks, type WritingTask } from "./content";
+import { countWords, formatDuration, type WritingTask } from "./content";
 import { PageHead } from "./ui";
 
 const criteria = ["J’ai respecté le type de texte et le destinataire.", "J’ai traité tous les points de la consigne.", "Mes idées sont organisées avec des connecteurs.", "J’ai varié le vocabulaire et évité les répétitions.", "J’ai relu l’accord, la conjugaison et la ponctuation."];
@@ -12,7 +12,7 @@ const criteria = ["J’ai respecté le type de texte et le destinataire.", "J’
 function read(key: string) { try { return localStorage.getItem(key) ?? ""; } catch { return ""; } }
 function write(key: string, value: string) { try { localStorage.setItem(key, value); return true; } catch { return false; } }
 
-export function WritingStudio({ task }: { task: WritingTask }) {
+export function WritingStudio({ task, others }: { task: WritingTask; others: { slug: string; number: number; title: string }[] }) {
   const [subject, setSubject] = useState(0);
   const key = `fluentia-ee-${task.slug}-${subject}`;
   const [text, setText] = useState("");
@@ -88,7 +88,7 @@ export function WritingStudio({ task }: { task: WritingTask }) {
         </section>
         <nav aria-label="Autres tâches de rédaction" className="student-card">
           <h2 className="student-eyebrow">Autres tâches</h2>
-          <ul className="checklist">{writingTasks.filter(t => t.slug !== task.slug).map(t => <li key={t.slug}><Link href={`/etudiant/expression-ecrite/${t.slug}`}>Tâche {t.number} — {t.title}</Link></li>)}</ul>
+          <ul className="checklist">{others.map(t => <li key={t.slug}><Link href={`/etudiant/expression-ecrite/${t.slug}`}>Tâche {t.number} — {t.title}</Link></li>)}</ul>
         </nav>
       </aside>
     </div>

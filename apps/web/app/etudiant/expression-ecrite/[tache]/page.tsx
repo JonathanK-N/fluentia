@@ -1,16 +1,14 @@
 import { notFound } from "next/navigation";
-import { writingTasks } from "../../../../features/student/content";
-import { WritingStudio } from "../../../../features/student/writing-studio";
+import { taskSlugs } from "../../../../features/student/content";
+import { TaskStudio } from "../../../../features/student/tasks";
 export const dynamicParams = false;
-export function generateStaticParams() { return writingTasks.map(task => ({ tache: task.slug })); }
+export function generateStaticParams() { return taskSlugs.map(tache => ({ tache })); }
 export async function generateMetadata({ params }: { params: Promise<{ tache: string }> }) {
   const { tache } = await params;
-  const task = writingTasks.find(t => t.slug === tache);
-  return { title: task ? `Expression écrite — tâche ${task.number}` : "Expression écrite" };
+  return { title: taskSlugs.includes(tache) ? `Expression écrite — tâche ${tache.slice(-1)}` : "Expression écrite" };
 }
 export default async function Page({ params }: { params: Promise<{ tache: string }> }) {
   const { tache } = await params;
-  const task = writingTasks.find(t => t.slug === tache);
-  if (!task) notFound();
-  return <WritingStudio key={task.slug} task={task} />;
+  if (!taskSlugs.includes(tache)) notFound();
+  return <TaskStudio kind="writing" slug={tache} />;
 }

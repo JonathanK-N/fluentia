@@ -104,6 +104,10 @@ class Exam(models.Model):
         return super().save(*args, **kwargs)
 
 
+# Barème Fluentia : points d’une bonne réponse selon le niveau visé.
+LEVEL_POINTS = {"A1": 3, "A2": 9, "B1": 15, "B2": 21, "C1": 26, "C2": 33}
+
+
 class Question(models.Model):
     class Review(models.TextChoices):
         DRAFT = "draft", "Brouillon pédagogique"
@@ -118,6 +122,12 @@ class Question(models.Model):
         max_length=255,
         blank=True,
         help_text="Référence privée ; aucun média n’est livré par ce lot",
+    )
+    image_key = models.CharField(
+        max_length=64, blank=True, help_text="Image privée du document (journal, lettre…)"
+    )
+    image_text = models.TextField(
+        blank=True, help_text="Texte de l’image, lu par les lecteurs d’écran"
     )
     explanation = models.TextField(blank=True)
     difficulty = models.CharField(max_length=32, default="non_calibree")
@@ -204,9 +214,13 @@ class Question(models.Model):
                     "Une validation exige un auteur et un relecteur distincts, avec date."
                 )
             if not self.explanation or (
-                exam.skill == Exam.Skill.READING and not self.reading_passage
+                exam.skill == Exam.Skill.READING
+                and not self.reading_passage
+                and not self.image_key
             ):
                 raise ValidationError("Ajoutez le texte et l’explication pédagogique.")
+            if self.image_key and not self.image_text.strip():
+                raise ValidationError("Ajoutez le texte de l’image pour les lecteurs d’écran.")
             if (
                 self.origin == "licensed" or exam.skill == Exam.Skill.LISTENING
             ) and not self.source_reference:

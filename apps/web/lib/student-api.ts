@@ -30,10 +30,10 @@ export type Subscription = { status: "free" | "premium" | "expired"; premium_unt
 export type Profile = { id: number; email: string; display_name: string; email_verified: boolean; preferences: { live_correction: boolean; answer_sound: boolean }; subscription: Subscription };
 export type SavedAnswer = { question_id: string; choice_id: string; saved: boolean; correct: boolean | null };
 export type Exam = { id: string; title: string; description: string; skill: string; mode: string; version: number; question_count: number; total_points: number; duration_seconds: number };
-export type Question = { id: string; position: number; statement: string; reading_passage: string; points: number; audio_available: boolean; audio_state: string; audio_ends_at?: string; transcript?: string; choices: {id: string; label: string}[] };
+export type Question = { id: string; position: number; statement: string; reading_passage: string; image_available: boolean; image_text: string; points: number; audio_available: boolean; audio_state: string; audio_ends_at?: string; transcript?: string; choices: {id: string; label: string}[] };
 export type Attempt = {id: string; exam_id: string; status: string; skill: string; mode: string; exam_title: string; expires_at: string; server_now: string; questions?: Question[]; answers: {question_id: string; choice_id: string}[]};
 export type AttemptSummary = Pick<Attempt, "id" | "status" | "expires_at" | "skill" | "mode" | "exam_title">;
-export type Results = { correct_count: number; question_count: number; percentage: number; score: number; max_score: number; disclaimer: string; details: {question_id: string; selected_choice_id: string | null; correct_choice_id: string; explanation: string; points: number; statement: string; reading_passage: string; choices: {id: string; position: number; label: string}[]; selected_label: string | null; correct_label: string; transcript?: string}[] };
+export type Results = { correct_count: number; question_count: number; percentage: number; score: number; max_score: number; disclaimer: string; details: {question_id: string; selected_choice_id: string | null; correct_choice_id: string; explanation: string; points: number; statement: string; reading_passage: string; image_available: boolean; image_text: string; choices: {id: string; position: number; label: string}[]; selected_label: string | null; correct_label: string; transcript?: string}[] };
 
 export async function fileRequest(path: string, method: string, body?: FormData): Promise<Response> {
   const csrfResponse = await http("/api/v1/auth/csrf/", {credentials: "same-origin", cache: "no-store"});
@@ -45,4 +45,13 @@ export async function fileRequest(path: string, method: string, body?: FormData)
     throw new ApiError(response.status, typeof data.detail === "string" ? data.detail : "Document indisponible. Vérifiez votre session et la validité de la tentative.");
   }
   return response;
+}
+
+/** Envoi d’un formulaire multipart ; renvoie aussi le corps des erreurs (ex. la liste des lignes refusées). */
+export async function postForm<T>(path: string, body: FormData): Promise<{ ok: boolean; status: number; data: T }> {
+  const csrfResponse = await http("/api/v1/auth/csrf/", {credentials: "same-origin", cache: "no-store"});
+  if (!csrfResponse.ok) throw new ApiError(csrfResponse.status, "Impossible de sécuriser la session.");
+  const token = (await csrfResponse.json()).csrf_token;
+  const response = await http(`/api/v1/${path}`, {method: "POST", credentials: "same-origin", cache: "no-store", headers: {"X-CSRFToken": token}, body});
+  return { ok: response.ok, status: response.status, data: await response.json().catch(() => ({})) as T };
 }

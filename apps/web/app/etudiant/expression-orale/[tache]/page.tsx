@@ -1,16 +1,14 @@
 import { notFound } from "next/navigation";
-import { speakingTasks } from "../../../../features/student/content";
-import { SpeakingStudio } from "../../../../features/student/speaking-studio";
+import { taskSlugs } from "../../../../features/student/content";
+import { TaskStudio } from "../../../../features/student/tasks";
 export const dynamicParams = false;
-export function generateStaticParams() { return speakingTasks.map(task => ({ tache: task.slug })); }
+export function generateStaticParams() { return taskSlugs.map(tache => ({ tache })); }
 export async function generateMetadata({ params }: { params: Promise<{ tache: string }> }) {
   const { tache } = await params;
-  const task = speakingTasks.find(t => t.slug === tache);
-  return { title: task ? `Expression orale — tâche ${task.number}` : "Expression orale" };
+  return { title: taskSlugs.includes(tache) ? `Expression orale — tâche ${tache.slice(-1)}` : "Expression orale" };
 }
 export default async function Page({ params }: { params: Promise<{ tache: string }> }) {
   const { tache } = await params;
-  const task = speakingTasks.find(t => t.slug === tache);
-  if (!task) notFound();
-  return <SpeakingStudio key={task.slug} task={task} />;
+  if (!taskSlugs.includes(tache)) notFound();
+  return <TaskStudio kind="speaking" slug={tache} />;
 }

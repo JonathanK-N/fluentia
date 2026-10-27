@@ -1,5 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import { execFileSync } from "node:child_process";
+import path from "node:path";
 import AxeBuilder from "@axe-core/playwright";
 
 async function student(page: Page, suffix: string) {
@@ -137,4 +138,57 @@ test("interface éditoriale : création, demande de relecture et historique", as
   await page.getByRole("button", {name: "Importer le média privé", exact: true}).click();
   await expect(page.getByRole("status")).toContainText("Média privé enregistré");
   await page.screenshot({path: info.outputPath("banque-editoriale.png"), fullPage: true});
+});
+
+async function staff(page: Page, email: string) {
+  await page.goto("/etudiant/compte");
+  await page.getByLabel("Adresse e-mail", {exact: true}).fill(email);
+  await page.getByLabel("Mot de passe", {exact: true}).fill("Edition!Fixture-7294");
+  await page.getByRole("button", {name: "Se connecter", exact: true}).click();
+  await expect(page.getByRole("heading", {name: "Mon abonnement"})).toBeVisible();
+  await page.goto("/edition/import");
+}
+
+test("import Excel : série avec images, relecture par une autre personne, publication et zoom", async ({browser}, info) => {
+  const editor = await (await browser.newContext()).newPage();
+  await staff(editor, "bank-editor@example.test");
+  expect((await new AxeBuilder({page: editor}).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations).toEqual([]);
+  const zip = path.resolve("tests/fixtures/documents-en-image.zip");
+  // Mauvaise épreuve choisie : refus clair, rien n’est importé.
+  await editor.getByRole("group", {name: "Épreuve de la série"}).getByRole("button", {name: "Oral"}).click();
+  await editor.locator(".import-drop input").setInputFiles(zip);
+  await editor.getByRole("button", {name: "Importer la série Oral"}).click();
+  await expect(editor.locator(".import-table")).toContainText("Ce fichier est un modèle Lecture, pas Oral.");
+  await editor.getByRole("group", {name: "Épreuve de la série"}).getByRole("button", {name: "Lecture"}).click();
+  await editor.locator(".import-drop input").setInputFiles(zip);
+  await editor.getByRole("button", {name: "Importer la série Lecture"}).click();
+  await expect(editor.locator(".import-success")).toContainText("importée : 2 questions en brouillon");
+  const card = editor.locator(".import-series").first();
+  await card.getByRole("button", {name: "Envoyer en relecture"}).click();
+  await expect(card.locator(".import-status")).toHaveText("En relecture");
+
+  const reviewer = await (await browser.newContext()).newPage();
+  await staff(reviewer, "bank-reviewer@example.test");
+  const pending = reviewer.locator(".import-series").first();
+  await pending.getByLabel("Note de relecture").fill(`Lettre, article, choix et droits relus (${info.project.name}).`);
+  await pending.getByRole("checkbox").check();
+  await pending.getByRole("button", {name: "Approuver la série"}).click();
+  await expect(pending.locator(".import-status")).toHaveText("Approuvée");
+  await pending.getByRole("button", {name: "Publier la série"}).click();
+  await expect(pending.locator(".import-status")).toContainText("Publiée");
+
+  const learner = await (await browser.newContext()).newPage();
+  await student(learner, info.project.name + "-image");
+  await learner.getByRole("article").filter({has: learner.getByRole("heading", {name: "Documents en image — démonstration", exact: true})}).getByRole("button", {name: "Démarrer la série"}).click();
+  await expect(learner.getByRole("heading", {name: "Question 1 / 2", exact: true})).toBeVisible();
+  const image = learner.getByRole("img", {name: /Lettre de Julien Moreau/});
+  await expect(image).toBeVisible();
+  expect(await image.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThanOrEqual(1200);
+  await learner.getByRole("button", {name: "Agrandir le document"}).click();
+  await expect(learner.getByRole("dialog", {name: "Document agrandi"})).toBeVisible();
+  await learner.getByRole("button", {name: "Agrandir encore"}).click();
+  await expect(learner.getByText("Zoom 150 %")).toBeVisible();
+  await learner.keyboard.press("Escape");
+  await expect(learner.getByRole("dialog", {name: "Document agrandi"})).toBeHidden();
+  await learner.screenshot({path: info.outputPath("question-image.png"), fullPage: true});
 });
