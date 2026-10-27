@@ -3,10 +3,12 @@
   --sidebar: 248px;
   display: grid;
   grid-template-columns: var(--sidebar) minmax(0, 1fr);
+  grid-template-areas: "side main";
   min-height: 100vh;
   background: var(--bg);
 }
 .shell-sidebar {
+  grid-area: side;
   position: sticky;
   top: 0;
   height: 100vh;
@@ -80,9 +82,8 @@
   font-size: 0.74rem;
   font-weight: 700;
 }
-.shell-main { min-width: 0; display: flex; flex-direction: column; }
+.shell-main { grid-area: main; min-width: 0; display: flex; flex-direction: column; }
 .shell-mobilebar { display: none; }
-.shell-backdrop { display: none; }
 .shell-icon-button {
   display: inline-grid;
   place-items: center;
@@ -120,30 +121,31 @@
   transition: border-color var(--duration);
 }
 .shell-site-link:hover { border-color: var(--control-border); }
+/* Écrans étroits : le menu pousse le contenu au lieu de le recouvrir. */
 @media (max-width: 960px) {
-  .app-shell { grid-template-columns: minmax(0, 1fr); }
-  .shell-sidebar {
-    position: fixed;
-    inset: 0 auto 0 0;
-    width: min(280px, 86vw);
-    transform: translateX(-102%);
-    visibility: hidden;
-    transition: transform 220ms var(--ease), visibility 0s linear 220ms;
-  }
-  .app-shell[data-open] .shell-sidebar { transform: none; visibility: visible; transition: transform 220ms var(--ease); }
-  .app-shell[data-open] .shell-backdrop { display: block; position: fixed; inset: 0; z-index: 25; border: 0; background: rgb(15 21 48 / 45%); }
+  .app-shell { grid-template-columns: minmax(0, 1fr); grid-template-areas: "bar" "main"; }
+  .app-shell[data-open] { grid-template-columns: var(--sidebar) minmax(0, 1fr); grid-template-areas: "bar bar" "side main"; }
+  .shell-sidebar { display: none; top: 62px; height: calc(100vh - 62px); }
+  .app-shell[data-open] .shell-sidebar { display: flex; }
   .shell-mobilebar {
+    grid-area: bar;
     position: sticky;
     top: 0;
-    z-index: 20;
+    z-index: 40;
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 0.6rem 1rem;
+    min-height: 62px;
+    padding: 0.5rem 1rem;
     background: var(--side-bg);
   }
   .shell-mobilebar .shell-icon-button { background: var(--side-active); border-color: var(--side-active); color: #fff; }
+  .app-shell[data-open] .shell-mobilebar .shell-brand { visibility: hidden; }
 }
-@media (prefers-reduced-motion: reduce) {
-  .shell-sidebar { transition: none !important; }
+@media (max-width: 640px) {
+  .app-shell[data-open] { grid-template-columns: minmax(0, 1fr); grid-template-areas: "bar" "side" "main"; }
+  .app-shell[data-open] .shell-sidebar { position: static; height: auto; overflow: visible; }
+  .app-shell[data-open] .shell-mobilebar .shell-brand { visibility: visible; }
+  .app-shell[data-open] .shell-sidebar > .shell-brand { display: none; }
 }
+

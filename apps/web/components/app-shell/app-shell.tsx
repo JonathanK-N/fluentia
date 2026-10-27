@@ -1,5 +1,5 @@
 "use client";
-/** Coque applicative : navigation latérale sombre, en-tête de page et menu mobile. */
+/** Coque applicative : navigation latérale sombre, en-tête de page et menu qui pousse le contenu. */
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -95,6 +95,12 @@ function Shell({ variant, children }: { variant: "student" | "edition"; children
   }, [open]);
   const close = () => setOpen(false);
   return <div className="app-shell" data-open={open || undefined}>
+    <div className="shell-mobilebar">
+      <button ref={toggleRef} type="button" className="shell-icon-button" aria-expanded={open} aria-controls="shell-sidebar" onClick={() => setOpen(value => !value)}>
+        <Icon name={open ? "close" : "menu"} /><span className="sr-only">{open ? "Fermer la navigation" : "Ouvrir la navigation"}</span>
+      </button>
+      <Brand variant={variant} />
+    </div>
     <aside id="shell-sidebar" className="shell-sidebar">
       <Brand variant={variant} />
       <nav aria-label={variant === "edition" ? "Navigation éditoriale" : "Navigation de l’espace étudiant"} className="shell-nav">
@@ -115,14 +121,7 @@ function Shell({ variant, children }: { variant: "student" | "edition"; children
       </nav>
       <UserCard onNavigate={close} />
     </aside>
-    <button type="button" className="shell-backdrop" tabIndex={-1} aria-hidden="true" onClick={close} />
     <div className="shell-main">
-      <div className="shell-mobilebar">
-        <button ref={toggleRef} type="button" className="shell-icon-button" aria-expanded={open} aria-controls="shell-sidebar" onClick={() => setOpen(value => !value)}>
-          <Icon name={open ? "close" : "menu"} /><span className="sr-only">{open ? "Fermer la navigation" : "Ouvrir la navigation"}</span>
-        </button>
-        <Brand variant={variant} />
-      </div>
       <main id="contenu" tabIndex={-1} className="shell-content student-space">
         <header className="shell-pagehead">
           <div>
