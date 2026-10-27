@@ -18,7 +18,7 @@ export default function ProgressPage() {
   const best = data?.groups.length ? [...data.groups].sort((a, b) => b.percentage - a.percentage)[0] : null;
   const categories = [...(data?.categories ?? [])].sort((a, b) => a.skill.localeCompare(b.skill) || order.indexOf(a.difficulty) - order.indexOf(b.difficulty));
   return <>
-    <PageHead eyebrow="Ma progression" title="Vos étapes, à votre rythme">Seules vos tentatives soumises alimentent ces indicateurs. Aucune progression fictive n’est affichée.</PageHead>
+    <PageHead eyebrow="Mes résultats" title="Vos étapes, à votre rythme">Seules vos tentatives soumises alimentent ces indicateurs. Aucune progression fictive n’est affichée.</PageHead>
     {ready && !profile && <Notice icon="user">Connectez-vous pour consulter vos résultats. <Link href="/etudiant/compte">Accéder à la connexion</Link></Notice>}
     {error && profile && <p role="alert">{error}</p>}
     {!data && !error && <p className="student-hint">Chargement de vos résultats…</p>}
@@ -43,17 +43,17 @@ export default function ProgressPage() {
         <section className="student-card card-muted" aria-labelledby="conseil">
           <h2 id="conseil">Prochaine séance</h2>
           <p>{best && data.groups.length > 1 ? "Alternez votre domaine le plus solide avec celui qui progresse le moins : la régularité compte davantage que la durée." : "Variez les compétences : une séance de lecture et une séance d’écoute chaque semaine donnent des repères comparables."}</p>
-          <p><Link href="/etudiant/plan">Ajuster mon plan d’étude</Link></p>
+          <p><Link href="/etudiant/plan">Ajuster mon programme</Link></p>
           <p className="student-hint">{data.disclaimer}</p>
         </section>
       </div>}
       {!!categories.length && <section className="student-card" aria-labelledby="reperes">
         <h2 id="reperes">Repères pour votre prochaine séance</h2>
         <p>Les difficultés sont proposées par les auteurs, sans calibration. Les questions non répondues sont incluses dans les totaux d’examen, pas dans cette répartition des réponses.</p>
-        <ul className="bar-list">{categories.map(c => <Bar key={c.skill + c.difficulty} label={`${c.skill === "listening" ? "Oral" : "Lecture"} · ${c.difficulty === "non_calibree" ? "Difficulté non calibrée" : c.difficulty}`} value={c.answered ? c.correct / c.answered * 100 : 0} detail={`${c.correct} / ${c.answered}`} />)}</ul>
+        <ul className="bar-list">{categories.map(c => <Bar key={c.skill + c.difficulty} label={`${skillLabel(c.skill)} · ${c.difficulty === "non_calibree" ? "Difficulté non calibrée" : c.difficulty}`} value={c.answered ? c.correct / c.answered * 100 : 0} detail={`${c.correct} / ${c.answered}`} />)}</ul>
         <details style={{ marginTop: "1rem" }}><summary>Afficher le tableau détaillé</summary>
           <div className="table-scroll"><table><caption className="sr-only">Réponses correctes par difficulté proposée</caption><thead><tr><th scope="col">Compétence</th><th scope="col">Difficulté</th><th scope="col">Correctes</th><th scope="col">Répondues</th></tr></thead>
-            <tbody>{categories.map(c => <tr key={c.skill + c.difficulty}><th scope="row">{c.skill === "listening" ? "Oral" : "Lecture"}</th><td>{c.difficulty === "non_calibree" ? "Non calibrée" : c.difficulty}</td><td>{c.correct}</td><td>{c.answered}</td></tr>)}</tbody></table></div>
+            <tbody>{categories.map(c => <tr key={c.skill + c.difficulty}><th scope="row">{skillLabel(c.skill)}</th><td>{c.difficulty === "non_calibree" ? "Non calibrée" : c.difficulty}</td><td>{c.correct}</td><td>{c.answered}</td></tr>)}</tbody></table></div>
         </details>
       </section>}
     </>}

@@ -63,7 +63,7 @@ test("inscription, courriel, session, lecture persistante et résultat privé su
   await page.reload();
   await expect(page.getByRole("radio", {name: "Les pièces à remplacer", exact: true})).toBeChecked();
   await page.getByRole("link", {name: "Retour aux exercices"}).click();
-  await page.getByRole("link", {name: /Reprendre/}).click();
+  await page.getByRole("link", {name: /· Reprendre/}).click();
   await expect(page).toHaveURL(attemptUrl);
   await expect(page.getByRole("heading", {name: "À vous de lire", exact: true})).toBeVisible();
   await expect(page).toHaveTitle(/Compréhension écrite/);
@@ -74,7 +74,7 @@ test("inscription, courriel, session, lecture persistante et résultat privé su
   expect((await new AxeBuilder({page}).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations).toEqual([]);
   // Thème clair unique : une préférence système sombre ne change pas l'apparence.
   await page.emulateMedia({colorScheme: "dark"});
-  await expect(page.locator("body")).toHaveCSS("background-color", "rgb(250, 247, 242)");
+  await expect(page.locator("body")).toHaveCSS("background-color", "rgb(238, 240, 246)");
   expect((await new AxeBuilder({page}).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations).toEqual([]);
   await page.emulateMedia({colorScheme: "light"});
   await page.getByRole("button", {name: "Terminer et vérifier mes réponses"}).click();
@@ -85,7 +85,7 @@ test("inscription, courriel, session, lecture persistante et résultat privé su
   await page.reload();
   await expect(page.getByText("1 / 1", {exact: true})).toBeVisible();
   await page.screenshot({path: info.outputPath("resultat.png"), fullPage: true});
-  await page.getByRole("link", {name: "Mon compte", exact: true}).click();
+  await page.getByRole("link", {name: "Profil", exact: true}).click();
   await page.getByRole("button", {name: "Se déconnecter"}).click();
   await expect(page.getByRole("heading", {name: "Content de vous retrouver"})).toBeVisible();
   expect(path.isAbsolute(process.env.DJANGO_EMAIL_FILE_PATH!)).toBe(true);

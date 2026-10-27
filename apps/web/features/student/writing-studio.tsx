@@ -41,7 +41,7 @@ export function WritingStudio({ task }: { task: WritingTask }) {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
   return <>
-    <PageHead eyebrow={`Expression écrite · Tâche ${task.number}`} title={task.title}>{task.genre}. Entre {task.min} et {task.max} mots, environ {task.minutes} minutes conseillées.</PageHead>
+    <PageHead eyebrow={`Rédaction · Tâche ${task.number}`} title={task.title}>{task.genre}. Entre {task.min} et {task.max} mots, environ {task.minutes} minutes conseillées.</PageHead>
     <div className="segmented" role="group" aria-label="Choisir un sujet">
       {task.subjects.map((item, index) => <Button key={item.title} variant="ghost" aria-pressed={subject === index} onClick={() => setSubject(index)}>{item.title}</Button>)}
     </div>
@@ -86,7 +86,7 @@ export function WritingStudio({ task }: { task: WritingTask }) {
           <h2 className="student-eyebrow">Conseils</h2>
           <ul className="checklist">{task.advice.map(item => <li key={item}>{item}</li>)}</ul>
         </section>
-        <nav aria-label="Autres tâches d’expression écrite" className="student-card">
+        <nav aria-label="Autres tâches de rédaction" className="student-card">
           <h2 className="student-eyebrow">Autres tâches</h2>
           <ul className="checklist">{writingTasks.filter(t => t.slug !== task.slug).map(t => <li key={t.slug}><Link href={`/etudiant/expression-ecrite/${t.slug}`}>Tâche {t.number} — {t.title}</Link></li>)}</ul>
         </nav>

@@ -18,7 +18,7 @@ export default function VerifyPage() {
     try { const data = await api<{detail: string}>("auth/verify/", "POST", {token}); setMessage(data.detail); setToken(""); }
     catch (e) { setError((e as Error).message); } finally { setBusy(false); }
   }
-  return <section className="student-card"><h1>Confirmer mon adresse e-mail</h1>
+  return <section className="student-card"><h2 className="page-title">Confirmer mon adresse e-mail</h2>
     <p>Le lien est valable 24 heures et ne peut être utilisé qu’une fois.</p>
     {token && <Button loading={busy} onClick={verify}>Vérifier mon adresse</Button>}
     {!token && !message && <p>Ouvrez le lien reçu par e-mail pour continuer.</p>}

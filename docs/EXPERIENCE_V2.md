@@ -6,20 +6,22 @@ Responsable : Jonathan Kakesa. Co-auteur et contributeur : Mamadou Barry.
 
 Un espace de préparation calme et complet, organisé comme un tableau de bord d’apprentissage : navigation latérale groupée (Général, Compréhension, Expression, Préparation), barre supérieure avec fil d’Ariane et thème, pages pleines pour chaque compétence. Les principes v3 sont conservés : aucune progression fictive, statut non officiel affiché, état vide utile, focus visible, Poppins et logos officiels.
 
-## Direction visuelle « Ivoire & Sable »
+## Direction visuelle « Marine & Indigo »
 
 | Rôle | Valeur | Contraste vérifié |
 |---|---|---|
-| Fond | `#FAF7F2` | — |
-| Surface | `#FFFFFF` | — |
-| Sable (teintes, cartes secondaires) | `#F3ECE1` | — |
-| Texte | `#1E1A16` | 16,2:1 |
-| Texte secondaire | `#6B6157` | ≥ 5,1:1 sur fond, surface et sable |
-| Accent bronze | `#8A5A2B` | ≥ 5,0:1 |
-| Action | `#0B1F3A` (texte blanc) | 16,5:1 |
-| Bordure de contrôle | `#8C7F70` | ≥ 3,9:1 |
+| Barre latérale | `#111733`, élément actif `#232B52` | texte `#C9CDE3` 11,2:1, intertitres `#8A91B4` 5,7:1 |
+| Fond de contenu | `#EEF0F6` | — |
+| Cartes | `#FFFFFF`, bordure `#E2E5EF` | — |
+| Texte | `#0F1530` | 15,8:1 |
+| Texte secondaire | `#5B6178` | ≥ 5,4:1 |
+| Bandeau d’accueil | indigo `#3B33A6` | texte blanc 9,5:1 |
+| Accent et liens | `#4338CA` | 6,9:1 |
+| Action principale | `#0F1530` (texte blanc) | 17,9:1 |
+| Pastilles | lavande `#EEEBFF` / `#4F46E5`, menthe `#E3F5F0` / `#0F766E` | 5,4:1 / 4,8:1 |
+| Échéance | `#FFF1E0` / `#B45309` | 4,5:1 |
 
-Fluentia utilise un **thème clair unique** : la préférence sombre du système n’est pas appliquée, pour garder partout l’identité crème, beige et blanc de l’accueil. Le bleu vif n’est plus utilisé pour la structure ni l’action ; le cyan reste réservé à l’indicateur vocal et à la démonstration Voice. Les icônes sont des SVG linéaires 24 px (`components/app-shell/icons.tsx`), jamais des émojis.
+Thème clair unique. Navigation : **Mon espace** (Accueil, Mes résultats, Mon programme, Profil), **Les 4 épreuves** (Lecture, Écoute, Rédaction, Oral), **Jour J** (Simulations TCF, Centre d’aide). Chaque page affiche « Espace étudiant », son titre et le lien « Voir le site ». Les icônes sont des SVG linéaires 24 px (`components/app-shell/icons.tsx`), jamais des émojis.
 
 ## Données et honnêteté
 

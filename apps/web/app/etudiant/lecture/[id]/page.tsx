@@ -70,8 +70,8 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
   const total = attempt?.questions?.length ?? 0;
   return <>
     <div className="page-head"><div>
-      <p className="student-eyebrow">{attempt?.skill === "listening" ? "Compréhension orale" : "Compréhension écrite"} · {attempt?.mode === "simulation" ? "Simulation non officielle" : "Entraînement non officiel"}</p>
-      <h1>{results ? "Prenons le temps de comprendre" : attempt?.skill === "listening" ? "À vous d’écouter" : "À vous de lire"}</h1>
+      <p className="student-eyebrow">{attempt?.skill === "listening" ? "Écoute" : "Lecture"} · {attempt?.mode === "simulation" ? "Simulation non officielle" : "Entraînement non officiel"}</p>
+      <h2 className="page-title">{results ? "Prenons le temps de comprendre" : attempt?.skill === "listening" ? "À vous d’écouter" : "À vous de lire"}</h2>
       {attempt?.exam_title && <p>{attempt.exam_title}</p>}
     </div><p><Link href="/etudiant">Retour aux exercices</Link></p></div>
     {error && <p role="alert">{error}</p>}
@@ -83,7 +83,7 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
         <div><h2 id="resultat">Votre résultat</h2><p><strong>{results.percentage} %</strong> de réponses correctes.</p><p>{results.disclaimer}</p>
           <div className="student-nav" style={{ margin: 0 }}><Link className="button button-secondary tile-link" href="/etudiant/progression">Voir mon évolution</Link></div></div>
       </section>
-      <section className="student-card" aria-labelledby="corrige"><h2 id="corrige">Corrigé détaillé</h2>
+      <section className="student-card" aria-labelledby="corrige"><h2 id="corrige">Correction détaillée</h2>
         {results.details.map((detail, index) => { const ok = detail.selected_choice_id === detail.correct_choice_id; return <article key={detail.question_id} className="student-correction">
           <div className="pill-row" style={{ justifyContent: "space-between", alignItems: "center" }}><h3 style={{ margin: 0 }}>Question {index + 1}</h3><span className={`pill ${ok ? "pill-success" : "pill-warning"}`}>{ok ? "Correct" : detail.selected_label ? "À revoir" : "Sans réponse"}</span></div>
           <p style={{ color: "var(--text)", marginTop: ".5rem" }}>{detail.statement}</p><p>Votre réponse : {detail.selected_label ?? "Sans réponse"}</p>

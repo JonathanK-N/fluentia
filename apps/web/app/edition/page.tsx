@@ -61,7 +61,7 @@ export default function EditorialPage() {
     event.preventDefault(); const fields = new FormData(event.currentTarget);
     action(async () => {const result = await (await fileRequest("bank/media/", "POST", fields)).json(); setMessage(`Média privé enregistré : ${result.id}. Reportez cet identifiant dans le brouillon. Durée : ${result.duration_ms} ms.`);});
   }
-  return <><div className="page-head"><div><p className="student-eyebrow">Espace éditorial réservé aux personnes habilitées</p><h1>Construire une banque fiable</h1>
+  return <><div className="page-head"><div><p className="student-eyebrow">Espace éditorial réservé aux personnes habilitées</p><h2 className="page-title">Construire une banque fiable</h2>
     <p>Les difficultés sont proposées, sans calibration. Aucun contenu n’est publié par un import ou par une génération. La relecture doit être réalisée par une personne distincte du responsable éditorial.</p></div></div>
     {error && <p role="alert">{error}</p>}<p role="status">{message}</p>
     {!ready && !error && <p className="student-hint">Chargement de la banque…</p>}

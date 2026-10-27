@@ -2,19 +2,19 @@
 .human-pilot,
 .human-pilot .learn-preview {
   color-scheme: light;
-  --bg: #faf7f2;
+  --bg: #eef0f6;
   --surface: #fff;
-  --text: #1e1a16;
-  --muted: #6b6157;
-  --border: #e8e0d4;
-  --control-border: #8c7f70;
-  --action: #0b1f3a;
-  --action-on-tint: #0b1f3a;
+  --text: #0f1530;
+  --muted: #5b6178;
+  --border: #e2e5ef;
+  --control-border: #8a90a8;
+  --action: #0f1530;
+  --action-on-tint: #3b33a6;
   --on-action: #fff;
-  --accent: #8a5a2b;
-  --focus: #0b1f3a;
+  --accent: #4338ca;
+  --focus: #4338ca;
   --danger: #a12535;
-  --tint: #f3ece1;
+  --tint: #edebfe;
   --radius: 10px;
   --button-radius: 7px;
   --shadow: none;
@@ -260,7 +260,7 @@
   width: 78%;
   box-shadow: inset -6px -6px 15px #081b3520;
   border-color: #1769e060;
-  background: radial-gradient(circle at 30% 25%, #9adbe6, #2f6f73 60%, #0b1f3a);
+  background: radial-gradient(circle at 30% 25%, #b9b3ff, #4338ca 60%, #111733);
 }
 .human-pilot .fluentia-orb[data-state="error"] .orb-body {
   border-color: var(--danger);

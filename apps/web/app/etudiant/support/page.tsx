@@ -10,12 +10,12 @@ const faq = [
   { q: "Pourquoi ne puis-je pas réécouter un document en simulation ?", a: "Comme dans les conditions du test, chaque document n’est diffusé qu’une fois en simulation. Utilisez le mode entraînement pour réécouter librement et consulter la transcription." },
   { q: "Le score obtenu correspond-il à un niveau officiel ?", a: "Non. Les exercices sont originaux et non officiels. Les difficultés sont proposées par les auteurs et ne sont pas calibrées. Seul le test officiel délivre un résultat reconnu." },
   { q: "Où sont conservés mes textes et mes enregistrements d’expression ?", a: "Dans votre navigateur uniquement. Les textes restent sur cet appareil ; les enregistrements disparaissent à la fermeture de la page. Téléchargez-les si vous souhaitez les garder." },
-  { q: "Je n’ai pas reçu le courriel de vérification.", a: "Depuis Mon compte, utilisez « Renvoyer le lien de vérification ». Le lien est valable 24 heures et ne fonctionne qu’une fois. Pensez à vérifier vos courriers indésirables." },
+  { q: "Je n’ai pas reçu le courriel de vérification.", a: "Depuis Profil, utilisez « Renvoyer le lien de vérification ». Le lien est valable 24 heures et ne fonctionne qu’une fois. Pensez à vérifier vos courriers indésirables." },
 ];
 
 export default function SupportPage() {
   return <>
-    <PageHead eyebrow="Aide et support" title="Comment pouvons-nous vous aider ?">Les réponses aux questions fréquentes sur les exercices, les simulations et votre compte.</PageHead>
+    <PageHead eyebrow="Centre d’aide" title="Comment pouvons-nous vous aider ?">Les réponses aux questions fréquentes sur les exercices, les simulations et votre compte.</PageHead>
     <div className="two-col">
       <section aria-labelledby="questions"><h2 id="questions" className="sr-only">Questions fréquentes</h2>
         <div className="faq">{faq.map(item => <details key={item.q}><summary>{item.q}</summary><p>{item.a}</p></details>)}</div>
@@ -23,8 +23,8 @@ export default function SupportPage() {
       <div style={{ display: "grid", gap: "1rem" }}>
         <section className="student-card" aria-labelledby="raccourcis"><h2 id="raccourcis">Raccourcis utiles</h2>
           <ul className="activity-list">
-            <li><Link href="/etudiant/compte">Gérer mon compte et ma vérification</Link><Icon name="user" /></li>
-            <li><Link href="/etudiant/plan">Organiser mon plan d’étude</Link><Icon name="calendar" /></li>
+            <li><Link href="/etudiant/compte">Gérer mon profil et ma vérification</Link><Icon name="user" /></li>
+            <li><Link href="/etudiant/plan">Organiser mon programme</Link><Icon name="calendar" /></li>
             <li><a href={officialSource} target="_blank" rel="noreferrer">Format officiel du TCF Canada</a><Icon name="arrow" /></li>
           </ul>
         </section>

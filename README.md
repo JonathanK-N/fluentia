@@ -50,7 +50,7 @@ Frontend : http://localhost:3000 · API : http://localhost:8000/api/v1/health/ �
 
 ## Expérience Fluentia v2 — espace étudiant complet
 
-Branche `feature/fluentia-experience-v2` : lot 03 et pilotes v3 réunis, direction visuelle **Ivoire & Sable** (blanc et beige dominants, encre chaude, marine réservé à l’action, cyan limité à la signature vocale ; thème clair unique, contrastes WCAG AA vérifiés). Détails dans [docs/EXPERIENCE_V2.md](docs/EXPERIENCE_V2.md).
+Branche `feature/fluentia-experience-v2` : lot 03 et pilotes v3 réunis, direction visuelle **Marine & Indigo** (barre latérale marine, fond gris lavande, bandeau indigo, cartes blanches, pastilles lavande et menthe ; contrastes WCAG AA vérifiés). Détails dans [docs/EXPERIENCE_V2.md](docs/EXPERIENCE_V2.md).
 
 | Page | Rôle |
 |---|---|

@@ -87,7 +87,7 @@ export function SpeakingStudio({ task }: { task: SpeakingTask }) {
   const left = phase === "prep" ? task.prepSeconds - clock : phase === "recording" ? task.seconds - clock : task.seconds;
 
   return <>
-    <PageHead eyebrow={`Expression orale · Tâche ${task.number}`} title={task.title}>{task.goal} Durée : {formatDuration(task.seconds)}{task.prepSeconds ? `, précédée de ${task.prepSeconds / 60} minutes de préparation` : ", sans préparation"}.</PageHead>
+    <PageHead eyebrow={`Oral · Tâche ${task.number}`} title={task.title}>{task.goal} Durée : {formatDuration(task.seconds)}{task.prepSeconds ? `, précédée de ${task.prepSeconds / 60} minutes de préparation` : ", sans préparation"}.</PageHead>
     <div className="segmented" role="group" aria-label="Choisir un sujet">
       {task.subjects.map((item, index) => <Button key={item.title} variant="ghost" aria-pressed={subject === index} disabled={phase !== "idle"} onClick={() => setSubject(index)}>{item.title}</Button>)}
     </div>
@@ -128,7 +128,7 @@ export function SpeakingStudio({ task }: { task: SpeakingTask }) {
           <h2 className="student-eyebrow">Conseils</h2>
           <ul className="checklist">{task.advice.map(item => <li key={item}>{item}</li>)}</ul>
         </section>
-        <nav aria-label="Autres tâches d’expression orale" className="student-card">
+        <nav aria-label="Autres tâches d’oral" className="student-card">
           <h2 className="student-eyebrow">Autres tâches</h2>
           <ul className="checklist">{speakingTasks.filter(t => t.slug !== task.slug).map(t => <li key={t.slug}><Link href={`/etudiant/expression-orale/${t.slug}`}>Tâche {t.number} — {t.title}</Link></li>)}</ul>
         </nav>

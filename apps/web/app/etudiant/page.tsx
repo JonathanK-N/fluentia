@@ -8,10 +8,10 @@ import { api, type AttemptSummary } from "../../lib/student-api";
 import { useSession } from "../../lib/session";
 import { Catalogue } from "../../features/student/catalogue";
 import { attemptHref, skillLabel } from "../../features/student/content";
-import { Notice, SectionTitle, SkillCards, Stat } from "../../features/student/ui";
+import { Notice, SectionTitle, SkillCards, Summary } from "../../features/student/ui";
 import type { Progress } from "./progression/page";
 
-export default function DashboardPage() {
+export default function HomePage() {
   const { profile, ready } = useSession();
   const [attempts, setAttempts] = useState<AttemptSummary[]>([]);
   const [progress, setProgress] = useState<Progress | null>(null);
@@ -35,55 +35,62 @@ export default function DashboardPage() {
   const done = groups.reduce((sum, g) => sum + g.attempts, 0);
   const questions = groups.reduce((sum, g) => sum + g.questions, 0);
   const correct = groups.reduce((sum, g) => sum + g.correct, 0);
-  const activeAttempts = attempts.filter(a => a.status === "active");
+  const rate = questions ? Math.round(correct / questions * 100) : 0;
+  const open = attempts.filter(a => a.status === "active");
   const firstName = profile?.display_name?.split(" ")[0];
-  const empty = !profile ? "—" : progress ? null : "…";
+  const pending = !profile ? "—" : progress ? null : "…";
   return <>
-    <section className="welcome" aria-labelledby="bienvenue">
-      <div>
-        <p className="student-eyebrow">Un texte. Une étape. Des progrès.</p>
-        <h1 id="bienvenue">{!ready ? "Bienvenue" : profile ? `Bonjour ${firstName || ""}`.trim() : "Bienvenue sur Fluentia"}</h1>
-        <p>{profile ? "Votre prochain entraînement vous attend. Chaque réponse confirmée est enregistrée sur votre compte." : "Connectez-vous pour enregistrer vos réponses, retrouver vos corrigés et suivre votre progression sur tous vos appareils."}</p>
-        <div className="actions">
-          {ready && !profile && <Link className="button button-primary tile-link" href="/etudiant/compte">Se connecter ou créer un compte</Link>}
-          {activeAttempts[0] && <Link className="button button-primary tile-link" href={attemptHref(activeAttempts[0])}>Continuer mon activité en cours</Link>}
-          {profile && !activeAttempts[0] && <Link className="button button-primary tile-link" href="/etudiant/examens-blancs">Passer un examen blanc</Link>}
-          <Link className="button button-secondary tile-link" href="/etudiant/plan">Construire mon plan d’étude</Link>
+    <div className="home-top">
+      <section className="hero-card" aria-labelledby="bienvenue">
+        <span className="hero-chip">Lire. Écouter. Progresser.</span>
+        <h2 id="bienvenue">{!ready ? "Bienvenue." : profile ? `Bon retour${firstName ? `, ${firstName}` : ""}.` : "Bienvenue sur Fluentia."}</h2>
+        <p>{profile ? "Votre prochaine séance est prête. Chaque réponse validée est sauvegardée automatiquement dans votre profil." : "Connectez-vous pour sauvegarder chaque réponse, retrouver vos corrections et suivre vos résultats sur tous vos appareils."}</p>
+        <div className="hero-actions">
+          {ready && !profile && <Link className="hero-button" href="/etudiant/compte">Se connecter<Icon name="arrow" size={16} /></Link>}
+          {open[0] && <Link className="hero-button" href={attemptHref(open[0])}>Reprendre ma séance<Icon name="arrow" size={16} /></Link>}
+          {profile && !open[0] && <Link className="hero-button" href="#epreuves">Choisir une épreuve<Icon name="arrow" size={16} /></Link>}
+          <Link className="hero-button hero-button-ghost" href="/etudiant/plan">Créer mon programme</Link>
         </div>
-      </div>
-      <Image className="welcome-mark" src="/branding/01_Logos_PNG/fluentia-symbole-transparent-256.png" alt="" width={120} height={120} unoptimized />
-    </section>
-    {profile && !profile.email_verified && <div style={{ marginTop: "1rem" }}><Notice icon="flag">Votre adresse e-mail n’est pas encore vérifiée. <Link href="/etudiant/compte">Gérer mon compte</Link></Notice></div>}
-    <div className="stats" aria-label="Indicateurs personnels">
-      <Stat icon="exam" label="Exercices terminés" value={empty ?? done} hint="Tentatives soumises" />
-      <Stat icon="target" label="Score moyen" value={empty ?? (questions ? `${Math.round(correct / questions * 100)} %` : "—")} hint="Sur les questions soumises" />
-      <Stat icon="check" label="Questions traitées" value={empty ?? questions} hint="Omissions comprises" />
-      <Stat icon="clock" label="Activités en cours" value={!profile ? "—" : loading ? "…" : activeAttempts.length} hint="À terminer avant le délai" />
+      </section>
+      <section className="status-card" aria-labelledby="en-cours">
+        <div className="status-head"><h2 id="en-cours">En cours</h2>{open.length > 0 && <span className="badge-warn"><Icon name="clock" size={14} />Échéance proche</span>}</div>
+        <p className="status-value"><strong>{profile && !loading ? open.length : "—"}</strong> {open.length > 1 ? "séances ouvertes" : "séance ouverte"}</p>
+        <p className="status-text">{!profile ? "Connectez-vous pour retrouver vos séances." : open.length ? "À terminer avant la fin du délai pour qu’elle soit comptabilisée." : "Aucune séance en attente : lancez une épreuve quand vous êtes prêt."}</p>
+        <Image className="status-mark" src="/branding/01_Logos_PNG/fluentia-symbole-transparent-256.png" alt="" width={56} height={56} unoptimized />
+      </section>
     </div>
-    <SectionTitle title="Accès rapide aux compétences" />
+    {profile && !profile.email_verified && <div style={{ marginTop: "1rem" }}><Notice icon="flag">Votre adresse e-mail n’est pas encore vérifiée. <Link href="/etudiant/compte">Ouvrir mon profil</Link></Notice></div>}
+    <SectionTitle title="Votre bilan" />
+    <Summary label="Votre bilan" items={[
+      { label: "Séries terminées", value: pending ?? done, hint: "Tentatives envoyées" },
+      { label: "Taux de réussite", value: pending ?? (questions ? `${rate} %` : "—"), hint: "Sur les réponses envoyées", meter: rate },
+      { label: "Questions vues", value: pending ?? questions, hint: "Questions sautées incluses" },
+      { label: "Séances ouvertes", value: !profile ? "—" : loading ? "…" : open.length, hint: "À clôturer avant l’échéance" },
+    ]} />
+    <div id="epreuves"><SectionTitle title="Choisir une épreuve" note="Les 4 épreuves du TCF, au format de l’examen" /></div>
     <SkillCards />
     <div className="two-col" style={{ marginTop: "2rem" }}>
       <section className="student-card" aria-labelledby="activites">
-        <h2 id="activites">Retrouver mes activités</h2>
+        <h2 id="activites">Mes séances</h2>
         {error && <p role="alert">{error}</p>}
-        {!profile && <p>Vos tentatives apparaîtront ici après votre connexion.</p>}
-        {profile && !loading && !attempts.length && <p>Aucune activité pour le moment. Choisissez un exercice ci-dessous pour commencer.</p>}
+        {!profile && <p>Vos séances apparaîtront ici après votre connexion.</p>}
+        {profile && !loading && !attempts.length && <p>Aucune séance pour le moment. Choisissez une série ci-dessous pour commencer.</p>}
         {attempts.length > 0 && <ul className="activity-list">{attempts.map(attempt => <li key={attempt.id}>
-          <span className="activity-title"><Link href={attemptHref(attempt)}>{attempt.exam_title} · {attempt.status === "submitted" ? "Voir mon corrigé" : attempt.status === "expired" ? "Temps écoulé" : "Reprendre"}</Link><small>{skillLabel(attempt.skill)} · {attempt.mode === "simulation" ? "Simulation" : "Entraînement"}</small></span>
-          <span className={`pill ${attempt.status === "submitted" ? "pill-success" : attempt.status === "active" ? "pill-warning" : ""}`}>{attempt.status === "submitted" ? "Terminé" : attempt.status === "active" ? "En cours" : "Expiré"}</span>
+          <span className="activity-title"><Link href={attemptHref(attempt)}>{attempt.exam_title} · {attempt.status === "submitted" ? "Voir ma correction" : attempt.status === "expired" ? "Temps écoulé" : "Reprendre"}</Link><small>{skillLabel(attempt.skill)} · {attempt.mode === "simulation" ? "Simulation" : "Entraînement"}</small></span>
+          <span className={`pill ${attempt.status === "submitted" ? "pill-success" : attempt.status === "active" ? "pill-warning" : ""}`}>{attempt.status === "submitted" ? "Terminée" : attempt.status === "active" ? "En cours" : "Expirée"}</span>
         </li>)}</ul>}
-        {more && <Button variant="secondary" loading={loading} onClick={() => { setError(""); setLoading(true); setOffset(attempts.length); }}>Afficher mes activités précédentes</Button>}
+        {more && <Button variant="secondary" loading={loading} onClick={() => { setError(""); setLoading(true); setOffset(attempts.length); }}>Afficher mes séances précédentes</Button>}
       </section>
       <section className="student-card card-muted" aria-labelledby="methode">
         <h2 id="methode">Votre méthode en trois temps</h2>
         <ul className="activity-list">
-          <li><span className="activity-title"><strong>1. S’entraîner</strong><small>Exercices courts, corrigés expliqués.</small></span><Icon name="book" /></li>
-          <li><span className="activity-title"><strong>2. Se mettre en condition</strong><small>Simulations complètes et chronométrées.</small></span><Icon name="clock" /></li>
-          <li><span className="activity-title"><strong>3. Analyser</strong><small>Repérez vos points forts et vos priorités.</small></span><Icon name="chart" /></li>
+          <li><span className="activity-title"><strong>1. S’entraîner</strong><small>Séries courtes, corrections expliquées.</small></span><Icon name="book" /></li>
+          <li><span className="activity-title"><strong>2. Se mettre en condition</strong><small>Simulations complètes et chronométrées.</small></span><Icon name="timer" /></li>
+          <li><span className="activity-title"><strong>3. Analyser</strong><small>Repérez vos points forts et vos priorités.</small></span><Icon name="trend" /></li>
         </ul>
       </section>
     </div>
-    <SectionTitle title="Exercices disponibles" link={{ href: "/etudiant/examens-blancs", label: "Voir les examens blancs" }} />
+    <SectionTitle title="Séries disponibles" link={{ href: "/etudiant/examens-blancs", label: "Voir les simulations TCF" }} />
     <Catalogue />
     <p className="student-hint">Entraînements et simulations non officiels. Les difficultés affichées sont proposées par les auteurs et ne constituent pas un niveau certifié.</p>
   </>;

@@ -6,26 +6,26 @@
   --brand-blue: #1769e0;
   --brand-cyan: #21d4f4;
   --brand-white: #f7faff;
-  --sand: #f3ece1;
-  --sand-strong: #e9decd;
-  --ink: #1e1a16;
-  --success: #2e6b47;
-  --warning: #8a5a00;
-  --info: #2f6f73;
-  --shadow-soft: 0 1px 2px rgb(30 26 22 / 6%), 0 8px 24px rgb(30 26 22 / 6%);
+  --sand: #f4f5fa;
+  --sand-strong: #e6e8f2;
+  --ink: #0f1530;
+  --success: #0f766e;
+  --warning: #b45309;
+  --info: #0f766e;
+  --shadow-soft: 0 1px 2px rgb(15 21 48 / 5%), 0 10px 30px rgb(15 21 48 / 6%);
   --brand-deep: #061b3d;
-  --bg: #faf7f2;
+  --bg: #eef0f6;
   --surface: #fff;
-  --text: #1e1a16;
-  --muted: #6b6157;
-  --border: #e8e0d4;
-  --control-border: #8c7f70;
-  --action: #0b1f3a;
+  --text: #0f1530;
+  --muted: #5b6178;
+  --border: #e2e5ef;
+  --control-border: #8a90a8;
+  --action: #0f1530;
   --on-action: #fff;
-  --accent: #8a5a2b;
-  --focus: #0b1f3a;
+  --accent: #4338ca;
+  --focus: #4338ca;
   --danger: #a12535;
-  --tint: #f3ece1;
+  --tint: #edebfe;
   --radius: 0.625rem;
   --button-radius: 0.4375rem;
   --input-radius: 0.5rem;
@@ -43,6 +43,17 @@
   --space-6: 3rem;
   --duration: 180ms;
   --ease: cubic-bezier(0.2, 0.7, 0.3, 1);
+  --indigo: #3b33a6;
+  --lavender: #eeebff;
+  --lavender-ink: #4f46e5;
+  --mint: #e3f5f0;
+  --mint-ink: #0f766e;
+  --warn-bg: #fff1e0;
+  --side-bg: #111733;
+  --side-active: #232b52;
+  --side-text: #c9cde3;
+  --side-muted: #8a91b4;
+  --side-card: #1b2246;
 }
 .discover {
   color-scheme: dark;
@@ -137,8 +148,8 @@ p {
   outline-offset: 5px;
 }
 ::selection {
-  background: #e9decd;
-  color: #1e1a16;
+  background: #d9d6ff;
+  color: #0f1530;
 }
 .container {
   width: min(1240px, calc(100% - 64px));

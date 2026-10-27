@@ -11,7 +11,7 @@ const details = {
 export function ComprehensionPage({ skill }: { skill: "reading" | "listening" }) {
   const d = details[skill];
   return <>
-    <PageHead eyebrow="Compréhension" title={d.title}>{d.lead}</PageHead>
+    <PageHead eyebrow={skill === "reading" ? "Lecture" : "Écoute"} title={d.title}>{d.lead}</PageHead>
     <div className="stats">
       <Stat icon="exam" label="Format du test" value={`${d.questions} questions`} hint="Quatre choix, une seule réponse" />
       <Stat icon="clock" label="Durée de l’épreuve" value={d.duration} hint="Format indicatif" />
@@ -21,7 +21,7 @@ export function ComprehensionPage({ skill }: { skill: "reading" | "listening" })
       <section className="student-card" aria-labelledby="methode"><h2 id="methode">Méthode recommandée</h2><ul className="checklist">{d.tips.map(tip => <li key={tip}>{tip}</li>)}</ul></section>
       <Notice icon="flag">Entraînements et simulations non officiels. Consultez le <a href={officialSource} target="_blank" rel="noreferrer">site de France Éducation international</a> pour le format de référence.</Notice>
     </div>
-    <SectionTitle title="Exercices disponibles" />
+    <SectionTitle title="Séries disponibles" />
     <Catalogue skill={skill} />
   </>;
 }

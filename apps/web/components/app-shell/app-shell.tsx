@@ -1,5 +1,5 @@
 "use client";
-/** Coque applicative : navigation latérale groupée, barre supérieure, thème et menu mobile. */
+/** Coque applicative : navigation latérale sombre, en-tête de page et menu mobile. */
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -14,23 +14,21 @@ type Group = { title: string; items: Item[] };
 const tasks = (base: string, label: string) => [1, 2, 3].map(n => ({ href: `${base}/tache-${n}`, label: `Tâche ${n}`, aria: `${label}, tâche ${n}` }));
 
 const studentGroups: Group[] = [
-  { title: "Général", items: [
-    { href: "/etudiant", label: "Tableau de bord", icon: "home", exact: true },
-    { href: "/etudiant/progression", label: "Ma progression", icon: "chart" },
-    { href: "/etudiant/plan", label: "Plan d’étude", icon: "calendar" },
-    { href: "/etudiant/compte", label: "Mon compte", icon: "user" },
+  { title: "Mon espace", items: [
+    { href: "/etudiant", label: "Accueil", icon: "grid", exact: true },
+    { href: "/etudiant/progression", label: "Mes résultats", icon: "trend" },
+    { href: "/etudiant/plan", label: "Mon programme", icon: "calendar" },
+    { href: "/etudiant/compte", label: "Profil", icon: "user" },
   ] },
-  { title: "Compréhension", items: [
-    { href: "/etudiant/comprehension-ecrite", label: "Compréhension écrite", icon: "book" },
-    { href: "/etudiant/comprehension-orale", label: "Compréhension orale", icon: "headphones" },
+  { title: "Les 4 épreuves", items: [
+    { href: "/etudiant/comprehension-ecrite", label: "Lecture", icon: "book" },
+    { href: "/etudiant/comprehension-orale", label: "Écoute", icon: "headphones" },
+    { href: "/etudiant/expression-ecrite", label: "Rédaction", icon: "pen", children: tasks("/etudiant/expression-ecrite", "Rédaction") },
+    { href: "/etudiant/expression-orale", label: "Oral", icon: "mic", children: tasks("/etudiant/expression-orale", "Oral") },
   ] },
-  { title: "Expression", items: [
-    { href: "/etudiant/expression-ecrite", label: "Expression écrite", icon: "pen", children: tasks("/etudiant/expression-ecrite", "Expression écrite") },
-    { href: "/etudiant/expression-orale", label: "Expression orale", icon: "mic", children: tasks("/etudiant/expression-orale", "Expression orale") },
-  ] },
-  { title: "Préparation", items: [
-    { href: "/etudiant/examens-blancs", label: "Examens blancs", icon: "exam" },
-    { href: "/etudiant/support", label: "Aide et support", icon: "help" },
+  { title: "Jour J", items: [
+    { href: "/etudiant/examens-blancs", label: "Simulations TCF", icon: "timer" },
+    { href: "/etudiant/support", label: "Centre d’aide", icon: "help" },
   ] },
 ];
 
@@ -46,8 +44,16 @@ const editionGroups: Group[] = [
     { href: "/edition#transfert", label: "Import et export", icon: "upload" },
   ] },
   { title: "Raccourcis", items: [
-    { href: "/etudiant", label: "Espace étudiant", icon: "home", exact: true },
+    { href: "/etudiant", label: "Espace étudiant", icon: "grid", exact: true },
   ] },
+];
+
+/** Titres des pages hors navigation (passation, vérification). */
+const extraTitles: [RegExp, string][] = [
+  [/^\/etudiant\/lecture\//, "Lecture"],
+  [/^\/etudiant\/ecoute\//, "Écoute"],
+  [/^\/etudiant\/verifier/, "Vérification de l’adresse"],
+  [/^\/edition/, "Banque pédagogique"],
 ];
 
 function isActive(pathname: string, item: Item) {
@@ -66,12 +72,20 @@ function UserCard({ onNavigate }: { onNavigate: () => void }) {
   </div>;
 }
 
+function Brand({ variant }: { variant: "student" | "edition" }) {
+  return <Link href="/" className="shell-brand" aria-label="Fluentia — accueil du site">
+    <Image src="/branding/01_Logos_PNG/fluentia-symbole-transparent-256.png" alt="" width={34} height={34} unoptimized />
+    <span><strong>Fluentia</strong><small>{variant === "edition" ? "Espace éditorial" : "Objectif TCF"}</small></span>
+  </Link>;
+}
+
 function Shell({ variant, children }: { variant: "student" | "edition"; children: ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const toggleRef = useRef<HTMLButtonElement>(null);
   const groups = variant === "edition" ? editionGroups : studentGroups;
   const current = groups.flatMap(group => group.items).find(item => isActive(pathname, item));
+  const title = current?.label ?? extraTitles.find(([pattern]) => pattern.test(pathname))?.[1] ?? "Espace étudiant";
   useEffect(() => { setOpen(false); }, [pathname]);
   useEffect(() => {
     if (!open) return;
@@ -82,13 +96,7 @@ function Shell({ variant, children }: { variant: "student" | "edition"; children
   const close = () => setOpen(false);
   return <div className="app-shell" data-open={open || undefined}>
     <aside id="shell-sidebar" className="shell-sidebar">
-      <div className="shell-brand">
-        <Link href="/" className="shell-logo" aria-label="Fluentia — accueil">
-          <Image className="logo-light" src="/branding/01_Logos_PNG/logo-horizontal-light.png" alt="" width={150} height={39} unoptimized />
-          <Image className="logo-dark" src="/branding/01_Logos_PNG/logo-horizontal-dark.png" alt="" width={150} height={39} unoptimized />
-        </Link>
-        <span className="shell-tagline">{variant === "edition" ? "Espace éditorial" : "Préparation TCF"}</span>
-      </div>
+      <Brand variant={variant} />
       <nav aria-label={variant === "edition" ? "Navigation éditoriale" : "Navigation de l’espace étudiant"} className="shell-nav">
         {groups.map(group => <div key={group.title} className="shell-group">
           <p className="shell-group-title">{group.title}</p>
@@ -96,7 +104,7 @@ function Shell({ variant, children }: { variant: "student" | "edition"; children
             const active = isActive(pathname, item);
             return <li key={item.href}>
               <Link href={item.href} onClick={close} className="shell-link" aria-current={active && (pathname === item.href || !item.children) ? "page" : undefined} data-active={active || undefined}>
-                <Icon name={item.icon} /><span>{item.label}</span>
+                <Icon name={item.icon} size={18} /><span>{item.label}</span>
               </Link>
               {item.children && active && <ul className="shell-sublist">{item.children.map(child =>
                 <li key={child.href}><Link href={child.href} onClick={close} aria-label={child.aria} aria-current={pathname === child.href ? "page" : undefined} className="shell-sublink">{child.label}</Link></li>)}
@@ -109,16 +117,22 @@ function Shell({ variant, children }: { variant: "student" | "edition"; children
     </aside>
     <button type="button" className="shell-backdrop" tabIndex={-1} aria-hidden="true" onClick={close} />
     <div className="shell-main">
-      <header className="shell-topbar">
-        <button ref={toggleRef} type="button" className="shell-icon-button shell-menu-button" aria-expanded={open} aria-controls="shell-sidebar" onClick={() => setOpen(value => !value)}>
+      <div className="shell-mobilebar">
+        <button ref={toggleRef} type="button" className="shell-icon-button" aria-expanded={open} aria-controls="shell-sidebar" onClick={() => setOpen(value => !value)}>
           <Icon name={open ? "close" : "menu"} /><span className="sr-only">{open ? "Fermer la navigation" : "Ouvrir la navigation"}</span>
         </button>
-        <p className="shell-crumb"><span>{variant === "edition" ? "Édition" : "Espace étudiant"}</span>{current && <><Icon name="chevron" size={14} /><span>{current.label}</span></>}</p>
-        <div className="shell-actions">
-          <Link href="/" className="shell-text-link">Site public</Link>
-        </div>
-      </header>
-      <main id="contenu" tabIndex={-1} className="shell-content student-space">{children}</main>
+        <Brand variant={variant} />
+      </div>
+      <main id="contenu" tabIndex={-1} className="shell-content student-space">
+        <header className="shell-pagehead">
+          <div>
+            <p className="shell-eyebrow">{variant === "edition" ? "Espace éditorial" : "Espace étudiant"}</p>
+            <h1>{title}</h1>
+          </div>
+          <Link href="/" className="shell-site-link">Voir le site<Icon name="external" size={14} /></Link>
+        </header>
+        {children}
+      </main>
     </div>
   </div>;
 }

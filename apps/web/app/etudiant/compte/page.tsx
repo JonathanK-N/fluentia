@@ -38,14 +38,14 @@ export default function AccountPage() {
     <aside className="auth-aside" aria-label="Avantages du compte">
       <div>
         <p className="student-eyebrow">Votre espace Fluentia</p>
-        <p style={{ fontSize: "1.25rem", fontWeight: 600, color: "var(--text)", lineHeight: 1.4 }}>Préparez le TCF à votre rythme, sans perdre une seule réponse.</p>
+        <p style={{ fontSize: "1.25rem", fontWeight: 700, color: "#fff", lineHeight: 1.4 }}>Préparez le TCF à votre rythme, sans perdre une seule réponse.</p>
       </div>
       <ul>{benefits.map(item => <li key={item}><Icon name="check" size={18} /><span>{item}</span></li>)}</ul>
       <p className="student-hint" style={{ margin: 0 }}>Exercices originaux et non officiels. Aucune donnée n’est revendue.</p>
     </aside>
     <section className="student-card auth-panel">
       {profile && <div className="shell-user" style={{ marginBottom: "1.25rem", background: "var(--sand)" }}><span className="shell-avatar" aria-hidden="true">{initials(profile)}</span><div><strong>{profile.display_name || "Mon profil"}</strong><span>{profile.email_verified ? "Adresse vérifiée" : "Adresse à vérifier"}</span></div></div>}
-      <h1>{profile ? "Mon profil étudiant" : mode === "login" ? "Content de vous retrouver" : "Un premier pas vers vos objectifs"}</h1>
+      <h2 className="page-title">{profile ? "Mon profil étudiant" : mode === "login" ? "Content de vous retrouver" : "Un premier pas vers vos objectifs"}</h2>
       <p>{profile ? profile.email : "Enregistrez vos réponses et reprenez votre entraînement à votre rythme."}</p>
       {!ready ? <p className="student-hint">Chargement de la session…</p> : <>
         {!profile && <div className="segmented" role="group" aria-label="Mode d’accès" style={{ marginTop: ".5rem" }}>

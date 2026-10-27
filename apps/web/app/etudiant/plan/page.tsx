@@ -18,7 +18,7 @@ function schedule(plan: Plan) {
     if (slot < 0) return { name, sessions: [] as string[] };
     const skill = skills.find(s => s.id === order[slot % order.length])!;
     const review = slot === plan.days.length - 1 && plan.days.length > 2;
-    return { name, sessions: review ? [`Révision des corrigés · ${minutes} min`] : [`${skill.title} · ${minutes} min`] };
+    return { name, sessions: review ? [`Révision des corrigés · ${minutes} min`] : [`${skill.name} · ${minutes} min`] };
   });
 }
 
@@ -40,27 +40,27 @@ export default function PlanPage() {
   const week = plan ? schedule(plan) : [];
   const priority = skills.find(s => s.id === plan?.priority);
   return <>
-    <PageHead eyebrow="Plan d’étude" title="Un rythme qui vous ressemble" actions={plan && !editing ? <Button variant="secondary" onClick={() => setEditing(true)}>Modifier mon plan</Button> : undefined}>
+    <PageHead eyebrow="Mon programme" title="Un rythme qui vous ressemble" actions={plan && !editing ? <Button variant="secondary" onClick={() => setEditing(true)}>Modifier mon programme</Button> : undefined}>
       Indiquez votre objectif et vos disponibilités : Fluentia répartit vos séances sur la semaine. Ce plan reste sur cet appareil.
     </PageHead>
-    {editing && <form className="student-card student-form" onSubmit={submit} aria-label="Paramètres du plan">
+    {editing && <form className="student-card student-form" onSubmit={submit} aria-label="Paramètres du programme">
       <div className="form-row">
         <label>Objectif visé<select name="goal" defaultValue={plan?.goal ?? "NCLC 7"}>{["NCLC 4", "NCLC 5", "NCLC 6", "NCLC 7", "NCLC 8", "NCLC 9", "NCLC 10 et plus"].map(v => <option key={v}>{v}</option>)}</select></label>
         <label>Date prévue du test<input type="date" name="date" defaultValue={plan?.date ?? ""} /></label>
         <label>Temps disponible par semaine<select name="hours" defaultValue={plan?.hours ?? 4}>{[2, 3, 4, 6, 8, 10].map(v => <option key={v} value={v}>{v} heures</option>)}</select></label>
-        <label>Compétence prioritaire<select name="priority" defaultValue={plan?.priority ?? "listening"}>{skills.map(s => <option key={s.id} value={s.id}>{s.title}</option>)}</select></label>
+        <label>Compétence prioritaire<select name="priority" defaultValue={plan?.priority ?? "listening"}>{skills.map(s => <option key={s.id} value={s.id}>{s.name} — {s.title}</option>)}</select></label>
       </div>
       <fieldset><legend>Jours où vous pouvez étudier</legend>
         <div className="pill-row">{dayNames.map((name, index) => <label key={name} className="pill" style={{ cursor: "pointer", padding: ".45rem .8rem" }}><input type="checkbox" name="days" value={index} defaultChecked={plan ? plan.days.includes(index) : [0, 2, 4, 5].includes(index)} /> {name}</label>)}</div>
       </fieldset>
-      <div className="student-nav" style={{ margin: 0 }}><Button type="submit">Générer mon plan</Button>{plan && <Button variant="ghost" onClick={() => setEditing(false)}>Annuler</Button>}</div>
+      <div className="student-nav" style={{ margin: 0 }}><Button type="submit">Générer mon programme</Button>{plan && <Button variant="ghost" onClick={() => setEditing(false)}>Annuler</Button>}</div>
     </form>}
     {plan && !editing && <>
       <div className="stats">
         <Stat icon="target" label="Objectif" value={plan.goal} hint="Repère indicatif, sans garantie de résultat" />
         <Stat icon="calendar" label="Jours restants" value={days === null ? "—" : days < 0 ? "Passé" : days} hint={plan.date ? new Date(plan.date + "T12:00:00").toLocaleDateString("fr-CA", { day: "numeric", month: "long", year: "numeric" }) : "Date non renseignée"} />
         <Stat icon="clock" label="Séances par semaine" value={plan.days.length} hint={`${plan.hours} h au total`} />
-        <Stat icon="chart" label="Priorité" value={priority?.title.replace("Compréhension", "Compr.").replace("Expression", "Expr.") ?? "—"} hint="Deux séances par semaine" />
+        <Stat icon="chart" label="Priorité" value={priority?.name ?? "—"} hint="Deux séances par semaine" />
       </div>
       <section className="student-card" aria-labelledby="semaine">
         <h2 id="semaine">Votre semaine type</h2>
@@ -74,7 +74,7 @@ export default function PlanPage() {
           <h2 id="jalons">Jalons conseillés</h2>
           <ul className="activity-list">
             <li><span className="activity-title"><strong>Chaque semaine</strong><small>Relire les corrigés et noter trois erreurs récurrentes.</small></span></li>
-            <li><span className="activity-title"><strong>Toutes les deux semaines</strong><small>Une simulation complète de compréhension.</small></span><Link href="/etudiant/examens-blancs">Examens blancs</Link></li>
+            <li><span className="activity-title"><strong>Toutes les deux semaines</strong><small>Une simulation complète de compréhension.</small></span><Link href="/etudiant/examens-blancs">Simulations TCF</Link></li>
             <li><span className="activity-title"><strong>Deux dernières semaines</strong><small>Une simulation par semaine et des tâches d’expression chronométrées.</small></span></li>
           </ul>
         </section>

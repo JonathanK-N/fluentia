@@ -33,6 +33,10 @@ const paths = {
   copy: "M9 9h11v11H9ZM5 15H4V4h11v1",
   flag: "M5 21V4M5 4h11l-2 4 2 4H5",
   spark: "M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6",
+  grid: "M4 4h6v6H4ZM14 4h6v6h-6ZM4 14h6v6H4ZM14 14h6v6h-6Z",
+  trend: "M3 17l6-6 4 4 8-8M15 7h6v6",
+  timer: "M12 21a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM12 9v4l2 2M10 2h4",
+  external: "M7 17 17 7M9 7h8v8",
   logout: "M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3",
 } as const;
 
