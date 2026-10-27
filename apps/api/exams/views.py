@@ -22,6 +22,7 @@ from .serializers import (
     ResultSerializer,
 )
 from .services import create_attempt, save_answer, submit_attempt, get_attempt
+from accounts.models import StudentProfile
 from accounts.permissions import VerifiedEmail
 
 
@@ -120,8 +121,19 @@ class SaveAnswerView(APIView):
                 "question_id": str(answer.question_id),
                 "choice_id": str(answer.choice_id),
                 "saved": True,
+                "correct": live_verdict(answer, request.user),
             }
         )
+
+
+def live_verdict(answer, user):
+    """Jamais en simulation : les conditions d’examen ne révèlent rien avant la fin."""
+    if answer.attempt.exam.mode != "training":
+        return None
+    profile = StudentProfile.objects.filter(user=user).first()
+    if profile is not None and not profile.live_correction:
+        return None
+    return answer.choice.is_correct
 
 
 def result_payload(attempt: Attempt) -> dict:

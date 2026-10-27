@@ -2,7 +2,9 @@
 import { useEffect, useRef, useState, use, useCallback } from "react";
 import Link from "next/link";
 import { Button } from "../../../../components/ui/primitives";
-import { api, type Attempt, type Results } from "../../../../lib/student-api";
+import { api, type Attempt, type Results, type SavedAnswer } from "../../../../lib/student-api";
+import { useSession } from "../../../../lib/session";
+import { playVerdict } from "../../../../lib/feedback-sound";
 import { AudioPlayer } from "../../../../components/student/audio-player";
 import { Icon } from "../../../../components/app-shell/icons";
 
@@ -16,6 +18,8 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
   const [busy, setBusy] = useState(false);
   const [confirm, setConfirm] = useState(false);
   const [remaining, setRemaining] = useState(0);
+  const [verdicts, setVerdicts] = useState<Record<string, boolean>>({});
+  const { profile } = useSession();
   const pending = useRef(false);
   const clockOffset = useRef(0);
   const loadVersion = useRef(0);
@@ -51,8 +55,14 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
     setAnswers(values => ({...values, [question]: choice}));
     pending.current = true; setBusy(true); setError(""); setMessage("Enregistrement en cours…");
     try {
-      await api(`attempts/${id}/answers/`, "PUT", {question_id: question, choice_id: choice});
-      setAnswers(previous => ({...previous, [question]: choice})); setMessage("Réponse enregistrée. Vous pouvez reprendre depuis cet appareil ou un autre.");
+      const saved = await api<SavedAnswer>(`attempts/${id}/answers/`, "PUT", {question_id: question, choice_id: choice});
+      setAnswers(previous => ({...previous, [question]: choice}));
+      const verdict = saved.correct;
+      setVerdicts(values => { const next = {...values}; if (typeof verdict === "boolean") next[question] = verdict; else delete next[question]; return next; });
+      if (typeof verdict === "boolean") {
+        if (profile?.preferences.answer_sound) playVerdict(verdict);
+        setMessage(verdict ? "Réponse enregistrée : c’est juste." : "Réponse enregistrée : ce n’est pas la bonne réponse. Réessayez si vous le souhaitez.");
+      } else setMessage("Réponse enregistrée. Vous pouvez reprendre depuis cet appareil ou un autre.");
     } catch (e) {
       setAnswers(values => { const restored = {...values}; if (previous) restored[question] = previous; else delete restored[question]; return restored; });
       setError((e as Error).message); setMessage("Réponse non enregistrée. Sélectionnez de nouveau votre choix pour réessayer.");
@@ -108,6 +118,7 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
               <input type="radio" name={question.id} value={choice.id} disabled={busy && answers[question.id] !== choice.id} checked={answers[question.id] === choice.id} onChange={() => save(question.id, choice.id)} />{choice.label}
             </label>)}
           </fieldset>
+          {question.id in verdicts && <p className="verdict" data-correct={verdicts[question.id]}><Icon name={verdicts[question.id] ? "check" : "close"} size={15} />{verdicts[question.id] ? "Juste" : "Faux"}</p>}
         </section>)}
         {!confirm ? <Button disabled={busy || remaining === 0} onClick={() => setConfirm(true)}>Terminer et vérifier mes réponses</Button> :
           <section className="student-card" aria-label="Confirmation de soumission"><h2>Prêt à découvrir le corrigé ?</h2><p>{answeredCount} réponses enregistrées. Les questions sans réponse comptent pour zéro. Après la soumission, les réponses seront définitives.</p>

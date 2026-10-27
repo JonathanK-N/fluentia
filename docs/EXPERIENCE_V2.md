@@ -52,3 +52,10 @@ Dans un second terminal : `cd apps/web`, `npm ci`, `npm run dev`, puis http://lo
 ## Vérifications réalisées
 
 Chromium : `npm run typecheck`, `npm run lint`, 12 tests unitaires, 21 tests e2e frontend et 5 parcours étudiants e2e sur API réelle (dont axe WCAG 2.1 AA, y compris avec une préférence système sombre). Firefox et WebKit restent à exécuter en CI. Le test d’écoute attend désormais l’activation effective du bouton de lecture (décodage `canplay`) avant d’appuyer sur Espace.
+
+## Profil, Premium et réglages d’entraînement
+
+- `Subscription` (app `accounts`) : date de fin du Premium, pause avec jours mis de côté et reprise automatique à la date choisie (365 jours maximum). Le Premium est attribué dans Django Admin ; le paiement en ligne n’est pas branché, « Renouveler » l’indique.
+- API : `GET auth/profile/` expose `subscription` (`free`, `premium`, `paused`, `expired`, jours restants) et `preferences` ; `PATCH auth/profile/` accepte `display_name`, `live_correction`, `answer_sound` ; `POST auth/subscription/pause/` (`resume_on`) et `POST auth/subscription/resume/`, avec session et CSRF.
+- Correction en direct : `PUT attempts/{id}/answers/` renvoie `correct` uniquement en **entraînement** et si le réglage est actif ; toujours `null` en simulation. Le signal sonore est généré dans le navigateur (Web Audio).
+- Tests : `accounts/test_premium.py` (10 cas, dont l’absence de verdict en simulation).

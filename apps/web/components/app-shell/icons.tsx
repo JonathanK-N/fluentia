@@ -37,6 +37,11 @@ const paths = {
   trend: "M3 17l6-6 4 4 8-8M15 7h6v6",
   timer: "M12 21a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM12 9v4l2 2M10 2h4",
   external: "M7 17 17 7M9 7h8v8",
+  pause: "M9 5v14M15 5v14",
+  sliders: "M4 7h10M18 7h2M4 17h4M12 17h8M14 5v4M8 15v4",
+  trophy: "M8 4h8v5a4 4 0 0 1-8 0ZM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 20h8M10 17h4",
+  volume: "M4 10v4h4l5 4V6L8 10ZM16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11",
+  refresh: "M20 11a8 8 0 0 0-14.5-4.5L4 8M4 4v4h4M4 13a8 8 0 0 0 14.5 4.5L20 16M20 20v-4h-4",
   logout: "M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3",
 } as const;
 
