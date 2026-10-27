@@ -127,9 +127,11 @@ class SaveAnswerView(APIView):
 
 
 def live_verdict(answer, user):
-    """Verdict sur le seul choix envoyé, sans révéler la bonne réponse ; jamais en simulation."""
-    if answer.attempt.exam.mode != "training":
-        return None
+    """Verdict sur le seul choix envoyé, sans révéler la bonne réponse.
+
+    Le réglage du profil décide pour toutes les séries : le désactiver remet l’étudiant
+    en conditions d’examen, où rien n’est révélé avant la fin.
+    """
     profile = StudentProfile.objects.filter(user=user).first()
     if profile is not None and not profile.live_correction:
         return None

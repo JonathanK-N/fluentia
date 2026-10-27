@@ -45,7 +45,7 @@ function Connected({ profile, busy, act, setMessage }: { profile: Profile; busy:
     </div>
     <section className="student-card settings-card" aria-labelledby="reglages">
       <div className="card-title"><span className="skill-chip"><Icon name="sliders" size={18} /></span><h2 id="reglages">Réglages d’entraînement</h2></div>
-      <p>Pendant les QCM d’entraînement, la correction en direct indique tout de suite si votre réponse est juste. Désactivez-la pour vous mettre en conditions d’examen : rien n’est révélé avant la fin. Les simulations ne révèlent jamais rien.</p>
+      <p>Pendant les QCM, la correction en direct indique tout de suite si votre réponse est juste. Désactivez-la pour vous mettre en conditions d’examen : rien n’est révélé avant la fin.</p>
       <div className="settings">
         <Switch id="reglage-correction" label="Correction en direct" hint="Juste ou faux après chaque réponse" checked={profile.preferences.live_correction} disabled={busy} onChange={value => prefer("live_correction", value)} />
         <Switch id="reglage-son" label="Signal sonore" hint="Un son pour chaque bonne ou mauvaise réponse" icon="volume" checked={profile.preferences.answer_sound} disabled={busy || !profile.preferences.live_correction} onChange={value => prefer("answer_sound", value)} />

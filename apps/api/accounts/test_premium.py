@@ -10,7 +10,7 @@ from django.utils import timezone
 from rest_framework.test import APIClient
 
 from .models import StudentProfile, Subscription
-from exams.models import Attempt, Exam
+from exams.models import Exam
 from exams.test_engine import exam_fixture
 from exams.views import live_verdict
 
@@ -77,7 +77,8 @@ class PremiumTests(TestCase):
         StudentProfile.objects.filter(user=self.user).update(live_correction=False)
         self.assertIsNone(self.call(path, {"question_id": str(question.pk), "choice_id": str(right.pk)}, "put").data["correct"])
 
-    def test_simulation_never_reveals_verdict(self):
-        answer = SimpleNamespace(attempt=SimpleNamespace(exam=SimpleNamespace(mode=Exam.Mode.SIMULATION)), choice=SimpleNamespace(is_correct=True))
+    def test_simulation_follows_the_same_setting(self):
+        answer = SimpleNamespace(attempt=SimpleNamespace(exam=SimpleNamespace(mode=Exam.Mode.SIMULATION)), choice=SimpleNamespace(is_correct=False))
+        self.assertIs(live_verdict(answer, self.user), False)
+        StudentProfile.objects.filter(user=self.user).update(live_correction=False)
         self.assertIsNone(live_verdict(answer, self.user))
-        self.assertTrue(Attempt.objects.model is Attempt)

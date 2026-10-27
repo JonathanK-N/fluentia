@@ -62,6 +62,8 @@ test("lecture complète : 39 questions, sauvegarde et correction sur PostgreSQL"
     await expect(page.getByRole("status")).toContainText("Réponse enregistrée");
     await expect(page.getByRole("radio").nth(index * 4 + 1)).toBeEnabled();
   }
+  // Correction en direct active par défaut : elle s’applique aussi en simulation.
+  await expect(page.locator("label.student-choice[data-verdict=right]")).toHaveCount(39);
   await page.reload();
   await expect(page.locator("input[type=radio]:checked")).toHaveCount(39);
   await page.getByRole("button", {name: "Terminer et vérifier mes réponses"}).click();
