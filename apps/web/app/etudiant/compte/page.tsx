@@ -1,6 +1,5 @@
 "use client";
 import { useState, type FormEvent } from "react";
-import Link from "next/link";
 import { Button } from "../../../components/ui/primitives";
 import { Icon } from "../../../components/app-shell/icons";
 import { api, type Profile } from "../../../lib/student-api";
@@ -9,7 +8,6 @@ import { SectionTitle, Summary } from "../../../features/student/ui";
 
 const benefits = ["Vos réponses enregistrées à chaque choix, reprise sur tous vos appareils.", "Des corrections expliquées après chaque série envoyée.", "Des résultats calculés uniquement sur vos réponses réelles."];
 const longDate = (value: string) => new Date(value.length === 10 ? value + "T12:00:00" : value).toLocaleDateString("fr-CA", { day: "numeric", month: "short", year: "numeric" });
-const inDays = (days: number) => { const date = new Date(); date.setDate(date.getDate() + days); return date.toLocaleDateString("en-CA"); };
 
 function Switch({ id, label, hint, checked, disabled, onChange, icon }: { id: string; label: string; hint: string; checked: boolean; disabled?: boolean; onChange: (value: boolean) => void; icon?: "volume" }) {
   return <div className="setting-row" data-nested={icon ? "" : undefined}>
@@ -20,14 +18,8 @@ function Switch({ id, label, hint, checked, disabled, onChange, icon }: { id: st
 
 function Connected({ profile, busy, act, setMessage }: { profile: Profile; busy: boolean; act: (work: () => Promise<Profile | null>, done?: string) => void; setMessage: (value: string) => void }) {
   const sub = profile.subscription;
-  const [resumeOn, setResumeOn] = useState(inDays(14));
-  const badge = { premium: "Membre Premium", paused: "Premium en pause", expired: "Premium expiré", free: "Formule gratuite" }[sub.status];
+  const badge = { premium: "Membre Premium", expired: "Premium expiré", free: "Formule gratuite" }[sub.status];
   const days = `${sub.days_remaining} ${sub.days_remaining > 1 ? "jours" : "jour"}`;
-  function save(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const values = Object.fromEntries(new FormData(event.currentTarget));
-    act(() => api<Profile>("auth/profile/", "PATCH", values), "Votre profil est enregistré.");
-  }
   function prefer(field: "live_correction" | "answer_sound", value: boolean) {
     act(() => api<Profile>("auth/profile/", "PATCH", { [field]: value }), "Réglage enregistré.");
   }
@@ -35,51 +27,28 @@ function Connected({ profile, busy, act, setMessage }: { profile: Profile; busy:
     <section className="profile-banner" aria-labelledby="identite">
       <span className="profile-avatar" aria-hidden="true">{initials(profile)}</span>
       <div><h2 id="identite">{profile.display_name || "Mon profil"}</h2><p>{profile.email}</p></div>
-      <span className="profile-badge" data-status={sub.status}><Icon name={sub.status === "paused" ? "pause" : "trophy"} size={14} />{badge}</span>
+      <div className="profile-banner-actions">
+        <span className="profile-badge" data-status={sub.status}><Icon name="trophy" size={14} />{badge}</span>
+        <button type="button" className="profile-logout" disabled={busy} onClick={() => act(async () => { await api("auth/logout/", "POST"); return null; }, "Vous êtes déconnecté.")}><Icon name="logout" size={15} />Se déconnecter</button>
+      </div>
     </section>
+    {!profile.email_verified && <div className="app-notice verify-notice"><Icon name="flag" size={18} /><p>Vérifiez votre adresse e-mail pour commencer un exercice.</p>
+      <Button variant="secondary" disabled={busy} onClick={() => act(async () => { const data = await api<{ detail: string }>("auth/verification/resend/", "POST"); setMessage(data.detail); return null; })}>Renvoyer le lien de vérification</Button></div>}
     <SectionTitle title="Mon abonnement" />
     <Summary label="Mon abonnement" items={[
-      { label: "Temps restant", value: sub.status === "free" || sub.status === "expired" ? "—" : days, hint: sub.status === "paused" ? "Mis de côté pendant la pause" : sub.status === "premium" ? "Avant la fin du Premium" : "Aucun Premium en cours" },
-      { label: "Valable jusqu’au", value: sub.status === "paused" ? "En pause" : sub.premium_until ? longDate(sub.premium_until) : "—", hint: sub.status === "premium" ? "Premium actif" : sub.status === "paused" && sub.resume_on ? `Reprise le ${longDate(sub.resume_on)}` : sub.status === "expired" ? "Premium terminé" : "Formule gratuite" },
+      { label: "Temps restant", value: sub.status === "premium" ? days : "—", hint: sub.status === "premium" ? "Avant la fin du Premium" : "Aucun Premium en cours" },
+      { label: "Valable jusqu’au", value: sub.premium_until ? longDate(sub.premium_until) : "—", hint: sub.status === "premium" ? "Premium actif" : sub.status === "expired" ? "Premium terminé" : "Formule gratuite" },
       { label: "Identifiant", value: <span className="summary-email">{profile.email}</span>, hint: "Adresse de connexion" },
     ]} />
     <div className="student-nav" style={{ marginTop: "1rem" }}>
       <Button onClick={() => setMessage("Le paiement en ligne ouvrira prochainement. En attendant, l’équipe Fluentia active le Premium sur demande depuis l’administration.")}><Icon name="refresh" size={16} />{sub.status === "free" ? "Passer au Premium" : "Renouveler mon Premium"}</Button>
     </div>
-    <div className="profile-grid">
-      <section className="student-card" aria-labelledby="pause">
-        <div className="card-title"><span className="skill-chip" data-tone="warm"><Icon name="pause" size={18} /></span><h2 id="pause">Faire une pause</h2></div>
-        {sub.status === "paused" ? <>
-          <p>Votre Premium est suspendu : vos <strong>{days}</strong> restants reprendront automatiquement le {sub.resume_on && longDate(sub.resume_on)}.</p>
-          <div className="card-actions"><Button variant="secondary" loading={busy} onClick={() => act(() => api<Profile>("auth/subscription/resume/", "POST"), "Votre Premium a repris.")}>Reprendre maintenant</Button></div>
-        </> : sub.status === "premium" ? <>
-          <p>Votre examen est repoussé ? Suspendez votre Premium : vos <strong>{days}</strong> restants sont mis de côté et reprennent à la date que vous choisissez.</p>
-          <form className="card-actions pause-form" onSubmit={event => { event.preventDefault(); act(() => api<Profile>("auth/subscription/pause/", "POST", { resume_on: resumeOn }), "Votre Premium est en pause."); }}>
-            <label>Date de reprise<input type="date" className="student-input" required min={inDays(1)} max={inDays(365)} value={resumeOn} onChange={e => setResumeOn(e.target.value)} /></label>
-            <Button type="submit" variant="secondary" loading={busy}>Suspendre mon Premium</Button>
-          </form>
-        </> : <p>La pause est disponible avec un abonnement Premium actif : vos jours restants sont alors mis de côté jusqu’à la date de votre choix.</p>}
-      </section>
-      <section className="student-card" aria-labelledby="reglages">
-        <div className="card-title"><span className="skill-chip"><Icon name="sliders" size={18} /></span><h2 id="reglages">Réglages d’entraînement</h2></div>
-        <p>Pendant les QCM d’entraînement, la correction en direct indique tout de suite si votre réponse est juste. Désactivez-la pour vous mettre en conditions d’examen : rien n’est révélé avant la fin. Les simulations ne révèlent jamais rien.</p>
-        <div className="settings">
-          <Switch id="reglage-correction" label="Correction en direct" hint="Juste ou faux après chaque réponse" checked={profile.preferences.live_correction} disabled={busy} onChange={value => prefer("live_correction", value)} />
-          <Switch id="reglage-son" label="Signal sonore" hint="Un son pour chaque bonne ou mauvaise réponse" icon="volume" checked={profile.preferences.answer_sound} disabled={busy || !profile.preferences.live_correction} onChange={value => prefer("answer_sound", value)} />
-        </div>
-      </section>
-    </div>
-    <section className="student-card" aria-labelledby="infos">
-      <h2 id="infos">Mon profil étudiant</h2>
-      <form onSubmit={save} className="student-form profile-form">
-        <label>Prénom ou nom d’usage<input name="display_name" autoComplete="nickname" maxLength={80} required defaultValue={profile.display_name} /></label>
-        <Button type="submit" loading={busy}>Enregistrer mon profil</Button>
-      </form>
-      <div className="app-notice"><Icon name={profile.email_verified ? "check" : "flag"} size={18} /><p>{profile.email_verified ? "Adresse e-mail vérifiée." : "Vérifiez votre adresse e-mail pour commencer un exercice."}</p></div>
-      <div className="student-nav" style={{ margin: "1rem 0 0" }}>
-        {!profile.email_verified && <Button variant="secondary" disabled={busy} onClick={() => act(async () => { const data = await api<{ detail: string }>("auth/verification/resend/", "POST"); setMessage(data.detail); return null; })}>Renvoyer le lien de vérification</Button>}
-        {profile.email_verified && <Link className="button button-secondary tile-link" href="/etudiant">Choisir un exercice</Link>}
-        <Button variant="ghost" disabled={busy} onClick={() => act(async () => { await api("auth/logout/", "POST"); return null; }, "Vous êtes déconnecté.")}><Icon name="logout" size={16} />Se déconnecter</Button>
+    <section className="student-card settings-card" aria-labelledby="reglages">
+      <div className="card-title"><span className="skill-chip"><Icon name="sliders" size={18} /></span><h2 id="reglages">Réglages d’entraînement</h2></div>
+      <p>Pendant les QCM d’entraînement, la correction en direct indique tout de suite si votre réponse est juste. Désactivez-la pour vous mettre en conditions d’examen : rien n’est révélé avant la fin. Les simulations ne révèlent jamais rien.</p>
+      <div className="settings">
+        <Switch id="reglage-correction" label="Correction en direct" hint="Juste ou faux après chaque réponse" checked={profile.preferences.live_correction} disabled={busy} onChange={value => prefer("live_correction", value)} />
+        <Switch id="reglage-son" label="Signal sonore" hint="Un son pour chaque bonne ou mauvaise réponse" icon="volume" checked={profile.preferences.answer_sound} disabled={busy || !profile.preferences.live_correction} onChange={value => prefer("answer_sound", value)} />
       </div>
     </section>
   </>;

@@ -7,8 +7,6 @@ from .views import (
     ProfileView,
     VerifyView,
     ResendView,
-    PauseSubscriptionView,
-    ResumeSubscriptionView,
 )
 
 urlpatterns = [
@@ -19,6 +17,4 @@ urlpatterns = [
     path("profile/", ProfileView.as_view()),
     path("verify/", VerifyView.as_view()),
     path("verification/resend/", ResendView.as_view()),
-    path("subscription/pause/", PauseSubscriptionView.as_view()),
-    path("subscription/resume/", ResumeSubscriptionView.as_view()),
 ]

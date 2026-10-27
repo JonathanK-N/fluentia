@@ -39,14 +39,9 @@ class PreferencesSerializer(serializers.Serializer):
 
 
 class SubscriptionSerializer(serializers.Serializer):
-    status = serializers.ChoiceField(choices=["free", "premium", "paused", "expired"], read_only=True)
+    status = serializers.ChoiceField(choices=["free", "premium", "expired"], read_only=True)
     premium_until = serializers.DateTimeField(read_only=True, allow_null=True)
     days_remaining = serializers.IntegerField(read_only=True)
-    resume_on = serializers.DateField(read_only=True, allow_null=True)
-
-
-class PauseSerializer(serializers.Serializer):
-    resume_on = serializers.DateField()
 
 
 class AccountSerializer(serializers.Serializer):

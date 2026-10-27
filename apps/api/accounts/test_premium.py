@@ -36,10 +36,12 @@ class PremiumTests(TestCase):
     def subscription(self):
         return self.client.get("/api/v1/auth/profile/").data["subscription"]
 
-    def test_free_account_has_no_premium_and_cannot_pause(self):
-        self.assertEqual(self.subscription(), {"status": "free", "premium_until": None, "days_remaining": 0, "resume_on": None})
-        resume_on = (timezone.localdate() + timedelta(days=5)).isoformat()
-        self.assertEqual(self.call("auth/subscription/pause/", {"resume_on": resume_on}).status_code, 400)
+    def test_free_account_has_no_premium(self):
+        self.assertEqual(self.subscription(), {"status": "free", "premium_until": None, "days_remaining": 0})
+
+    def test_pause_endpoints_do_not_exist(self):
+        self.assertEqual(self.call("auth/subscription/pause/").status_code, 404)
+        self.assertEqual(self.call("auth/subscription/resume/").status_code, 404)
 
     def test_premium_reports_remaining_days(self):
         self.grant(9)
@@ -51,36 +53,6 @@ class PremiumTests(TestCase):
         Subscription.objects.create(user=self.user, premium_until=timezone.now() - timedelta(days=1))
         self.assertEqual(self.subscription()["status"], "expired")
         self.assertEqual(self.subscription()["days_remaining"], 0)
-
-    def test_pause_freezes_days_and_resume_restores_them(self):
-        self.grant(9)
-        resume_on = timezone.localdate() + timedelta(days=30)
-        paused = self.call("auth/subscription/pause/", {"resume_on": resume_on.isoformat()})
-        self.assertEqual(paused.status_code, 200, paused.data)
-        body = paused.json()["subscription"]
-        self.assertEqual((body["status"], body["days_remaining"], body["resume_on"], body["premium_until"]), ("paused", 10, resume_on.isoformat(), None))
-        resumed = self.call("auth/subscription/resume/")
-        self.assertEqual(resumed.status_code, 200)
-        self.assertEqual((resumed.data["subscription"]["status"], resumed.data["subscription"]["days_remaining"]), ("premium", 10))
-        self.assertEqual(self.call("auth/subscription/resume/").status_code, 400)
-
-    def test_pause_date_must_be_future_and_bounded(self):
-        self.grant(9)
-        for days in (0, -1, 400):
-            date = (timezone.localdate() + timedelta(days=days)).isoformat()
-            self.assertEqual(self.call("auth/subscription/pause/", {"resume_on": date}).status_code, 400, days)
-
-    def test_pause_resumes_automatically_on_its_date(self):
-        self.grant(9)
-        self.call("auth/subscription/pause/", {"resume_on": (timezone.localdate() + timedelta(days=3)).isoformat()})
-        Subscription.objects.filter(user=self.user).update(resume_on=timezone.localdate())
-        data = self.subscription()
-        self.assertEqual((data["status"], data["days_remaining"]), ("premium", 10))
-
-    def test_subscription_endpoints_require_session_and_csrf(self):
-        anonymous = APIClient(enforce_csrf_checks=True)
-        self.assertEqual(anonymous.post("/api/v1/auth/subscription/resume/", {}, format="json").status_code, 403)
-        self.assertEqual(self.client.post("/api/v1/auth/subscription/resume/", {}, format="json").status_code, 403)
 
     def test_preferences_are_partial_updates(self):
         response = self.call("auth/profile/", {"answer_sound": False}, method="patch")

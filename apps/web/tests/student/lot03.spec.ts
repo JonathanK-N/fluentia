@@ -20,7 +20,8 @@ async function student(page: Page, suffix: string) {
   await page.getByLabel("Adresse e-mail", {exact: true}).fill(email);
   await page.getByLabel("Mot de passe", {exact: true}).fill("Lecture!Orbite-7294");
   await page.getByRole("button", {name: "Se connecter", exact: true}).click();
-  await page.getByRole("link", {name: "Choisir un exercice"}).click();
+  await expect(page.getByRole("heading", {name: "Mon abonnement"})).toBeVisible();
+  await page.goto("/etudiant");
 }
 
 test("oral entraînement : média privé, lecteur, transcription et résultat", async ({page}, info) => {
@@ -96,7 +97,7 @@ test("interface éditoriale : création, demande de relecture et historique", as
   await page.getByLabel("Adresse e-mail", {exact: true}).fill("bank-editor@example.test");
   await page.getByLabel("Mot de passe", {exact: true}).fill("Edition!Fixture-7294");
   await page.getByRole("button", {name: "Se connecter", exact: true}).click();
-  await expect(page.getByRole("heading", {name: "Mon profil étudiant"})).toBeVisible();
+  await expect(page.getByRole("heading", {name: "Mon abonnement"})).toBeVisible();
   const response = await page.goto("/edition");
   expect(response?.headers()["x-frame-options"]).toBe("DENY");
   expect(response?.headers()["content-security-policy"]).toContain("frame-ancestors 'none'");

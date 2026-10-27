@@ -29,7 +29,6 @@ from .serializers import (
     CsrfSerializer,
     LoginSerializer,
     MessageSerializer,
-    PauseSerializer,
     ProfileSerializer,
     RegisterSerializer,
     VerifySerializer,
@@ -67,7 +66,7 @@ def account(user):
             "live_correction": profile.live_correction,
             "answer_sound": profile.answer_sound,
         },
-        "subscription": premium.payload(premium.current(user)),
+        "subscription": premium.payload(user),
     }
 
 
@@ -175,26 +174,6 @@ class ProfileView(SecureView):
         for field, value in data.validated_data.items():
             setattr(profile, field, value)
         profile.save(update_fields=list(data.validated_data))
-        return Response(account(request.user))
-
-
-class PauseSubscriptionView(SecureView):
-    permission_classes = [IsAuthenticated]
-
-    @extend_schema(request=PauseSerializer, responses=AccountSerializer)
-    def post(self, request):
-        data = PauseSerializer(data=request.data)
-        data.is_valid(raise_exception=True)
-        premium.pause(request.user, data.validated_data["resume_on"])
-        return Response(account(request.user))
-
-
-class ResumeSubscriptionView(SecureView):
-    permission_classes = [IsAuthenticated]
-
-    @extend_schema(request=None, responses=AccountSerializer)
-    def post(self, request):
-        premium.resume(request.user)
         return Response(account(request.user))
 
 
