@@ -55,26 +55,6 @@ function isActive(pathname: string, item: Item) {
   return item.exact ? pathname === item.href : pathname === item.href || pathname.startsWith(item.href + "/");
 }
 
-function ThemeToggle() {
-  const [theme, setTheme] = useState<"light" | "dark" | null>(null);
-  useEffect(() => {
-    let saved: string | null = null;
-    try { saved = localStorage.getItem("fluentia-theme"); } catch {}
-    if (saved === "light" || saved === "dark") { document.documentElement.dataset.theme = saved; setTheme(saved); }
-    else setTheme(matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-  }, []);
-  function toggle() {
-    const current = theme ?? (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-    const next = current === "dark" ? "light" : "dark";
-    document.documentElement.dataset.theme = next;
-    try { localStorage.setItem("fluentia-theme", next); } catch {}
-    setTheme(next);
-  }
-  return <button type="button" className="shell-icon-button" onClick={toggle} aria-label="Changer le thème" title="Changer le thème">
-    <Icon name={theme === "dark" ? "sun" : "moon"} />
-  </button>;
-}
-
 function UserCard({ onNavigate }: { onNavigate: () => void }) {
   const { profile, ready } = useSession();
   return <div className="shell-user">
@@ -136,7 +116,6 @@ function Shell({ variant, children }: { variant: "student" | "edition"; children
         <p className="shell-crumb"><span>{variant === "edition" ? "Édition" : "Espace étudiant"}</span>{current && <><Icon name="chevron" size={14} /><span>{current.label}</span></>}</p>
         <div className="shell-actions">
           <Link href="/" className="shell-text-link">Site public</Link>
-          <ThemeToggle />
         </div>
       </header>
       <main id="contenu" tabIndex={-1} className="shell-content student-space">{children}</main>

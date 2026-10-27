@@ -50,7 +50,7 @@ Frontend : http://localhost:3000 · API : http://localhost:8000/api/v1/health/ �
 
 ## Expérience Fluentia v2 — espace étudiant complet
 
-Branche `feature/fluentia-experience-v2` : lot 03 et pilotes v3 réunis, direction visuelle **Ivoire & Sable** (blanc et beige dominants, encre chaude, marine réservé à l’action, cyan limité à la signature vocale ; contrastes WCAG AA vérifiés en clair et en sombre). Détails dans [docs/EXPERIENCE_V2.md](docs/EXPERIENCE_V2.md).
+Branche `feature/fluentia-experience-v2` : lot 03 et pilotes v3 réunis, direction visuelle **Ivoire & Sable** (blanc et beige dominants, encre chaude, marine réservé à l’action, cyan limité à la signature vocale ; thème clair unique, contrastes WCAG AA vérifiés). Détails dans [docs/EXPERIENCE_V2.md](docs/EXPERIENCE_V2.md).
 
 | Page | Rôle |
 |---|---|
@@ -83,7 +83,7 @@ Projet et responsabilité éditoriale : **Jonathan Kakesa**. Les commits doivent
 
 ## Frontend — Mission 01
 
-Vitrine et catalogue `/design-system`, thèmes clair/sombre, logos officiels et Poppins locale. Le lot 02 intégré fournit `/etudiant`, comptes et lecture connectée. La branche du [lot 03](docs/backend/lot-03/README.md) étend le parcours à l’oral, aux simulations, à la progression et à `/edition` pour les personnes habilitées ; coach et paiements restent ultérieurs. La PR #3 Human-Centered reste indépendante.
+Vitrine et catalogue `/design-system`, thème clair, logos officiels et Poppins locale. Le lot 02 intégré fournit `/etudiant`, comptes et lecture connectée. La branche du [lot 03](docs/backend/lot-03/README.md) étend le parcours à l’oral, aux simulations, à la progression et à `/edition` pour les personnes habilitées ; coach et paiements restent ultérieurs. La PR #3 Human-Centered reste indépendante.
 
 Démarrage : `cd apps/web`, `npm ci`, `npm run dev`.
 

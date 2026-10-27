@@ -72,10 +72,11 @@ test("inscription, courriel, session, lecture persistante et résultat privé su
   await page.screenshot({path: info.outputPath("lecture.png"), fullPage: true});
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   expect((await new AxeBuilder({page}).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations).toEqual([]);
-  await page.getByRole("button", {name: "Changer le thème"}).click();
+  // Thème clair unique : une préférence système sombre ne change pas l'apparence.
+  await page.emulateMedia({colorScheme: "dark"});
+  await expect(page.locator("body")).toHaveCSS("background-color", "rgb(250, 247, 242)");
   expect((await new AxeBuilder({page}).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations).toEqual([]);
-  await page.screenshot({path: info.outputPath("lecture-sombre.png"), fullPage: true});
-  await page.getByRole("button", {name: "Changer le thème"}).click();
+  await page.emulateMedia({colorScheme: "light"});
   await page.getByRole("button", {name: "Terminer et vérifier mes réponses"}).click();
   await page.getByRole("button", {name: "Confirmer la soumission"}).click();
   await expect(page.getByRole("heading", {name: "Votre résultat", exact: true})).toBeVisible();

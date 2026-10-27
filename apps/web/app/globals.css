@@ -44,7 +44,6 @@
   --duration: 180ms;
   --ease: cubic-bezier(0.2, 0.7, 0.3, 1);
 }
-:root[data-theme="dark"],
 .discover {
   color-scheme: dark;
   --bg: #16130f;
@@ -65,29 +64,6 @@
   --warning: #e3b866;
   --info: #8fd0d4;
   --shadow-soft: 0 1px 2px rgb(0 0 0 / 30%);
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
-    --bg: #16130f;
-    --surface: #211d18;
-    --text: #f5efe6;
-    --muted: #c9bdae;
-    --border: #3d362e;
-    --control-border: #8f8476;
-    --action: #e9dcc6;
-    --on-action: #16130f;
-    --accent: #d9b48a;
-    --focus: #e9dcc6;
-    --danger: #ffb1b9;
-    --tint: #2a251f;
-  --sand: #2a251f;
-  --sand-strong: #3d362e;
-  --success: #7fc79a;
-  --warning: #e3b866;
-  --info: #8fd0d4;
-  --shadow-soft: 0 1px 2px rgb(0 0 0 / 30%);
-  }
 }
 * {
   box-sizing: border-box;
@@ -825,20 +801,6 @@ thead {
 @keyframes spin {
   to {
     transform: rotate(360deg);
-  }
-}
-:root[data-theme="dark"] .logo-light {
-  display: none;
-}
-:root[data-theme="dark"] .logo-dark {
-  display: block;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .logo-light {
-    display: none;
-  }
-  :root:not([data-theme="light"]) .logo-dark {
-    display: block;
   }
 }
 @media (min-width: 900px) and (prefers-reduced-motion: no-preference) {

@@ -1,9 +1,8 @@
 "use client";
-/** Navigation mobile native et thème système/manuel non persistant. Propriétaire : Jonathan Kakesa. */
+/** Navigation mobile native, thème clair unique. Propriétaire : Jonathan Kakesa. */
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { Logo } from "../branding/logo";
-import { Button } from "../ui/primitives";
 import { usePathname } from "next/navigation";
 import { LandingNavigation } from "../../features/landing/navigation";
 export function Header() {
@@ -11,15 +10,6 @@ export function Header() {
   const menuRef = useRef<HTMLDetailsElement>(null);
   function closeMenu() {
     if (menuRef.current) menuRef.current.open = false;
-  }
-  const [theme, setTheme] = useState<"light" | "dark" | null>(null);
-  function toggleTheme() {
-    const current =
-      theme ??
-      (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-    const next = current === "dark" ? "light" : "dark";
-    document.documentElement.dataset.theme = next;
-    setTheme(next);
   }
   if (/^\/(apercu\/etudiant|etudiant|edition)(\/|$)/.test(pathname)) return null;
   if (pathname === "/") return <LandingNavigation />;
@@ -34,14 +24,6 @@ export function Header() {
           <Link href="/etudiant">Espace étudiant</Link>
         </nav>
         <div className="header-actions">
-          <Button
-            variant="ghost"
-            onClick={toggleTheme}
-            aria-label="Changer le thème"
-            title="Changer le thème"
-          >
-            ◐
-          </Button>
           <details ref={menuRef} className="mobile-menu">
             <summary>Menu</summary>
             <nav aria-label="Navigation mobile">

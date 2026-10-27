@@ -65,8 +65,8 @@ test("thème, menu mobile, mouvement réduit et manifest", async ({
   await page.emulateMedia({ reducedMotion: "reduce", colorScheme: "light" });
   await page.setViewportSize({ width: 375, height: 850 });
   await page.goto("/design-system");
-  await page.getByRole("button", { name: "Changer le thème" }).click();
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await expect(page.getByRole("button", { name: "Changer le thème" })).toHaveCount(0);
+  await expect(page.locator("html")).toHaveCSS("color-scheme", "light");
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   await page.goto("/");
   await page.getByText("Menu", { exact: true }).click();

@@ -29,7 +29,7 @@ export default function SupportPage() {
           </ul>
         </section>
         <section className="student-card card-muted" aria-labelledby="clavier"><h2 id="clavier">Accessibilité</h2>
-          <p>Toutes les activités se pilotent au clavier : Tab pour avancer, flèches pour changer de choix, Échap pour fermer le menu. Le thème sombre s’active avec le bouton en haut à droite.</p>
+          <p>Toutes les activités se pilotent au clavier : Tab pour avancer, flèches pour changer de choix, Échap pour fermer le menu. Les contrastes respectent le niveau WCAG AA.</p>
         </section>
       </div>
     </div>

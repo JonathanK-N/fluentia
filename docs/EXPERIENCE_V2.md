@@ -8,18 +8,18 @@ Un espace de préparation calme et complet, organisé comme un tableau de bord d
 
 ## Direction visuelle « Ivoire & Sable »
 
-| Rôle | Clair | Sombre | Contraste vérifié |
-|---|---|---|---|
-| Fond | `#FAF7F2` | `#16130F` | — |
-| Surface | `#FFFFFF` | `#211D18` | — |
-| Sable (teintes, cartes secondaires) | `#F3ECE1` | `#2A251F` | — |
-| Texte | `#1E1A16` | `#F5EFE6` | 16,2:1 |
-| Texte secondaire | `#6B6157` | `#C9BDAE` | ≥ 5,1:1 sur fond, surface et sable |
-| Accent bronze | `#8A5A2B` | `#D9B48A` | ≥ 5,0:1 |
-| Action | `#0B1F3A` (texte blanc) | `#E9DCC6` (texte encre) | 16,5:1 / 13,7:1 |
-| Bordure de contrôle | `#8C7F70` | `#8F8476` | ≥ 3,9:1 |
+| Rôle | Valeur | Contraste vérifié |
+|---|---|---|
+| Fond | `#FAF7F2` | — |
+| Surface | `#FFFFFF` | — |
+| Sable (teintes, cartes secondaires) | `#F3ECE1` | — |
+| Texte | `#1E1A16` | 16,2:1 |
+| Texte secondaire | `#6B6157` | ≥ 5,1:1 sur fond, surface et sable |
+| Accent bronze | `#8A5A2B` | ≥ 5,0:1 |
+| Action | `#0B1F3A` (texte blanc) | 16,5:1 |
+| Bordure de contrôle | `#8C7F70` | ≥ 3,9:1 |
 
-Le bleu vif n’est plus utilisé pour la structure ni l’action ; le cyan reste réservé à l’indicateur vocal et à la démonstration Voice. Les icônes sont des SVG linéaires 24 px (`components/app-shell/icons.tsx`), jamais des émojis.
+Fluentia utilise un **thème clair unique** : la préférence sombre du système n’est pas appliquée, pour garder partout l’identité crème, beige et blanc de l’accueil. Le bleu vif n’est plus utilisé pour la structure ni l’action ; le cyan reste réservé à l’indicateur vocal et à la démonstration Voice. Les icônes sont des SVG linéaires 24 px (`components/app-shell/icons.tsx`), jamais des émojis.
 
 ## Données et honnêteté
 
@@ -49,4 +49,4 @@ Dans un second terminal : `cd apps/web`, `npm ci`, `npm run dev`, puis http://lo
 
 ## Vérifications réalisées
 
-Chromium : `npm run typecheck`, `npm run lint`, 12 tests unitaires, 21 tests e2e frontend et 5 parcours étudiants e2e sur API réelle (dont axe WCAG 2.1 AA en clair et en sombre). Firefox et WebKit restent à exécuter en CI. Le test d’écoute attend désormais l’activation effective du bouton de lecture (décodage `canplay`) avant d’appuyer sur Espace.
+Chromium : `npm run typecheck`, `npm run lint`, 12 tests unitaires, 21 tests e2e frontend et 5 parcours étudiants e2e sur API réelle (dont axe WCAG 2.1 AA, y compris avec une préférence système sombre). Firefox et WebKit restent à exécuter en CI. Le test d’écoute attend désormais l’activation effective du bouton de lecture (décodage `canplay`) avant d’appuyer sur Espace.
