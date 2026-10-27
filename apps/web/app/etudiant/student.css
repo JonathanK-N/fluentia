@@ -557,3 +557,6 @@ html[data-exam-focus] .shell-content.student-space { max-width: none; padding: 0
 .student-space .import-subject p { margin: 0.25rem 0 0; }
 .import-subject ul.pill-row { list-style: none; padding: 0; margin: 0.5rem 0 0; }
 @media (max-width: 640px) { .import-series-head { grid-template-columns: auto minmax(0, 1fr); } .import-status { grid-column: 1 / -1; justify-self: start; } .import-track { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.editorial-lock { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 1rem; align-items: start; max-width: 46rem; }
+.student-space .editorial-lock h2 { margin: 0 0 0.4rem; font-size: 1.1rem; }
+.editorial-lock p { font-size: 0.88rem; }

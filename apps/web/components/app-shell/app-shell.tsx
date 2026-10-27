@@ -8,7 +8,7 @@ import { Icon, type IconName } from "./icons";
 import { SessionProvider, initials, useSession } from "../../lib/session";
 import "./app-shell.css";
 
-type Item = { href: string; label: string; icon: IconName; exact?: boolean; children?: { href: string; label: string; aria: string }[] };
+type Item = { href: string; label: string; icon: IconName; exact?: boolean; external?: boolean; children?: { href: string; label: string; aria: string }[] };
 type Group = { title: string; items: Item[] };
 
 const tasks = (base: string, label: string) => [1, 2, 3].map(n => ({ href: `${base}/tache-${n}`, label: `Tâche ${n}`, aria: `${label}, tâche ${n}` }));
@@ -48,8 +48,16 @@ const editionGroups: Group[] = [
   ] },
   { title: "Raccourcis", items: [
     { href: "/etudiant", label: "Espace étudiant", icon: "grid", exact: true },
+    { href: "/admin/", label: "Administration Django", icon: "sliders", external: true },
   ] },
 ];
+
+/** Raccourcis visibles dans l’espace étudiant pour les comptes de l’équipe éditoriale. */
+const adminGroup: Group = { title: "Administration", items: [
+  { href: "/edition/import", label: "Importer une série", icon: "upload" },
+  { href: "/edition", label: "Banque pédagogique", icon: "library", exact: true },
+  { href: "/admin/", label: "Administration Django", icon: "sliders", external: true },
+] };
 
 /** Titres des pages hors navigation (passation, vérification). */
 const extraTitles: [RegExp, string][] = [
@@ -75,6 +83,19 @@ function UserCard({ onNavigate }: { onNavigate: () => void }) {
   </div>;
 }
 
+function EditorialLock({ signedIn }: { signedIn: boolean }) {
+  return <section className="student-card editorial-lock" aria-labelledby="acces-reserve">
+    <span className="template-icon" aria-hidden="true"><Icon name="sliders" size={18} /></span>
+    <div>
+      <h2 id="acces-reserve">Accès réservé à l’équipe éditoriale</h2>
+      <p>{signedIn
+        ? "Ce compte n’a pas les droits d’édition. Connectez-vous avec un compte de l’équipe, ou demandez à un administrateur de vous les attribuer dans l’administration Django."
+        : "Connectez-vous avec un compte de l’équipe éditoriale pour importer, relire et publier des séries."}</p>
+      <Link className="button button-primary tile-link" href="/etudiant/compte">{signedIn ? "Changer de compte" : "Se connecter"}</Link>
+    </div>
+  </section>;
+}
+
 function Brand({ variant }: { variant: "student" | "edition" }) {
   return <Link href="/" className="shell-brand" aria-label="Fluentia — accueil du site">
     <Image src="/branding/01_Logos_PNG/fluentia-symbole-transparent-256.png" alt="" width={34} height={34} unoptimized />
@@ -84,9 +105,11 @@ function Brand({ variant }: { variant: "student" | "edition" }) {
 
 function Shell({ variant, children }: { variant: "student" | "edition"; children: ReactNode }) {
   const pathname = usePathname();
+  const { profile, ready } = useSession();
   const [open, setOpen] = useState(false);
   const toggleRef = useRef<HTMLButtonElement>(null);
-  const groups = variant === "edition" ? editionGroups : studentGroups;
+  const groups = variant === "edition" ? editionGroups : profile?.editor ? [...studentGroups, adminGroup] : studentGroups;
+  const locked = variant === "edition" && ready && !profile?.editor;
   const current = groups.flatMap(group => group.items).find(item => isActive(pathname, item));
   const title = current?.label ?? extraTitles.find(([pattern]) => pattern.test(pathname))?.[1] ?? "Espace étudiant";
   // Pages d’épreuve : fil d’Ariane dans l’en-tête, le titre principal est porté par le bandeau.
@@ -117,9 +140,10 @@ function Shell({ variant, children }: { variant: "student" | "edition"; children
           <ul>{group.items.map(item => {
             const active = isActive(pathname, item);
             return <li key={item.href}>
+              {item.external ? <a href={item.href} className="shell-link"><Icon name={item.icon} size={18} /><span>{item.label}</span></a> :
               <Link href={item.href} onClick={close} className="shell-link" aria-current={active && (pathname === item.href || !item.children) ? "page" : undefined} data-active={active || undefined}>
                 <Icon name={item.icon} size={18} /><span>{item.label}</span>
-              </Link>
+              </Link>}
               {item.children && active && <ul className="shell-sublist">{item.children.map(child =>
                 <li key={child.href}><Link href={child.href} onClick={close} aria-label={child.aria} aria-current={pathname === child.href ? "page" : undefined} className="shell-sublink">{child.label}</Link></li>)}
               </ul>}
@@ -148,7 +172,7 @@ function Shell({ variant, children }: { variant: "student" | "edition"; children
             ? <Link href={sessionHome.href} className="shell-site-link"><Icon name="back" size={14} />Toutes les séries</Link>
             : <Link href="/" className="shell-site-link">Voir le site<Icon name="external" size={14} /></Link>}
         </header>
-        {children}
+        {locked ? <EditorialLock signedIn={Boolean(profile)} /> : children}
       </main>
     </div>
   </div>;

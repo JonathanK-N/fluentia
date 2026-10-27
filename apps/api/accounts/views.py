@@ -67,6 +67,8 @@ def account(user):
             "answer_sound": profile.answer_sound,
         },
         "subscription": premium.payload(user),
+        # Accès à l’espace éditorial : même règle que l’API de la banque.
+        "editor": user.is_active and user.is_staff and user.has_perm("pedagogy.view_bankitem"),
     }
 
 

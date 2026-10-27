@@ -3,7 +3,13 @@ const apiOrigin = process.env.API_ORIGIN || "http://127.0.0.1:8000";
 const nextConfig = {
   skipTrailingSlashRedirect: true,
   async rewrites() {
-    return [{ source: "/api/v1/:path*", destination: `${apiOrigin}/api/v1/:path*/` }];
+    return [
+      { source: "/api/v1/:path*", destination: `${apiOrigin}/api/v1/:path*/` },
+      // Administration Django servie sur la même origine que le site.
+      { source: "/admin", destination: `${apiOrigin}/admin/` },
+      { source: "/admin/:path*", destination: `${apiOrigin}/admin/:path*/` },
+      { source: "/static/admin/:path*", destination: `${apiOrigin}/static/admin/:path*` },
+    ];
   },
   async headers() {
     return ["/etudiant/:path*", "/edition/:path*"].map(source => ({ source, headers: [

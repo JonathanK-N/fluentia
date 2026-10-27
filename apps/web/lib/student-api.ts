@@ -27,7 +27,7 @@ export async function api<T>(path: string, method = "GET", body?: unknown): Prom
   return data as T;
 }
 export type Subscription = { status: "free" | "premium" | "expired"; premium_until: string | null; days_remaining: number };
-export type Profile = { id: number; email: string; display_name: string; email_verified: boolean; preferences: { live_correction: boolean; answer_sound: boolean }; subscription: Subscription };
+export type Profile = { id: number; email: string; display_name: string; email_verified: boolean; editor: boolean; preferences: { live_correction: boolean; answer_sound: boolean }; subscription: Subscription };
 export type SavedAnswer = { question_id: string; choice_id: string; saved: boolean; correct: boolean | null };
 export type Exam = { id: string; title: string; description: string; skill: string; mode: string; version: number; question_count: number; total_points: number; duration_seconds: number };
 export type Question = { id: string; position: number; statement: string; reading_passage: string; image_available: boolean; image_text: string; points: number; audio_available: boolean; audio_state: string; audio_ends_at?: string; transcript?: string; choices: {id: string; label: string}[] };

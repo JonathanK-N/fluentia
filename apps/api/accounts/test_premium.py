@@ -36,6 +36,12 @@ class PremiumTests(TestCase):
     def subscription(self):
         return self.client.get("/api/v1/auth/profile/").data["subscription"]
 
+    def test_editor_flag_follows_bank_access(self):
+        self.assertFalse(self.client.get("/api/v1/auth/profile/").data["editor"])
+        self.user.is_staff = self.user.is_superuser = True
+        self.user.save()
+        self.assertTrue(self.client.get("/api/v1/auth/profile/").data["editor"])
+
     def test_free_account_has_no_premium(self):
         self.assertEqual(self.subscription(), {"status": "free", "premium_until": None, "days_remaining": 0})
 

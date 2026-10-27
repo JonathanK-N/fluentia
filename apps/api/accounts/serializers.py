@@ -51,6 +51,7 @@ class AccountSerializer(serializers.Serializer):
     email_verified = serializers.BooleanField(read_only=True)
     preferences = PreferencesSerializer(read_only=True)
     subscription = SubscriptionSerializer(read_only=True)
+    editor = serializers.BooleanField(read_only=True)
 
 
 class MessageSerializer(serializers.Serializer):
