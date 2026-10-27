@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Button } from "../../../../components/ui/primitives";
 import { api, type Attempt, type Results } from "../../../../lib/student-api";
 import { AudioPlayer } from "../../../../components/student/audio-player";
+import { Icon } from "../../../../components/app-shell/icons";
 
 export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
   const {id} = use(params);
@@ -64,37 +65,63 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
     catch (e) { setError((e as Error).message); await load().catch(() => {}); }
     finally { setBusy(false); }
   }
+  const shown = attempt?.questions?.filter(q => attempt.skill !== "listening" || attempt.mode !== "simulation" || !["past", "locked"].includes(q.audio_state)) ?? [];
+  const answeredCount = Object.keys(answers).length;
+  const total = attempt?.questions?.length ?? 0;
   return <>
-    <p className="student-eyebrow">{attempt?.skill === "listening" ? "Compréhension orale" : "Compréhension écrite"} · {attempt?.mode === "simulation" ? "Simulation non officielle" : "Entraînement non officiel"}</p>
-    <h1>{results ? "Prenons le temps de comprendre" : attempt?.skill === "listening" ? "À vous d’écouter" : "À vous de lire"}</h1>
-    {attempt?.exam_title && <p>{attempt.exam_title}</p>}
-    <p><Link href="/etudiant">Retour aux exercices</Link></p>
+    <div className="page-head"><div>
+      <p className="student-eyebrow">{attempt?.skill === "listening" ? "Compréhension orale" : "Compréhension écrite"} · {attempt?.mode === "simulation" ? "Simulation non officielle" : "Entraînement non officiel"}</p>
+      <h1>{results ? "Prenons le temps de comprendre" : attempt?.skill === "listening" ? "À vous d’écouter" : "À vous de lire"}</h1>
+      {attempt?.exam_title && <p>{attempt.exam_title}</p>}
+    </div><p><Link href="/etudiant">Retour aux exercices</Link></p></div>
     {error && <p role="alert">{error}</p>}
-    {!attempt && !error && <p role="status">Chargement de votre lecture…</p>}
+    {!attempt && !error && <p className="student-hint">Chargement de votre lecture…</p>}
     {attempt?.status === "expired" && <section className="student-card"><h2>Le temps est écoulé</h2><p>Les réponses enregistrées sont conservées. Cette tentative n’a pas été soumise et aucun score n’a été calculé. Vous pouvez recommencer depuis le catalogue.</p></section>}
-    {results && <section className="student-card"><h2>Votre résultat</h2><p className="student-score">{results.correct_count} / {results.question_count}</p><p>{results.disclaimer}</p>
-      {results.details.map((detail, index) => <article key={detail.question_id} className="student-correction"><h3>Question {index + 1}</h3>
-        <p>{detail.statement}</p><p>Votre réponse : {detail.selected_label ?? "Sans réponse"}</p>
-        <p>Réponse attendue : {detail.correct_label}</p><p>{detail.explanation}</p>{detail.transcript && <details><summary>Transcription du document</summary><p>{detail.transcript}</p></details>}</article>)}
-    </section>}
-    {attempt?.status === "active" && <>
-      <div className="student-session"><p>Temps indicatif restant : {Math.floor(remaining / 60)} min {remaining % 60} s</p><p>{Object.keys(answers).length} / {attempt.questions?.length} réponses {busy ? "(enregistrement en cours)" : "enregistrées"}</p></div>
-      <p>Le délai est contrôlé par le serveur. Chaque choix confirmé est enregistré immédiatement.</p>
-      <p role="status" className="student-save-status">{message}</p>
-      {attempt.questions?.filter(q => attempt.skill !== "listening" || attempt.mode !== "simulation" || !["past", "locked"].includes(q.audio_state)).map((question) => <section className="student-card" key={question.id}>
-        <h2>{attempt.skill === "listening" ? "Document" : "Lecture"} {question.position}</h2>{question.reading_passage && <p className="student-passage">{question.reading_passage}</p>}
-        {attempt.skill === "listening" && (question.audio_available ? <AudioPlayer attemptId={id} questionId={question.id} simulation={attempt.mode === "simulation"} state={question.audio_state} endsAt={question.audio_ends_at} serverOffset={clockOffset.current} refresh={load} /> : <p role="alert">Le document audio n’est pas disponible pour cette version.</p>)}
-        {question.transcript && <details><summary>Consulter la transcription</summary><p>{question.transcript}</p></details>}
-        <fieldset disabled={remaining === 0 || (attempt.skill === "listening" && attempt.mode === "simulation" && question.audio_state !== "ready")} aria-busy={busy}><legend>{question.statement}</legend>
-          {question.choices.map(choice => <label className="student-choice" key={choice.id}>
-            <input type="radio" name={question.id} value={choice.id} disabled={busy && answers[question.id] !== choice.id} checked={answers[question.id] === choice.id} onChange={() => save(question.id, choice.id)} />{choice.label}
-          </label>)}
-        </fieldset>
-      </section>)}
-      {!confirm ? <Button disabled={busy || remaining === 0} onClick={() => setConfirm(true)}>Terminer et vérifier mes réponses</Button> :
-        <section className="student-card" aria-label="Confirmation de soumission"><h2>Prêt à découvrir le corrigé ?</h2><p>{Object.keys(answers).length} réponses enregistrées. Les questions sans réponse comptent pour zéro. Après la soumission, les réponses seront définitives.</p>
-          <Button loading={busy} onClick={submit}>Confirmer la soumission</Button> <Button variant="secondary" disabled={busy} onClick={() => setConfirm(false)}>Continuer ma lecture</Button>
-        </section>}
+    {results && <>
+      <section className="student-card result-hero" aria-labelledby="resultat">
+        <div className="score-ring" style={{ ["--value" as string]: results.percentage }}><p className="student-score">{results.correct_count} / {results.question_count}</p></div>
+        <div><h2 id="resultat">Votre résultat</h2><p><strong>{results.percentage} %</strong> de réponses correctes.</p><p>{results.disclaimer}</p>
+          <div className="student-nav" style={{ margin: 0 }}><Link className="button button-secondary tile-link" href="/etudiant/progression">Voir mon évolution</Link></div></div>
+      </section>
+      <section className="student-card" aria-labelledby="corrige"><h2 id="corrige">Corrigé détaillé</h2>
+        {results.details.map((detail, index) => { const ok = detail.selected_choice_id === detail.correct_choice_id; return <article key={detail.question_id} className="student-correction">
+          <div className="pill-row" style={{ justifyContent: "space-between", alignItems: "center" }}><h3 style={{ margin: 0 }}>Question {index + 1}</h3><span className={`pill ${ok ? "pill-success" : "pill-warning"}`}>{ok ? "Correct" : detail.selected_label ? "À revoir" : "Sans réponse"}</span></div>
+          <p style={{ color: "var(--text)", marginTop: ".5rem" }}>{detail.statement}</p><p>Votre réponse : {detail.selected_label ?? "Sans réponse"}</p>
+          <p>Réponse attendue : {detail.correct_label}</p><p>{detail.explanation}</p>{detail.transcript && <details><summary>Transcription du document</summary><p>{detail.transcript}</p></details>}</article>; })}
+      </section>
     </>}
+    {attempt?.status === "active" && <div className="attempt-layout">
+      <div>
+        <div className="student-session">
+          <p className="session-timer"><Icon name="clock" size={16} />Temps indicatif restant : {Math.floor(remaining / 60)} min {remaining % 60} s</p>
+          <span className="session-progress" aria-hidden="true"><span style={{ width: `${total ? answeredCount / total * 100 : 0}%` }} /></span>
+          <p>{answeredCount} / {attempt.questions?.length} réponses {busy ? "(enregistrement en cours)" : "enregistrées"}</p>
+        </div>
+        <p className="student-hint">Le délai est contrôlé par le serveur. Chaque choix confirmé est enregistré immédiatement.</p>
+        <p role="status" className="student-save-status">{message}</p>
+        {shown.map((question) => <section className="student-card question-card" id={`q-${question.id}`} key={question.id}>
+          <h2>{attempt.skill === "listening" ? "Document" : "Lecture"} {question.position}</h2>{question.reading_passage && <p className="student-passage">{question.reading_passage}</p>}
+          {attempt.skill === "listening" && (question.audio_available ? <AudioPlayer attemptId={id} questionId={question.id} simulation={attempt.mode === "simulation"} state={question.audio_state} endsAt={question.audio_ends_at} serverOffset={clockOffset.current} refresh={load} /> : <p role="alert">Le document audio n’est pas disponible pour cette version.</p>)}
+          {question.transcript && <details><summary>Consulter la transcription</summary><p>{question.transcript}</p></details>}
+          <fieldset disabled={remaining === 0 || (attempt.skill === "listening" && attempt.mode === "simulation" && question.audio_state !== "ready")} aria-busy={busy}><legend>{question.statement}</legend>
+            {question.choices.map(choice => <label className="student-choice" key={choice.id}>
+              <input type="radio" name={question.id} value={choice.id} disabled={busy && answers[question.id] !== choice.id} checked={answers[question.id] === choice.id} onChange={() => save(question.id, choice.id)} />{choice.label}
+            </label>)}
+          </fieldset>
+        </section>)}
+        {!confirm ? <Button disabled={busy || remaining === 0} onClick={() => setConfirm(true)}>Terminer et vérifier mes réponses</Button> :
+          <section className="student-card" aria-label="Confirmation de soumission"><h2>Prêt à découvrir le corrigé ?</h2><p>{answeredCount} réponses enregistrées. Les questions sans réponse comptent pour zéro. Après la soumission, les réponses seront définitives.</p>
+            <div className="student-nav" style={{ margin: 0 }}><Button loading={busy} onClick={submit}>Confirmer la soumission</Button> <Button variant="secondary" disabled={busy} onClick={() => setConfirm(false)}>Continuer ma lecture</Button></div>
+          </section>}
+      </div>
+      <aside className="attempt-aside" aria-label="Suivi de la tentative">
+        <nav className="student-card map-card" aria-label="Plan des questions">
+          <p className="student-eyebrow">Plan des questions</p>
+          <p className="student-hint" style={{ margin: 0 }}>{answeredCount} sur {total} répondues</p>
+          <ul className="question-map">{shown.map(question => <li key={question.id}><a href={`#q-${question.id}`} data-answered={answers[question.id] ? "" : undefined} aria-label={`Aller au numéro ${question.position}${answers[question.id] ? ", répondu" : ""}`}>{question.position}</a></li>)}</ul>
+        </nav>
+        <div className="student-card card-muted"><p className="student-eyebrow">Bon à savoir</p><p style={{ margin: 0 }}>{attempt.mode === "simulation" ? "En simulation, avancez sans revenir en arrière : chaque document n’est diffusé qu’une fois." : "En entraînement, prenez le temps de relire : le corrigé explique chaque réponse."}</p></div>
+      </aside>
+    </div>}
   </>;
 }

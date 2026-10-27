@@ -1,57 +1,90 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Button } from "../../components/ui/primitives";
-import { api, type Exam, type AttemptSummary } from "../../lib/student-api";
+import { Icon } from "../../components/app-shell/icons";
+import { api, type AttemptSummary } from "../../lib/student-api";
+import { useSession } from "../../lib/session";
+import { Catalogue } from "../../features/student/catalogue";
+import { attemptHref, skillLabel } from "../../features/student/content";
+import { Notice, SectionTitle, SkillCards, Stat } from "../../features/student/ui";
+import type { Progress } from "./progression/page";
 
-export default function CataloguePage() {
-  const [exams, setExams] = useState<Exam[] | null>(null);
-  const [skill, setSkill] = useState("reading");
-  const [error, setError] = useState("");
-  const [busy, setBusy] = useState(false);
+export default function DashboardPage() {
+  const { profile, ready } = useSession();
   const [attempts, setAttempts] = useState<AttemptSummary[]>([]);
-  const [examOffset, setExamOffset] = useState(0);
-  const [attemptOffset, setAttemptOffset] = useState(0);
-  const [moreExams, setMoreExams] = useState(false);
-  const [moreAttempts, setMoreAttempts] = useState(false);
-  const [loadingExams, setLoadingExams] = useState(true);
-  const [loadingAttempts, setLoadingAttempts] = useState(true);
-  const [examRequest, setExamRequest] = useState(0);
-  const [attemptRequest, setAttemptRequest] = useState(0);
-  const router = useRouter();
+  const [progress, setProgress] = useState<Progress | null>(null);
+  const [offset, setOffset] = useState(0);
+  const [more, setMore] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   useEffect(() => {
+    if (!profile) return;
     let active = true;
-    api<{results: Exam[]; next: string | null}>(`exams/?skill=${skill}&limit=50&offset=${examOffset}`).then(data => {
-      if (active) {setExams(previous => examOffset ? [...(previous ?? []), ...data.results] : data.results); setMoreExams(Boolean(data.next));}
-    }).catch(e => {if (active) setError(e.message);}).finally(() => {if (active) setLoadingExams(false);});
-    return () => {active = false;};
-  }, [examOffset, examRequest, skill]);
+    api<{ results: AttemptSummary[]; next: string | null }>(`attempts/?limit=50&offset=${offset}`).then(data => {
+      if (active) { setAttempts(previous => offset ? [...previous, ...data.results] : data.results); setMore(Boolean(data.next)); }
+    }).catch(e => { if (active && e.status !== 403) setError(e.message); }).finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [offset, profile]);
   useEffect(() => {
-    let active = true;
-    api<{results: AttemptSummary[]; next: string | null}>(`attempts/?limit=50&offset=${attemptOffset}`).then(data => {
-      if (active) {setAttempts(previous => attemptOffset ? [...previous, ...data.results] : data.results); setMoreAttempts(Boolean(data.next));}
-    }).catch(e => {if (active && e.status !== 403) setError(e.message);}).finally(() => {if (active) setLoadingAttempts(false);});
-    return () => {active = false;};
-  }, [attemptOffset, attemptRequest]);
-  async function start(id: string) {
-    setBusy(true); setError("");
-    try { const attempt = await api<{id: string}>(`exams/${id}/attempts/`, "POST"); router.push(`/etudiant/${skill === "listening" ? "ecoute" : "lecture"}/${attempt.id}`); }
-    catch (e) { setError((e as Error).message); setBusy(false); }
-  }
-  return <><p className="student-eyebrow">Un texte. Une étape. Des progrès.</p><h1>Votre prochain entraînement</h1>
-    <p>Choisissez une lecture ou une écoute, puis prenez le temps de comprendre le corrigé. Entraînements et simulations non officiels.</p>
-    <div className="student-nav" aria-label="Compétences"><Button variant="secondary" disabled={skill === "reading" || busy} onClick={() => {setSkill("reading"); setExamOffset(0); setExams(null);}}>Compréhension écrite</Button><Button variant="secondary" disabled={skill === "listening" || busy} onClick={() => {setSkill("listening"); setExamOffset(0); setExams(null);}}>Compréhension orale</Button></div>
-    <p><Link href="/etudiant/compte">Se connecter ou vérifier mon adresse</Link></p>
-    {error && <p role="alert">{error}</p>}
-    {attempts.length > 0 && <section className="student-card"><h2>Retrouver mes activités</h2><ul>{attempts.map(attempt => <li key={attempt.id}><Link href={`/etudiant/${attempt.skill === "listening" ? "ecoute" : "lecture"}/${attempt.id}`}>{attempt.exam_title} · {attempt.status === "submitted" ? "Voir mon corrigé" : attempt.status === "expired" ? "Temps écoulé" : "Reprendre"}</Link></li>)}</ul>{moreAttempts && <Button variant="secondary" loading={loadingAttempts} onClick={() => {setError(""); setLoadingAttempts(true); setAttemptOffset(attempts.length); setAttemptRequest(value => value + 1);}}>Afficher mes activités précédentes</Button>}</section>}
-    {!exams && !error && <p role="status">Recherche des exercices…</p>}
-    {exams?.length === 0 && <section className="student-card"><h2>Les premières lectures se préparent</h2><p>Les exercices apparaîtront ici après leur relecture pédagogique. Revenez bientôt.</p></section>}
-    <div className="student-grid">{exams?.map(exam => <article className="student-card" key={exam.id}>
-      <p className="student-eyebrow">{exam.skill === "listening" ? "Compréhension orale" : "Compréhension écrite"} · {exam.mode === "simulation" ? "Simulation" : "Entraînement"}</p><h2>{exam.title}</h2><p>{exam.description}</p>
-      <p>Version {exam.version} · {exam.question_count} questions · {Math.ceil(exam.duration_seconds / 60)} minutes</p>
-      <Button disabled={busy} onClick={() => start(exam.id)}>Commencer cet exercice</Button>
-    </article>)}</div>
-    {moreExams && <Button variant="secondary" loading={loadingExams} onClick={() => {setError(""); setLoadingExams(true); setExamOffset(exams?.length ?? 0); setExamRequest(value => value + 1);}}>Voir d’autres exercices</Button>}
+    if (!profile) return;
+    api<Progress>("progress/").then(setProgress).catch(() => setProgress(null));
+  }, [profile]);
+  const groups = progress?.groups ?? [];
+  const done = groups.reduce((sum, g) => sum + g.attempts, 0);
+  const questions = groups.reduce((sum, g) => sum + g.questions, 0);
+  const correct = groups.reduce((sum, g) => sum + g.correct, 0);
+  const activeAttempts = attempts.filter(a => a.status === "active");
+  const firstName = profile?.display_name?.split(" ")[0];
+  const empty = !profile ? "—" : progress ? null : "…";
+  return <>
+    <section className="welcome" aria-labelledby="bienvenue">
+      <div>
+        <p className="student-eyebrow">Un texte. Une étape. Des progrès.</p>
+        <h1 id="bienvenue">{!ready ? "Bienvenue" : profile ? `Bonjour ${firstName || ""}`.trim() : "Bienvenue sur Fluentia"}</h1>
+        <p>{profile ? "Votre prochain entraînement vous attend. Chaque réponse confirmée est enregistrée sur votre compte." : "Connectez-vous pour enregistrer vos réponses, retrouver vos corrigés et suivre votre progression sur tous vos appareils."}</p>
+        <div className="actions">
+          {ready && !profile && <Link className="button button-primary tile-link" href="/etudiant/compte">Se connecter ou créer un compte</Link>}
+          {activeAttempts[0] && <Link className="button button-primary tile-link" href={attemptHref(activeAttempts[0])}>Continuer mon activité en cours</Link>}
+          {profile && !activeAttempts[0] && <Link className="button button-primary tile-link" href="/etudiant/examens-blancs">Passer un examen blanc</Link>}
+          <Link className="button button-secondary tile-link" href="/etudiant/plan">Construire mon plan d’étude</Link>
+        </div>
+      </div>
+      <Image className="welcome-mark" src="/branding/01_Logos_PNG/fluentia-symbole-transparent-256.png" alt="" width={120} height={120} unoptimized />
+    </section>
+    {profile && !profile.email_verified && <div style={{ marginTop: "1rem" }}><Notice icon="flag">Votre adresse e-mail n’est pas encore vérifiée. <Link href="/etudiant/compte">Gérer mon compte</Link></Notice></div>}
+    <div className="stats" aria-label="Indicateurs personnels">
+      <Stat icon="exam" label="Exercices terminés" value={empty ?? done} hint="Tentatives soumises" />
+      <Stat icon="target" label="Score moyen" value={empty ?? (questions ? `${Math.round(correct / questions * 100)} %` : "—")} hint="Sur les questions soumises" />
+      <Stat icon="check" label="Questions traitées" value={empty ?? questions} hint="Omissions comprises" />
+      <Stat icon="clock" label="Activités en cours" value={!profile ? "—" : loading ? "…" : activeAttempts.length} hint="À terminer avant le délai" />
+    </div>
+    <SectionTitle title="Accès rapide aux compétences" />
+    <SkillCards />
+    <div className="two-col" style={{ marginTop: "2rem" }}>
+      <section className="student-card" aria-labelledby="activites">
+        <h2 id="activites">Retrouver mes activités</h2>
+        {error && <p role="alert">{error}</p>}
+        {!profile && <p>Vos tentatives apparaîtront ici après votre connexion.</p>}
+        {profile && !loading && !attempts.length && <p>Aucune activité pour le moment. Choisissez un exercice ci-dessous pour commencer.</p>}
+        {attempts.length > 0 && <ul className="activity-list">{attempts.map(attempt => <li key={attempt.id}>
+          <span className="activity-title"><Link href={attemptHref(attempt)}>{attempt.exam_title} · {attempt.status === "submitted" ? "Voir mon corrigé" : attempt.status === "expired" ? "Temps écoulé" : "Reprendre"}</Link><small>{skillLabel(attempt.skill)} · {attempt.mode === "simulation" ? "Simulation" : "Entraînement"}</small></span>
+          <span className={`pill ${attempt.status === "submitted" ? "pill-success" : attempt.status === "active" ? "pill-warning" : ""}`}>{attempt.status === "submitted" ? "Terminé" : attempt.status === "active" ? "En cours" : "Expiré"}</span>
+        </li>)}</ul>}
+        {more && <Button variant="secondary" loading={loading} onClick={() => { setError(""); setLoading(true); setOffset(attempts.length); }}>Afficher mes activités précédentes</Button>}
+      </section>
+      <section className="student-card card-muted" aria-labelledby="methode">
+        <h2 id="methode">Votre méthode en trois temps</h2>
+        <ul className="activity-list">
+          <li><span className="activity-title"><strong>1. S’entraîner</strong><small>Exercices courts, corrigés expliqués.</small></span><Icon name="book" /></li>
+          <li><span className="activity-title"><strong>2. Se mettre en condition</strong><small>Simulations complètes et chronométrées.</small></span><Icon name="clock" /></li>
+          <li><span className="activity-title"><strong>3. Analyser</strong><small>Repérez vos points forts et vos priorités.</small></span><Icon name="chart" /></li>
+        </ul>
+      </section>
+    </div>
+    <SectionTitle title="Exercices disponibles" link={{ href: "/etudiant/examens-blancs", label: "Voir les examens blancs" }} />
+    <Catalogue />
+    <p className="student-hint">Entraînements et simulations non officiels. Les difficultés affichées sont proposées par les auteurs et ne constituent pas un niveau certifié.</p>
   </>;
 }

@@ -1,0 +1,163 @@
+/* Coque de l’espace connecté : surfaces ivoire, navigation sable. Propriétaire : Jonathan Kakesa. */
+.app-shell {
+  --sidebar: 272px;
+  display: grid;
+  grid-template-columns: var(--sidebar) minmax(0, 1fr);
+  min-height: 100vh;
+  background: var(--bg);
+}
+.shell-sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.25rem 1rem;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  z-index: 30;
+}
+.shell-brand {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.25rem 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+.shell-logo { display: inline-flex; width: 150px; }
+.shell-logo img { width: 100%; height: 39px; object-fit: contain; object-position: left; }
+.shell-tagline { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.04em; }
+.shell-nav { display: grid; gap: 1.1rem; flex: 1; align-content: start; }
+.shell-group ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.shell-group-title {
+  margin: 0 0 0.35rem;
+  padding-inline: 0.75rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.shell-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 42px;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: var(--text);
+  transition: background var(--duration), color var(--duration);
+}
+.shell-link svg { color: var(--muted); flex-shrink: 0; transition: color var(--duration); }
+.shell-link:hover { background: var(--tint); }
+.shell-link[data-active] { background: var(--sand); font-weight: 600; }
+.shell-link[data-active] svg { color: var(--accent); }
+.shell-link[aria-current="page"] { box-shadow: inset 3px 0 0 var(--accent); }
+.shell-sublist { margin: 2px 0 6px 1.6rem !important; padding-left: 0.75rem !important; border-left: 1px solid var(--border); }
+.shell-sublink {
+  display: block;
+  padding: 0.45rem 0.75rem;
+  min-height: 36px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.shell-sublink:hover { background: var(--tint); color: var(--text); }
+.shell-sublink[aria-current="page"] { color: var(--text); font-weight: 600; background: var(--tint); }
+.shell-user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 10px;
+  background: var(--sand);
+  min-width: 0;
+}
+.shell-user div { display: grid; min-width: 0; line-height: 1.35; }
+.shell-user strong { font-size: 0.84rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.shell-user div span, .shell-user div a { font-size: 0.74rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.shell-user a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+.shell-avatar {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--action);
+  color: var(--on-action);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.shell-main { min-width: 0; display: flex; flex-direction: column; }
+.shell-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: 64px;
+  padding: 0.5rem clamp(1rem, 3vw, 2.5rem);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+.shell-crumb { display: flex; align-items: center; gap: 0.4rem; margin: 0; font-size: 0.82rem; color: var(--muted); min-width: 0; }
+.shell-crumb span:last-child { color: var(--text); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.shell-actions { margin-left: auto; display: flex; align-items: center; gap: 0.5rem; }
+.shell-text-link { font-size: 0.8rem; color: var(--muted); padding: 0.5rem; }
+.shell-text-link:hover { color: var(--text); text-decoration: underline; text-underline-offset: 4px; }
+.shell-icon-button {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  transition: background var(--duration);
+}
+.shell-icon-button:hover { background: var(--tint); }
+.shell-menu-button { display: none; }
+.shell-backdrop { display: none; }
+.shell-content.student-space {
+  width: 100%;
+  max-width: 1180px;
+  margin-inline: auto;
+  padding: clamp(1.25rem, 3vw, 2.5rem) clamp(1rem, 3vw, 2.5rem) 4rem;
+  min-height: auto;
+}
+.shell-content:focus { outline: none; }
+@media (max-width: 960px) {
+  .app-shell { grid-template-columns: minmax(0, 1fr); }
+  .shell-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: min(300px, 86vw);
+    transform: translateX(-102%);
+    visibility: hidden;
+    transition: transform 220ms var(--ease), visibility 0s linear 220ms;
+    box-shadow: var(--shadow-soft);
+  }
+  .app-shell[data-open] .shell-sidebar { transform: none; visibility: visible; transition: transform 220ms var(--ease); }
+  .app-shell[data-open] .shell-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 25;
+    border: 0;
+    background: rgb(30 26 22 / 35%);
+  }
+  .shell-menu-button { display: inline-grid; }
+  .shell-text-link { display: none; }
+  .shell-crumb > span:first-child, .shell-crumb > svg { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shell-sidebar { transition: none !important; }
+}
