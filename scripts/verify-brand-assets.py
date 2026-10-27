@@ -30,7 +30,7 @@ def luminance(hexadecimal):
     linear = [v / 12.92 if v <= .04045 else ((v + .055) / 1.055) ** 2.4 for v in channels]
     return sum(a * b for a, b in zip(linear, [.2126, .7152, .0722]))
 
-pairs = [('texte clair', '081b35', 'f7faff', 4.5), ('texte secondaire clair', '52647a', 'ffffff', 4.5), ('action claire', 'ffffff', '1769e0', 4.5), ('accent clair', '086b82', 'eaf1fc', 4.5), ('erreur claire', 'a12535', 'ffffff', 4.5), ('champ clair', '71829a', 'f7faff', 3), ('champ clair sur surface', '71829a', 'ffffff', 3), ('texte sombre', 'f7faff', '081b35', 4.5), ('texte secondaire sombre', 'b7c9df', '102944', 4.5), ('action sombre', '081b35', '21d4f4', 4.5), ('erreur sombre', 'ffb1b9', '102944', 4.5), ('champ sombre', '7e94ae', '081b35', 3), ('champ sombre sur surface', '7e94ae', '102944', 3)]
+pairs = [('texte clair', '081b35', 'f8fafc', 4.5), ('texte secondaire clair', '52647a', 'ffffff', 4.5), ('action claire', 'ffffff', '1769e0', 4.5), ('accent clair', '086b82', 'eaf1fc', 4.5), ('erreur claire', 'a12535', 'ffffff', 4.5), ('champ clair', '71829a', 'f8fafc', 3), ('champ clair sur surface', '71829a', 'ffffff', 3), ('texte sombre', 'f7faff', '081b35', 4.5), ('texte secondaire sombre', 'b7c9df', '102944', 4.5), ('action sombre', '081b35', '21d4f4', 4.5), ('erreur sombre', 'ffb1b9', '102944', 4.5), ('champ sombre', '7e94ae', '081b35', 3), ('champ sombre sur surface', '7e94ae', '102944', 3)]
 contrasts = []
 for name, foreground, background, minimum in pairs:
     a, b = sorted([luminance(foreground), luminance(background)])

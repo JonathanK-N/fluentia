@@ -7,18 +7,20 @@ export function Dialog({
   title,
   description,
   children,
+  className = "",
 }: {
   trigger: ReactNode;
   title: string;
   description: string;
   children: ReactNode;
+  className?: string;
 }) {
   return (
     <DialogPrimitive.Root>
       <DialogPrimitive.Trigger asChild>{trigger}</DialogPrimitive.Trigger>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="dialog-overlay" />
-        <DialogPrimitive.Content className="dialog-content">
+        <DialogPrimitive.Content className={`dialog-content ${className}`}>
           <DialogPrimitive.Title>{title}</DialogPrimitive.Title>
           <DialogPrimitive.Description>
             {description}

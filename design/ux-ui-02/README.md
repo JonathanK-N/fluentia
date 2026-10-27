@@ -2,6 +2,8 @@
 
 Propriétaire et responsable : Jonathan Kakesa.
 
+**Actualisation v3 :** après validation des pilotes, les 62 références adoptent le langage clair et compact commun. Discover, Learn et Voice restent des contextes fonctionnels ; le studio seul conserve une petite sphère. Les états et huit parcours simulés sont conservés. Voir [la généralisation et sa recette](../../docs/GENERALISATION_V3.md). Figma natif reste différé et aucun service métier n’est connecté. `human-centered.css` contient les ajustements de composition ; `tokens.css` définit le thème commun et `verify.py` vérifie désormais huit paires de contraste, sans prétendre maintenir trois thèmes visuels.
+
 **Prototype de conception local, pas une application métier ni un fichier Figma enregistré.** 62 écrans, huit parcours simulés et trois univers. Données fictives ; aucun microphone, compte, paiement ou modèle IA connecté. Les pages légales sont des structures non approuvées et les éditeurs professionnels restent partiels.
 
 ```bash

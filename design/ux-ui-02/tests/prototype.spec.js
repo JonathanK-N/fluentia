@@ -3,7 +3,7 @@ import {test,expect} from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import {readFileSync,writeFileSync} from 'node:fs';
 const catalogue=JSON.parse(readFileSync(new URL('../catalogue.json',import.meta.url)));
-async function go(page,id){await page.goto('/#'+id);const screen=catalogue.screens.find(s=>s.id===id.split(':')[0]);if(screen)await expect(page).toHaveTitle(`${screen.title} · Référence Fluentia`);await expect(page.locator('h1')).toBeVisible();await page.evaluate(async()=>{await document.fonts.ready;await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));});if(screen&&await page.locator('.card').count())await expect(page.locator('.card').first()).toHaveCSS('background-color',screen.universe==='Learn'?'rgb(255, 255, 255)':'rgb(16, 41, 68)');}
+async function go(page,id){await page.goto('/#'+id);const screen=catalogue.screens.find(s=>s.id===id.split(':')[0]);if(screen)await expect(page).toHaveTitle(`${screen.title} · Référence Fluentia`);await expect(page.locator('h1')).toBeVisible();await page.evaluate(async()=>{await document.fonts.ready;await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));});if(screen&&await page.locator('.card').count())await expect(page.locator('.card').first()).toHaveCSS('background-color','rgb(255, 255, 255)');}
 async function at(page,id){await expect(page).toHaveURL(new RegExp('#'+id+'$'));}
 for(const width of [375,768,1440])test(`62 écrans à ${width}px`,async({page},info)=>{
  await page.setViewportSize({width,height:1000});const errors=[];page.on('pageerror',e=>errors.push(e.message));const checks=[];
@@ -12,6 +12,26 @@ for(const width of [375,768,1440])test(`62 écrans à ${width}px`,async({page},i
   if((info.project.name==='chromium'&&['P01','A01','S01','S13','T01','E01','M01'].includes(s.id))||(info.project.name==='webkit'&&['P01','S01','S13'].includes(s.id)))await page.screenshot({path:info.outputPath(`${s.id}-${width}.png`),fullPage:true});
  }
  expect(errors).toEqual([]);writeFileSync(info.outputPath(`geometry-${width}.json`),JSON.stringify(checks,null,2));
+});
+
+test('direction v3 et navigation mobile de chaque rôle',async({page})=>{
+ await page.setViewportSize({width:375,height:900});
+ for(const [id,target] of [['S01','S20'],['T01','T02'],['E01','E02'],['M01','M03']]){
+  await go(page,id);
+  await expect(page.locator('body')).toHaveCSS('background-color','rgb(248, 250, 252)');
+  await expect(page.locator('.brand img')).toHaveAttribute('src','assets/logo-horizontal-light.png');
+  const menu=page.locator('.mobile-nav>summary');await menu.click();
+  const nav=page.getByRole('navigation',{name:'Navigation mobile'});
+  await expect(nav.locator(`a[href="#${target}"]`)).toBeVisible();
+  expect((await new AxeBuilder({page}).analyze()).violations).toEqual([]);
+  await page.keyboard.press('Escape');await expect(menu).toBeFocused();await expect(nav).not.toBeVisible();
+  await menu.click();await nav.locator(`a[href="#${target}"]`).click();await at(page,target);
+ }
+ await go(page,'P01');await expect(page.locator('.orb')).toHaveCount(0);
+ await go(page,'S13');await expect(page.locator('.orb')).toHaveCSS('width','110px');
+ await page.emulateMedia({reducedMotion:'no-preference'});await page.locator('#voice-state').selectOption('listening');
+ await expect(page.locator('.orb')).toHaveCSS('animation-iteration-count','1');
+ await page.emulateMedia({reducedMotion:'reduce'});await expect(page.locator('.orb')).toHaveCSS('animation-name','none');
 });
 for(const group of ['public','auth','student','teacher','school','admin'])test(`accessibilité à 1440px — ${group}`,async({page})=>{await page.setViewportSize({width:1440,height:1000});for(const screen of catalogue.screens.filter(s=>s.group===group)){await go(page,screen.id);expect((await new AxeBuilder({page}).analyze()).violations,screen.id).toEqual([]);}});
 test('lien d’évitement au clavier',async({page})=>{await go(page,'S01');await page.keyboard.press('Tab');await expect(page.getByRole('link',{name:'Aller au contenu'})).toBeFocused();await page.keyboard.press('Enter');await expect(page.locator('#contenu')).toBeFocused();await at(page,'S01');});
