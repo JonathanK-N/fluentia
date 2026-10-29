@@ -272,3 +272,18 @@ class AccountTests(TestCase):
         self.signin()
         data = self.client.get("/api/v1/attempts/?limit=1&offset=0").data
         self.assertEqual(data["results"], [])
+
+
+class AdminEmailLoginTests(TestCase):
+    def test_admin_accepts_email_instead_of_technical_username(self):
+        user = get_user_model().objects.create_user(
+            "student-technique", "Equipe@Example.test", "Mot-de-passe-solide-42", is_staff=True
+        )
+        page = self.client.get("/admin/login/")
+        self.assertContains(page, "Adresse e-mail")
+        refused = self.client.post("/admin/login/", {"username": "equipe@example.test", "password": "faux-mot-de-passe"})
+        self.assertNotIn("_auth_user_id", self.client.session)
+        self.assertEqual(refused.status_code, 200)
+        response = self.client.post("/admin/login/?next=/admin/", {"username": "equipe@example.test", "password": "Mot-de-passe-solide-42", "next": "/admin/"})
+        self.assertRedirects(response, "/admin/", fetch_redirect_response=False)
+        self.assertEqual(int(self.client.session["_auth_user_id"]), user.pk)

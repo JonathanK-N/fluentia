@@ -24,6 +24,7 @@ INSTALLED_APPS += ["accounts"]
 INSTALLED_APPS += ["pedagogy"]
 PRIVATE_MEDIA_ROOT = Path(os.getenv("PRIVATE_MEDIA_ROOT", str(BASE_DIR / ".private-media")))
 ACCOUNT_ANON_RATE = os.getenv("ACCOUNT_ANON_RATE", "20/hour")
+AUTHENTICATION_BACKENDS = ["accounts.backends.EmailBackend"]
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", "OPTIONS": {"min_length": 12}},
