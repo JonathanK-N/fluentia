@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.utils.text import slugify
 from rest_framework.exceptions import ValidationError
 
-from exams.models import LEVEL_POINTS
+from exams.models import LEVEL_POINTS, Exam
 from .models import BankItem, SeriesImport, TaskSet
 from .services import publish_exam, require, transition
 from .tasks import tasks_payload
@@ -109,6 +109,55 @@ def act_on_tasks(actor, task_set, action, note, attest):
         TaskSet.objects.filter(skill=locked.skill, is_active=True).update(is_active=False)
         locked.state, locked.is_active, locked.published_at = "published", True, timezone.now()
     locked.save()
+
+
+@transaction.atomic
+def set_online(actor, series, online):
+    """Retire une série publiée du catalogue ou l’y remet ; les tentatives passées restent lisibles."""
+    require(actor, "publish_bankitem")
+    if series.task_set_id:
+        locked = TaskSet.objects.select_for_update().get(pk=series.task_set_id)
+        if locked.state != "published":
+            raise ValidationError("Ces sujets n’ont pas encore été publiés.")
+        others = TaskSet.objects.filter(skill=locked.skill, state="published").exclude(pk=locked.pk)
+        # Un seul jeu actif par épreuve (contrainte unique) : désactiver avant d’activer.
+        if online:
+            others.filter(is_active=True).update(is_active=False)
+            locked.is_active = True
+            locked.save(update_fields=["is_active"])
+        elif locked.is_active:
+            # Les étudiants gardent toujours des sujets : le jeu publié précédent reprend la place.
+            previous = others.order_by("-published_at").first()
+            if previous is None:
+                raise ValidationError("Ce sont les seuls sujets publiés : publiez-en d’autres avant de les retirer.")
+            locked.is_active = False
+            locked.save(update_fields=["is_active"])
+            previous.is_active = True
+            previous.save(update_fields=["is_active"])
+        return
+    if not series.exam_id:
+        raise ValidationError("Cette série n’a pas encore été publiée.")
+    exam = Exam.objects.select_for_update().get(pk=series.exam_id)
+    if online:
+        # Une seule version par série dans le catalogue, comme à la publication.
+        for other in Exam.objects.filter(slug=exam.slug, is_published=True).exclude(pk=exam.pk):
+            other.is_published = False
+            other.save()
+    exam.is_published = online
+    exam.save()
+
+
+@transaction.atomic
+def discard(actor, series):
+    """Supprime une série jamais publiée. Ses questions restent dans l’historique de la banque."""
+    require(actor, "change_bankitem")
+    locked = SeriesImport.objects.select_related("task_set").select_for_update(of=("self",)).get(pk=series.pk)
+    if locked.exam_id or (locked.task_set_id and locked.task_set.state == "published"):
+        raise ValidationError("Une série publiée ne peut pas être supprimée : retirez-la du catalogue.")
+    task_set = locked.task_set
+    locked.delete()
+    if task_set:
+        task_set.delete()
 
 
 def all_series():

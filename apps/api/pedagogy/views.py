@@ -299,16 +299,24 @@ class SeriesDetailView(EditorView):
     def get(self, request, series_id):
         return Response(workflow.detail(get_object_or_404(workflow.all_series(), pk=series_id)))
 
+    @extend_schema(responses={204: None})
+    def delete(self, request, series_id):
+        workflow.discard(request.user, get_object_or_404(workflow.all_series(), pk=series_id))
+        return Response(status=204)
+
 
 class SeriesActionView(EditorView):
     @extend_schema(request=SeriesActionSerializer, responses=SeriesSerializer)
     def post(self, request, series_id, action):
-        if action not in ("request_review", "approve", "reject", "publish"):
+        if action not in ("request_review", "approve", "reject", "publish", "withdraw", "restore"):
             raise ValidationError({"action": "Action inconnue."})
         data = SeriesActionSerializer(data=request.data)
         data.is_valid(raise_exception=True)
         series = get_object_or_404(workflow.all_series(), pk=series_id)
-        workflow.act(request.user, series, action, **data.validated_data)
+        if action in ("withdraw", "restore"):
+            workflow.set_online(request.user, series, action == "restore")
+        else:
+            workflow.act(request.user, series, action, **data.validated_data)
         return Response(workflow.summary(workflow.all_series().get(pk=series_id)))
 
 

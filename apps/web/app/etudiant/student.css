@@ -541,6 +541,8 @@ html[data-exam-focus] .shell-content.student-space { max-width: none; padding: 0
 .import-track li[data-done] { border-top-color: var(--indigo); color: var(--text); font-weight: 600; }
 .import-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .import-actions .button { display: inline-flex; align-items: center; gap: 0.45rem; }
+.import-actions .import-delete { margin-left: auto; color: var(--danger); }
+.import-actions .import-delete:hover:not(:disabled) { background: color-mix(in srgb, var(--danger) 8%, transparent); }
 .import-review { display: grid; gap: 0.7rem; padding: 1rem; border-radius: 12px; background: var(--warn-bg); }
 .student-space .import-review p { margin: 0; font-size: 0.82rem; color: var(--text); }
 .import-review label { display: grid; gap: 0.35rem; font-size: 0.8rem; font-weight: 600; }
@@ -577,3 +579,4 @@ html[data-exam-focus] .shell-content.student-space { max-width: none; padding: 0
 .audio-time { font-variant-numeric: tabular-nums; font-size: 0.85rem; font-weight: 600; color: var(--indigo); }
 .audio-player [role="alert"] { flex-basis: 100%; margin: 0; }
 @media (min-width: 1200px) { .plan-week { grid-template-columns: repeat(7, minmax(0, 1fr)); } }
+

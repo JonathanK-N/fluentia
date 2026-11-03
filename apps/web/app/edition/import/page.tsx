@@ -138,13 +138,20 @@ export default function ImportPage() {
     {visible?.length === 0 && <div className="empty-block"><h3>Aucune série importée</h3><p>Les séries apparaîtront ici dès leur import, en brouillon.</p></div>}
     <ul className="import-list" aria-labelledby="series">{visible?.map(item => <SeriesCard key={item.id} item={item} open={openId === item.id} busy={busy}
       onToggle={() => setOpenId(openId === item.id ? null : item.id)}
-      onAction={(action, body, done) => run(async () => { await api(`bank/series/${item.id}/${action}/`, "POST", body ?? {}); setMessage(done); await refresh(); })} />)}</ul>
+      onAction={(action, body, done) => run(async () => { await api(`bank/series/${item.id}/${action}/`, "POST", body ?? {}); setMessage(done); await refresh(); })}
+      onDelete={() => {
+        if (!window.confirm(`Supprimer « ${item.title} » ? La série disparaît de cette liste ; cette action est définitive.`)) return;
+        run(async () => { await api(`bank/series/${item.id}/`, "DELETE"); setMessage(`« ${item.title} » supprimée.`); if (openId === item.id) setOpenId(null); await refresh(); });
+      }} />)}</ul>
   </>;
 }
 
-function SeriesCard({ item, open, busy, onToggle, onAction }: { item: Series; open: boolean; busy: boolean; onToggle: () => void; onAction: (action: string, body: object | undefined, done: string) => void }) {
+function SeriesCard({ item, open, busy, onToggle, onAction, onDelete }: { item: Series; open: boolean; busy: boolean; onToggle: () => void; onAction: (action: string, body: object | undefined, done: string) => void; onDelete: () => void }) {
   const s = skillOf(item.skill);
   const qcm = item.skill === "reading" || item.skill === "listening";
+  const published = item.status === "published";
+  const online = qcm ? !!item.exam?.is_published : item.active;
+  const neverPublished = !item.exam && !published;
   const [note, setNote] = useState("");
   const [attest, setAttest] = useState(false);
   return <li className="student-card import-series">
@@ -155,15 +162,21 @@ function SeriesCard({ item, open, busy, onToggle, onAction }: { item: Series; op
         <h3>{item.title}</h3>
         <p className="import-file"><Icon name="layers" size={13} />{item.file_name}</p>
       </div>
-      <span className="import-status" data-tone={STATUS[item.status].tone}>{STATUS[item.status].label}{item.status === "published" && item.exam ? ` · v${item.exam.version}` : ""}</span>
+      <span className="import-status" data-tone={published && !online ? "neutral" : STATUS[item.status].tone}>{published && !online ? "Retirée du catalogue" : STATUS[item.status].label}{published && item.exam ? ` · v${item.exam.version}` : ""}</span>
     </div>
     <ol className="import-track" aria-label="Avancement">{(["draft", "review", "approved", "published"] as Status[]).map((step, index, all) =>
       <li key={step} data-done={all.indexOf(item.status) >= index || undefined}>{STATUS[step].label}</li>)}</ol>
     <div className="import-actions">
       {item.status === "draft" && <Button disabled={busy} onClick={() => onAction("request_review", undefined, "Série envoyée en relecture.")}><Icon name="send" size={15} />Envoyer en relecture</Button>}
       {item.status === "approved" && <Button disabled={busy} onClick={() => onAction("publish", undefined, qcm ? "Série publiée : elle apparaît dans le catalogue des étudiants." : "Sujets publiés : ils remplacent les précédents pour les étudiants.")}><Icon name="flag" size={15} />Publier la série</Button>}
-      {item.status === "published" && <Link className="button button-secondary tile-link" href={s.href}>Voir côté étudiant<Icon name="external" size={14} /></Link>}
+      {published && online && <Link className="button button-secondary tile-link" href={s.href}>Voir côté étudiant<Icon name="external" size={14} /></Link>}
       <Button variant="secondary" onClick={onToggle} aria-expanded={open}><Icon name="chevron" size={14} />{open ? "Masquer le contenu" : "Voir le contenu"}</Button>
+      {published && online && <Button variant="ghost" disabled={busy} onClick={() => {
+        if (window.confirm(`Retirer « ${item.title} » ${qcm ? "du catalogue" : "des sujets proposés"} ? Les étudiants ne la verront plus ; leurs résultats sont conservés.`))
+          onAction("withdraw", undefined, qcm ? "Série retirée du catalogue. Les résultats des étudiants sont conservés." : "Sujets retirés : les précédents sont de nouveau proposés.");
+      }}><Icon name="close" size={14} />Retirer du catalogue</Button>}
+      {published && !online && <Button variant="secondary" disabled={busy} onClick={() => onAction("restore", undefined, qcm ? "Série remise en ligne : elle remplace les autres versions dans le catalogue." : "Sujets remis en ligne pour les étudiants.")}><Icon name="flag" size={14} />Remettre en ligne</Button>}
+      {neverPublished && <Button variant="ghost" className="import-delete" disabled={busy} onClick={onDelete}><Icon name="trash" size={14} />Supprimer</Button>}
     </div>
     {item.status === "review" && <form className="import-review" onSubmit={event => { event.preventDefault(); onAction("approve", { note, attest }, "Série approuvée : elle peut être publiée."); }}>
       <p><strong>Relecture par une deuxième personne.</strong> La personne qui a importé la série ne peut pas l’approuver.</p>

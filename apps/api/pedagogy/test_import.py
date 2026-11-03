@@ -134,6 +134,35 @@ class ImportTests(TestCase):
         versions = Exam.objects.filter(slug="serie-de-recette").order_by("version")
         self.assertEqual([(e.version, e.is_published) for e in versions], [(1, False), (2, True)])
 
+    def test_published_series_can_be_withdrawn_and_restored_but_not_deleted(self):
+        first = self.upload("reading", workbook("reading", reading_rows(3), {"Mode": "Entraînement"}))
+        self.run_workflow(first.data["id"])
+        second = self.upload("reading", workbook("reading", reading_rows(3), {"Mode": "Entraînement"}))
+        self.run_workflow(second.data["id"])
+        catalogue = lambda: [(e["version"]) for e in APIClient().get("/api/v1/exams/").data["results"]]
+        self.assertEqual(catalogue(), [2])
+        self.assertEqual(self.post(self.editor, f"bank/series/{second.data['id']}/withdraw/").status_code, 200)
+        self.assertEqual(catalogue(), [])
+        # Remettre en ligne l’ancienne version la fait revenir seule au catalogue.
+        restored = self.post(self.editor, f"bank/series/{first.data['id']}/restore/")
+        self.assertEqual((restored.status_code, restored.data["exam"]["is_published"]), (200, True))
+        self.assertEqual(catalogue(), [1])
+        client = self.client_for(self.editor)
+        refused = client.delete(f"/api/v1/bank/series/{first.data['id']}/", HTTP_X_CSRFTOKEN=client.csrf)
+        self.assertEqual(refused.status_code, 400)
+        self.assertEqual(SeriesImport.objects.count(), 2)
+
+    def test_unpublished_series_can_be_deleted(self):
+        draft = self.upload("reading", workbook("reading", reading_rows(3), {"Mode": "Entraînement"}))
+        self.post(self.editor, f"bank/series/{draft.data['id']}/request_review/")
+        client = self.client_for(self.editor)
+        self.assertEqual(client.delete(f"/api/v1/bank/series/{draft.data['id']}/", HTTP_X_CSRFTOKEN=client.csrf).status_code, 204)
+        self.assertEqual(SeriesImport.objects.count(), 0)
+        self.assertEqual(self.post(self.editor, f"bank/series/{draft.data['id']}/withdraw/").status_code, 404)
+        writing = self.upload("writing", workbook("writing", [[1, "A", "B", "Courriel", 60, 120, 10, None, None], [2, "C", "D", "Récit", 120, 150, 20, None, None], [3, "E", "F", "Argumentation", 120, 180, 30, "G", "H"]]))
+        self.assertEqual(client.delete(f"/api/v1/bank/series/{writing.data['id']}/", HTTP_X_CSRFTOKEN=client.csrf).status_code, 204)
+        self.assertFalse(TaskSet.objects.filter(title=writing.data["title"]).exists())
+
     def test_wrong_test_type_is_refused_before_anything_is_saved(self):
         response = self.upload("reading", workbook("listening", []))
         self.assertEqual(response.status_code, 400)
@@ -216,6 +245,11 @@ class ImportTests(TestCase):
         self.assertEqual([t["subjects"][0]["title"] for t in after["tasks"]], ["Fête de rue", "Souvenir", "Vélo en ville"])
         self.assertEqual(after["tasks"][2]["subjects"][0]["documents"][1]["text"], "Contre le vélo.")
         self.assertEqual(TaskSet.objects.filter(skill="writing", is_active=True).count(), 1)
+        # Retirer les nouveaux sujets rend la place aux précédents ; les étudiants en ont toujours.
+        self.assertEqual(self.post(self.editor, f"bank/series/{response.data['id']}/withdraw/").status_code, 200)
+        self.assertEqual(APIClient().get("/api/v1/tasks/writing/").data["title"], "Sujets originaux Fluentia")
+        self.assertEqual(self.post(self.editor, f"bank/series/{response.data['id']}/restore/").status_code, 200)
+        self.assertEqual(APIClient().get("/api/v1/tasks/writing/").data["title"], "Sujets d’automne")
 
     def test_speaking_needs_all_three_tasks(self):
         rows = [[1, "Se présenter", "Parlez de vous.", 0, 2, "Parcours ; loisirs"]]
