@@ -117,6 +117,8 @@ function Shell({ variant, children }: { variant: "student" | "edition"; children
   // Séance ou bilan : retour vers la page de l’épreuve concernée.
   const session = variant === "student" ? /^\/etudiant\/(lecture|ecoute)\//.exec(pathname)?.[1] : undefined;
   const sessionHome = session === "ecoute" ? studentGroups[1]!.items[1]! : studentGroups[1]!.items[0]!;
+  // Présentation d’une série avant la séance : fil d’Ariane vers l’épreuve.
+  const intro = variant === "student" ? studentGroups[1]!.items.find(item => pathname.startsWith(item.href + "/") && /^\/etudiant\/comprehension-(ecrite|orale)\//.test(pathname)) : undefined;
   useEffect(() => { setOpen(false); }, [pathname]);
   useEffect(() => {
     if (!open) return;
@@ -164,12 +166,16 @@ function Shell({ variant, children }: { variant: "student" | "edition"; children
             <li><Link className="crumb" href="/etudiant">Accueil</Link></li>
             <li><Link className="crumb" href={sessionHome.href}>{sessionHome.label}</Link></li>
             <li aria-current="page">Bilan de la séance</li>
+          </ol></nav> : intro ? <nav aria-label="Fil d’Ariane" className="shell-breadcrumb"><ol>
+            <li><Link className="crumb" href="/etudiant">Accueil</Link></li>
+            <li><Link className="crumb" href={intro.href}>{intro.label}</Link></li>
+            <li aria-current="page">Présentation de la série</li>
           </ol></nav> : <div>
             <p className="shell-eyebrow">{variant === "edition" ? "Espace éditorial" : "Espace étudiant"}</p>
             <h1>{title}</h1>
           </div>}
-          {session
-            ? <Link href={sessionHome.href} className="shell-site-link"><Icon name="back" size={14} />Toutes les séries</Link>
+          {session || intro
+            ? <Link href={intro?.href ?? sessionHome.href} className="shell-site-link"><Icon name="back" size={14} />Toutes les séries</Link>
             : <Link href="/" className="shell-site-link">Voir le site<Icon name="external" size={14} /></Link>}
         </header>
         {locked ? <EditorialLock signedIn={Boolean(profile)} /> : children}

@@ -580,3 +580,11 @@ html[data-exam-focus] .shell-content.student-space { max-width: none; padding: 0
 .audio-player [role="alert"] { flex-basis: 100%; margin: 0; }
 @media (min-width: 1200px) { .plan-week { grid-template-columns: repeat(7, minmax(0, 1fr)); } }
 
+/* Consignes d’une série avant la séance : sept lignes, puis « Commencer ». */
+.series-intro { max-width: 46rem; margin: 1rem auto 0; display: grid; gap: 0.9rem; padding: clamp(1.4rem, 3vw, 2rem); }
+.series-intro .series-kind { justify-self: start; }
+.student-space .series-intro h2 { margin: 0; font-size: clamp(1.25rem, 2.4vw, 1.6rem); letter-spacing: -0.02em; }
+.series-intro-lines { margin: 0; padding-left: 1.3rem; display: grid; gap: 0.5rem; font-size: 0.92rem; line-height: 1.55; }
+.series-intro-lines li::marker { color: var(--accent); font-weight: 700; }
+.series-intro-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.4rem; }
+.series-intro-actions .button { display: inline-flex; align-items: center; gap: 0.45rem; }

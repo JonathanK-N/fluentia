@@ -1,11 +1,10 @@
 "use client";
-/** Séries publiées d’une épreuve : filtre par type et démarrage d’une tentative. */
+/** Séries publiées d’une épreuve : filtre par type, puis page de présentation avant la séance. */
+import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "../../components/ui/primitives";
 import { Icon } from "../../components/app-shell/icons";
 import { api, type Exam } from "../../lib/student-api";
-import { enterFullscreen, exitFullscreen } from "../../lib/fullscreen";
 
 type Skill = "reading" | "listening";
 type Mode = "all" | "training" | "simulation";
@@ -14,11 +13,9 @@ export function Catalogue({ skill, mode: fixedMode, title = "Vos séries", empty
   const [mode, setMode] = useState<Mode>(fixedMode ?? "all");
   const [exams, setExams] = useState<Exam[] | null>(null);
   const [error, setError] = useState("");
-  const [busy, setBusy] = useState(false);
   const [offset, setOffset] = useState(0);
   const [more, setMore] = useState(false);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
   useEffect(() => {
     let active = true;
     const filter = skill ? `skill=${skill}&` : "";
@@ -27,12 +24,6 @@ export function Catalogue({ skill, mode: fixedMode, title = "Vos séries", empty
     }).catch(e => { if (active) setError(e.message); }).finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [offset, skill]);
-  async function start(exam: Exam) {
-    enterFullscreen();
-    setBusy(true); setError("");
-    try { const attempt = await api<{ id: string }>(`exams/${exam.id}/attempts/`, "POST"); router.push(`/etudiant/${exam.skill === "listening" ? "ecoute" : "lecture"}/${attempt.id}`); }
-    catch (e) { exitFullscreen(); setError((e as Error).message); setBusy(false); }
-  }
   const visible = exams?.filter(exam => mode === "all" || exam.mode === mode);
   return <section aria-labelledby="series" className="series">
     <div className="series-head">
@@ -53,7 +44,7 @@ export function Catalogue({ skill, mode: fixedMode, title = "Vos séries", empty
       <h3>{exam.title}</h3>
       <p>{exam.description}</p>
       <div className="pill-row"><span className="pill"><Icon name="exam" size={13} />{exam.question_count} {exam.question_count > 1 ? "questions" : "question"}</span><span className="pill"><Icon name="clock" size={13} />{Math.ceil(exam.duration_seconds / 60)} min</span>{exam.total_points > exam.question_count && <span className="pill"><Icon name="trophy" size={13} />{exam.total_points} points</span>}</div>
-      <Button disabled={busy} onClick={() => start(exam)}>Démarrer la série<Icon name="arrow" size={15} /></Button>
+      <Link className="button button-primary tile-link" href={`/etudiant/${exam.skill === "listening" ? "comprehension-orale" : "comprehension-ecrite"}/${exam.id}`}>Démarrer la série<span className="sr-only"> — {exam.title}</span><Icon name="arrow" size={15} /></Link>
     </article>)}</div>
     {more && <p><Button variant="secondary" loading={loading} onClick={() => { setError(""); setLoading(true); setOffset(exams?.length ?? 0); }}>Voir d’autres séries</Button></p>}
   </section>;

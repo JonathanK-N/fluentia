@@ -28,7 +28,8 @@ async function student(page: Page, suffix: string) {
 test("oral entraînement : média privé, lecteur, transcription et résultat", async ({page}, info) => {
   await student(page, info.project.name + "-oral");
   await page.goto("/etudiant/comprehension-orale");
-  await page.getByRole("article").filter({has: page.getByRole("heading", {name: "Écoute de recette — annonce", exact: true})}).getByRole("button", {name: "Démarrer la série"}).click();
+  await page.getByRole("article").filter({has: page.getByRole("heading", {name: "Écoute de recette — annonce", exact: true})}).getByRole("link", {name: /Démarrer la série/}).click();
+  await page.getByRole("button", {name: "Commencer"}).click();
   await expect(page.getByRole("heading", {name: "Écoutez, choisissez, avancez."})).toBeVisible();
   // Le document se charge dès l’affichage de la question ; ▶ le lance.
   const audio = page.locator("audio");
@@ -53,7 +54,8 @@ test("oral entraînement : média privé, lecteur, transcription et résultat", 
 
 test("lecture complète : 39 questions, sauvegarde et correction sur PostgreSQL", async ({page}, info) => {
   await student(page, info.project.name + "-reading");
-  await page.getByRole("article").filter({has: page.getByRole("heading", {name: "Lecture complète de recette — 39 questions", exact: true})}).getByRole("button", {name: "Démarrer la série"}).click();
+  await page.getByRole("article").filter({has: page.getByRole("heading", {name: "Lecture complète de recette — 39 questions", exact: true})}).getByRole("link", {name: /Démarrer la série/}).click();
+  await page.getByRole("button", {name: "Commencer"}).click();
   // Une question à la fois : on répond, puis « Suivant ».
   await expect(page.getByRole("radio")).toHaveCount(4);
   const map = page.getByRole("navigation", {name: "Vue d’ensemble"});
@@ -84,7 +86,8 @@ test("simulation orale : 39 questions ouvertes, navigation libre et réécoute",
   test.setTimeout(150_000);
   await student(page, info.project.name + "-simulation");
   await page.goto("/etudiant/comprehension-orale");
-  await page.getByRole("article").filter({has: page.getByRole("heading", {name: "Écoute complète de recette — 39 questions", exact: true})}).getByRole("button", {name: "Démarrer la série"}).click();
+  await page.getByRole("article").filter({has: page.getByRole("heading", {name: "Écoute complète de recette — 39 questions", exact: true})}).getByRole("link", {name: /Démarrer la série/}).click();
+  await page.getByRole("button", {name: "Commencer"}).click();
   // Les 39 questions sont accessibles d’emblée, avec leurs choix.
   const map = page.getByRole("navigation", {name: "Vue d’ensemble"});
   await expect(map.locator(".question-map button:enabled")).toHaveCount(39);
@@ -184,7 +187,8 @@ test("import Excel : série avec images, relecture par une autre personne, publi
 
   const learner = await (await browser.newContext()).newPage();
   await student(learner, info.project.name + "-image");
-  await learner.getByRole("article").filter({has: learner.getByRole("heading", {name: "Documents en image — démonstration", exact: true})}).getByRole("button", {name: "Démarrer la série"}).click();
+  await learner.getByRole("article").filter({has: learner.getByRole("heading", {name: "Documents en image — démonstration", exact: true})}).getByRole("link", {name: /Démarrer la série/}).click();
+  await learner.getByRole("button", {name: "Commencer"}).click();
   await expect(learner.getByRole("heading", {name: "Question 1 / 2", exact: true})).toBeVisible();
   const image = learner.getByRole("img", {name: /Lettre de Julien Moreau/});
   await expect(image).toBeVisible();
