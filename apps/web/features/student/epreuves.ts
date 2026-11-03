@@ -32,16 +32,16 @@ export const epreuves: Record<EpreuveId, Epreuve> = {
   },
   listening: {
     id: "listening", number: "02", name: "Écoute", subtitle: "Compréhension orale", icon: "headphones",
-    lead: "Annonces, dialogues, extraits radio : entraînez votre oreille avec réécoute et transcription, puis passez en simulation avec une diffusion unique.",
+    lead: "Annonces, dialogues, extraits radio : entraînez votre oreille, chaque document se réécoute librement, et la transcription vous attend en entraînement.",
     notice: "Ces séries sont des entraînements non officiels.",
     brief: [
       { label: "Questions", value: "39", hint: "QCM · 4 choix, 1 seule bonne réponse" },
       { label: "Chrono", value: "35 min", hint: "Durée indicative" },
-      { label: "Diffusion", value: "1 écoute", hint: "En simulation ; réécoute libre en entraînement" },
+      { label: "Écoute", value: "Illimitée", hint: "Réécoutez chaque document autant que nécessaire" },
     ],
     reflexes: [
       { title: "Lire les choix avant", text: "Parcourez les propositions pendant que le document se charge." },
-      { title: "Une seule écoute", text: "En simulation, chaque document n’est diffusé qu’une fois : restez concentré." },
+      { title: "Réécouter avec méthode", text: "Une première écoute pour l’idée générale, une deuxième pour vérifier le détail." },
       { title: "La transcription après", text: "En entraînement, comparez ce que vous avez compris avec le texte." },
     ],
   },

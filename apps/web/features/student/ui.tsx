@@ -1,4 +1,5 @@
 /** Blocs de présentation partagés par les pages de l’espace étudiant. */
+import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Icon, type IconName } from "../../components/app-shell/icons";
@@ -8,6 +9,23 @@ export function PageHead({ eyebrow, title, children, actions }: { eyebrow?: stri
   return <div className="page-head">
     <div>{eyebrow && <p className="student-eyebrow">{eyebrow}</p>}<h2 className="page-title">{title}</h2>{children && <p>{children}</p>}</div>
     {actions && <div className="student-nav">{actions}</div>}
+  </div>;
+}
+
+/** En-tête des pages de l’espace : bandeau indigo et encadré « Bon à savoir », comme l’accueil et les épreuves. */
+export function PageHero({ chip, title, children, actions, asideTitle = "Bon à savoir", aside }: { chip: string; title: string; children: ReactNode; actions?: ReactNode; asideTitle?: string; aside: ReactNode }) {
+  return <div className="home-top">
+    <section className="hero-card" aria-labelledby="page-hero">
+      <span className="hero-chip">{chip}</span>
+      <h2 id="page-hero">{title}</h2>
+      <p>{children}</p>
+      {actions && <div className="hero-actions">{actions}</div>}
+    </section>
+    <section className="status-card" aria-labelledby="page-aside">
+      <div className="status-head"><h2 id="page-aside" className="badge-warn"><Icon name="clock" size={14} />{asideTitle}</h2></div>
+      <div className="status-text notice-text">{aside}</div>
+      <Image className="status-mark" src="/branding/01_Logos_PNG/fluentia-symbole-transparent-256.png" alt="" width={56} height={56} unoptimized />
+    </section>
   </div>;
 }
 

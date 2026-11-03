@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Catalogue } from "../../../features/student/catalogue";
-import { Notice, PageHead } from "../../../features/student/ui";
+import { PageHero, SectionTitle } from "../../../features/student/ui";
 import { Icon } from "../../../components/app-shell/icons";
 export const metadata = { title: "Examens blancs" };
 const parts = [
@@ -11,15 +11,17 @@ const parts = [
 ];
 export default function MockExamsPage() {
   return <>
-    <PageHead eyebrow="Jour J" title="Simulations TCF">Mettez-vous en conditions réelles : durée imposée, progression séquentielle et corrigé complet à la fin de chaque épreuve.</PageHead>
-    <section className="student-card" aria-labelledby="deroulement">
-      <h2 id="deroulement">Déroulement d’une session complète</h2>
+    <PageHero chip="Jour J" title="Simulations TCF"
+      aside="Le délai est contrôlé par le serveur et continue même si vous fermez la page. Prévoyez un moment calme et une connexion stable avant de commencer.">
+      Mettez-vous en conditions réelles : durée imposée et corrigé complet à la fin de chaque épreuve.
+    </PageHero>
+    <SectionTitle title="Déroulement d’une session complète" note="Les 4 épreuves, dans l’ordre du test" />
+    <section className="student-card" aria-label="Déroulement d’une session complète" style={{ marginTop: 0 }}>
       <ul className="activity-list">{parts.map((part, index) => <li key={part.title}>
         <span className="activity-title"><strong>{index + 1}. {part.title}</strong><small>{part.detail}</small></span>
         <Link className="plain pill" href={part.href}>{part.live ? "Simulation chronométrée" : "Studio d’entraînement"}<Icon name="chevron" size={14} /></Link>
       </li>)}</ul>
     </section>
-    <Notice icon="clock">Le délai est contrôlé par le serveur et continue même si vous fermez la page. Prévoyez un moment calme et une connexion stable avant de commencer.</Notice>
     <Catalogue mode="simulation" title="Simulations disponibles" emptyText="Aucune simulation complète n’est publiée pour le moment. Elles apparaîtront ici après leur relecture pédagogique." />
   </>;
 }

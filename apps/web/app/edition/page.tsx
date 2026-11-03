@@ -1,7 +1,10 @@
 "use client";
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { api, fileRequest } from "../../lib/student-api";
+import Link from "next/link";
 import { Button } from "../../components/ui/primitives";
+import { Icon } from "../../components/app-shell/icons";
+import { PageHero } from "../../features/student/ui";
 
 type Item = {id: string; family: string; version: number; revision: number; skill: string; difficulty: string; state: string; statement: string; passage: string; media: string | null; choices: string[]; correct_index: number; explanation: string; origin: string; provenance: string; credit: string};
 type Event = {id: number; action: string; actor: number | null; created_at: string; before: unknown; after: unknown};
@@ -61,8 +64,11 @@ export default function EditorialPage() {
     event.preventDefault(); const fields = new FormData(event.currentTarget);
     action(async () => {const result = await (await fileRequest("bank/media/", "POST", fields)).json(); setMessage(`Média privé enregistré : ${result.id}. Reportez cet identifiant dans le brouillon. Durée : ${result.duration_ms} ms.`);});
   }
-  return <><div className="page-head"><div><p className="student-eyebrow">Espace éditorial réservé aux personnes habilitées</p><h2 className="page-title">Construire une banque fiable</h2>
-    <p>Les difficultés sont proposées, sans calibration. Aucun contenu n’est publié par un import ou par une génération. La relecture doit être réalisée par une personne distincte du responsable éditorial.</p></div></div>
+  return <><PageHero chip="Espace éditorial" title="Construire une banque fiable"
+      actions={<><a className="hero-button" href="#editeur">Créer une question<Icon name="arrow" size={16} /></a><Link className="hero-button hero-button-ghost" href="/edition/import">Importer une série</Link></>}
+      aside="Réservé aux personnes habilitées. Aucun contenu n’est publié par un import ou par une génération : la relecture doit être faite par une personne distincte du responsable éditorial.">
+      Rédigez des questions originales, faites-les relire, puis publiez-les en examens. Les difficultés sont proposées, sans calibration.
+    </PageHero>
     {error && <p role="alert">{error}</p>}<p role="status">{message}</p>
     {!ready && !error && <p className="student-hint">Chargement de la banque…</p>}
     {ready && <>
@@ -76,17 +82,17 @@ export default function EditorialPage() {
       </section>
       <section className="student-card" id="editeur"><h2>{item ? `Version ${item.version} · ${item.state}` : "Créer une question originale"}</h2>
         <form key={item ? item.id + item.revision : "new"} onSubmit={save} className="student-form"><fieldset disabled={busy || !!item && item.state !== "draft"}>
-          <label>Compétence<select name="skill" defaultValue={item?.skill ?? "reading"}><option value="reading">Compréhension écrite</option><option value="listening">Compréhension orale</option></select></label>
+          <div className="form-row"><label>Compétence<select name="skill" defaultValue={item?.skill ?? "reading"}><option value="reading">Compréhension écrite</option><option value="listening">Compréhension orale</option></select></label>
           <label>Difficulté proposée<select name="difficulty" defaultValue={item?.difficulty ?? "non_calibree"}>{["non_calibree","A1","A2","B1","B2","C1","C2"].map(v => <option value={v} key={v}>{v}</option>)}</select></label>
+          <label>Identifiant du média privé<input name="media" defaultValue={item?.media ?? ""} /></label></div>
           <label>Question<textarea name="statement" required maxLength={10000} defaultValue={item?.statement ?? ""} /></label>
           <label>Texte de lecture<textarea name="passage" maxLength={40000} defaultValue={item?.passage ?? ""} /></label>
-          <label>Identifiant du média privé<input name="media" defaultValue={item?.media ?? ""} /></label>
-          {[0,1,2,3].map(index => <label key={index}>Choix {index + 1}<input name={`c${index}`} required maxLength={500} defaultValue={item?.choices[index] ?? ""} /></label>)}
-          <label>Réponse correcte<select name="correct_index" defaultValue={item?.correct_index ?? 0}>{[0,1,2,3].map(i => <option key={i} value={i}>Choix {i + 1}</option>)}</select></label>
-          <label>Explication<textarea name="explanation" required maxLength={10000} defaultValue={item?.explanation ?? ""} /></label>
+          <div className="form-row">{[0,1,2,3].map(index => <label key={index}>Choix {index + 1}<input name={`c${index}`} required maxLength={500} defaultValue={item?.choices[index] ?? ""} /></label>)}</div>
+          <div className="form-row"><label>Réponse correcte<select name="correct_index" defaultValue={item?.correct_index ?? 0}>{[0,1,2,3].map(i => <option key={i} value={i}>Choix {i + 1}</option>)}</select></label>
           <label>Origine<select name="origin" defaultValue={item?.origin ?? "original"}><option value="original">Original</option><option value="licensed">Sous licence</option></select></label>
+          <label>Attribution réelle<input name="credit" maxLength={250} defaultValue={item?.credit ?? ""} /></label></div>
+          <label>Explication<textarea name="explanation" required maxLength={10000} defaultValue={item?.explanation ?? ""} /></label>
           <label>Provenance et autorisation<textarea name="provenance" required maxLength={10000} defaultValue={item?.provenance ?? ""} /></label>
-          <label>Attribution réelle<input name="credit" maxLength={250} defaultValue={item?.credit ?? ""} /></label>
           <Button type="submit" loading={busy}>Enregistrer le brouillon</Button>
         </fieldset></form>
         {item && <Button variant="secondary" disabled={busy} onClick={() => action(async () => {const copy = await api<Item>(`bank/${item.id}/versions/`, "POST"); setItem(copy); setHistory([]); setMessage("Nouvelle version en brouillon. La validation n’a pas été héritée.");})}>Créer une nouvelle version</Button>}
@@ -98,13 +104,13 @@ export default function EditorialPage() {
         <Button type="submit" loading={busy}>Enregistrer la décision</Button>
       </form><details><summary>Historique complet ({history.length})</summary>{history.map(h => <article key={h.id}><p>{h.action} · Compte {h.actor ?? "non attribué"} · {h.created_at}</p><pre className="editorial-history">{JSON.stringify({before:h.before, after:h.after}, null, 2)}</pre></article>)}</details></section>}
       <section className="student-card" id="medias"><h2>Ajouter un support audio autorisé</h2><p>WAV PCM, 20 Mo et 15 minutes maximum. La transcription doit comprendre le document et la question. Ne chargez pas d’audio propriétaire sans autorisation.</p><form className="student-form" onSubmit={upload}>
-        <label>Titre du média<input name="title" required maxLength={180} /></label><label>Document WAV<input name="file" type="file" accept="audio/wav,.wav" required /></label><label>Transcription<textarea name="transcript" required maxLength={40000} /></label><label>Provenance du média et droits<textarea name="provenance" required maxLength={10000} /></label><Button type="submit" loading={busy}>Importer le média privé</Button>
+        <div className="form-row"><label>Titre du média<input name="title" required maxLength={180} /></label><label>Document WAV<input name="file" type="file" accept="audio/wav,.wav" required /></label></div><label>Transcription<textarea name="transcript" required maxLength={40000} /></label><label>Provenance du média et droits<textarea name="provenance" required maxLength={10000} /></label><Button type="submit" loading={busy}>Importer le média privé</Button>
       </form></section>
       <section className="student-card" id="publication"><h2>Publier une version d’examen</h2><p>{selected.length} items sélectionnés, dans l’ordre des cases cochées. Une simulation requiert 39 questions et 3600 secondes en lecture ou 2100 secondes à l’oral. Tous les items doivent être approuvés et de même compétence.</p><form className="student-form" onSubmit={publish}>
         <Button variant="secondary" disabled={busy || !selected.length} onClick={() => setSelected(previous => [...previous].sort((a,b) => ["non_calibree","A1","A2","B1","B2","C1","C2"].indexOf(selectionDetails[a]?.difficulty) - ["non_calibree","A1","A2","B1","B2","C1","C2"].indexOf(selectionDetails[b]?.difficulty)))}>Ordonner par difficulté proposée</Button>
         <ol>{selected.map((id,index) => <li key={id}>{selectionDetails[id]?.statement} · {selectionDetails[id]?.difficulty}<Button variant="ghost" aria-label={`Monter la question ${index+1}`} disabled={busy || index === 0} onClick={() => setSelected(previous => {const next=[...previous]; [next[index-1],next[index]]=[next[index],next[index-1]]; return next;})}>↑</Button><Button variant="ghost" aria-label={`Descendre la question ${index+1}`} disabled={busy || index === selected.length-1} onClick={() => setSelected(previous => {const next=[...previous]; [next[index],next[index+1]]=[next[index+1],next[index]]; return next;})}>↓</Button></li>)}</ol>
-        <label>Identifiant stable de l’examen<input name="slug" required maxLength={120} pattern="[a-zA-Z0-9_-]+" /></label><label>Titre de l’examen<input name="title" required maxLength={180} /></label><label>Description<textarea name="description" maxLength={10000} /></label>
-        <label>Compétence de l’examen<select name="skill"><option value="reading">Compréhension écrite</option><option value="listening">Compréhension orale</option></select></label><label>Mode<select name="mode"><option value="training">Entraînement</option><option value="simulation">Simulation</option></select></label><label>Durée en secondes<input type="number" name="duration_seconds" min={1} max={14400} required defaultValue={600} /></label><Button type="submit" disabled={!selected.length} loading={busy}>Publier les items sélectionnés</Button>
+        <div className="form-row"><label>Identifiant stable de l’examen<input name="slug" required maxLength={120} pattern="[a-zA-Z0-9_-]+" /></label><label>Titre de l’examen<input name="title" required maxLength={180} /></label></div><label>Description<textarea name="description" maxLength={10000} /></label>
+        <div className="form-row"><label>Compétence de l’examen<select name="skill"><option value="reading">Compréhension écrite</option><option value="listening">Compréhension orale</option></select></label><label>Mode<select name="mode"><option value="training">Entraînement</option><option value="simulation">Simulation</option></select></label><label>Durée en secondes<input type="number" name="duration_seconds" min={1} max={14400} required defaultValue={600} /></label></div><Button type="submit" disabled={!selected.length} loading={busy}>Publier les items sélectionnés</Button>
       </form></section>
       <section className="student-card" id="transfert"><h2>Import et export structurés</h2><p>Format fluentia.bank.v1, 100 items et 2 Mo maximum par import. Les statuts et relecteurs ne peuvent pas être importés. Les médias doivent déjà exister dans cet environnement.</p>
         <label>Fichier JSON de brouillons<input type="file" accept="application/json,.json" disabled={busy} onChange={event => {const file = event.target.files?.[0]; if (!file) return; action(async () => {if (file.size > 2_000_000) throw new Error("Fichier limité à 2 Mo."); await api("bank/import/", "POST", JSON.parse(await file.text())); setMessage("Import en brouillon terminé ; une relecture humaine est requise.");});}} /></label>

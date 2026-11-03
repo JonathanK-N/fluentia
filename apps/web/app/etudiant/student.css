@@ -42,6 +42,7 @@
 .hero-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.4rem; }
 .hero-button { display: inline-flex; align-items: center; gap: 0.5rem; min-height: 44px; padding: 0.6rem 1.1rem; border-radius: 10px; background: #fff; color: var(--text); font-size: 0.82rem; font-weight: 700; text-decoration: none; border: 1px solid #fff; transition: box-shadow var(--duration); }
 .hero-button:hover { box-shadow: 0 0 0 4px rgb(255 255 255 / 20%); }
+button.hero-button { font: inherit; font-size: 0.82rem; font-weight: 700; cursor: pointer; }
 .hero-button-ghost { background: transparent; color: #fff; border-color: rgb(255 255 255 / 45%); }
 .hero-card :focus-visible { outline-color: #fff; }
 .status-card { position: relative; display: grid; align-content: start; gap: 0.5rem; padding: 1.4rem; border-radius: 20px; background: var(--surface); border: 1px solid var(--border); overflow: hidden; }
@@ -575,3 +576,4 @@ html[data-exam-focus] .shell-content.student-space { max-width: none; padding: 0
 .audio-seek { flex: 1; min-width: 8rem; accent-color: var(--indigo); }
 .audio-time { font-variant-numeric: tabular-nums; font-size: 0.85rem; font-weight: 600; color: var(--indigo); }
 .audio-player [role="alert"] { flex-basis: 100%; margin: 0; }
+@media (min-width: 1200px) { .plan-week { grid-template-columns: repeat(7, minmax(0, 1fr)); } }
