@@ -251,6 +251,11 @@ class ImportTests(TestCase):
         self.assertEqual(self.post(self.editor, f"bank/series/{response.data['id']}/restore/").status_code, 200)
         self.assertEqual(APIClient().get("/api/v1/tasks/writing/").data["title"], "Sujets d’automne")
 
+    def test_task_subjects_are_not_limited_like_logins(self):
+        cache.clear()
+        statuses = {APIClient().get("/api/v1/tasks/writing/").status_code for _ in range(30)}
+        self.assertEqual(statuses, {200})
+
     def test_speaking_needs_all_three_tasks(self):
         rows = [[1, "Se présenter", "Parlez de vous.", 0, 2, "Parcours ; loisirs"]]
         response = self.upload("speaking", workbook("speaking", rows))

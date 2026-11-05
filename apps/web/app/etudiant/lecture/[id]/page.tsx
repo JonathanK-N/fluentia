@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState, use, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import * as Dialog from "@radix-ui/react-dialog";
 import { useRouter } from "next/navigation";
 import { Button } from "../../../../components/ui/primitives";
 import { api, type Attempt, type Results, type SavedAnswer } from "../../../../lib/student-api";
@@ -25,6 +26,7 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const [confirm, setConfirm] = useState(false);
+  const [quitting, setQuitting] = useState(false);
   const [remaining, setRemaining] = useState(0);
   const [spoken, setSpoken] = useState("");
   const [verdicts, setVerdicts] = useState<Record<string, {correct: boolean; choice: string}>>({});
@@ -221,7 +223,20 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
           <Image src="/branding/01_Logos_PNG/fluentia-symbole-transparent-256.png" alt="" width={30} height={30} unoptimized />
           <strong>Fluentia</strong><span aria-hidden="true" className="seance-sep" /><span>Séance · {listening ? "Écoute" : "Lecture"}</span>
         </div>
-        <Link className="seance-quit" href={listening ? "/etudiant/comprehension-orale" : "/etudiant/comprehension-ecrite"} onClick={exitFullscreen}><Icon name="close" size={14} />Quitter la séance</Link>
+        <Dialog.Root open={quitting} onOpenChange={open => { if (!busy) setQuitting(open); }}>
+          <Dialog.Trigger className="seance-quit"><Icon name="close" size={14} />Quitter la séance</Dialog.Trigger>
+          <Dialog.Portal>
+            <Dialog.Overlay className="dialog-overlay" />
+            <Dialog.Content className="dialog-content quit-dialog">
+              <Dialog.Title>Quitter la séance ?</Dialog.Title>
+              <Dialog.Description>{answeredCount} réponse{answeredCount > 1 ? "s" : ""} enregistrée{answeredCount > 1 ? "s" : ""} sur {total}. En quittant, vos réponses sont envoyées et vous passez à la correction. Les questions sans réponse comptent pour zéro.</Dialog.Description>
+              <div className="quit-actions">
+                <Button loading={busy} onClick={async () => { await submit(); setQuitting(false); }}>Quitter et voir la correction</Button>
+                <Dialog.Close asChild><Button variant="secondary" disabled={busy}>Continuer la séance</Button></Dialog.Close>
+              </div>
+            </Dialog.Content>
+          </Dialog.Portal>
+        </Dialog.Root>
       </header>
       <div className="seance-body">
         <div className="seance-head">

@@ -1,5 +1,6 @@
 """Format des trois tâches de Rédaction et d’Oral ; les sujets viennent du jeu actif en base."""
 
+from .correction import recipient
 from .models import TaskSet
 
 # Repères de format TCF, communs à tous les jeux de sujets.
@@ -30,7 +31,7 @@ def tasks_payload(task_set):
         if skill == "writing":
             task.update(
                 genre=first.genre, min=first.min_words, max=first.max_words, minutes=first.minutes,
-                subjects=[{"title": s.title, "prompt": s.prompt, "documents": s.documents} for s in subjects],
+                subjects=[{"id": s.id, "title": s.title, "prompt": s.prompt, "documents": s.documents} for s in subjects],
             )
         else:
             task.update(
@@ -43,4 +44,7 @@ def tasks_payload(task_set):
 
 def active_tasks(skill):
     task_set = TaskSet.objects.filter(skill=skill, is_active=True).prefetch_related("subjects").first()
-    return tasks_payload(task_set) if task_set else {"title": "", "tasks": []}
+    payload = tasks_payload(task_set) if task_set else {"title": "", "tasks": []}
+    if skill == "writing":
+        payload["corrector"] = recipient()
+    return payload

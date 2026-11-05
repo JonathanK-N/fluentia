@@ -186,6 +186,7 @@ class SeriesQuestionSerializer(serializers.Serializer):
 
 
 class TaskSubjectSerializer(serializers.Serializer):
+    id = serializers.IntegerField(required=False)
     title = serializers.CharField()
     prompt = serializers.CharField()
     documents = serializers.ListField(child=serializers.DictField(), required=False)
@@ -210,6 +211,48 @@ class TaskSerializer(serializers.Serializer):
 class TaskSetSerializer(serializers.Serializer):
     title = serializers.CharField(allow_blank=True)
     tasks = TaskSerializer(many=True)
+    corrector = serializers.CharField(required=False, allow_blank=True)
+
+
+class CorrectionRequestSerializer(serializers.Serializer):
+    text = serializers.CharField(max_length=8000, trim_whitespace=True)
+
+
+class CorrectionCriterionSerializer(serializers.Serializer):
+    id = serializers.ChoiceField(choices=["consigne", "organisation", "lexique", "grammaire"])
+    label = serializers.CharField()
+    score = serializers.IntegerField(min_value=0, max_value=5)
+    comment = serializers.CharField()
+
+
+class CorrectionErrorSerializer(serializers.Serializer):
+    original = serializers.CharField()
+    correction = serializers.CharField(allow_blank=True)
+    explanation = serializers.CharField()
+
+
+class CorrectionSerializer(serializers.Serializer):
+    """Format commun à tous les fournisseurs ; une réponse hors format n’est jamais montrée à l’étudiant."""
+
+    demo = serializers.BooleanField()
+    level = serializers.ChoiceField(choices=["A1", "A2", "B1", "B2", "C1", "C2"])
+    score = serializers.IntegerField(min_value=0, max_value=20)
+    summary = serializers.CharField()
+    criteria = CorrectionCriterionSerializer(many=True)
+    errors = CorrectionErrorSerializer(many=True)
+    improved = serializers.CharField()
+    advice = serializers.ListField(child=serializers.CharField())
+    goal = serializers.CharField()
+    off_topic = serializers.BooleanField(default=False)
+    off_topic_reason = serializers.CharField(default="", allow_blank=True)
+    disclaimer = serializers.CharField()
+    remaining = serializers.IntegerField(required=False)
+
+
+class ModelAnswerSerializer(serializers.Serializer):
+    demo = serializers.BooleanField()
+    text = serializers.CharField()
+    words = serializers.IntegerField(required=False)
 
 
 class SeriesDetailSerializer(SeriesSerializer):

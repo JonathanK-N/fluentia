@@ -18,6 +18,10 @@ from .views import (
     BankImageView,
     QuestionImageView,
     TaskListView,
+    WritingCorrectionView,
+    ModelAnswerView,
+    WritingCorrectionDetailView,
+    CorrectionStreamView,
 )
 from .progress import ProgressView
 
@@ -35,6 +39,10 @@ urlpatterns = [
     path("bank/series/<uuid:series_id>/<str:action>/", SeriesActionView.as_view()),
     path("bank/images/<uuid:image_id>/", BankImageView.as_view()),
     path("tasks/<str:skill>/", TaskListView.as_view()),
+    path("tasks/writing/subjects/<int:subject_id>/correction/", WritingCorrectionView.as_view()),
+    path("tasks/writing/subjects/<int:subject_id>/model-answer/", ModelAnswerView.as_view()),
+    path("tasks/writing/corrections/<int:correction_id>/", WritingCorrectionDetailView.as_view()),
+    path("tasks/writing/corrections/<int:correction_id>/stream/", CorrectionStreamView.as_view()),
     path("bank/<uuid:item_id>/", BankDetailView.as_view()),
     path("bank/<uuid:item_id>/transition/", TransitionView.as_view()),
     path("bank/<uuid:item_id>/versions/", ForkView.as_view()),

@@ -5,7 +5,6 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "../../components/ui/primitives";
 import { Icon } from "../../components/app-shell/icons";
 import { formatDuration, type SpeakingTask } from "./content";
-import { Notice, PageHead } from "./ui";
 
 type Take = { url: string; seconds: number; at: string; type: string };
 type Phase = "idle" | "prep" | "recording";
@@ -87,9 +86,21 @@ export function SpeakingStudio({ task, others }: { task: SpeakingTask; others: {
   const left = phase === "prep" ? task.prepSeconds - clock : phase === "recording" ? task.seconds - clock : task.seconds;
 
   return <>
-    <PageHead eyebrow={`Oral · Tâche ${task.number}`} title={task.title}>{task.goal} Durée : {formatDuration(task.seconds)}{task.prepSeconds ? `, précédée de ${task.prepSeconds / 60} minutes de préparation` : ", sans préparation"}.</PageHead>
-    <div className="segmented" role="group" aria-label="Choisir un sujet">
-      {task.subjects.map((item, index) => <Button key={item.title} variant="ghost" aria-pressed={subject === index} disabled={phase !== "idle"} onClick={() => setSubject(index)}>{item.title}</Button>)}
+    <div className="home-top">
+      <section className="hero-card" aria-labelledby="tache-titre">
+        <span className="hero-chip-row"><span className="hero-chip">Tâche {task.number}</span><span>Oral · Expression orale</span></span>
+        <h1 id="tache-titre" className="epreuve-title"><Icon name="mic" size={30} />{task.title}</h1>
+        <p>{task.goal} Durée : {formatDuration(task.seconds)}{task.prepSeconds ? `, précédée de ${task.prepSeconds / 60} minutes de préparation` : ", sans préparation"}.</p>
+      </section>
+      <section className="status-card" aria-labelledby="bon-a-savoir">
+        <div className="status-head"><h2 id="bon-a-savoir" className="badge-warn"><Icon name="clock" size={14} />Bon à savoir</h2></div>
+        <p className="status-text notice-text">Vos enregistrements restent dans ce navigateur et disparaissent à la fermeture de la page. Rien n’est envoyé à Fluentia.</p>
+      </section>
+    </div>
+    <div className="section-title"><h2>Votre sujet</h2>
+      {task.subjects.length > 1 && <div className="series-filter" role="group" aria-label="Choisir un sujet">
+        {task.subjects.map((item, index) => <button key={item.title} type="button" aria-pressed={subject === index} disabled={phase !== "idle"} onClick={() => setSubject(index)}>{item.title}</button>)}
+      </div>}
     </div>
     <div className="studio">
       <div style={{ display: "grid", gap: "1rem" }}>
@@ -123,14 +134,13 @@ export function SpeakingStudio({ task, others }: { task: SpeakingTask; others: {
         </section>
       </div>
       <aside className="studio-aside" aria-label="Repères pour l’oral">
-        <Notice icon="mic">Vos enregistrements restent dans ce navigateur et disparaissent à la fermeture de la page. Rien n’est envoyé à Fluentia.</Notice>
-        <section className="student-card card-muted">
-          <h2 className="student-eyebrow">Conseils</h2>
+        <section className="student-card card-muted" aria-labelledby="conseils">
+          <div className="studio-card-head"><h2 id="conseils">Conseils</h2></div>
           <ul className="checklist">{task.advice.map(item => <li key={item}>{item}</li>)}</ul>
         </section>
-        <nav aria-label="Autres tâches d’oral" className="student-card">
-          <h2 className="student-eyebrow">Autres tâches</h2>
-          <ul className="checklist">{others.map(t => <li key={t.slug}><Link href={`/etudiant/expression-orale/${t.slug}`}>Tâche {t.number} — {t.title}</Link></li>)}</ul>
+        <nav className="student-card" aria-labelledby="autres-taches">
+          <div className="studio-card-head"><h2 id="autres-taches">Autres tâches</h2></div>
+          <ul className="activity-list">{others.map(t => <li key={t.slug}><Link href={`/etudiant/expression-orale/${t.slug}`}>Tâche {t.number} — {t.title}</Link><Icon name="chevron" size={16} /></li>)}</ul>
         </nav>
       </aside>
     </div>

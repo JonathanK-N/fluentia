@@ -8,10 +8,9 @@ import { Icon, type IconName } from "./icons";
 import { SessionProvider, initials, useSession } from "../../lib/session";
 import "./app-shell.css";
 
-type Item = { href: string; label: string; icon: IconName; exact?: boolean; external?: boolean; children?: { href: string; label: string; aria: string }[] };
+type Item = { href: string; label: string; icon: IconName; exact?: boolean; external?: boolean };
 type Group = { title: string; items: Item[] };
 
-const tasks = (base: string, label: string) => [1, 2, 3].map(n => ({ href: `${base}/tache-${n}`, label: `Tâche ${n}`, aria: `${label}, tâche ${n}` }));
 
 const studentGroups: Group[] = [
   { title: "Mon espace", items: [
@@ -23,8 +22,8 @@ const studentGroups: Group[] = [
   { title: "Les 4 épreuves", items: [
     { href: "/etudiant/comprehension-ecrite", label: "Lecture", icon: "book" },
     { href: "/etudiant/comprehension-orale", label: "Écoute", icon: "headphones" },
-    { href: "/etudiant/expression-ecrite", label: "Rédaction", icon: "pen", children: tasks("/etudiant/expression-ecrite", "Rédaction") },
-    { href: "/etudiant/expression-orale", label: "Oral", icon: "mic", children: tasks("/etudiant/expression-orale", "Oral") },
+    { href: "/etudiant/expression-ecrite", label: "Rédaction", icon: "pen" },
+    { href: "/etudiant/expression-orale", label: "Oral", icon: "mic" },
   ] },
   { title: "Jour J", items: [
     { href: "/etudiant/examens-blancs", label: "Simulations TCF", icon: "timer" },
@@ -117,8 +116,10 @@ function Shell({ variant, children }: { variant: "student" | "edition"; children
   // Séance ou bilan : retour vers la page de l’épreuve concernée.
   const session = variant === "student" ? /^\/etudiant\/(lecture|ecoute)\//.exec(pathname)?.[1] : undefined;
   const sessionHome = session === "ecoute" ? studentGroups[1]!.items[1]! : studentGroups[1]!.items[0]!;
-  // Présentation d’une série avant la séance : fil d’Ariane vers l’épreuve.
-  const intro = variant === "student" ? studentGroups[1]!.items.find(item => pathname.startsWith(item.href + "/") && /^\/etudiant\/comprehension-(ecrite|orale)\//.test(pathname)) : undefined;
+  // Page dans une épreuve (présentation d’une série, tâche) : fil d’Ariane vers l’épreuve.
+  const intro = variant === "student" ? studentGroups[1]!.items.find(item => pathname.startsWith(item.href + "/")) : undefined;
+  const task = /\/tache-(\d)$/.exec(pathname)?.[1];
+  const corrected = /\/correction\/\d+$/.test(pathname);
   useEffect(() => { setOpen(false); }, [pathname]);
   useEffect(() => {
     if (!open) return;
@@ -143,12 +144,9 @@ function Shell({ variant, children }: { variant: "student" | "edition"; children
             const active = isActive(pathname, item);
             return <li key={item.href}>
               {item.external ? <a href={item.href} className="shell-link"><Icon name={item.icon} size={18} /><span>{item.label}</span></a> :
-              <Link href={item.href} onClick={close} className="shell-link" aria-current={active && (pathname === item.href || !item.children) ? "page" : undefined} data-active={active || undefined}>
+              <Link href={item.href} onClick={close} className="shell-link" aria-current={active ? "page" : undefined} data-active={active || undefined}>
                 <Icon name={item.icon} size={18} /><span>{item.label}</span>
               </Link>}
-              {item.children && active && <ul className="shell-sublist">{item.children.map(child =>
-                <li key={child.href}><Link href={child.href} onClick={close} aria-label={child.aria} aria-current={pathname === child.href ? "page" : undefined} className="shell-sublink">{child.label}</Link></li>)}
-              </ul>}
             </li>;
           })}</ul>
         </div>)}
@@ -169,13 +167,13 @@ function Shell({ variant, children }: { variant: "student" | "edition"; children
           </ol></nav> : intro ? <nav aria-label="Fil d’Ariane" className="shell-breadcrumb"><ol>
             <li><Link className="crumb" href="/etudiant">Accueil</Link></li>
             <li><Link className="crumb" href={intro.href}>{intro.label}</Link></li>
-            <li aria-current="page">Présentation de la série</li>
+            <li aria-current="page">{task ? `Tâche ${task}` : corrected ? "Correction" : "Présentation de la série"}</li>
           </ol></nav> : <div>
             <p className="shell-eyebrow">{variant === "edition" ? "Espace éditorial" : "Espace étudiant"}</p>
             <h1>{title}</h1>
           </div>}
           {session || intro
-            ? <Link href={intro?.href ?? sessionHome.href} className="shell-site-link"><Icon name="back" size={14} />Toutes les séries</Link>
+            ? <Link href={intro?.href ?? sessionHome.href} className="shell-site-link"><Icon name="back" size={14} />{task || corrected ? "Toutes les tâches" : "Toutes les séries"}</Link>
             : <Link href="/" className="shell-site-link">Voir le site<Icon name="external" size={14} /></Link>}
         </header>
         {locked ? <EditorialLock signedIn={Boolean(profile)} /> : children}

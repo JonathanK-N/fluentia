@@ -74,9 +74,12 @@ test("inscription, courriel, session, lecture persistante et résultat privé su
   await expect(page.locator("label.student-choice[data-verdict=wrong]")).toHaveCount(0);
   await page.reload();
   await expect(page.getByRole("radio", {name: "Les pièces à remplacer", exact: true})).toBeChecked();
-  await page.getByRole("link", {name: "Quitter la séance"}).click();
-  await expect(page).toHaveURL(/\/etudiant\/comprehension-ecrite$/);
-  await page.getByRole("navigation", {name: "Navigation de l’espace étudiant"}).getByRole("link", {name: "Accueil", exact: true}).click();
+  // Quitter demande confirmation : « Continuer la séance » referme la fenêtre sans rien envoyer.
+  await page.getByRole("button", {name: "Quitter la séance"}).click();
+  await expect(page.getByRole("dialog", {name: "Quitter la séance ?"})).toBeVisible();
+  await page.getByRole("button", {name: "Continuer la séance"}).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await page.goto("/etudiant");
   await page.getByRole("link", {name: "Reprendre ma séance"}).click();
   await expect(page).toHaveURL(attemptUrl);
   await expect(page.getByRole("heading", {name: "Lisez, choisissez, avancez.", exact: true})).toBeVisible();

@@ -9,7 +9,7 @@ import { SpeakingStudio } from "./speaking-studio";
 import { WritingStudio } from "./writing-studio";
 
 type Kind = "writing" | "speaking";
-type TaskSetData<K extends Kind> = { title: string; tasks: (K extends "writing" ? WritingTask : SpeakingTask)[] };
+type TaskSetData<K extends Kind> = { title: string; tasks: (K extends "writing" ? WritingTask : SpeakingTask)[]; corrector?: string };
 
 export function useTasks<K extends Kind>(kind: K) {
   const [data, setData] = useState<TaskSetData<K> | null>(null);
@@ -53,6 +53,6 @@ export function TaskStudio({ kind, slug }: { kind: Kind; slug: string }) {
   if (!task) return <div className="empty-block"><h3>Cette tâche n’a pas encore de sujet</h3><p><Link href={base(kind)}>Revenir à l’épreuve</Link></p></div>;
   const others = data.tasks.filter(t => t.slug !== slug).map(t => ({ slug: t.slug, number: t.number, title: t.title }));
   return kind === "writing"
-    ? <WritingStudio key={task.slug} task={task as WritingTask} others={others} />
+    ? <WritingStudio key={task.slug} task={task as WritingTask} others={others} corrector={data.corrector ?? ""} />
     : <SpeakingStudio key={task.slug} task={task as SpeakingTask} others={others} />;
 }

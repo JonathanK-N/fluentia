@@ -1,14 +1,19 @@
 """API éditoriale privée et médias servis sous contrôle de la tentative."""
 
+import json
 import re
 
+from datetime import timedelta
+
+from django.conf import settings
 from django.db import transaction, IntegrityError
-from django.http import HttpResponse
+from django.http import HttpResponse, StreamingHttpResponse
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from drf_spectacular.utils import extend_schema, OpenApiTypes, OpenApiParameter
 from rest_framework import generics
 from rest_framework.authentication import SessionAuthentication
-from rest_framework.exceptions import NotFound, ValidationError
+from rest_framework.exceptions import NotFound, Throttled, ValidationError
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
 from rest_framework.response import Response
@@ -16,7 +21,8 @@ from rest_framework.throttling import UserRateThrottle
 from accounts.views import SecureView
 from exams.serializers import ExamListSerializer
 from exams.views import CataloguePagination
-from .models import BankItem, ImageAsset
+from .models import BankItem, ImageAsset, TaskSubject, WritingCorrection
+from .correction import NCLC_GOAL, WORD, AnswerIncomplete, CorrectionUnavailable, correct, nclc, provider, stored_answer
 from . import series as workflow
 from .importer import SKILLS, ImportRejected, build_template, import_series
 from .tasks import active_tasks
@@ -36,6 +42,9 @@ from .serializers import (
     SeriesDetailSerializer,
     SeriesActionSerializer,
     TaskSetSerializer,
+    CorrectionRequestSerializer,
+    CorrectionSerializer,
+    ModelAnswerSerializer,
 )
 from .services import (
     create_item,
@@ -354,9 +363,138 @@ class QuestionImageView(SecureView):
 class TaskListView(SecureView):
     permission_classes = [AllowAny]
     authentication_classes = []
+    # Lecture publique comme le catalogue : la limite des connexions bloquerait la page au bout de 20 visites.
+    throttle_classes = []
 
     @extend_schema(responses=TaskSetSerializer)
     def get(self, request, skill):
         if skill not in ("writing", "speaking"):
             raise ValidationError({"skill": "writing ou speaking."})
         return Response(active_tasks(skill))
+
+
+def writing_subject(subject_id):
+    return get_object_or_404(TaskSubject, pk=subject_id, task_set__skill="writing", task_set__is_active=True)
+
+
+class WritingCorrectionView(SecureView):
+    permission_classes = [IsAuthenticated]
+    # La limite est comptée en base, par jour : elle survit aux redémarrages et protège le coût de l’IA.
+    throttle_classes = []
+    MIN_WORDS = 20
+
+    @extend_schema(request=CorrectionRequestSerializer, responses=CorrectionSerializer)
+    def post(self, request, subject_id):
+        subject = writing_subject(subject_id)
+        text = CorrectionRequestSerializer(data=request.data)
+        text.is_valid(raise_exception=True)
+        text = text.validated_data["text"]
+        if len(WORD.findall(text)) < self.MIN_WORDS:
+            raise ValidationError({"text": [f"Écrivez au moins {self.MIN_WORDS} mots avant de demander une correction."]})
+        if corrections_left(request.user) <= 0:
+            limit = settings.WRITING_CORRECTION_DAILY_LIMIT
+            raise Throttled(detail=f"Vous avez utilisé vos {limit} corrections des dernières 24 heures. Réessayez demain.")
+        try:
+            provider("correct")
+        except CorrectionUnavailable as error:
+            return Response({"detail": str(error)}, status=503)
+        # La correction elle-même arrive sur sa page, au fil de l’eau (CorrectionStreamView).
+        saved = WritingCorrection.objects.create(
+            user=request.user, subject=subject, text=text, status=WritingCorrection.Status.PENDING, provider=settings.WRITING_CORRECTOR
+        )
+        return Response({"id": saved.pk, "remaining": corrections_left(request.user)}, status=201)
+
+
+def stream_events(saved):
+    """Lignes JSON : corrections partielles, puis la correction finale ou une erreur. Rien n’est compté en cas d’échec."""
+    finished, last = False, {}
+    try:
+        try:
+            for last in correct(saved.subject, saved.text):
+                yield json.dumps({"partial": last}, ensure_ascii=False) + "\n"
+        except CorrectionUnavailable as error:
+            yield json.dumps({"error": str(error), "status": 503}, ensure_ascii=False) + "\n"
+            return
+        result = CorrectionSerializer(data=last)
+        if not result.is_valid():
+            yield json.dumps({"error": "La correction reçue est incomplète. Réessayez dans un instant.", "status": 502}, ensure_ascii=False) + "\n"
+            return
+        saved.result, saved.status = result.validated_data, WritingCorrection.Status.DONE
+        saved.save(update_fields=["result", "status"])
+        finished = True
+        yield json.dumps({"done": True, "result": result.validated_data, "remaining": corrections_left(saved.user)}, ensure_ascii=False) + "\n"
+    finally:
+        if not finished:  # échec ou page fermée en cours de route
+            saved.delete()
+
+
+class CorrectionStreamView(SecureView):
+    permission_classes = [IsAuthenticated]
+    throttle_classes = []
+
+    @extend_schema(request=None, responses={(200, "application/x-ndjson"): OpenApiTypes.STR})
+    def post(self, request, correction_id):
+        started = WritingCorrection.objects.filter(
+            pk=correction_id, user=request.user, status=WritingCorrection.Status.PENDING, subject__isnull=False
+        ).update(status=WritingCorrection.Status.RUNNING)
+        if not started:
+            get_object_or_404(WritingCorrection, pk=correction_id, user=request.user)
+            return Response({"detail": "Cette correction est déjà en cours ou terminée."}, status=409)
+        saved = WritingCorrection.objects.select_related("subject", "user").get(pk=correction_id)
+        response = StreamingHttpResponse(stream_events(saved), content_type="application/x-ndjson; charset=utf-8")
+        response["X-Accel-Buffering"] = "no"  # pas de mise en tampon par un proxy
+        return response
+
+
+def corrections_left(user):
+    since = timezone.now() - timedelta(days=1)
+    used = WritingCorrection.objects.filter(user=user, created_at__gte=since).count()
+    return max(0, settings.WRITING_CORRECTION_DAILY_LIMIT - used)
+
+
+def subject_link(subject):
+    return {"id": subject.pk, "title": subject.title, "task_number": subject.task_number, "task_slug": f"tache-{subject.task_number}"}
+
+
+class WritingCorrectionDetailView(SecureView):
+    """Page de correction : relisible par son auteur seulement, avec le sujet suivant à proposer."""
+
+    permission_classes = [IsAuthenticated]
+    throttle_classes = []
+
+    @extend_schema(responses=OpenApiTypes.OBJECT)
+    def get(self, request, correction_id):
+        saved = get_object_or_404(WritingCorrection.objects.select_related("subject"), pk=correction_id, user=request.user)
+        subject, following = saved.subject, None
+        if subject is not None:
+            siblings = list(TaskSubject.objects.filter(task_set_id=subject.task_set_id).order_by("task_number", "position"))
+            index = next(i for i, item in enumerate(siblings) if item.pk == subject.pk)
+            following = siblings[index + 1] if index + 1 < len(siblings) else None
+        return Response({
+            "id": saved.pk,
+            "status": saved.status,
+            "created_at": saved.created_at,
+            "text": saved.text,
+            "result": saved.result,
+            "nclc": nclc(saved.result["score"]) if saved.result else None,
+            "nclc_goal": NCLC_GOAL,
+            "remaining": corrections_left(request.user),
+            "subject": subject_link(subject) | {"prompt": subject.prompt} if subject else None,
+            "next": subject_link(following) if following else None,
+        })
+
+
+class ModelAnswerView(SecureView):
+    permission_classes = [IsAuthenticated]
+    # Rédigée une fois par sujet puis relue en base : pas de coût par étudiant, donc pas de limite.
+    throttle_classes = []
+
+    @extend_schema(responses=ModelAnswerSerializer)
+    def get(self, request, subject_id):
+        try:
+            saved = stored_answer(writing_subject(subject_id))
+        except CorrectionUnavailable as error:
+            return Response({"detail": str(error)}, status=503)
+        except AnswerIncomplete:
+            return Response({"detail": "La proposition reçue est incomplète. Réessayez dans un instant."}, status=502)
+        return Response({"demo": saved.provider == "demo", "text": saved.text, "words": len(WORD.findall(saved.text))})

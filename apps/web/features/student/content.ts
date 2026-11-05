@@ -10,7 +10,7 @@ export const skills: { id: "reading" | "listening" | "writing" | "speaking"; num
   { id: "speaking", number: "04", name: "Oral", href: "/etudiant/expression-orale", title: "Expression orale", icon: "mic", tone: "mint", summary: "Parlez comme le jour J, réécoutez votre enregistrement et améliorez chaque prise.", facts: ["3 tâches", "12 min"] },
 ];
 
-export type WritingTask = { slug: string; number: number; title: string; genre: string; min: number; max: number; minutes: number; advice: string[]; subjects: { title: string; prompt: string; documents?: { label: string; text: string }[] }[] };
+export type WritingTask = { slug: string; number: number; title: string; genre: string; min: number; max: number; minutes: number; advice: string[]; subjects: { id?: number; title: string; prompt: string; documents?: { label: string; text: string }[] }[] };
 
 export type SpeakingTask = { slug: string; number: number; title: string; seconds: number; prepSeconds: number; goal: string; advice: string[]; subjects: { title: string; prompt: string; cues: string[] }[] };
 

@@ -360,3 +360,36 @@ class TaskSubject(models.Model):
                 condition=Q(task_number__gte=1, task_number__lte=3), name="task_number_one_to_three"
             ),
         ]
+
+
+class WritingCorrection(models.Model):
+    """Correction automatique d’un texte de Rédaction ; sert aussi à compter la limite quotidienne."""
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="writing_corrections")
+    subject = models.ForeignKey(TaskSubject, null=True, on_delete=models.SET_NULL, related_name="corrections")
+    class Status(models.TextChoices):
+        PENDING = "pending", "En attente"
+        RUNNING = "running", "En cours"
+        DONE = "done", "Terminée"
+
+    text = models.TextField()
+    result = models.JSONField(null=True, blank=True)
+    status = models.CharField(max_length=16, choices=Status.choices, default=Status.DONE)
+    provider = models.CharField(max_length=32)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [models.Index(fields=["user", "created_at"])]
+
+
+class ModelAnswer(models.Model):
+    """Proposition de réponse à un sujet, rédigée une seule fois par fournisseur et partagée par tous."""
+
+    subject = models.ForeignKey(TaskSubject, on_delete=models.CASCADE, related_name="model_answers")
+    provider = models.CharField(max_length=32)
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["subject", "provider"], name="one_model_answer_per_provider")]

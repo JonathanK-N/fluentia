@@ -5,13 +5,6 @@ import type { ReactNode } from "react";
 import { Icon, type IconName } from "../../components/app-shell/icons";
 import { skills } from "./content";
 
-export function PageHead({ eyebrow, title, children, actions }: { eyebrow?: string; title: string; children?: ReactNode; actions?: ReactNode }) {
-  return <div className="page-head">
-    <div>{eyebrow && <p className="student-eyebrow">{eyebrow}</p>}<h2 className="page-title">{title}</h2>{children && <p>{children}</p>}</div>
-    {actions && <div className="student-nav">{actions}</div>}
-  </div>;
-}
-
 /** En-tête des pages de l’espace : bandeau indigo et encadré « Bon à savoir », comme l’accueil et les épreuves. */
 export function PageHero({ chip, title, children, actions, asideTitle = "Bon à savoir", aside }: { chip: string; title: string; children: ReactNode; actions?: ReactNode; asideTitle?: string; aside: ReactNode }) {
   return <div className="home-top">
@@ -26,15 +19,6 @@ export function PageHero({ chip, title, children, actions, asideTitle = "Bon à 
       <div className="status-text notice-text">{aside}</div>
       <Image className="status-mark" src="/branding/01_Logos_PNG/fluentia-symbole-transparent-256.png" alt="" width={56} height={56} unoptimized />
     </section>
-  </div>;
-}
-
-/** Indicateur isolé (carte). */
-export function Stat({ label, value, hint, icon }: { label: string; value: ReactNode; hint?: string; icon: IconName }) {
-  return <div className="stat">
-    <span className="stat-head">{label}<Icon name={icon} size={18} /></span>
-    <strong>{value}</strong>
-    {hint && <small>{hint}</small>}
   </div>;
 }
 

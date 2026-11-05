@@ -24,6 +24,12 @@ INSTALLED_APPS += ["accounts"]
 INSTALLED_APPS += ["pedagogy"]
 PRIVATE_MEDIA_ROOT = Path(os.getenv("PRIVATE_MEDIA_ROOT", str(BASE_DIR / ".private-media")))
 ACCOUNT_ANON_RATE = os.getenv("ACCOUNT_ANON_RATE", "20/hour")
+# Correction des textes de Rédaction : « demo » ne sort jamais du serveur ; le vrai fournisseur se branche dans pedagogy/correction.py.
+WRITING_CORRECTOR = os.getenv("WRITING_CORRECTOR", "demo")
+WRITING_CORRECTION_DAILY_LIMIT = int(os.getenv("WRITING_CORRECTION_DAILY_LIMIT", "10"))
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "")
+OPENAI_REASONING_EFFORT = os.getenv("OPENAI_REASONING_EFFORT", "low")
 AUTHENTICATION_BACKENDS = ["accounts.backends.EmailBackend"]
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},

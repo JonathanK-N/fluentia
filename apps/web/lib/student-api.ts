@@ -35,6 +35,34 @@ export type Attempt = {id: string; exam_id: string; status: string; skill: strin
 export type AttemptSummary = Pick<Attempt, "id" | "status" | "expires_at" | "skill" | "mode" | "exam_title">;
 export type Results = { correct_count: number; question_count: number; percentage: number; score: number; max_score: number; disclaimer: string; details: {question_id: string; selected_choice_id: string | null; correct_choice_id: string; explanation: string; points: number; statement: string; reading_passage: string; image_available: boolean; image_text: string; choices: {id: string; position: number; label: string}[]; selected_label: string | null; correct_label: string; transcript?: string}[] };
 
+export type WritingCorrection = { demo: boolean; level: string; score: number; summary: string; criteria: { id: string; label: string; score: number; comment: string }[]; errors: { original: string; correction: string; explanation: string }[]; improved: string; advice: string[]; goal?: string; off_topic?: boolean; off_topic_reason?: string; disclaimer: string; remaining?: number; id?: number };
+export type ModelAnswer = { demo: boolean; text: string; words: number };
+type SubjectLink = { id: number; title: string; task_number: number; task_slug: string };
+export type CorrectionPage = { id: number; status: "pending" | "running" | "done"; created_at: string; text: string; result: WritingCorrection | null; nclc: string | null; nclc_goal: number; remaining: number; subject: (SubjectLink & { prompt: string }) | null; next: SubjectLink | null };
+
+/** POST dont la réponse arrive ligne par ligne (JSON par ligne) ; onLine est appelé à chaque ligne reçue. */
+export async function streamLines(path: string, onLine: (line: Record<string, unknown>) => void): Promise<void> {
+  const csrfResponse = await http("/api/v1/auth/csrf/", { credentials: "same-origin", cache: "no-store" });
+  if (!csrfResponse.ok) throw new ApiError(csrfResponse.status, "La session ne peut pas être sécurisée. Réessayez.");
+  const token = (await csrfResponse.json()).csrf_token;
+  const response = await http(`/api/v1/${path}`, { method: "POST", credentials: "same-origin", cache: "no-store", headers: { "X-CSRFToken": token } });
+  if (!response.ok || !response.body) {
+    const data = await response.json().catch(() => ({}));
+    throw new ApiError(response.status, typeof data.detail === "string" ? data.detail : "Cette action a échoué.");
+  }
+  const reader = response.body.getReader(), decoder = new TextDecoder();
+  let pending = "";
+  for (;;) {
+    const { done, value } = await reader.read();
+    pending += decoder.decode(value, { stream: !done });
+    const lines = pending.split("\n");
+    pending = lines.pop() ?? "";
+    for (const line of lines) if (line.trim()) onLine(JSON.parse(line));
+    if (done) break;
+  }
+  if (pending.trim()) onLine(JSON.parse(pending));
+}
+
 export async function fileRequest(path: string, method: string, body?: FormData): Promise<Response> {
   const csrfResponse = await http("/api/v1/auth/csrf/", {credentials: "same-origin", cache: "no-store"});
   if (!csrfResponse.ok) throw new ApiError(csrfResponse.status, "Impossible de sécuriser la session.");
