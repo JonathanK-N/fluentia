@@ -1,0 +1,26 @@
+{
+  "source": "d8abfa0 + formatage seul",
+  "checks": [
+    {
+      "width": 375,
+      "title": "Fluentia — Préparation au TCF",
+      "h1": "Maîtrisez\nle français,\nallez plus loin.",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "title": "Fluentia — Préparation au TCF",
+      "h1": "Maîtrisez\nle français,\nallez plus loin.",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "title": "Fluentia — Préparation au TCF",
+      "h1": "Maîtrisez\nle français,\nallez plus loin.",
+      "overflow": false
+    }
+  ],
+  "errors": [],
+  "violations": [],
+  "browser": "155.0.8059.84"
+}

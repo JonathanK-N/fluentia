@@ -1,0 +1,80 @@
+{
+  "owner": "Jonathan Kakesa",
+  "codeSha": "32ed8a5b8cdc40acf985596232a5c0b66c733e66",
+  "devSha": "62f6ff43dcd0e03e006849e317b20a4c4795adfc",
+  "artifacts": [
+    {
+      "suite": "frontend",
+      "artifactId": 12569369701,
+      "run": 40119167167,
+      "sha256": "718038711197642fd662f4b86269dfeebbf42f5e3070b66d857e3d133b3e5697",
+      "stats": {
+        "startTime": "2026-10-24T18:07:56.618Z",
+        "duration": 63229.164,
+        "expected": 22,
+        "skipped": 2,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "zoom": {
+        "zoom": 2,
+        "initialWidth": 1440,
+        "zoomedWidth": 720
+      }
+    },
+    {
+      "suite": "ux",
+      "artifactId": 12570700015,
+      "run": 40119162321,
+      "sha256": "30b900d2dfedf669b05f7612437b80e4963f09ca71d5d5c6f7ea52fe2e12a6eb",
+      "stats": {
+        "startTime": "2026-10-24T18:07:08.376Z",
+        "duration": 199521.905,
+        "expected": 58,
+        "skipped": 2,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "zoom": {
+        "zoom": 2,
+        "initialWidth": 1440,
+        "zoomedWidth": 720,
+        "screensChecked": 62
+      },
+      "geometryGroups": 9,
+      "geometryMeasurements": 558
+    }
+  ],
+  "images": [
+    {
+      "path": "docs/images/consolidation-pr2/frontend-accueil-chromium-375.png",
+      "sha256": "d4ecede267ca7fd96507e29c6a15006afe1e042f44d54a2afe1c248a64336583",
+      "source": "frontend-accueil-et-catalogue-à-375px-chromium/accueil-375.png"
+    },
+    {
+      "path": "docs/images/consolidation-pr2/frontend-catalogue-firefox-768.png",
+      "sha256": "12974d2135448e1319e4df87f86101c4ba749e9d9f5729911655f10bff4eb98d",
+      "source": "frontend-accueil-et-catalogue-à-768px-firefox/catalogue-768.png"
+    },
+    {
+      "path": "docs/images/consolidation-pr2/frontend-accueil-webkit-1440.png",
+      "sha256": "3cae42acde2fae0fa2f2873ed6452a55bf577071186d8612a92457c6d4e667dc",
+      "source": "frontend-accueil-et-catalogue-à-1440px-webkit/accueil-1440.png"
+    },
+    {
+      "path": "docs/images/consolidation-pr2/ux-P01-chromium-1440.png",
+      "sha256": "522e46a56efdfb0aac4e956f5542841793a2da40d371d945b60da4daa1826bcc",
+      "source": "prototype-62-écrans-à-1440px-chromium/P01-1440.png"
+    },
+    {
+      "path": "docs/images/consolidation-pr2/ux-S01-webkit-768.png",
+      "sha256": "165cafa9272612bbb289b231d4c97daa7a8ccfc2ebd425cd9ac44567d9ddfa05",
+      "source": "prototype-62-écrans-à-768px-webkit/S01-768.png"
+    },
+    {
+      "path": "docs/images/consolidation-pr2/ux-S13-webkit-375.png",
+      "sha256": "160329bf4806e937aab8574030d15edfb30a665f06c9b943eea133375fab6926",
+      "source": "prototype-62-écrans-à-375px-webkit/S13-375.png"
+    }
+  ]
+}

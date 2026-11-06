@@ -1,0 +1,805 @@
+{
+  "owner": "Jonathan Kakesa",
+  "codeSha": "f3da6299d176c47d6c52f82d7d2499497f9544b4",
+  "run": 40137579875,
+  "artifact": {
+    "id": 12578091939,
+    "archiveSha256": "198e6052aba2a627c31715e5c5fe3c9f174b60ec6c784b55fc7fc5c3a3834b5d"
+  },
+  "stats": {
+    "startTime": "2026-10-24T22:14:32.843Z",
+    "duration": 127023.98499999999,
+    "expected": 61,
+    "skipped": 2,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "cases": [
+    {
+      "file": "frontend.spec.ts",
+      "title": "accueil et catalogue à 320px",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "frontend.spec.ts",
+      "title": "accueil et catalogue à 375px",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "frontend.spec.ts",
+      "title": "accueil et catalogue à 390px",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "frontend.spec.ts",
+      "title": "accueil et catalogue à 768px",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "frontend.spec.ts",
+      "title": "accueil et catalogue à 1024px",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "frontend.spec.ts",
+      "title": "accueil et catalogue à 1440px",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "frontend.spec.ts",
+      "title": "accueil et catalogue à 1920px",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "frontend.spec.ts",
+      "title": "thème, menu mobile, mouvement réduit et manifest",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "frontend.spec.ts",
+      "title": "accueil et catalogue à 320px",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "frontend.spec.ts",
+      "title": "accueil et catalogue à 375px",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "frontend.spec.ts",
+      "title": "accueil et catalogue à 390px",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "frontend.spec.ts",
+      "title": "accueil et catalogue à 768px",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "frontend.spec.ts",
+      "title": "accueil et catalogue à 1024px",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "frontend.spec.ts",
+      "title": "accueil et catalogue à 1440px",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "frontend.spec.ts",
+      "title": "accueil et catalogue à 1920px",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "frontend.spec.ts",
+      "title": "thème, menu mobile, mouvement réduit et manifest",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "frontend.spec.ts",
+      "title": "accueil et catalogue à 320px",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "frontend.spec.ts",
+      "title": "accueil et catalogue à 375px",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "frontend.spec.ts",
+      "title": "accueil et catalogue à 390px",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "frontend.spec.ts",
+      "title": "accueil et catalogue à 768px",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "frontend.spec.ts",
+      "title": "accueil et catalogue à 1024px",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "frontend.spec.ts",
+      "title": "accueil et catalogue à 1440px",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "frontend.spec.ts",
+      "title": "accueil et catalogue à 1920px",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "frontend.spec.ts",
+      "title": "thème, menu mobile, mouvement réduit et manifest",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "landing.spec.ts",
+      "title": "Voice : états, pause, erreur, fin, focus et absence de capture",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "landing.spec.ts",
+      "title": "navigation mobile, Échap et destinations réelles",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "landing.spec.ts",
+      "title": "FAQ au clavier, conseil et prix non définitifs",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "landing.spec.ts",
+      "title": "mouvement réduit et pause manuelle conservent les contenus",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "landing.spec.ts",
+      "title": "lecture et FAQ disponibles sans JavaScript",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "landing.spec.ts",
+      "title": "géométrie des cartes aux tailles intermédiaires",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "landing.spec.ts",
+      "title": "Voice : états, pause, erreur, fin, focus et absence de capture",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "landing.spec.ts",
+      "title": "navigation mobile, Échap et destinations réelles",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "landing.spec.ts",
+      "title": "FAQ au clavier, conseil et prix non définitifs",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "landing.spec.ts",
+      "title": "mouvement réduit et pause manuelle conservent les contenus",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "landing.spec.ts",
+      "title": "lecture et FAQ disponibles sans JavaScript",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "landing.spec.ts",
+      "title": "géométrie des cartes aux tailles intermédiaires",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "landing.spec.ts",
+      "title": "Voice : états, pause, erreur, fin, focus et absence de capture",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "landing.spec.ts",
+      "title": "navigation mobile, Échap et destinations réelles",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "landing.spec.ts",
+      "title": "FAQ au clavier, conseil et prix non définitifs",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "landing.spec.ts",
+      "title": "mouvement réduit et pause manuelle conservent les contenus",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "landing.spec.ts",
+      "title": "lecture et FAQ disponibles sans JavaScript",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "landing.spec.ts",
+      "title": "géométrie des cartes aux tailles intermédiaires",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "student-dashboard.spec.ts",
+      "title": "dashboard aux sept largeurs sans données réelles",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "student-dashboard.spec.ts",
+      "title": "dashboard : exemple rempli, erreur et dialogue sans fonction fictivement opérationnelle",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "student-dashboard.spec.ts",
+      "title": "dashboard : navigation mobile et lien d’évitement",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "student-dashboard.spec.ts",
+      "title": "dashboard aux sept largeurs sans données réelles",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "student-dashboard.spec.ts",
+      "title": "dashboard : exemple rempli, erreur et dialogue sans fonction fictivement opérationnelle",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "student-dashboard.spec.ts",
+      "title": "dashboard : navigation mobile et lien d’évitement",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "student-dashboard.spec.ts",
+      "title": "dashboard aux sept largeurs sans données réelles",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "student-dashboard.spec.ts",
+      "title": "dashboard : exemple rempli, erreur et dialogue sans fonction fictivement opérationnelle",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "student-dashboard.spec.ts",
+      "title": "dashboard : navigation mobile et lien d’évitement",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "validation.spec.ts",
+      "title": "contrastes et focus — light",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "validation.spec.ts",
+      "title": "contrastes et focus — dark",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "validation.spec.ts",
+      "title": "assets officiels et comportement PWA sans mode hors ligne",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "validation.spec.ts",
+      "title": "contrastes et focus — light",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "validation.spec.ts",
+      "title": "contrastes et focus — dark",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "validation.spec.ts",
+      "title": "assets officiels et comportement PWA sans mode hors ligne",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "validation.spec.ts",
+      "title": "contrastes et focus — light",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "validation.spec.ts",
+      "title": "contrastes et focus — dark",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "validation.spec.ts",
+      "title": "assets officiels et comportement PWA sans mode hors ligne",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "zoom.spec.ts",
+      "title": "zoom navigateur réel à 200 %",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        "passed"
+      ]
+    },
+    {
+      "file": "zoom.spec.ts",
+      "title": "zoom navigateur réel à 200 %",
+      "project": "firefox",
+      "status": "skipped",
+      "results": [
+        "skipped"
+      ]
+    },
+    {
+      "file": "zoom.spec.ts",
+      "title": "zoom navigateur réel à 200 %",
+      "project": "webkit",
+      "status": "skipped",
+      "results": [
+        "skipped"
+      ]
+    }
+  ],
+  "images": [
+    {
+      "path": "docs/images/human-centered/accueil-chromium-375.png",
+      "source": "frontend-accueil-et-catalogue-à-375px-chromium/accueil-375.png",
+      "size": [
+        375,
+        10628
+      ],
+      "sha256": "bc84b3d45a90f3127e568fb45622ec7c0cef4e554e01ee8747c7c6943e19a02c"
+    },
+    {
+      "path": "docs/images/human-centered/etudiant-chromium-375.png",
+      "source": "student-dashboard-dashboar-40447-rgeurs-sans-données-réelles-chromium/etudiant-375.png",
+      "size": [
+        375,
+        2020
+      ],
+      "sha256": "1b7150555da461f8b23ff48f70a57e3dfaeef0cf240040ea973e4e4b8ed5434a"
+    },
+    {
+      "path": "docs/images/human-centered/accueil-firefox-768.png",
+      "source": "frontend-accueil-et-catalogue-à-768px-firefox/accueil-768.png",
+      "size": [
+        768,
+        7359
+      ],
+      "sha256": "90f30f80d60c711bfdd0da9d66911a575ef4bb9810722d6f241036591e257535"
+    },
+    {
+      "path": "docs/images/human-centered/etudiant-firefox-768.png",
+      "source": "student-dashboard-dashboar-40447-rgeurs-sans-données-réelles-firefox/etudiant-768.png",
+      "size": [
+        768,
+        1490
+      ],
+      "sha256": "84fdaaed676521be4b7c5f4009e3670fd66fb57e364cc9c20d4962ee894cbfc2"
+    },
+    {
+      "path": "docs/images/human-centered/accueil-webkit-1440.png",
+      "source": "frontend-accueil-et-catalogue-à-1440px-webkit/accueil-1440.png",
+      "size": [
+        1440,
+        5389
+      ],
+      "sha256": "debc077ca1c7ad40805c8425e28a0c8e46815ba5f2a4d6ab34fc7f63744ce137"
+    },
+    {
+      "path": "docs/images/human-centered/etudiant-webkit-1440.png",
+      "source": "student-dashboard-dashboar-40447-rgeurs-sans-données-réelles-webkit/etudiant-1440.png",
+      "size": [
+        1440,
+        1267
+      ],
+      "sha256": "b4f744bd023e0bb8902a063973f21bc4bcd687b47c70e33b94269ff4f4ead2e7"
+    },
+    {
+      "path": "docs/images/human-centered/etudiant-exemple-chromium.png",
+      "source": "student-dashboard-dashboar-bcd04--fictivement-opérationnelle-chromium/etudiant-exemple.png",
+      "size": [
+        1280,
+        1492
+      ],
+      "sha256": "46f537b502b0de3dfc73515eb3bcdc4e48f814978851ede5e6c8c1fcd3ac6334"
+    },
+    {
+      "path": "docs/images/human-centered/etudiant-indisponible-chromium.png",
+      "source": "student-dashboard-dashboar-bcd04--fictivement-opérationnelle-chromium/etudiant-indisponible.png",
+      "size": [
+        1280,
+        842
+      ],
+      "sha256": "1ef0072d7f4b6411199b2baf7b4422508e34109449c96c6a2bfb0de85f53957c"
+    },
+    {
+      "path": "docs/images/human-centered/etudiant-exemple-mobile-chromium.png",
+      "source": "student-dashboard-dashboar-bcd04--fictivement-opérationnelle-chromium/etudiant-exemple-mobile.png",
+      "size": [
+        375,
+        2305
+      ],
+      "sha256": "6d118fba5e955ed87335636f362978ba91afc5cdee0db706926821c4673404e1"
+    }
+  ],
+  "crops": [
+    {
+      "path": "docs/images/human-centered/accueil-desktop-extrait.png",
+      "source": "docs/images/human-centered/accueil-webkit-1440.png",
+      "box": [
+        0,
+        0,
+        1440,
+        1000
+      ],
+      "sha256": "70598f8032973f34f5810dcc1e63ab7c930d2c1551e6f1adbeac13f10a07ec7f"
+    },
+    {
+      "path": "docs/images/human-centered/etudiant-desktop-extrait.png",
+      "source": "docs/images/human-centered/etudiant-webkit-1440.png",
+      "box": [
+        0,
+        0,
+        1440,
+        1267
+      ],
+      "sha256": "882ad8fa58316d1aefc92f665c229be4e8441b6252a03bbb963ed25fec5cdb8f"
+    }
+  ],
+  "zoom": {
+    "zoom": 2,
+    "initialWidth": 1440,
+    "zoomedWidth": 720
+  },
+  "pwa": [
+    {
+      "manifest": {
+        "name": "Fluentia",
+        "short_name": "Fluentia",
+        "description": "Maîtrisez le français, allez plus loin.",
+        "lang": "fr-CA",
+        "start_url": "/",
+        "display": "standalone",
+        "background_color": "#F7FAFF",
+        "theme_color": "#081B35",
+        "icons": [
+          {
+            "src": "/branding/02_Icons_PWA/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+          },
+          {
+            "src": "/branding/02_Icons_PWA/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+          },
+          {
+            "src": "/branding/02_Icons_PWA/icon-maskable-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+          }
+        ]
+      },
+      "registrations": 0,
+      "offline": "non implémenté",
+      "installationReelle": "non testée"
+    },
+    {
+      "manifest": {
+        "name": "Fluentia",
+        "short_name": "Fluentia",
+        "description": "Maîtrisez le français, allez plus loin.",
+        "lang": "fr-CA",
+        "start_url": "/",
+        "display": "standalone",
+        "background_color": "#F7FAFF",
+        "theme_color": "#081B35",
+        "icons": [
+          {
+            "src": "/branding/02_Icons_PWA/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+          },
+          {
+            "src": "/branding/02_Icons_PWA/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+          },
+          {
+            "src": "/branding/02_Icons_PWA/icon-maskable-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+          }
+        ]
+      },
+      "registrations": 0,
+      "offline": "non implémenté",
+      "installationReelle": "non testée"
+    },
+    {
+      "manifest": {
+        "name": "Fluentia",
+        "short_name": "Fluentia",
+        "description": "Maîtrisez le français, allez plus loin.",
+        "lang": "fr-CA",
+        "start_url": "/",
+        "display": "standalone",
+        "background_color": "#F7FAFF",
+        "theme_color": "#081B35",
+        "icons": [
+          {
+            "src": "/branding/02_Icons_PWA/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+          },
+          {
+            "src": "/branding/02_Icons_PWA/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+          },
+          {
+            "src": "/branding/02_Icons_PWA/icon-maskable-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+          }
+        ]
+      },
+      "registrations": 0,
+      "offline": "non implémenté",
+      "installationReelle": "non testée"
+    }
+  ]
+}

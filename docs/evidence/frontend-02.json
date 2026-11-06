@@ -1,0 +1,295 @@
+{
+  "owner": "Jonathan Kakesa",
+  "codeSha": "d8abfa06e3403d7069d26656b77c8c31feff4ab9",
+  "runs": [
+    40123086754,
+    40123082997
+  ],
+  "artifact": {
+    "id": 12571808486,
+    "run": 40123086754,
+    "archiveSha256": "6ec146bd412b5128676cdb24ed4e668e5202c3ca8762219cc1117c4f91d67f5d"
+  },
+  "stats": {
+    "startTime": "2026-10-24T18:59:13.251Z",
+    "duration": 137542.83,
+    "expected": 52,
+    "skipped": 2,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "zoom": {
+    "zoom": 2,
+    "initialWidth": 1440,
+    "zoomedWidth": 720
+  },
+  "images": [
+    {
+      "path": "docs/images/frontend-02/accueil-chromium-320.png",
+      "sha256": "61f168ac61485e97e3417c98df7e261ff9a8385a89645edb432e94536f9cf160",
+      "size": [
+        320,
+        13051
+      ],
+      "source": "frontend-accueil-et-catalogue-à-320px-chromium/accueil-320.png"
+    },
+    {
+      "path": "docs/images/frontend-02/accueil-chromium-375.png",
+      "sha256": "472bb4ea603c64ed616f367848f28b4d686d5400c8ccd6f75e8d8900b3bbc44c",
+      "size": [
+        375,
+        12382
+      ],
+      "source": "frontend-accueil-et-catalogue-à-375px-chromium/accueil-375.png"
+    },
+    {
+      "path": "docs/images/frontend-02/accueil-firefox-768.png",
+      "sha256": "9616abdd8efdd6ae4b0b11da964c0b510a8156bc34ba335f7baf81eda167773f",
+      "size": [
+        768,
+        9020
+      ],
+      "source": "frontend-accueil-et-catalogue-à-768px-firefox/accueil-768.png"
+    },
+    {
+      "path": "docs/images/frontend-02/accueil-webkit-1440.png",
+      "sha256": "11c9358a8ff6103baa09ad5d39eadb2824cac859b8a2f687298c307c1f275240",
+      "size": [
+        1440,
+        7868
+      ],
+      "source": "frontend-accueil-et-catalogue-à-1440px-webkit/accueil-1440.png"
+    },
+    {
+      "path": "docs/images/frontend-02/accueil-chromium-1920.png",
+      "sha256": "38b7501cfaa0f0d040475d259ba85382029316fc26b106dc58b1275ccf388b35",
+      "size": [
+        1920,
+        7884
+      ],
+      "source": "frontend-accueil-et-catalogue-à-1920px-chromium/accueil-1920.png"
+    }
+  ],
+  "crops": [
+    {
+      "path": "docs/images/frontend-02/detail-chromium-375-01.png",
+      "source": "docs/images/frontend-02/accueil-chromium-375.png",
+      "box": [
+        0,
+        0,
+        375,
+        1500
+      ]
+    },
+    {
+      "path": "docs/images/frontend-02/detail-chromium-375-02.png",
+      "source": "docs/images/frontend-02/accueil-chromium-375.png",
+      "box": [
+        0,
+        1500,
+        375,
+        3000
+      ]
+    },
+    {
+      "path": "docs/images/frontend-02/detail-chromium-375-03.png",
+      "source": "docs/images/frontend-02/accueil-chromium-375.png",
+      "box": [
+        0,
+        3000,
+        375,
+        4500
+      ]
+    },
+    {
+      "path": "docs/images/frontend-02/detail-chromium-375-04.png",
+      "source": "docs/images/frontend-02/accueil-chromium-375.png",
+      "box": [
+        0,
+        4500,
+        375,
+        6000
+      ]
+    },
+    {
+      "path": "docs/images/frontend-02/detail-chromium-375-05.png",
+      "source": "docs/images/frontend-02/accueil-chromium-375.png",
+      "box": [
+        0,
+        6000,
+        375,
+        7500
+      ]
+    },
+    {
+      "path": "docs/images/frontend-02/detail-chromium-375-06.png",
+      "source": "docs/images/frontend-02/accueil-chromium-375.png",
+      "box": [
+        0,
+        7500,
+        375,
+        9000
+      ]
+    },
+    {
+      "path": "docs/images/frontend-02/detail-chromium-375-07.png",
+      "source": "docs/images/frontend-02/accueil-chromium-375.png",
+      "box": [
+        0,
+        9000,
+        375,
+        10500
+      ]
+    },
+    {
+      "path": "docs/images/frontend-02/detail-chromium-375-08.png",
+      "source": "docs/images/frontend-02/accueil-chromium-375.png",
+      "box": [
+        0,
+        10500,
+        375,
+        12000
+      ]
+    },
+    {
+      "path": "docs/images/frontend-02/detail-chromium-375-09.png",
+      "source": "docs/images/frontend-02/accueil-chromium-375.png",
+      "box": [
+        0,
+        12000,
+        375,
+        12382
+      ]
+    },
+    {
+      "path": "docs/images/frontend-02/detail-firefox-768-01.png",
+      "source": "docs/images/frontend-02/accueil-firefox-768.png",
+      "box": [
+        0,
+        0,
+        768,
+        1500
+      ]
+    },
+    {
+      "path": "docs/images/frontend-02/detail-firefox-768-02.png",
+      "source": "docs/images/frontend-02/accueil-firefox-768.png",
+      "box": [
+        0,
+        1500,
+        768,
+        3000
+      ]
+    },
+    {
+      "path": "docs/images/frontend-02/detail-firefox-768-03.png",
+      "source": "docs/images/frontend-02/accueil-firefox-768.png",
+      "box": [
+        0,
+        3000,
+        768,
+        4500
+      ]
+    },
+    {
+      "path": "docs/images/frontend-02/detail-firefox-768-04.png",
+      "source": "docs/images/frontend-02/accueil-firefox-768.png",
+      "box": [
+        0,
+        4500,
+        768,
+        6000
+      ]
+    },
+    {
+      "path": "docs/images/frontend-02/detail-firefox-768-05.png",
+      "source": "docs/images/frontend-02/accueil-firefox-768.png",
+      "box": [
+        0,
+        6000,
+        768,
+        7500
+      ]
+    },
+    {
+      "path": "docs/images/frontend-02/detail-firefox-768-06.png",
+      "source": "docs/images/frontend-02/accueil-firefox-768.png",
+      "box": [
+        0,
+        7500,
+        768,
+        9000
+      ]
+    },
+    {
+      "path": "docs/images/frontend-02/detail-firefox-768-07.png",
+      "source": "docs/images/frontend-02/accueil-firefox-768.png",
+      "box": [
+        0,
+        9000,
+        768,
+        9020
+      ]
+    },
+    {
+      "path": "docs/images/frontend-02/detail-webkit-1440-01.png",
+      "source": "docs/images/frontend-02/accueil-webkit-1440.png",
+      "box": [
+        0,
+        0,
+        1440,
+        1500
+      ]
+    },
+    {
+      "path": "docs/images/frontend-02/detail-webkit-1440-02.png",
+      "source": "docs/images/frontend-02/accueil-webkit-1440.png",
+      "box": [
+        0,
+        1500,
+        1440,
+        3000
+      ]
+    },
+    {
+      "path": "docs/images/frontend-02/detail-webkit-1440-03.png",
+      "source": "docs/images/frontend-02/accueil-webkit-1440.png",
+      "box": [
+        0,
+        3000,
+        1440,
+        4500
+      ]
+    },
+    {
+      "path": "docs/images/frontend-02/detail-webkit-1440-04.png",
+      "source": "docs/images/frontend-02/accueil-webkit-1440.png",
+      "box": [
+        0,
+        4500,
+        1440,
+        6000
+      ]
+    },
+    {
+      "path": "docs/images/frontend-02/detail-webkit-1440-05.png",
+      "source": "docs/images/frontend-02/accueil-webkit-1440.png",
+      "box": [
+        0,
+        6000,
+        1440,
+        7500
+      ]
+    },
+    {
+      "path": "docs/images/frontend-02/detail-webkit-1440-06.png",
+      "source": "docs/images/frontend-02/accueil-webkit-1440.png",
+      "box": [
+        0,
+        7500,
+        1440,
+        7868
+      ]
+    }
+  ]
+}

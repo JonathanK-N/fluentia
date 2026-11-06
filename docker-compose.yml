@@ -13,14 +13,23 @@ services:
   api:
     build: ./apps/api
     env_file: .env
+    environment:
+      PUBLIC_WEB_ORIGIN: ${PUBLIC_WEB_ORIGIN:-http://localhost:3000}
+      PRIVATE_MEDIA_ROOT: /var/lib/fluentia/private-media
+    volumes: [private_media:/var/lib/fluentia/private-media]
     ports: ["8000:8000"]
     depends_on:
       db:
         condition: service_healthy
   web:
-    build: ./apps/web
-    env_file: .env
+    build:
+      context: ./apps/web
+      args:
+        API_ORIGIN: ${API_ORIGIN:-http://api:8000}
+    environment:
+      NODE_ENV: production
     ports: ["3000:3000"]
     depends_on: [api]
 volumes:
   pgdata:
+  private_media:

@@ -1,0 +1,370 @@
+{
+  "owner": "Jonathan Kakesa",
+  "date": "2026-10-24",
+  "codeSha": "5967491f5f44d212a64f31b1bc309ce44cc558de",
+  "initialPrSha": "9b4cfa902b9acc20774ec651921ac777969d0654",
+  "initialRuns": [
+    40082962080,
+    40082958171
+  ],
+  "runs": [
+    {
+      "id": 40086695392,
+      "event": "pull_request",
+      "sha": "5967491f5f44d212a64f31b1bc309ce44cc558de",
+      "conclusion": "success",
+      "url": "https://github.com/JonathanK-N/fluentia/actions/runs/40086695392",
+      "jobs": [
+        {
+          "id": 120850988154,
+          "name": "docker",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run docker version",
+              "conclusion": "success"
+            },
+            {
+              "name": "Construire le frontend",
+              "conclusion": "success"
+            },
+            {
+              "name": "Démarrer et contrôler le conteneur",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 120850988425,
+          "name": "web",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npm ci",
+              "conclusion": "success"
+            },
+            {
+              "name": "Audit des dépendances",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npm run lint",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npm run typecheck",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npm run test",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npm run build",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npx playwright install --with-deps chromium firefox webkit",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npm run test:e2e",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 120850988446,
+          "name": "api",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run pip install -r requirements.txt",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run python manage.py check",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run python manage.py test",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 40086691688,
+      "event": "push",
+      "sha": "5967491f5f44d212a64f31b1bc309ce44cc558de",
+      "conclusion": "success",
+      "url": "https://github.com/JonathanK-N/fluentia/actions/runs/40086691688",
+      "jobs": [
+        {
+          "id": 120850977877,
+          "name": "docker",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run docker version",
+              "conclusion": "success"
+            },
+            {
+              "name": "Construire le frontend",
+              "conclusion": "success"
+            },
+            {
+              "name": "Démarrer et contrôler le conteneur",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 120850978009,
+          "name": "web",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npm ci",
+              "conclusion": "success"
+            },
+            {
+              "name": "Audit des dépendances",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npm run lint",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npm run typecheck",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npm run test",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npm run build",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npx playwright install --with-deps chromium firefox webkit",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npm run test:e2e",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 120850978020,
+          "name": "api",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run pip install -r requirements.txt",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run python manage.py check",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run python manage.py test",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "browser": {
+    "passed": 22,
+    "skipped": 2,
+    "failed": 0,
+    "zoom": {
+      "engine": "chromium",
+      "factor": 2,
+      "initialCssWidth": 1440,
+      "zoomedCssWidth": 720
+    },
+    "skippedReason": "Zoom navigateur par extension Chromium : API indisponible sur Firefox/WebKit."
+  },
+  "unitTests": 7,
+  "apiTests": 1,
+  "auditReportedVulnerabilities": 0,
+  "artifact": {
+    "id": 12557960329,
+    "name": "frontend-browser",
+    "size_in_bytes": 4895725,
+    "url": "https://api.github.com/repos/JonathanK-N/fluentia/actions/artifacts/12557960329",
+    "archive_download_url": "https://api.github.com/repos/JonathanK-N/fluentia/actions/artifacts/12557960329/zip",
+    "expired": false,
+    "created_at": "2026-10-24T10:41:35Z",
+    "expires_at": "2026-10-31T10:41:33Z",
+    "updated_at": "2026-10-24T10:41:35Z",
+    "digest": "sha256:45af8308aa21461e6d7636d400360d19e76e14c77f15c76ae31f13ea8e33e05f",
+    "workflow_run": {
+      "id": 40086695392,
+      "repository_id": 1431900179,
+      "head_repository_id": 1431900179,
+      "head_branch": "frontend/mission-01",
+      "head_sha": "5967491f5f44d212a64f31b1bc309ce44cc558de"
+    }
+  },
+  "limits": [
+    "Figma non validé : défauts visuels et quota Starter atteint",
+    "Code Connect indisponible sur le forfait actuel",
+    "Lecteurs d’écran et appareils physiques non testés",
+    "Installation PWA réelle non testée",
+    "Mode hors ligne non implémenté et navigation hors ligne indisponible constatée",
+    "Docker local absent ; build et exécution en CI Linux réussis"
+  ]
+}

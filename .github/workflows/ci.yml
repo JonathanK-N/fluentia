@@ -11,11 +11,50 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm install
+          cache: 'npm'
+          cache-dependency-path: apps/web/package-lock.json
+      - run: npm ci
+      - name: Audit des dépendances
+        run: npm audit --audit-level=moderate
+      - uses: actions/upload-artifact@v4
+        with:
+          name: frontend-lockfile
+          path: apps/web/package-lock.json
+      - run: npm run lint
       - run: npm run typecheck
+      - run: npm run test
       - run: npm run build
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frontend-browser
+          path: apps/web/test-results
+          retention-days: 7
   api:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        database: [sqlite, postgresql]
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: fluentia
+          POSTGRES_USER: fluentia
+          POSTGRES_PASSWORD: fluentia_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U fluentia -d fluentia"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DJANGO_DEBUG: "1"
+      DATABASE_URL: ${{ matrix.database == 'postgresql' && 'postgresql://fluentia:fluentia_ci@127.0.0.1:5432/fluentia' || '' }}
     defaults:
       run:
         working-directory: apps/api
@@ -25,5 +64,181 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r requirements.txt
+      - run: pip install pip-audit==2.10.1
+      - run: python -m pip_audit -r requirements.txt --format=json --output=dependency-audit.json
       - run: python manage.py check
+      - run: python manage.py makemigrations --check --dry-run
+      - run: python manage.py migrate --noinput
+      - name: Vérifier le retour arrière des migrations de comptes sur base jetable
+        run: |
+          python manage.py migrate accounts 0001 --noinput
+          python manage.py migrate accounts 0003 --noinput
+      - run: python manage.py seed_original_tcf
+      - run: python manage.py seed_original_tcf
+      - name: Vérifier la réversibilité des garde-fous sur la base CI éphémère
+        run: |
+          python manage.py migrate exams 0001 --noinput
+          python manage.py migrate --noinput
+      - name: Vérifier les migrations éditoriales sur base jetable
+        run: |
+          python manage.py migrate pedagogy 0001 --noinput
+          python manage.py migrate pedagogy 0002 --noinput
+          python manage.py seed_original_bank
+          python manage.py seed_original_bank
+      - run: python manage.py spectacular --validate --fail-on-warn --file schema.yaml
       - run: python manage.py test
+      - name: Conserver le schéma et les versions réellement installées
+        if: always()
+        run: python -m pip freeze > runtime.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-lot03-${{ matrix.database }}
+          path: |
+            apps/api/schema.yaml
+            apps/api/runtime.txt
+            apps/api/dependency-audit.json
+
+  api-container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Construire et vérifier le conteneur backend de développement
+        shell: bash
+        run: |
+          test ! -e apps/api/.env
+          test ! -e apps/api/db.sqlite3
+          mkdir -p apps/api/.private-media apps/api/.local-mail
+          printf 'SENTINELLE_CI_SANS_SECRET' > apps/api/.env
+          printf 'SENTINELLE_CI_SANS_DONNEES' > apps/api/db.sqlite3
+          printf 'SENTINELLE_CI_MEDIA' > apps/api/.private-media/DO_NOT_PACKAGE.txt
+          printf 'SENTINELLE_CI_COURRIER' > apps/api/.local-mail/DO_NOT_PACKAGE.txt
+          docker build --tag fluentia-api:validation apps/api
+          docker run --detach --name fluentia-api-validation -e DJANGO_DEBUG=1 -p 127.0.0.1:3300:8000 fluentia-api:validation
+          trap 'docker logs fluentia-api-validation; docker rm -f fluentia-api-validation' EXIT
+          docker exec fluentia-api-validation sh -c 'test ! -e /app/.env && test ! -e /app/db.sqlite3 && test ! -e /app/.private-media/DO_NOT_PACKAGE.txt && test ! -e /app/.local-mail/DO_NOT_PACKAGE.txt'
+          docker exec fluentia-api-validation python manage.py migrate --noinput
+          docker exec fluentia-api-validation python manage.py seed_original_tcf
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:3300/api/v1/health/ > /tmp/fluentia-health.json; then break; fi
+            sleep 1
+          done
+          python -c "import json; assert json.load(open('/tmp/fluentia-health.json'))['status'] == 'ok'"
+          curl --fail --silent http://127.0.0.1:3300/api/v1/exams/ > /tmp/fluentia-exams.json
+          python -c "import json; assert json.load(open('/tmp/fluentia-exams.json'))['count'] == 0"
+
+  student-journey:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: fluentia_e2e
+          POSTGRES_USER: fluentia
+          POSTGRES_PASSWORD: fluentia_ci
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U fluentia -d fluentia_e2e"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DJANGO_DEBUG: '1'
+      DATABASE_URL: postgresql://fluentia:fluentia_ci@127.0.0.1:5432/fluentia_e2e
+      FLUENTIA_E2E: '1'
+      DJANGO_EMAIL_BACKEND: django.core.mail.backends.filebased.EmailBackend
+      DJANGO_EMAIL_FILE_PATH: /tmp/fluentia-e2e-mail
+      PUBLIC_WEB_ORIGIN: http://127.0.0.1:3101
+      API_ORIGIN: http://127.0.0.1:8000
+      ACCOUNT_ANON_RATE: 240/hour
+      PRIVATE_MEDIA_ROOT: /tmp/fluentia-e2e-private-media
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - run: pip install -r apps/api/requirements.txt
+      - run: python apps/api/manage.py migrate --noinput
+      - run: python scripts/seed-student-e2e.py
+      - run: python scripts/seed-lot03-e2e.py
+      - name: Générer une proposition audio française originale sans service externe
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y espeak-ng
+          python scripts/render-original-audio.py
+      - run: npm ci
+        working-directory: apps/web
+      - run: npm run build
+        working-directory: apps/web
+      - run: npx playwright install --with-deps chromium firefox webkit
+        working-directory: apps/web
+      - run: npx playwright test --config=playwright.student.config.ts
+        working-directory: apps/web
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: parcours-etudiant-postgresql
+          path: apps/web/test-results
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: audio-original-brouillon
+          path: docs/backend/lot-03/exemples
+          retention-days: 7
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker version
+      - name: Construire le frontend
+        run: docker build --tag fluentia-web:validation apps/web
+      - name: Démarrer et contrôler le conteneur
+        shell: bash
+        run: |
+          docker run --detach --name fluentia-web-validation -p 127.0.0.1:3200:3000 fluentia-web:validation
+          trap 'docker logs fluentia-web-validation; docker rm -f fluentia-web-validation' EXIT
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:3200/ > /tmp/fluentia-home.html; then break; fi
+            sleep 1
+          done
+          grep -q 'Fluentia' /tmp/fluentia-home.html
+          curl --fail --silent http://127.0.0.1:3200/design-system > /tmp/fluentia-catalogue.html
+          grep -q 'Couleurs' /tmp/fluentia-catalogue.html
+          curl --fail --silent http://127.0.0.1:3200/apercu/etudiant > /tmp/fluentia-etudiant.html
+          grep -q 'Bienvenue sur Fluentia' /tmp/fluentia-etudiant.html
+          curl --fail --silent http://127.0.0.1:3200/manifest.webmanifest
+          curl --fail --silent http://127.0.0.1:3200/branding/02_Icons_PWA/icon-192x192.png > /tmp/fluentia-icon.png
+
+  compose-journey:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Vérifier le démarrage Compose et la passerelle de session
+        shell: bash
+        run: |
+          docker compose version
+          cp .env.example .env
+          trap 'docker compose -p fluentia-lot03-validation logs --tail 60; docker compose -p fluentia-lot03-validation down --volumes' EXIT
+          docker compose -p fluentia-lot03-validation build
+          docker compose -p fluentia-lot03-validation up -d db
+          docker compose -p fluentia-lot03-validation run --rm api python manage.py migrate --noinput
+          docker compose -p fluentia-lot03-validation up -d api web
+          docker compose -p fluentia-lot03-validation exec -T web sh -c 'test -z "$DJANGO_SECRET_KEY" && test -z "$DATABASE_URL" && test -z "$POSTGRES_PASSWORD"'
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:3000/api/v1/health/ > /tmp/fluentia-compose-health.json; then break; fi
+            sleep 1
+          done
+          python3 scripts/check-compose-smoke.py > compose-results.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: compose-session-postgresql
+          path: compose-results.json
+          retention-days: 7

@@ -4,6 +4,8 @@
 
 ## Route disponible
 
+Les lots 01 et 02 intégrés à dev fournissent le [moteur privé](backend/lot-01/README.md) et les [comptes/lecture connectée](backend/lot-02/README.md). La branche du [lot 03](backend/lot-03/README.md) ajoute les API éditoriales, médias privés et progression ; son [OpenAPI validé](backend/lot-03/openapi.yaml) constitue le contrat actuel de cette branche. Les contrats « prévus » ci-dessous sont un historique du socle, pas une liste de fonctions opérationnelles. IA et paiements restent ultérieurs.
+
 | Verbe | URL | Description |
 |---|---|---|
 | GET | `/api/v1/health/` | État minimal de l'API |
@@ -23,4 +25,4 @@ Schéma généré : `/api/schema/` · Swagger : `/api/schema/swagger-ui/`.
 | Progression | `GET /dashboard/overview` |
 | Paiements | `POST /billing/checkout` |
 
-Les endpoints sensibles nécessiteront authentification, permissions, validation, quotas et idempotence.
+Les routes implémentées appliquent les permissions et protections décrites dans leurs guides de lot ; le [schéma du lot 03](backend/lot-03/openapi.yaml) précise les corps et réponses de la branche en revue. Les limites d’exploitation et les contrats futurs restent distincts.

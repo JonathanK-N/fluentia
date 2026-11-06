@@ -1,0 +1,75 @@
+{
+  "archiveSha256": "34a9d5254cf2c0fc27c76016819c4fb98703e2a883bcca2a75b03eea9572528a",
+  "files": [
+    {
+      "archivePath": "ROADMAP_BACKEND.md",
+      "sha256": "75b609c8a7baaa3d250d82048db7797b53b18cfee8d3922537906cbd50d6738b",
+      "bytes": 1708
+    },
+    {
+      "archivePath": "INTEGRATION.md",
+      "sha256": "648f5ad65f51eca5a987d9c63f516a17cdfb7cba08cd8c6c4a1fbd18dd943db7",
+      "bytes": 3605
+    },
+    {
+      "archivePath": "apps/api/exams/tests.py",
+      "sha256": "701dd2678696f2ad3cf270dd559a06b29b3b87b8c5bc103ec64512bedc9c0855",
+      "bytes": 3718
+    },
+    {
+      "archivePath": "apps/api/exams/admin.py",
+      "sha256": "8c1f8895f351433208b179fecd295a0e43a7f1c1b225e47ff125e0b738374bf6",
+      "bytes": 709
+    },
+    {
+      "archivePath": "apps/api/exams/__init__.py",
+      "sha256": "095e1c35a9360ed0001d54a975d3d12d754f88d7d939f675ef9a36b71696dc27",
+      "bytes": 79
+    },
+    {
+      "archivePath": "apps/api/exams/views.py",
+      "sha256": "726176392fc443881bc0af89b2b73670a53e2ba97feb1ea6e7f4c79f1ac4c33d",
+      "bytes": 4586
+    },
+    {
+      "archivePath": "apps/api/exams/services.py",
+      "sha256": "619f3883739aac624165dd71487f0ff749654c3c31b81a661cbac70b4c451afe",
+      "bytes": 2565
+    },
+    {
+      "archivePath": "apps/api/exams/urls.py",
+      "sha256": "e3b7368efaf38a245299bec7f2c3c99e0e68f711dc0e8bdba45b7112c549b6c0",
+      "bytes": 880
+    },
+    {
+      "archivePath": "apps/api/exams/models.py",
+      "sha256": "91a4b4d3e8948ae7761f61484827a2a2379ee5d54a867b1ccd6cf22e45503178",
+      "bytes": 4225
+    },
+    {
+      "archivePath": "apps/api/exams/serializers.py",
+      "sha256": "ad78472306f92bca743d58ba1b5d7a79723fb6064db6730410bb07b809fd8290",
+      "bytes": 1137
+    },
+    {
+      "archivePath": "apps/api/exams/apps.py",
+      "sha256": "cf3170324c928598afdba8f571bfaef80cf2b3756d297e682a0095e1708ae739",
+      "bytes": 194
+    },
+    {
+      "archivePath": "apps/api/exams/management/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "archivePath": "apps/api/exams/management/commands/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "archivePath": "apps/api/exams/management/commands/seed_original_tcf.py",
+      "sha256": "dd9e1033a75a22626deb66be04de38ff7f90bade2684e775e619602435140080",
+      "bytes": 2943
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+# Frontend 02 — suivi de mission
+
+Responsable : Jonathan Kakesa. 24 octobre 2026.
+
+## État actuel
+
+**Nouvelle direction client :** la mission Human-Centered Redesign remplace l’orientation immersive par deux pilotes sobres, accueil et tableau de bord. L’ancien code au SHA `d8abfa06e3403d7069d26656b77c8c31feff4ab9` a passé ses deux CI (52 tests navigateur, 10 DOM, deux exclusions), mais ce succès technique ne vaut pas validation visuelle. Les [preuves antérieures](evidence/frontend-02.json) sont conservées avec leur source. Les assertions complémentaires ajoutées après ce checkpoint ne sont pas annoncées réussies avant exécution. Le statut actuel est dans [UX_REVIEW.md](UX_REVIEW.md), et les états d’attente ci-dessous sont historiques.
+
+**Mise à jour après le point B :** Jonathan Kakesa a explicitement autorisé la fusion de la PR #2. dev est consolidé à `2e1ed545540e8ea5fb0c540475ce7e146fcf315f`, contenu identique au HEAD validé `1100a99382f23842a3e5faa76da9c77c842771de`. Sa [CI 40120241790](https://github.com/JonathanK-N/fluentia/actions/runs/40120241790) est réussie : frontend, API et Docker, sept tests DOM et 22 tests navigateur réussis, deux exclusions. La branche `frontend/mission-02-landing` part exactement de ce dev. L’accueil décrit dans [LANDING_PAGE.md](LANDING_PAGE.md) est implémenté et entre en recette ; il n’est pas encore déclaré validé. Les états d’attente ci-dessous sont l’historique des points A/B avant autorisations.
+
+Le point A a été explicitement autorisé par Jonathan Kakesa. La PR #1 est fusionnée dans dev au commit `62f6ff43dcd0e03e006849e317b20a4c4795adfc`. Ce dev a été intégré dans la branche de la PR #2 par une fusion ordinaire, sans réécriture. Voir le [rapport du point B](VALIDATION_PR_02.md) et la [consolidation](CONSOLIDATION_PR_01_02.md). L’accueil attend l’autorisation de fusion de la PR #2 et la validation du dev consolidé.
+
+| Étape | État |
+|---|---|
+| A — audit et rapport PR #1 | Autorisés ; PR #1 fusionnée vers dev |
+| B — PR #2 après intégration de #1 | Branche actualisée, conflits résolus, recettes réussies et captures inspectées ; autorisation de fusion attendue |
+| C — branche et accueil immersif | Non commencés ; branche prévue `frontend/mission-02-landing` depuis le futur dev consolidé |
+| D — présentation et décision propriétaire | À venir |
+
+## Périmètre ultérieur
+
+Navigation, hero avec slogan « Maîtrisez le français, allez plus loin. », quatre compétences, coach de démonstration, Voice simulé, parcours personnalisé, dashboard fictif, tarifs configurables non définitifs, FAQ, CTA et footer. Réutiliser composants, tokens, Poppins et PNG officiels. Motion avec mouvement réduit ; pas d’API, capture micro, prix ou résultats commerciaux fictivement présentés comme réels.
+
+Recette à préparer sur les sept largeurs 320/375/390/768/1024/1440/1920, zoom et trois moteurs disponibles. Ces contrôles et la page ne sont pas déclarés réalisés. Actualiser les guides existants de motion, responsive, accessibilité et tests au fur et à mesure du code ; créer LANDING_PAGE.md avec l’implémentation réelle.
+
+La [décision Code-First](DECISIONS/002-code-first-et-consolidation.md) est approuvée. Le [backlog Figma](FIGMA_SYNC_BACKLOG.md) reste ouvert. Aucun changement de main/tests, déploiement Railway Production, release ou service payant.

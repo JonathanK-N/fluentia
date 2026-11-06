@@ -9,3 +9,13 @@ __pycache__/
 .venv/
 staticfiles/
 .DS_Store
+design/ux-ui-02/test-results/
+design/ux-ui-02/playwright-report/
+*.tsbuildinfo
+apps/web/test-results/
+apps/web/playwright-report/
+apps/api/.local-mail/
+apps/api/.private-media/
+
+# Données de la démo locale (base, médias privés) : jamais publiées.
+.local-data/

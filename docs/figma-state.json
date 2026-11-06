@@ -1,0 +1,208 @@
+{
+  "fileKey": "SIjNphVU1NHimwwImszGbE",
+  "scope": "Bibliothèque Frontend 01 et six maquettes responsive — non validées",
+  "pageId": "0:1",
+  "status": "NO-GO",
+  "components": {
+    "Field": "8:21",
+    "Card": "8:66",
+    "Badge": "8:77",
+    "Alert": "8:84",
+    "Notification": "8:97",
+    "Progress": "8:110",
+    "Skeleton": "8:135",
+    "EmptyState": "8:138",
+    "DataTable": "8:149",
+    "BarChart": "8:168",
+    "Tabs": "8:201",
+    "Dialog": "8:230",
+    "Button": "3:38",
+    "ButtonSombre": "12:11",
+    "Header": "12:54"
+  },
+  "frames": {
+    "foundations": "2:38",
+    "buttonReview": "3:39",
+    "componentReview": "12:819",
+    "temporaryCapture": "9:11",
+    "Catalogue / Clair / 375": "12:83",
+    "Catalogue / Clair / 768": "12:205",
+    "Catalogue / Clair / 1440": "12:328",
+    "Catalogue / Sombre / 375": "12:451",
+    "Catalogue / Sombre / 768": "12:573",
+    "Catalogue / Sombre / 1440": "12:696"
+  },
+  "collections": {
+    "primitives": "VariableCollectionId:2:2",
+    "light": "VariableCollectionId:2:19",
+    "dark": "VariableCollectionId:6:11",
+    "dimensions": "VariableCollectionId:2:31"
+  },
+  "validation": {
+    "created": true,
+    "fontFamily": "Poppins",
+    "screenEvidence": [
+      {
+        "id": "12:83",
+        "name": "Catalogue / Clair / 375",
+        "width": 375,
+        "height": 3553.60009765625,
+        "types": {
+          "INSTANCE": 18,
+          "FRAME": 37,
+          "RECTANGLE": 10,
+          "TEXT": 56
+        },
+        "fonts": [
+          "Poppins"
+        ],
+        "images": [
+          {
+            "id": "I12:84;12:60",
+            "name": "Logo PNG officiel — Clair",
+            "width": 135,
+            "height": 48
+          }
+        ]
+      },
+      {
+        "id": "12:205",
+        "name": "Catalogue / Clair / 768",
+        "width": 768,
+        "height": 2466,
+        "types": {
+          "INSTANCE": 18,
+          "FRAME": 37,
+          "RECTANGLE": 10,
+          "TEXT": 57
+        },
+        "fonts": [
+          "Poppins"
+        ],
+        "images": [
+          {
+            "id": "I12:206;12:56",
+            "name": "Logo PNG officiel — Clair",
+            "width": 170,
+            "height": 48
+          }
+        ]
+      },
+      {
+        "id": "12:328",
+        "name": "Catalogue / Clair / 1440",
+        "width": 1440,
+        "height": 2672,
+        "types": {
+          "INSTANCE": 18,
+          "FRAME": 37,
+          "RECTANGLE": 10,
+          "TEXT": 57
+        },
+        "fonts": [
+          "Poppins"
+        ],
+        "images": [
+          {
+            "id": "I12:329;12:56",
+            "name": "Logo PNG officiel — Clair",
+            "width": 170,
+            "height": 48
+          }
+        ]
+      },
+      {
+        "id": "12:451",
+        "name": "Catalogue / Sombre / 375",
+        "width": 375,
+        "height": 3553.60009765625,
+        "types": {
+          "INSTANCE": 18,
+          "FRAME": 37,
+          "RECTANGLE": 10,
+          "TEXT": 56
+        },
+        "fonts": [
+          "Poppins"
+        ],
+        "images": [
+          {
+            "id": "I12:452;12:74",
+            "name": "Logo PNG officiel — Sombre",
+            "width": 135,
+            "height": 48
+          }
+        ]
+      },
+      {
+        "id": "12:573",
+        "name": "Catalogue / Sombre / 768",
+        "width": 768,
+        "height": 2466,
+        "types": {
+          "INSTANCE": 18,
+          "FRAME": 37,
+          "RECTANGLE": 10,
+          "TEXT": 57
+        },
+        "fonts": [
+          "Poppins"
+        ],
+        "images": [
+          {
+            "id": "I12:574;12:70",
+            "name": "Logo PNG officiel — Sombre",
+            "width": 170,
+            "height": 48
+          }
+        ]
+      },
+      {
+        "id": "12:696",
+        "name": "Catalogue / Sombre / 1440",
+        "width": 1440,
+        "height": 2672,
+        "types": {
+          "INSTANCE": 18,
+          "FRAME": 37,
+          "RECTANGLE": 10,
+          "TEXT": 57
+        },
+        "fonts": [
+          "Poppins"
+        ],
+        "images": [
+          {
+            "id": "I12:697;12:70",
+            "name": "Logo PNG officiel — Sombre",
+            "width": 170,
+            "height": 48
+          }
+        ]
+      }
+    ],
+    "visualReview": {
+      "nodeId": "12:205",
+      "result": "échec",
+      "screenshot": "images/figma-tablette-a-corriger.png",
+      "defects": [
+        "Débordements horizontaux",
+        "Chevauchements de sections",
+        "Contraintes des champs et graphiques",
+        "Libellés non alignés sur React"
+      ]
+    },
+    "remainingVisualReviews": "Non exécutées : quota Figma Starter atteint",
+    "codeConnect": "Accès refusé : forfait/siège requis",
+    "paidActivation": false
+  },
+  "pending": [
+    "Corriger auto-layout, contraintes, libellés et styles",
+    "Contrôler toutes les variantes et six maquettes",
+    "Retirer la capture temporaire 9:11 après validation"
+  ],
+  "correctiveScript": {
+    "path": "scripts/figma-repair-layouts.js",
+    "executed": false
+  }
+}

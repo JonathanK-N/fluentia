@@ -1,0 +1,686 @@
+openapi: 3.0.3
+info:
+  title: Fluentia API
+  version: 0.1.0
+paths:
+  /api/schema/:
+    get:
+      operationId: api_schema_retrieve
+      description: |-
+        OpenApi3 schema for this API. Format can be selected via content negotiation.
+
+        - YAML: application/vnd.oai.openapi
+        - JSON: application/vnd.oai.openapi+json
+      parameters:
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - json
+          - yaml
+      - in: query
+        name: lang
+        schema:
+          type: string
+          enum:
+          - af
+          - ar
+          - ar-dz
+          - ast
+          - az
+          - be
+          - bg
+          - bn
+          - br
+          - bs
+          - ca
+          - ckb
+          - cs
+          - cy
+          - da
+          - de
+          - dsb
+          - el
+          - en
+          - en-au
+          - en-gb
+          - eo
+          - es
+          - es-ar
+          - es-co
+          - es-mx
+          - es-ni
+          - es-ve
+          - et
+          - eu
+          - fa
+          - fi
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - he
+          - hi
+          - hr
+          - hsb
+          - hu
+          - hy
+          - ia
+          - id
+          - ig
+          - io
+          - is
+          - it
+          - ja
+          - ka
+          - kab
+          - kk
+          - km
+          - kn
+          - ko
+          - ky
+          - lb
+          - lt
+          - lv
+          - mk
+          - ml
+          - mn
+          - mr
+          - ms
+          - my
+          - nb
+          - ne
+          - nl
+          - nn
+          - os
+          - pa
+          - pl
+          - pt
+          - pt-br
+          - ro
+          - ru
+          - sk
+          - sl
+          - sq
+          - sr
+          - sr-latn
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - tk
+          - tr
+          - tt
+          - udm
+          - ug
+          - uk
+          - ur
+          - uz
+          - vi
+          - zh-hans
+          - zh-hant
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/vnd.oai.openapi:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/yaml:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/vnd.oai.openapi+json:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/attempts/{attempt_id}/:
+    get:
+      operationId: api_v1_attempts_retrieve
+      parameters:
+      - in: path
+        name: attempt_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttemptRead'
+          description: ''
+  /api/v1/attempts/{attempt_id}/answers/:
+    put:
+      operationId: api_v1_attempts_answers_update
+      parameters:
+      - in: path
+        name: attempt_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveAnswer'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SaveAnswer'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SaveAnswer'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SaveAnswerResponse'
+          description: ''
+  /api/v1/attempts/{attempt_id}/results/:
+    get:
+      operationId: api_v1_attempts_results_retrieve
+      parameters:
+      - in: path
+        name: attempt_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Result'
+          description: ''
+        '409':
+          description: No response body
+  /api/v1/attempts/{attempt_id}/submit/:
+    post:
+      operationId: api_v1_attempts_submit_create
+      parameters:
+      - in: path
+        name: attempt_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Result'
+          description: ''
+  /api/v1/exams/:
+    get:
+      operationId: api_v1_exams_list
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: L'index initial depuis lequel retourner les résultats.
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedExamListList'
+          description: ''
+  /api/v1/exams/{exam_id}/:
+    get:
+      operationId: api_v1_exams_retrieve
+      parameters:
+      - in: path
+        name: exam_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExamList'
+          description: ''
+  /api/v1/exams/{exam_id}/attempts/:
+    post:
+      operationId: api_v1_exams_attempts_create
+      parameters:
+      - in: path
+        name: exam_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Attempt'
+          description: ''
+  /api/v1/health/:
+    get:
+      operationId: api_v1_health_retrieve
+      description: Retourne un état public sans secrets ni détails d'infrastructure.
+      tags:
+      - api
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+          description: ''
+components:
+  schemas:
+    Attempt:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        exam_id:
+          type: string
+          format: uuid
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/StatusEnum'
+          readOnly: true
+        started_at:
+          type: string
+          format: date-time
+          readOnly: true
+        expires_at:
+          type: string
+          format: date-time
+          readOnly: true
+        submitted_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - exam_id
+      - expires_at
+      - id
+      - started_at
+      - status
+      - submitted_at
+    AttemptRead:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        exam_id:
+          type: string
+          format: uuid
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/StatusEnum'
+          readOnly: true
+        started_at:
+          type: string
+          format: date-time
+          readOnly: true
+        expires_at:
+          type: string
+          format: date-time
+          readOnly: true
+        submitted_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionPublic'
+          readOnly: true
+        answers:
+          type: array
+          items:
+            $ref: '#/components/schemas/SavedAnswer'
+          readOnly: true
+      required:
+      - answers
+      - exam_id
+      - expires_at
+      - id
+      - questions
+      - started_at
+      - status
+      - submitted_at
+    ChoicePublic:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        position:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        label:
+          type: string
+          maxLength: 500
+      required:
+      - id
+      - label
+      - position
+    ExamList:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        slug:
+          type: string
+          maxLength: 120
+          pattern: ^[-a-zA-Z0-9_]+$
+        version:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          default: 1
+        title:
+          type: string
+          maxLength: 180
+        skill:
+          $ref: '#/components/schemas/SkillEnum'
+        mode:
+          $ref: '#/components/schemas/ModeEnum'
+        description:
+          type: string
+        duration_seconds:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        question_count:
+          type: integer
+          readOnly: true
+        official:
+          type: boolean
+          readOnly: true
+      required:
+      - id
+      - official
+      - question_count
+      - skill
+      - slug
+      - title
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        service:
+          type: string
+      required:
+      - service
+      - status
+    ModeEnum:
+      enum:
+      - training
+      - simulation
+      type: string
+      description: |-
+        * `training` - Entraînement non officiel
+        * `simulation` - Simulation non officielle
+    PaginatedExamListList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExamList'
+    QuestionPublic:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        position:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        statement:
+          type: string
+        reading_passage:
+          type: string
+        choices:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChoicePublic'
+          readOnly: true
+      required:
+      - choices
+      - id
+      - position
+      - statement
+    Result:
+      type: object
+      properties:
+        attempt_id:
+          type: string
+          format: uuid
+          readOnly: true
+        status:
+          type: string
+          readOnly: true
+        correct_count:
+          type: integer
+          readOnly: true
+        question_count:
+          type: integer
+          readOnly: true
+        percentage:
+          type: number
+          format: double
+          readOnly: true
+        official:
+          type: boolean
+          readOnly: true
+        disclaimer:
+          type: string
+          readOnly: true
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResultDetail'
+          readOnly: true
+      required:
+      - attempt_id
+      - correct_count
+      - details
+      - disclaimer
+      - official
+      - percentage
+      - question_count
+      - status
+    ResultDetail:
+      type: object
+      properties:
+        question_id:
+          type: string
+          format: uuid
+          readOnly: true
+        selected_choice_id:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        correct_choice_id:
+          type: string
+          format: uuid
+          readOnly: true
+        explanation:
+          type: string
+          readOnly: true
+      required:
+      - correct_choice_id
+      - explanation
+      - question_id
+      - selected_choice_id
+    SaveAnswer:
+      type: object
+      properties:
+        question_id:
+          type: string
+          format: uuid
+        choice_id:
+          type: string
+          format: uuid
+      required:
+      - choice_id
+      - question_id
+    SaveAnswerResponse:
+      type: object
+      properties:
+        question_id:
+          type: string
+          format: uuid
+          readOnly: true
+        choice_id:
+          type: string
+          format: uuid
+          readOnly: true
+        saved:
+          type: boolean
+          readOnly: true
+      required:
+      - choice_id
+      - question_id
+      - saved
+    SavedAnswer:
+      type: object
+      properties:
+        question_id:
+          type: string
+          format: uuid
+          readOnly: true
+        choice_id:
+          type: string
+          format: uuid
+          readOnly: true
+      required:
+      - choice_id
+      - question_id
+    SkillEnum:
+      enum:
+      - reading
+      - listening
+      type: string
+      description: |-
+        * `reading` - Compréhension écrite
+        * `listening` - Compréhension orale
+    StatusEnum:
+      enum:
+      - active
+      - submitted
+      - expired
+      type: string
+      description: |-
+        * `active` - En cours
+        * `submitted` - Terminée
+        * `expired` - Expirée
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid

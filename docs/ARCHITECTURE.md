@@ -30,3 +30,16 @@ flowchart TD
 
 > [!NOTE]
 > Le diagramme représente l'architecture cible. Seul un premier frontend et un endpoint de santé sont réalisés dans ce lot.
+
+## Frontend réalisé
+
+```mermaid
+flowchart TD
+  App[App Router et pages serveur] --> UI[Composants UI et tokens CSS]
+  App --> Brand[Configuration française et actifs]
+  App --> Client[Catalogue et navigation clients]
+  Client --> Radix[Dialogues et onglets Radix]
+  App --> Motion[Motion Providers et Reveal]
+```
+
+Les appels métier Django ne sont pas encore intégrés. Voir [FRONTEND.md](FRONTEND.md).

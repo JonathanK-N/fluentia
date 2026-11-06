@@ -1,0 +1,31 @@
+{
+  "database": "SQLite dédiée dans le venv ignoré",
+  "steps": [
+    {
+      "command": "manage.py migrate --noinput",
+      "exitCode": 0
+    },
+    {
+      "command": "manage.py seed_original_tcf",
+      "exitCode": 0
+    },
+    {
+      "command": "manage.py seed_original_tcf",
+      "exitCode": 0
+    },
+    {
+      "command": "manage.py migrate exams 0001 --noinput",
+      "exitCode": 0
+    },
+    {
+      "command": "manage.py migrate exams 0002 --noinput",
+      "exitCode": 0
+    },
+    {
+      "command": "manage.py check",
+      "exitCode": 0
+    }
+  ],
+  "questionsPreserved": 3,
+  "triggersReinstalled": 11
+}

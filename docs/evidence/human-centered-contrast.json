@@ -1,0 +1,75 @@
+{
+  "method": "Luminance relative sRGB ; rapport (Lmax + 0.05) / (Lmin + 0.05), sans arrondi avant comparaison. Ne remplace pas une verification du rendu.",
+  "pairs": [
+    {
+      "role": "Texte principal",
+      "foreground": "#081b35",
+      "background": "#f8fafc",
+      "ratio": 16.472,
+      "minimum": 4.5
+    },
+    {
+      "role": "Texte secondaire sur fond",
+      "foreground": "#52647a",
+      "background": "#f8fafc",
+      "ratio": 5.796,
+      "minimum": 4.5
+    },
+    {
+      "role": "Texte secondaire sur surface",
+      "foreground": "#52647a",
+      "background": "#ffffff",
+      "ratio": 6.065,
+      "minimum": 4.5
+    },
+    {
+      "role": "Action principale",
+      "foreground": "#ffffff",
+      "background": "#1769e0",
+      "ratio": 5.081,
+      "minimum": 4.5
+    },
+    {
+      "role": "Navigation active corrigee",
+      "foreground": "#1358bd",
+      "background": "#eaf1fc",
+      "ratio": 5.853,
+      "minimum": 4.5
+    },
+    {
+      "role": "Accent sur teinte",
+      "foreground": "#086b82",
+      "background": "#eaf1fc",
+      "ratio": 5.381,
+      "minimum": 4.5
+    },
+    {
+      "role": "Bordure de controle sur fond",
+      "foreground": "#71829a",
+      "background": "#f8fafc",
+      "ratio": 3.743,
+      "minimum": 3
+    },
+    {
+      "role": "Bordure de controle sur surface",
+      "foreground": "#71829a",
+      "background": "#ffffff",
+      "ratio": 3.917,
+      "minimum": 3
+    },
+    {
+      "role": "Focus sur fond",
+      "foreground": "#1769e0",
+      "background": "#f8fafc",
+      "ratio": 4.856,
+      "minimum": 3
+    },
+    {
+      "role": "Erreur sur surface",
+      "foreground": "#a12535",
+      "background": "#ffffff",
+      "ratio": 7.417,
+      "minimum": 4.5
+    }
+  ]
+}

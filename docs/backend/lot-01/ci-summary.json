@@ -1,0 +1,65 @@
+{
+  "sourceSha": "c79ca87372f36a35d68fccfc8ce0f0a7ad4b685b",
+  "run": 40156536525,
+  "jobs": [
+    {
+      "id": 121059026689,
+      "name": "web",
+      "status": "completed",
+      "result": "success"
+    },
+    {
+      "id": 121059026817,
+      "name": "docker",
+      "status": "completed",
+      "result": "success"
+    },
+    {
+      "id": 121059026830,
+      "name": "api (sqlite)",
+      "status": "completed",
+      "result": "success"
+    },
+    {
+      "id": 121059026836,
+      "name": "api-container",
+      "status": "completed",
+      "result": "success"
+    },
+    {
+      "id": 121059026860,
+      "name": "api (postgresql)",
+      "status": "completed",
+      "result": "success"
+    }
+  ],
+  "postgresql": {
+    "discovered": 40,
+    "passed": 40,
+    "skipped": 0
+  },
+  "sqlite": {
+    "discovered": 40,
+    "passed": 35,
+    "skipped": 5,
+    "reason": "Courses réservées à PostgreSQL"
+  },
+  "frontendBaseline": {
+    "unitPassed": 7,
+    "e2ePassed": 22,
+    "skipped": 2,
+    "scope": "dev de base, pas la PR #3"
+  },
+  "migrationRoundTrip": [
+    "sqlite",
+    "postgresql"
+  ],
+  "backendContainer": "Build et smoke Linux DEBUG=1 réussis, pas une recette production",
+  "dependencyAudit": "Aucune vulnérabilité connue signalée",
+  "limitations": [
+    "HSTS à définir",
+    "Tests de charge et pentest non exécutés",
+    "Contenus de démonstration non validés pédagogiquement",
+    "Pas de frontend d'examen React livré"
+  ]
+}

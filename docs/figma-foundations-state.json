@@ -1,0 +1,369 @@
+{
+  "pageId": "0:1",
+  "collections": {
+    "primitives": "VariableCollectionId:2:2",
+    "light": "VariableCollectionId:2:19",
+    "dark": "VariableCollectionId:6:11",
+    "dimensions": "VariableCollectionId:2:31"
+  },
+  "variables": [
+    {
+      "id": "VariableID:2:3",
+      "name": "palette/081b35",
+      "collection": "VariableCollectionId:2:2"
+    },
+    {
+      "id": "VariableID:2:4",
+      "name": "palette/1769e0",
+      "collection": "VariableCollectionId:2:2"
+    },
+    {
+      "id": "VariableID:2:5",
+      "name": "palette/21d4f4",
+      "collection": "VariableCollectionId:2:2"
+    },
+    {
+      "id": "VariableID:2:6",
+      "name": "palette/f7faff",
+      "collection": "VariableCollectionId:2:2"
+    },
+    {
+      "id": "VariableID:2:7",
+      "name": "palette/061b3d",
+      "collection": "VariableCollectionId:2:2"
+    },
+    {
+      "id": "VariableID:2:8",
+      "name": "palette/ffffff",
+      "collection": "VariableCollectionId:2:2"
+    },
+    {
+      "id": "VariableID:2:9",
+      "name": "palette/52647a",
+      "collection": "VariableCollectionId:2:2"
+    },
+    {
+      "id": "VariableID:2:10",
+      "name": "palette/c9d4e3",
+      "collection": "VariableCollectionId:2:2"
+    },
+    {
+      "id": "VariableID:2:11",
+      "name": "palette/086b82",
+      "collection": "VariableCollectionId:2:2"
+    },
+    {
+      "id": "VariableID:2:12",
+      "name": "palette/102944",
+      "collection": "VariableCollectionId:2:2"
+    },
+    {
+      "id": "VariableID:2:13",
+      "name": "palette/b7c9df",
+      "collection": "VariableCollectionId:2:2"
+    },
+    {
+      "id": "VariableID:2:14",
+      "name": "palette/526982",
+      "collection": "VariableCollectionId:2:2"
+    },
+    {
+      "id": "VariableID:2:15",
+      "name": "palette/163658",
+      "collection": "VariableCollectionId:2:2"
+    },
+    {
+      "id": "VariableID:2:16",
+      "name": "palette/a12535",
+      "collection": "VariableCollectionId:2:2"
+    },
+    {
+      "id": "VariableID:2:17",
+      "name": "palette/ffb1b9",
+      "collection": "VariableCollectionId:2:2"
+    },
+    {
+      "id": "VariableID:2:18",
+      "name": "palette/eaf1fc",
+      "collection": "VariableCollectionId:2:2"
+    },
+    {
+      "id": "VariableID:2:20",
+      "name": "bg",
+      "collection": "VariableCollectionId:2:19"
+    },
+    {
+      "id": "VariableID:2:21",
+      "name": "surface",
+      "collection": "VariableCollectionId:2:19"
+    },
+    {
+      "id": "VariableID:2:22",
+      "name": "text",
+      "collection": "VariableCollectionId:2:19"
+    },
+    {
+      "id": "VariableID:2:23",
+      "name": "muted",
+      "collection": "VariableCollectionId:2:19"
+    },
+    {
+      "id": "VariableID:2:24",
+      "name": "border",
+      "collection": "VariableCollectionId:2:19"
+    },
+    {
+      "id": "VariableID:2:25",
+      "name": "action",
+      "collection": "VariableCollectionId:2:19"
+    },
+    {
+      "id": "VariableID:2:26",
+      "name": "on-action",
+      "collection": "VariableCollectionId:2:19"
+    },
+    {
+      "id": "VariableID:2:27",
+      "name": "accent",
+      "collection": "VariableCollectionId:2:19"
+    },
+    {
+      "id": "VariableID:2:28",
+      "name": "focus",
+      "collection": "VariableCollectionId:2:19"
+    },
+    {
+      "id": "VariableID:2:29",
+      "name": "danger",
+      "collection": "VariableCollectionId:2:19"
+    },
+    {
+      "id": "VariableID:2:30",
+      "name": "tint",
+      "collection": "VariableCollectionId:2:19"
+    },
+    {
+      "id": "VariableID:2:32",
+      "name": "spacing/16",
+      "collection": "VariableCollectionId:2:31"
+    },
+    {
+      "id": "VariableID:2:33",
+      "name": "spacing/24",
+      "collection": "VariableCollectionId:2:31"
+    },
+    {
+      "id": "VariableID:2:34",
+      "name": "radius/card",
+      "collection": "VariableCollectionId:2:31"
+    },
+    {
+      "id": "VariableID:6:12",
+      "name": "hex/71829a",
+      "collection": "VariableCollectionId:2:2"
+    },
+    {
+      "id": "VariableID:6:13",
+      "name": "control-border",
+      "collection": "VariableCollectionId:2:19"
+    },
+    {
+      "id": "VariableID:6:14",
+      "name": "bg",
+      "collection": "VariableCollectionId:6:11"
+    },
+    {
+      "id": "VariableID:6:15",
+      "name": "surface",
+      "collection": "VariableCollectionId:6:11"
+    },
+    {
+      "id": "VariableID:6:16",
+      "name": "text",
+      "collection": "VariableCollectionId:6:11"
+    },
+    {
+      "id": "VariableID:6:17",
+      "name": "muted",
+      "collection": "VariableCollectionId:6:11"
+    },
+    {
+      "id": "VariableID:6:18",
+      "name": "border",
+      "collection": "VariableCollectionId:6:11"
+    },
+    {
+      "id": "VariableID:6:19",
+      "name": "hex/7e94ae",
+      "collection": "VariableCollectionId:2:2"
+    },
+    {
+      "id": "VariableID:6:20",
+      "name": "control-border",
+      "collection": "VariableCollectionId:6:11"
+    },
+    {
+      "id": "VariableID:6:21",
+      "name": "action",
+      "collection": "VariableCollectionId:6:11"
+    },
+    {
+      "id": "VariableID:6:22",
+      "name": "on-action",
+      "collection": "VariableCollectionId:6:11"
+    },
+    {
+      "id": "VariableID:6:23",
+      "name": "accent",
+      "collection": "VariableCollectionId:6:11"
+    },
+    {
+      "id": "VariableID:6:24",
+      "name": "focus",
+      "collection": "VariableCollectionId:6:11"
+    },
+    {
+      "id": "VariableID:6:25",
+      "name": "danger",
+      "collection": "VariableCollectionId:6:11"
+    },
+    {
+      "id": "VariableID:6:26",
+      "name": "tint",
+      "collection": "VariableCollectionId:6:11"
+    },
+    {
+      "id": "VariableID:6:27",
+      "name": "spacing/4",
+      "collection": "VariableCollectionId:2:31"
+    },
+    {
+      "id": "VariableID:6:28",
+      "name": "spacing/8",
+      "collection": "VariableCollectionId:2:31"
+    },
+    {
+      "id": "VariableID:6:29",
+      "name": "spacing/12",
+      "collection": "VariableCollectionId:2:31"
+    },
+    {
+      "id": "VariableID:6:30",
+      "name": "spacing/32",
+      "collection": "VariableCollectionId:2:31"
+    },
+    {
+      "id": "VariableID:6:31",
+      "name": "spacing/48",
+      "collection": "VariableCollectionId:2:31"
+    },
+    {
+      "id": "VariableID:6:32",
+      "name": "padding/button-y",
+      "collection": "VariableCollectionId:2:31"
+    },
+    {
+      "id": "VariableID:6:33",
+      "name": "padding/button-x",
+      "collection": "VariableCollectionId:2:31"
+    },
+    {
+      "id": "VariableID:6:34",
+      "name": "padding/card",
+      "collection": "VariableCollectionId:2:31"
+    },
+    {
+      "id": "VariableID:6:35",
+      "name": "padding/input",
+      "collection": "VariableCollectionId:2:31"
+    },
+    {
+      "id": "VariableID:6:36",
+      "name": "radius/button",
+      "collection": "VariableCollectionId:2:31"
+    },
+    {
+      "id": "VariableID:6:37",
+      "name": "radius/input",
+      "collection": "VariableCollectionId:2:31"
+    }
+  ],
+  "styles": {
+    "Body": "S:999eb1ff2eb948459c5369daf8671e58049ec794,",
+    "Heading": "S:aae86c030d7fc3d270ebaeaf5d7b6905bfc53723,",
+    "Button": "S:2fd417813d1ee8d3fedd79154d75fed17fb050f8,",
+    "Label": "S:5482f3d1e1648a3f278b682d4200342848118c29,",
+    "Caption": "S:2f4417e4965631bb4f2018ed4714778b577e762d,",
+    "H3": "S:717455419ea7a37bd2852a7d19bac90d0e9e6ed6,",
+    "Section": "S:e3af399203e1637ad4d340689c86da5dd7a52869,",
+    "Badge": "S:7af08aec01c1cf3d2742c6ffb44f732f031c845d,"
+  },
+  "mutatedIds": [
+    "VariableID:2:6",
+    "VariableID:2:20",
+    "VariableID:2:8",
+    "VariableID:2:21",
+    "VariableID:2:3",
+    "VariableID:2:22",
+    "VariableID:2:9",
+    "VariableID:2:23",
+    "VariableID:2:10",
+    "VariableID:2:24",
+    "VariableID:6:12",
+    "VariableID:6:13",
+    "VariableID:2:4",
+    "VariableID:2:25",
+    "VariableID:2:26",
+    "VariableID:2:11",
+    "VariableID:2:27",
+    "VariableID:2:28",
+    "VariableID:2:16",
+    "VariableID:2:29",
+    "VariableID:2:18",
+    "VariableID:2:30",
+    "VariableID:6:14",
+    "VariableID:2:12",
+    "VariableID:6:15",
+    "VariableID:6:16",
+    "VariableID:2:13",
+    "VariableID:6:17",
+    "VariableID:2:14",
+    "VariableID:6:18",
+    "VariableID:6:19",
+    "VariableID:6:20",
+    "VariableID:2:5",
+    "VariableID:6:21",
+    "VariableID:6:22",
+    "VariableID:6:23",
+    "VariableID:6:24",
+    "VariableID:2:17",
+    "VariableID:6:25",
+    "VariableID:2:15",
+    "VariableID:6:26",
+    "VariableID:6:27",
+    "VariableID:6:28",
+    "VariableID:6:29",
+    "VariableID:2:32",
+    "VariableID:2:33",
+    "VariableID:6:30",
+    "VariableID:6:31",
+    "VariableID:6:32",
+    "VariableID:6:33",
+    "VariableID:6:34",
+    "VariableID:6:35",
+    "VariableID:6:36",
+    "VariableID:6:37",
+    "VariableID:2:34",
+    "S:999eb1ff2eb948459c5369daf8671e58049ec794,",
+    "S:aae86c030d7fc3d270ebaeaf5d7b6905bfc53723,",
+    "S:2fd417813d1ee8d3fedd79154d75fed17fb050f8,",
+    "S:5482f3d1e1648a3f278b682d4200342848118c29,",
+    "S:2f4417e4965631bb4f2018ed4714778b577e762d,",
+    "S:717455419ea7a37bd2852a7d19bac90d0e9e6ed6,",
+    "S:e3af399203e1637ad4d340689c86da5dd7a52869,",
+    "S:7af08aec01c1cf3d2742c6ffb44f732f031c845d,"
+  ],
+  "limitations": [
+    "Starter : deux collections sémantiques distinctes, un mode chacune."
+  ]
+}

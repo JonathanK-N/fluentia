@@ -1,0 +1,52 @@
+{
+  "owner": "Jonathan Kakesa",
+  "auditedSha": "82c5a0ecff25bc81cdf0366a274024d578fbf7a5",
+  "run": 40087127072,
+  "artifactId": 12557274034,
+  "archiveSha256": "356c5b03b75be36b8c53ed64914ccf2cb9abb125fbc5e49fc9793f442d3bb109",
+  "stats": {
+    "startTime": "2026-10-24T10:46:36.481Z",
+    "duration": 51395.544,
+    "expected": 22,
+    "skipped": 2,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "images": [
+    {
+      "path": "docs/images/consolidation/accueil-chromium-375.png",
+      "sha256": "d4ecede267ca7fd96507e29c6a15006afe1e042f44d54a2afe1c248a64336583",
+      "source": "frontend-accueil-et-catalogue-à-375px-chromium/accueil-375.png"
+    },
+    {
+      "path": "docs/images/consolidation/catalogue-chromium-375.png",
+      "sha256": "f8280f200e85f1a30c7dc6a48ff749289bb077ba76f9fba0af8cb0374a7c560c",
+      "source": "frontend-accueil-et-catalogue-à-375px-chromium/catalogue-375.png"
+    },
+    {
+      "path": "docs/images/consolidation/accueil-firefox-768.png",
+      "sha256": "3c80abe5dd6adb7915c87492b819b0eb8b4c9c5d8abe4ec3c4914b2afa303cc4",
+      "source": "frontend-accueil-et-catalogue-à-768px-firefox/accueil-768.png"
+    },
+    {
+      "path": "docs/images/consolidation/catalogue-firefox-768.png",
+      "sha256": "3b6b04dbc63eb70b037d29dd8ff5223c472294bcde653ed1bb304cbfe5a1eab2",
+      "source": "frontend-accueil-et-catalogue-à-768px-firefox/catalogue-768.png"
+    },
+    {
+      "path": "docs/images/consolidation/accueil-webkit-1440.png",
+      "sha256": "3cae42acde2fae0fa2f2873ed6452a55bf577071186d8612a92457c6d4e667dc",
+      "source": "frontend-accueil-et-catalogue-à-1440px-webkit/accueil-1440.png"
+    },
+    {
+      "path": "docs/images/consolidation/catalogue-webkit-1440.png",
+      "sha256": "14dddcfc14b29761c79c1b9fa13cd72464d179a34a569c7daea9c788d2691542",
+      "source": "frontend-accueil-et-catalogue-à-1440px-webkit/catalogue-1440.png"
+    }
+  ],
+  "zoom": {
+    "zoom": 2,
+    "initialWidth": 1440,
+    "zoomedWidth": 720
+  }
+}

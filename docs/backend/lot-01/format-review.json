@@ -1,0 +1,22 @@
+{
+  "sourceSha": "c79ca87372f36a35d68fccfc8ce0f0a7ad4b685b",
+  "formattedCommit": "f9bd5829160af6ae1181961d6a670a75ef098509",
+  "scope": "Comparaison du seul formatage à ce checkpoint, avant toute correction métier ultérieure.",
+  "formatter": "ruff 0.17.2, outil de développement non ajouté aux dépendances applicatives",
+  "astEquivalent": true,
+  "files": [
+    "apps/api/exams/admin.py",
+    "apps/api/exams/apps.py",
+    "apps/api/exams/management/commands/seed_original_tcf.py",
+    "apps/api/exams/migrations/0001_initial.py",
+    "apps/api/exams/migrations/0002_integrity_guards.py",
+    "apps/api/exams/models.py",
+    "apps/api/exams/serializers.py",
+    "apps/api/exams/services.py",
+    "apps/api/exams/test_concurrency.py",
+    "apps/api/exams/test_engine.py",
+    "apps/api/exams/tests.py",
+    "apps/api/exams/urls.py",
+    "apps/api/exams/views.py"
+  ]
+}

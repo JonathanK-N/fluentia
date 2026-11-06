@@ -1,0 +1,39 @@
+{
+  "owner": "Jonathan Kakesa",
+  "date": "2026-10-24",
+  "browser": "WebKit 27.2, distribution Playwright 2370 Windows",
+  "initialObservation": {
+    "rootSurface": "#102944",
+    "descendantSurface": "#ffffff",
+    "context": "Learn puis Voice, nouveaux descendants après remplacement du sous-arbre"
+  },
+  "fix": "Recalculer les styles hérités du conteneur après changement d’univers et avant remplacement du sous-arbre.",
+  "observedSequence": [
+    {
+      "screen": "S12",
+      "surface": "#ffffff",
+      "background": "rgb(255, 255, 255)"
+    },
+    {
+      "screen": "S13",
+      "surface": "#102944",
+      "background": "rgb(16, 41, 68)"
+    },
+    {
+      "screen": "S01",
+      "surface": "#ffffff",
+      "background": "rgb(255, 255, 255)"
+    },
+    {
+      "screen": "P01",
+      "surface": "#102944",
+      "background": "rgb(16, 41, 68)"
+    },
+    {
+      "screen": "S13",
+      "surface": "#102944",
+      "background": "rgb(16, 41, 68)"
+    }
+  ],
+  "scope": "Diagnostic local exécuté ; la recette complète reste consignée séparément."
+}
