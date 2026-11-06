@@ -586,11 +586,15 @@ class SpeakingFinishView(SecureView):
             saved = get_object_or_404(SpeakingSession.objects.select_for_update(), pk=session_id, user=request.user)
             if saved.status not in (SpeakingSession.Status.PENDING, SpeakingSession.Status.LIVE):
                 return Response({"detail": "Cette session est déjà terminée."}, status=409)
-            # Jamais plus que les secondes réservées à l’ouverture : le navigateur ne peut pas gonfler le compteur.
-            saved.seconds = min(data.validated_data["seconds"], saved.seconds)
+            # Le temps écoulé est mesuré par le serveur, préparation déduite : le navigateur ne peut pas
+            # se rembourser des minutes en envoyant moins, ni dépasser les secondes réservées à l’ouverture.
+            now = timezone.now()
+            prep = (saved.subject.prep_seconds or 0) if saved.subject else 0
+            elapsed = max(0, int((now - saved.started_at).total_seconds()) - prep)
+            saved.seconds = min(saved.seconds, max(data.validated_data["seconds"], elapsed))
             saved.transcript = data.validated_data["transcript"]
-            saved.status, saved.ended_at = SpeakingSession.Status.FINISHED, timezone.now()
-            saved.estimated_cost_usd = 0 if saved.provider == "demo" else speaking.estimated_cost(saved.seconds)
+            saved.status, saved.ended_at = SpeakingSession.Status.FINISHED, now
+            saved.estimated_cost_usd = 0 if saved.provider == "demo" else speaking.estimated_cost_ceiling(saved.seconds)
             saved.save(update_fields=["seconds", "transcript", "status", "ended_at", "estimated_cost_usd"])
         return Response(SpeakingFinishedSerializer({
             "id": saved.pk, "status": saved.status, "seconds": saved.seconds, "seconds_left": speaking_seconds_left(request.user),

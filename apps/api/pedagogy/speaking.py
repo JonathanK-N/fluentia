@@ -141,7 +141,9 @@ INPUT_TOKENS_PER_MINUTE = 600
 OUTPUT_TOKENS_PER_MINUTE = 1200
 
 
-def estimated_cost(seconds):
+def estimated_cost_ceiling(seconds):
+    """Plafond prudent, pas le coût réel : il suppose que le candidat et l’examinateur parlent chacun
+    pendant toute la durée, au tarif audio plein, sans remise du cache. La facture réelle est en dessous."""
     minutes = Decimal(seconds) / 60
     per_minute = (INPUT_TOKENS_PER_MINUTE * AUDIO_INPUT_USD + OUTPUT_TOKENS_PER_MINUTE * AUDIO_OUTPUT_USD) / 1_000_000
     return (minutes * per_minute).quantize(Decimal("0.000001"))

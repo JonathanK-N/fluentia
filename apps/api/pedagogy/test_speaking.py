@@ -15,7 +15,7 @@ from rest_framework.test import APIClient
 
 from accounts.models import Subscription
 from .models import SpeakingSession, TaskSet, TaskSubject
-from .speaking import estimated_cost, instructions
+from .speaking import estimated_cost_ceiling, instructions
 
 User = get_user_model()
 TRANSCRIPT = [
@@ -212,10 +212,28 @@ class FinishTests(SpeakingClient):
         self.assertEqual(extra.status_code, 400)
         self.assertEqual(SpeakingSession.objects.get().status, "pending")
 
-    def test_cost_estimate(self):
+    def test_elapsed_time_is_counted_even_if_the_browser_sends_zero(self):
+        self.premium()
+        client = self.client_for(self.student)
+        opened = self.open(self.task3, client=client)  # 270 s réservées, sans préparation
+        started = SpeakingSession.objects.get().started_at
+        with patch("pedagogy.views.timezone.now", return_value=started + timedelta(minutes=3)):
+            response = self.finish(opened.data["id"], seconds=0, client=client)
+        self.assertEqual(response.data["seconds"], 180)
+        self.assertEqual(SpeakingSession.objects.get().seconds, 180)
+
+    def test_preparation_time_is_not_counted(self):
+        self.premium()
+        client = self.client_for(self.student)
+        opened = self.open(self.task2, client=client)  # 2 min de préparation, 330 s réservées
+        started = SpeakingSession.objects.get().started_at
+        with patch("pedagogy.views.timezone.now", return_value=started + timedelta(minutes=5)):
+            self.assertEqual(self.finish(opened.data["id"], seconds=0, client=client).data["seconds"], 180)
+
+    def test_cost_ceiling(self):
         # 2 min : 1 200 jetons entrants à 10 $/M + 2 400 sortants à 20 $/M = 0,06 $.
-        self.assertEqual(estimated_cost(120), Decimal("0.060000"))
-        self.assertEqual(estimated_cost(0), Decimal("0"))
+        self.assertEqual(estimated_cost_ceiling(120), Decimal("0.060000"))
+        self.assertEqual(estimated_cost_ceiling(0), Decimal("0"))
 
 
 class InstructionsTests(SpeakingClient):
