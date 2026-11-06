@@ -22,6 +22,8 @@ from .views import (
     ModelAnswerView,
     WritingCorrectionDetailView,
     CorrectionStreamView,
+    SpeakingSessionView,
+    SpeakingFinishView,
 )
 from .progress import ProgressView
 
@@ -43,6 +45,8 @@ urlpatterns = [
     path("tasks/writing/subjects/<int:subject_id>/model-answer/", ModelAnswerView.as_view()),
     path("tasks/writing/corrections/<int:correction_id>/", WritingCorrectionDetailView.as_view()),
     path("tasks/writing/corrections/<int:correction_id>/stream/", CorrectionStreamView.as_view()),
+    path("speaking/sessions/", SpeakingSessionView.as_view()),
+    path("speaking/sessions/<int:session_id>/finish/", SpeakingFinishView.as_view()),
     path("bank/<uuid:item_id>/", BankDetailView.as_view()),
     path("bank/<uuid:item_id>/transition/", TransitionView.as_view()),
     path("bank/<uuid:item_id>/versions/", ForkView.as_view()),

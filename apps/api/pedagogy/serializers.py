@@ -212,6 +212,7 @@ class TaskSetSerializer(serializers.Serializer):
     title = serializers.CharField(allow_blank=True)
     tasks = TaskSerializer(many=True)
     corrector = serializers.CharField(required=False, allow_blank=True)
+    examiner = serializers.CharField(required=False, allow_blank=True)
 
 
 class CorrectionRequestSerializer(serializers.Serializer):
@@ -254,6 +255,41 @@ class ModelAnswerSerializer(serializers.Serializer):
     demo = serializers.BooleanField()
     text = serializers.CharField()
     words = serializers.IntegerField(required=False)
+
+
+class SpeakingRequestSerializer(StrictSerializer):
+    subject_id = serializers.IntegerField(min_value=1)
+    mode = serializers.ChoiceField(choices=["practice", "simulation"])
+
+
+class SpeakingSessionSerializer(serializers.Serializer):
+    """Ce que reçoit le navigateur : une clé éphémère, jamais la clé d’API du serveur."""
+
+    id = serializers.IntegerField()
+    demo = serializers.BooleanField()
+    client_secret = serializers.CharField()
+    expires_at = serializers.DateTimeField()
+    model = serializers.CharField()
+    voice = serializers.CharField()
+    seconds = serializers.IntegerField()
+    prep_seconds = serializers.IntegerField()
+
+
+class SpeakingTurnSerializer(StrictSerializer):
+    role = serializers.ChoiceField(choices=["examiner", "candidate"])
+    text = serializers.CharField(max_length=4000, allow_blank=True, trim_whitespace=True)
+
+
+class SpeakingFinishSerializer(StrictSerializer):
+    seconds = serializers.IntegerField(min_value=0, max_value=7200)
+    transcript = SpeakingTurnSerializer(many=True, max_length=400)
+
+
+class SpeakingFinishedSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    status = serializers.CharField()
+    seconds = serializers.IntegerField()
+    seconds_left = serializers.IntegerField()
 
 
 class SeriesDetailSerializer(SeriesSerializer):

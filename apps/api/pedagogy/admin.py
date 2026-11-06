@@ -8,6 +8,7 @@ from .models import (
     ImageAsset,
     MediaAsset,
     SeriesImport,
+    SpeakingSession,
     TaskSet,
     TaskSubject,
     EditorialEvent,
@@ -115,6 +116,13 @@ class TaskSubjectInline(admin.TabularInline):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+@admin.register(SpeakingSession)
+class SpeakingSessionAdmin(AuditAdmin):
+    list_display = ["user", "subject", "mode", "provider", "model", "status", "seconds", "estimated_cost_usd", "started_at"]
+    list_filter = ["mode", "provider", "status"]
+    search_fields = ["user__email"]
 
 
 @admin.register(TaskSet)

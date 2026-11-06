@@ -383,6 +383,38 @@ class WritingCorrection(models.Model):
         indexes = [models.Index(fields=["user", "created_at"])]
 
 
+class SpeakingSession(models.Model):
+    """Passage d’une tâche d’Oral avec l’examinateur IA ; sert aussi à compter les minutes du jour."""
+
+    class Mode(models.TextChoices):
+        PRACTICE = "practice", "Entraînement"
+        SIMULATION = "simulation", "Simulation d’examen"
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "En attente"
+        LIVE = "live", "En cours"
+        FINISHED = "finished", "Terminée"
+        FAILED = "failed", "Échouée"
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="speaking_sessions")
+    subject = models.ForeignKey(TaskSubject, null=True, on_delete=models.SET_NULL, related_name="speaking_sessions")
+    mode = models.CharField(max_length=16, choices=Mode.choices)
+    provider = models.CharField(max_length=32)
+    model = models.CharField(max_length=64, blank=True)
+    status = models.CharField(max_length=16, choices=Status.choices, default=Status.PENDING)
+    started_at = models.DateTimeField(auto_now_add=True)
+    ended_at = models.DateTimeField(null=True, blank=True)
+    # Secondes réservées à l’ouverture, puis secondes réellement parlées à la fin.
+    seconds = models.PositiveIntegerField(default=0)
+    transcript = models.JSONField(default=list, blank=True)
+    result = models.JSONField(null=True, blank=True)
+    estimated_cost_usd = models.DecimalField(max_digits=10, decimal_places=6, default=0)
+
+    class Meta:
+        ordering = ["-started_at"]
+        indexes = [models.Index(fields=["user", "started_at"])]
+
+
 class ModelAnswer(models.Model):
     """Proposition de réponse à un sujet, rédigée une seule fois par fournisseur et partagée par tous."""
 
