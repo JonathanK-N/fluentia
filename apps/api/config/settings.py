@@ -50,9 +50,57 @@ SESSION_COOKIE_AGE = 43200
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SECURE_REFERRER_POLICY = "same-origin"
 MIDDLEWARE.insert(1, "accounts.middleware.PrivateApiMiddleware")
+
+# --- Fichiers statiques (administration Django) servis par WhiteNoise ---
+STATIC_ROOT = BASE_DIR / "staticfiles"
+MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage" if not DEBUG else "django.contrib.staticfiles.storage.StaticFilesStorage"},
+}
+
+# --- Hébergement derrière un proxy (Railway, Docker) ---
+def env_list(name):
+    return [item.strip() for item in os.getenv(name, "").split(",") if item.strip()]
+
+# Domaines fournis automatiquement par Railway (public et réseau privé).
+for railway_host in (os.getenv("RAILWAY_PUBLIC_DOMAIN"), os.getenv("RAILWAY_PRIVATE_DOMAIN")):
+    if railway_host and railway_host not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(railway_host)
+if os.getenv("RAILWAY_ENVIRONMENT_NAME"):
+    ALLOWED_HOSTS.append("healthcheck.railway.app")  # sonde de santé Railway
+CSRF_TRUSTED_ORIGINS += [origin.rstrip("/") for origin in env_list("DJANGO_CSRF_TRUSTED_ORIGINS")]
+# Le proxy Railway termine le TLS et transmet X-Forwarded-Proto (relayé par Next.js).
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+# Limitation de débit par client réel : derrière Railway + Next.js, REMOTE_ADDR est celui du service web.
+# DJANGO_NUM_PROXIES=1 lit la dernière adresse de X-Forwarded-For, posée par le proxy Railway.
+if os.getenv("DJANGO_NUM_PROXIES"):
+    REST_FRAMEWORK["NUM_PROXIES"] = int(os.getenv("DJANGO_NUM_PROXIES"))
+
+# --- Courriel transactionnel (vérification des adresses) ---
+EMAIL_HOST = os.getenv("EMAIL_HOST", "localhost")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "1") == "1"
+EMAIL_TIMEOUT = 15
+
+# --- Journalisation sur la sortie standard (lisible dans Railway) ---
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {"console": {"class": "logging.StreamHandler"}},
+    "root": {"handlers": ["console"], "level": os.getenv("DJANGO_LOG_LEVEL", "INFO")},
+}
+
 if not DEBUG:
     if SECRET_KEY == "local-dev-only-change-in-production":
         raise RuntimeError("Configure DJANGO_SECRET_KEY for production")
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    SECURE_SSL_REDIRECT = True
+    SECURE_SSL_REDIRECT = os.getenv("DJANGO_SECURE_SSL_REDIRECT", "1") == "1"
+    # La sonde de santé interne arrive en HTTP : elle ne doit pas être redirigée.
+    SECURE_REDIRECT_EXEMPT = [r"^api/v1/health/$"]
+    SECURE_HSTS_SECONDS = int(os.getenv("DJANGO_HSTS_SECONDS", "0"))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+    SECURE_CONTENT_TYPE_NOSNIFF = True

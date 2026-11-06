@@ -114,7 +114,7 @@ jobs:
           printf 'SENTINELLE_CI_MEDIA' > apps/api/.private-media/DO_NOT_PACKAGE.txt
           printf 'SENTINELLE_CI_COURRIER' > apps/api/.local-mail/DO_NOT_PACKAGE.txt
           docker build --tag fluentia-api:validation apps/api
-          docker run --detach --name fluentia-api-validation -e DJANGO_DEBUG=1 -p 127.0.0.1:3300:8000 fluentia-api:validation
+          docker run --detach --name fluentia-api-validation -e DJANGO_DEBUG=1 -e RUN_MIGRATIONS=0 -p 127.0.0.1:3300:8000 fluentia-api:validation
           trap 'docker logs fluentia-api-validation; docker rm -f fluentia-api-validation' EXIT
           docker exec fluentia-api-validation sh -c 'test ! -e /app/.env && test ! -e /app/db.sqlite3 && test ! -e /app/.private-media/DO_NOT_PACKAGE.txt && test ! -e /app/.local-mail/DO_NOT_PACKAGE.txt'
           docker exec fluentia-api-validation python manage.py migrate --noinput
