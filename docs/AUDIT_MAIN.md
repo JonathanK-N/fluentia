@@ -57,7 +57,6 @@
 | Moyenne | **En‑têtes de sécurité** | `X-Frame-Options`, CSP `frame-ancestors` et `no-store` posés seulement sur `/etudiant` et `/edition` | Étendre une CSP de base et `X-Content-Type-Options` à tout le site ; activer HSTS après validation du domaine |
 | Moyenne | **`API_ORIGIN` figé au build** | Les réécritures Next.js sont compilées | Documenté ; rebuild obligatoire si l'API change d'adresse |
 | Basse | **Variable morte** | `NEXT_PUBLIC_API_BASE_URL` présente dans `.env.example` mais jamais lue | La retirer |
-| Basse | **Dossier `.claude/`** | Dossier d'outillage de poste (20 fichiers CSV/Python) versionné à la racine | Le retirer du dépôt et l'ajouter au `.gitignore` |
 | Basse | **Documentation** | Plus de 40 fichiers dans `docs/`, plusieurs avec des statuts dépassés (« NO-GO », « PR en brouillon ») | Archiver les rapports de lot dans `docs/archive/`, garder un index court |
 | Basse | **Branches** | 10 branches distantes, dont plusieurs fusionnées (`frontend/mission-01`, `backend/lot-0x`, `tests`) | Supprimer les branches fusionnées ; garder `main`, `dev` et les branches actives |
 | Basse | **CODEOWNERS** | Seul `@JonathanK-N` est propriétaire | Ajouter Mamadou sur les zones qu'il maintient pour les relectures automatiques |
