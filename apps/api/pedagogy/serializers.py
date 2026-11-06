@@ -221,8 +221,8 @@ class CorrectionRequestSerializer(serializers.Serializer):
 class CorrectionCriterionSerializer(serializers.Serializer):
     id = serializers.ChoiceField(choices=["consigne", "organisation", "lexique", "grammaire"])
     label = serializers.CharField()
-    score = serializers.IntegerField(min_value=0, max_value=5)
-    comment = serializers.CharField()
+    level = serializers.ChoiceField(choices=["A1", "A2", "B1", "B2", "C1", "C2"])
+    comment = serializers.CharField(required=False, allow_blank=True)
 
 
 class CorrectionErrorSerializer(serializers.Serializer):
@@ -238,6 +238,7 @@ class CorrectionSerializer(serializers.Serializer):
     level = serializers.ChoiceField(choices=["A1", "A2", "B1", "B2", "C1", "C2"])
     score = serializers.IntegerField(min_value=0, max_value=20)
     summary = serializers.CharField()
+    feedback = serializers.CharField(required=False, allow_blank=True, default="")
     criteria = CorrectionCriterionSerializer(many=True)
     errors = CorrectionErrorSerializer(many=True)
     improved = serializers.CharField()

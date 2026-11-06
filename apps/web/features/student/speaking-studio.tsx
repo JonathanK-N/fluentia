@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "../../components/ui/primitives";
 import { Icon } from "../../components/app-shell/icons";
 import { formatDuration, type SpeakingTask } from "./content";
+import { FoldableAside } from "./foldable-aside";
 
 type Take = { url: string; seconds: number; at: string; type: string };
 type Phase = "idle" | "prep" | "recording";
@@ -133,7 +134,7 @@ export function SpeakingStudio({ task, others }: { task: SpeakingTask; others: {
           </li>)}</ul>
         </section>
       </div>
-      <aside className="studio-aside" aria-label="Repères pour l’oral">
+      <FoldableAside className="studio-aside" label="Repères pour l’oral" tab="Repères">
         <section className="student-card card-muted" aria-labelledby="conseils">
           <div className="studio-card-head"><h2 id="conseils">Conseils</h2></div>
           <ul className="checklist">{task.advice.map(item => <li key={item}>{item}</li>)}</ul>
@@ -142,7 +143,7 @@ export function SpeakingStudio({ task, others }: { task: SpeakingTask; others: {
           <div className="studio-card-head"><h2 id="autres-taches">Autres tâches</h2></div>
           <ul className="activity-list">{others.map(t => <li key={t.slug}><Link href={`/etudiant/expression-orale/${t.slug}`}>Tâche {t.number} — {t.title}</Link><Icon name="chevron" size={16} /></li>)}</ul>
         </nav>
-      </aside>
+      </FoldableAside>
     </div>
   </>;
 }

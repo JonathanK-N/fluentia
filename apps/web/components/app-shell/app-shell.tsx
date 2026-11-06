@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Icon, type IconName } from "./icons";
 import { SessionProvider, initials, useSession } from "../../lib/session";
+import { useFoldable } from "../../lib/foldable";
 import "./app-shell.css";
 
 type Item = { href: string; label: string; icon: IconName; exact?: boolean; external?: boolean };
@@ -106,6 +107,8 @@ function Shell({ variant, children }: { variant: "student" | "edition"; children
   const pathname = usePathname();
   const { profile, ready } = useSession();
   const [open, setOpen] = useState(false);
+  // Grand écran : menu replié en une colonne d’icônes, pour laisser la place au contenu.
+  const [folded, fold] = useFoldable("fluentia-menu-replie");
   const toggleRef = useRef<HTMLButtonElement>(null);
   const groups = variant === "edition" ? editionGroups : profile?.editor ? [...studentGroups, adminGroup] : studentGroups;
   const locked = variant === "edition" && ready && !profile?.editor;
@@ -128,23 +131,29 @@ function Shell({ variant, children }: { variant: "student" | "edition"; children
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
   const close = () => setOpen(false);
-  return <div className="app-shell" data-open={open || undefined}>
+  return <div className="app-shell" data-open={open || undefined} data-folded={folded || undefined}>
     <div className="shell-mobilebar">
       <button ref={toggleRef} type="button" className="shell-icon-button" aria-expanded={open} aria-controls="shell-sidebar" onClick={() => setOpen(value => !value)}>
         <Icon name={open ? "close" : "menu"} /><span className="sr-only">{open ? "Fermer la navigation" : "Ouvrir la navigation"}</span>
       </button>
       <Brand variant={variant} />
     </div>
-    <aside id="shell-sidebar" className="shell-sidebar">
-      <Brand variant={variant} />
+    <aside id="shell-sidebar" className="shell-sidebar" onClick={event => { if (folded && !(event.target as HTMLElement).closest("a, button")) fold(false); }}>
+      <div className="shell-sidebar-head">
+        <Brand variant={variant} />
+        <button type="button" className="shell-fold" aria-expanded={!folded} aria-controls="shell-sidebar" onClick={() => fold(!folded)}
+          title={folded ? "Afficher le menu" : "Réduire le menu"}>
+          <Icon name="chevron" size={16} /><span className="sr-only">{folded ? "Afficher le menu" : "Réduire le menu"}</span>
+        </button>
+      </div>
       <nav aria-label={variant === "edition" ? "Navigation éditoriale" : "Navigation de l’espace étudiant"} className="shell-nav">
         {groups.map(group => <div key={group.title} className="shell-group">
           <p className="shell-group-title">{group.title}</p>
           <ul>{group.items.map(item => {
             const active = isActive(pathname, item);
             return <li key={item.href}>
-              {item.external ? <a href={item.href} className="shell-link"><Icon name={item.icon} size={18} /><span>{item.label}</span></a> :
-              <Link href={item.href} onClick={close} className="shell-link" aria-current={active ? "page" : undefined} data-active={active || undefined}>
+              {item.external ? <a href={item.href} className="shell-link" title={folded ? item.label : undefined}><Icon name={item.icon} size={18} /><span>{item.label}</span></a> :
+              <Link href={item.href} onClick={close} className="shell-link" title={folded ? item.label : undefined} aria-current={active ? "page" : undefined} data-active={active || undefined}>
                 <Icon name={item.icon} size={18} /><span>{item.label}</span>
               </Link>}
             </li>;

@@ -11,6 +11,7 @@ import { playVerdict, primeSound } from "../../../../lib/feedback-sound";
 import { AudioPlayer } from "../../../../components/student/audio-player";
 import { Icon } from "../../../../components/app-shell/icons";
 import { Summary } from "../../../../features/student/ui";
+import { FoldableAside } from "../../../../features/student/foldable-aside";
 import { DocumentImage } from "../../../../features/student/document-image";
 import { exitFullscreen, enterFullscreen } from "../../../../lib/fullscreen";
 
@@ -286,7 +287,7 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
               <div className="student-nav" style={{ margin: 0 }}><Button loading={busy} onClick={submit}>Confirmer la soumission</Button> <Button variant="secondary" disabled={busy} onClick={() => setConfirm(false)}>Continuer la séance</Button></div>
             </section>}
           </div>
-          <aside className="attempt-aside" aria-label="Suivi de la séance">
+          <FoldableAside className="attempt-aside" label="Suivi de la séance" tab="Vue d’ensemble">
             <nav className="student-card map-card" aria-labelledby="vue-ensemble">
               <div className="map-head"><h2 id="vue-ensemble">Vue d’ensemble</h2><p>{answeredCount}/{total} répondues</p></div>
               <ul className="question-map">{shown.map((item, position) => {
@@ -301,7 +302,7 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
               <p className="badge-warn"><Icon name="clock" size={13} />Bon à savoir</p>
               <p>{listening ? "Appuyez sur ▶ pour écouter le document : vous pouvez le réécouter autant de fois que vous le souhaitez." : attempt.mode === "simulation" ? "En simulation, gardez un œil sur le chrono : chaque question compte." : "En entraînement, prenez le temps de relire : le corrigé explique chaque réponse."}</p>
             </div>
-          </aside>
+          </FoldableAside>
         </div>
       </div>
     </div>}

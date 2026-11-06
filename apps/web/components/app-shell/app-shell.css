@@ -151,3 +151,26 @@
 .shell-breadcrumb a { color: var(--muted); text-decoration: none; }
 .shell-breadcrumb a:hover { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
 .shell-breadcrumb [aria-current="page"] { color: var(--text); font-weight: 600; }
+
+/* Menu repliable (grand écran) : une colonne d’icônes, le contenu prend la place libérée. */
+.app-shell { transition: grid-template-columns 0.2s ease; }
+.shell-sidebar-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.shell-fold { display: inline-grid; place-items: center; width: 30px; height: 30px; flex-shrink: 0; border: 1px solid var(--side-active); border-radius: 8px; background: transparent; color: var(--side-text); cursor: pointer; transition: background var(--duration), color var(--duration); }
+.shell-fold svg { transform: rotate(180deg); transition: transform 0.2s ease; }
+.shell-fold:hover { background: var(--side-active); color: #fff; }
+@media (min-width: 961px) {
+  .app-shell[data-folded] { --sidebar: 72px; }
+  .app-shell[data-folded] .shell-sidebar { padding-inline: 0.6rem; cursor: pointer; }
+  .app-shell[data-folded] .shell-sidebar a, .app-shell[data-folded] .shell-sidebar button { cursor: pointer; }
+  .app-shell[data-folded] .shell-sidebar-head { flex-direction: column; }
+  .app-shell[data-folded] .shell-brand { padding: 0; }
+  .app-shell[data-folded] .shell-brand span, .app-shell[data-folded] .shell-group-title, .app-shell[data-folded] .shell-link span, .app-shell[data-folded] .shell-user div { display: none; }
+  .app-shell[data-folded] .shell-fold svg { transform: none; }
+  .app-shell[data-folded] .shell-nav { gap: 0.9rem; }
+  .app-shell[data-folded] .shell-group + .shell-group { padding-top: 0.9rem; border-top: 1px solid var(--side-active); }
+  .app-shell[data-folded] .shell-link { justify-content: center; padding-inline: 0; }
+  .app-shell[data-folded] .shell-user { justify-content: center; padding: 0.5rem; }
+  .app-shell[data-folded] .shell-content.student-space { max-width: 1360px; }
+}
+@media (max-width: 960px) { .shell-fold { display: none; } }
+@media (prefers-reduced-motion: reduce) { .app-shell, .shell-fold svg { transition: none; } }

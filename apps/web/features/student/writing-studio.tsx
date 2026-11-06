@@ -9,6 +9,7 @@ import { Icon } from "../../components/app-shell/icons";
 import { api, type ModelAnswer } from "../../lib/student-api";
 import { useSession } from "../../lib/session";
 import { countWords, formatDuration, type WritingTask } from "./content";
+import { FoldableAside } from "./foldable-aside";
 
 const criteria = ["J’ai respecté le type de texte et le destinataire.", "J’ai traité tous les points de la consigne.", "Mes idées sont organisées avec des connecteurs.", "J’ai varié le vocabulaire et évité les répétitions.", "J’ai relu l’accord, la conjugaison et la ponctuation."];
 
@@ -22,17 +23,20 @@ const draftKey = (task: WritingTask, subject: number) => `fluentia-ee-${task.slu
 function requestedSubject(task: WritingTask) {
   const params = new URLSearchParams(window.location.search);
   const index = Math.max(0, task.subjects.findIndex(item => item.id === Number(params.get("sujet"))));
-  if (params.has("vide")) {
-    write(draftKey(task, index), "");
-    params.delete("vide");
-    window.history.replaceState(null, "", `${window.location.pathname}${params.size ? `?${params}` : ""}`);
-  }
+  if (params.has("vide")) write(draftKey(task, index), "");
   return index;
 }
 
 export function WritingStudio({ task, others, corrector }: { task: WritingTask; others: { slug: string; number: number; title: string }[]; corrector: string }) {
   const [subject, setSubject] = useState(() => requestedSubject(task));
   const router = useRouter();
+  // Après l’affichage (pas pendant) : modifier l’adresse en plein rendu dérange le routeur de Next.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (!params.has("vide")) return;
+    params.delete("vide");
+    window.history.replaceState(window.history.state, "", `${window.location.pathname}${params.size ? `?${params}` : ""}`);
+  }, []);
   const key = draftKey(task, subject);
   const [text, setText] = useState("");
   const [saved, setSaved] = useState("");
@@ -156,7 +160,7 @@ export function WritingStudio({ task, others, corrector }: { task: WritingTask; 
           <p className="student-hint">{answer.demo ? "Exemple de démonstration pour ce type de tâche : la vraie IA rédigera une réponse propre à ce sujet. " : ""}Inspirez-vous de la structure et des connecteurs, puis rédigez avec vos propres mots.</p>
         </section>}
       </section>
-      <aside className="studio-aside" aria-label="Outils de rédaction">
+      <FoldableAside className="studio-aside" label="Outils de rédaction" tab="Outils">
         <section className="student-card" aria-labelledby="auto-evaluation">
           <div className="studio-card-head"><h2 id="auto-evaluation">Auto-évaluation</h2><span className="pill">{checks.filter(Boolean).length} / {criteria.length}</span></div>
           <ul className="checklist">{criteria.map((label, index) => <li key={label}><label><input type="checkbox" checked={checks[index]} onChange={e => setChecks(values => values.map((v, i) => i === index ? e.target.checked : v))} />{label}</label></li>)}</ul>
@@ -169,7 +173,7 @@ export function WritingStudio({ task, others, corrector }: { task: WritingTask; 
           <div className="studio-card-head"><h2 id="autres-taches">Autres tâches</h2></div>
           <ul className="activity-list">{others.map(t => <li key={t.slug}><Link href={`/etudiant/expression-ecrite/${t.slug}`}>Tâche {t.number} — {t.title}</Link><Icon name="chevron" size={16} /></li>)}</ul>
         </nav>
-      </aside>
+      </FoldableAside>
     </div>
   </>;
 }

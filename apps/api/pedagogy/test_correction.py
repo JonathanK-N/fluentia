@@ -12,7 +12,7 @@ from django.core.management import call_command
 from django.test import TestCase, override_settings
 from rest_framework.test import APIClient
 
-from .correction import in_band, level, nclc
+from .correction import coherent, in_band, level, nclc
 from .models import ModelAnswer, TaskSubject, WritingCorrection
 
 User = get_user_model()
@@ -149,17 +149,12 @@ class WritingCorrectionTests(StudentClient):
 OPENAI_CORRECTION = {
     "off_topic": False,
     "off_topic_reason": "",
+    "levels": [{"id": "grammaire", "level": "A2"}, {"id": "consigne", "level": "B2"}, {"id": "lexique", "level": "B1"}, {"id": "organisation", "level": "B2"}],
     "level": "B1",
     "score": 8,
     "goal": "Relisez les conjugaisons pour gagner les points qui manquent.",
-    "scores": [{"id": "grammaire", "score": 2}, {"id": "consigne", "score": 4}, {"id": "lexique", "score": 3}, {"id": "organisation", "score": 4}],
     "summary": "Message clair et poli ; relisez les conjugaisons.",
-    "comments": [
-        {"id": "consigne", "comment": "Tous les points sont traités."},
-        {"id": "organisation", "comment": "Bons connecteurs, avec « d’abord, ensuite »."},
-        {"id": "lexique", "comment": "Vocabulaire simple mais juste."},
-        {"id": "grammaire", "comment": "Plusieurs erreurs de conjugaison."},
-    ],
+    "feedback": "Tous les points sont traités, avec de bons connecteurs comme « d’abord, ensuite ». Le vocabulaire est simple mais juste ; relisez les conjugaisons.",
     "errors": [{"original": "je arriverai", "correction": "j’arriverai", "explanation": "Élision devant une voyelle, \"j’\"."}],
     "improved": "Bonjour Marie, j’arriverai un peu tard.",
     "advice": ["Relisez les élisions."],
@@ -196,7 +191,8 @@ class OpenAICorrectionTests(StudentClient):
         self.assertIn(f"<texte>\n{TEXT}\n</texte>", call["input"])
         self.assertIn(self.subject.prompt, call["input"])
         self.assertEqual(WritingCorrection.objects.get().provider, "openai")
-        self.assertEqual(response.data["criteria"][1]["comment"], "Bons connecteurs, avec « d’abord, ensuite ».")
+        self.assertIn("« d’abord, ensuite »", response.data["feedback"])
+        self.assertNotIn("comment", response.data["criteria"][0])
 
     def test_score_arrives_before_the_details(self):
         patcher, _ = self.fake(OPENAI_CORRECTION)
@@ -205,7 +201,7 @@ class OpenAICorrectionTests(StudentClient):
         partials = [event["partial"] for event in response.events if "partial" in event]
         first_scored = next(p for p in partials if "score" in p)
         self.assertEqual((first_scored["score"], first_scored["level"]), (8, "B1"))
-        self.assertNotIn("criteria", first_scored)
+        self.assertEqual([c["level"] for c in first_scored["criteria"]], ["B2", "B2", "B1", "A2"])
         self.assertNotIn("errors", first_scored)
         self.assertNotIn("improved", next(p for p in partials if "goal" in p))
         self.assertTrue(response.events[-1]["done"])
@@ -220,7 +216,7 @@ class OpenAICorrectionTests(StudentClient):
         self.assertEqual((response.data["level"], response.data["score"]), ("A1", 3))
         self.assertTrue(response.data["off_topic"])
         self.assertEqual(response.data["off_topic_reason"], reason)
-        self.assertEqual(sum(c["score"] for c in response.data["criteria"]), 13)  # le détail par critère reste visible
+        self.assertEqual([c["level"] for c in response.data["criteria"]], ["B2", "B2", "B1", "A2"])  # le détail reste visible
         page = self.client_for(self.student).get(f"/api/v1/tasks/writing/corrections/{response.data['id']}/")
         self.assertEqual(page.data["nclc"], "3 ou moins")
 
@@ -230,8 +226,15 @@ class OpenAICorrectionTests(StudentClient):
             response = self.correct()
         self.assertEqual((response.data["level"], response.data["score"]), ("B1", 9))
 
+    def test_overall_level_stays_between_the_criteria(self):
+        all_c1 = [{"id": key, "level": "C1"} for key in ("consigne", "organisation", "lexique", "grammaire")]
+        patcher, _ = self.fake({**OPENAI_CORRECTION, "levels": all_c1, "level": "B2", "score": 13})
+        with patcher:
+            response = self.correct()
+        self.assertEqual((response.data["level"], response.data["score"]), ("C1", 14))
+
     def test_incomplete_answer_is_refused(self):
-        patcher, _ = self.fake({**OPENAI_CORRECTION, "scores": OPENAI_CORRECTION["scores"][:3]})
+        patcher, _ = self.fake({**OPENAI_CORRECTION, "levels": OPENAI_CORRECTION["levels"][:3]})
         with patcher:
             self.assertEqual(self.correct().status_code, 502)
         self.assertFalse(WritingCorrection.objects.exists())
@@ -274,8 +277,9 @@ class PrepareAnswersTests(TestCase):
 
 class CorrectionPageTests(StudentClient):
     def test_official_tcf_bands(self):
-        self.assertEqual([level(n) for n in (0, 3, 4, 5, 6, 9, 10, 13, 14, 15, 16, 20)], ["A1", "A1", "A2", "A2", "B1", "B1", "B2", "B2", "C1", "C1", "C2", "C2"])
-        self.assertEqual((in_band("B1", 17), in_band("B2", 4), in_band("C1", 15)), (9, 10, 15))
+        self.assertEqual([level(n) for n in (0, 3, 4, 5, 6, 9, 10, 13, 14, 15, 16, 18, 20)], ["A1", "A1", "A2", "A2", "B1", "B1", "B2", "B2", "C1", "C1", "C2", "C2", "C2"])
+        self.assertEqual((in_band("B1", 17), in_band("B2", 4), in_band("C1", 15), in_band("C2", 20)), (9, 10, 15, 18))
+        self.assertEqual((coherent("B2", ["C1", "C1"]), coherent("C2", ["B1", "B2"]), coherent("B2", ["B1", "C1"])), ("C1", "B2", "B2"))
 
     def test_score_is_converted_with_the_ircc_scale(self):
         self.assertEqual([nclc(n) for n in (3, 4, 6, 9, 10, 11, 12, 15, 16, 20)], ["3 ou moins", "4", "5", "6", "7", "7", "8", "9", "10+", "10+"])

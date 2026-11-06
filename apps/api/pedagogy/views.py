@@ -479,7 +479,7 @@ class WritingCorrectionDetailView(SecureView):
             "nclc": nclc(saved.result["score"]) if saved.result else None,
             "nclc_goal": NCLC_GOAL,
             "remaining": corrections_left(request.user),
-            "subject": subject_link(subject) | {"prompt": subject.prompt} if subject else None,
+            "subject": subject_link(subject) | {"prompt": subject.prompt, "min_words": subject.min_words, "max_words": subject.max_words} if subject else None,
             "next": subject_link(following) if following else None,
         })
 
