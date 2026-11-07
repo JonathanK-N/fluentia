@@ -141,6 +141,36 @@ INPUT_TOKENS_PER_MINUTE = 600
 OUTPUT_TOKENS_PER_MINUTE = 1200
 
 
+# Tarifs Realtime (USD par million de jetons), page Pricing d’OpenAI consultée le 6 novembre 2026.
+PRICES = {
+    "gpt-realtime-2.1-mini": {
+        "audio_in": Decimal(10), "cached_audio_in": Decimal("0.30"), "text_in": Decimal("0.60"),
+        "audio_out": Decimal(20), "text_out": Decimal("2.40"),
+    },
+    "gpt-realtime-2.1": {
+        "audio_in": Decimal(32), "cached_audio_in": Decimal("0.40"), "text_in": Decimal(4),
+        "audio_out": Decimal(64), "text_out": Decimal(24),
+    },
+}
+# Transcription de la voix du candidat, facturée à la minute.
+TRANSCRIPTION_USD_PER_MINUTE = {"gpt-live-transcribe": Decimal("0.017")}
+
+
+def measured_cost(model, usage):
+    """Coût d’après la consommation que la session a réellement rapportée (événements response.done).
+
+    Les jetons d’entrée comptent toute la conversation à chaque réponse : le coût réel grandit avec la durée.
+    Renvoie None pour un modèle sans tarif connu ; le plafond prudent sert alors d’estimation.
+    """
+    prices = PRICES.get(model)
+    if prices is None or not usage:
+        return None
+    total = sum(Decimal(usage.get(key, 0)) * price for key, price in prices.items()) / 1_000_000
+    per_minute = TRANSCRIPTION_USD_PER_MINUTE.get(settings.OPENAI_REALTIME_TRANSCRIPTION_MODEL, Decimal(0))
+    total += Decimal(str(usage.get("transcription_seconds", 0))) / 60 * per_minute
+    return total.quantize(Decimal("0.000001"))
+
+
 def estimated_cost_ceiling(seconds):
     """Plafond prudent, pas le coût réel : il suppose que le candidat et l’examinateur parlent chacun
     pendant toute la durée, au tarif audio plein, sans remise du cache. La facture réelle est en dessous."""

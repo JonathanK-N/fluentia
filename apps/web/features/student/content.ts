@@ -12,7 +12,7 @@ export const skills: { id: "reading" | "listening" | "writing" | "speaking"; num
 
 export type WritingTask = { slug: string; number: number; title: string; genre: string; min: number; max: number; minutes: number; advice: string[]; subjects: { id?: number; title: string; prompt: string; documents?: { label: string; text: string }[] }[] };
 
-export type SpeakingTask = { slug: string; number: number; title: string; seconds: number; prepSeconds: number; goal: string; advice: string[]; subjects: { title: string; prompt: string; cues: string[] }[] };
+export type SpeakingTask = { slug: string; number: number; title: string; seconds: number; prepSeconds: number; goal: string; advice: string[]; subjects: { id: number; title: string; prompt: string; cues: string[] }[] };
 
 /** Les trois tâches suivent le format TCF ; leurs sujets viennent de l’API. */
 export const taskSlugs = ["tache-1", "tache-2", "tache-3"];

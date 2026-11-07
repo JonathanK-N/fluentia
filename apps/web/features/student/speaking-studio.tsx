@@ -6,11 +6,13 @@ import { Button } from "../../components/ui/primitives";
 import { Icon } from "../../components/app-shell/icons";
 import { formatDuration, type SpeakingTask } from "./content";
 import { FoldableAside } from "./foldable-aside";
+import { ExaminerSession } from "./examiner-session";
 
 type Take = { url: string; seconds: number; at: string; type: string };
 type Phase = "idle" | "prep" | "recording";
 
-export function SpeakingStudio({ task, others }: { task: SpeakingTask; others: { slug: string; number: number; title: string }[] }) {
+export function SpeakingStudio({ task, others, examiner = "" }: { task: SpeakingTask; others: { slug: string; number: number; title: string }[]; examiner?: string }) {
+  const [withExaminer, setWithExaminer] = useState(false);
   const [subject, setSubject] = useState(0);
   const [phase, setPhase] = useState<Phase>("idle");
   const [clock, setClock] = useState(0);
@@ -95,7 +97,7 @@ export function SpeakingStudio({ task, others }: { task: SpeakingTask; others: {
       </section>
       <section className="status-card" aria-labelledby="bon-a-savoir">
         <div className="status-head"><h2 id="bon-a-savoir" className="badge-warn"><Icon name="clock" size={14} />Bon à savoir</h2></div>
-        <p className="status-text notice-text">Vos enregistrements restent dans ce navigateur et disparaissent à la fermeture de la page. Rien n’est envoyé à Fluentia.</p>
+        <p className="status-text notice-text">{examiner ? <>L’enregistreur libre garde vos prises dans ce navigateur. Avec l’examinateur, votre voix est envoyée à {examiner} pendant la conversation ; Fluentia conserve la transcription.</> : "Vos enregistrements restent dans ce navigateur et disparaissent à la fermeture de la page. Rien n’est envoyé à Fluentia."}</p>
       </section>
     </div>
     <div className="section-title"><h2>Votre sujet</h2>
@@ -110,8 +112,16 @@ export function SpeakingStudio({ task, others }: { task: SpeakingTask; others: {
           <p>{current.prompt}</p>
           <div className="pill-row" style={{ marginTop: ".9rem" }}>{current.cues.map(cue => <span className="pill" key={cue}>{cue}</span>)}</div>
         </section>
+        {examiner && <section className="examiner-launch" aria-labelledby="examinateur">
+          <div>
+            <h2 id="examinateur">Passer la tâche avec l’examinateur</h2>
+            <p>Il vous parle, vous écoute et vous relance, dans le temps officiel.</p>
+          </div>
+          <Button disabled={phase !== "idle"} onClick={() => setWithExaminer(true)}><Icon name="mic" size={18} />Commencer</Button>
+        </section>}
+        {withExaminer && <ExaminerSession task={task} subject={current} examiner={examiner} onExit={() => setWithExaminer(false)} />}
         <section className="recorder" aria-labelledby="enregistreur">
-          <h2 id="enregistreur" className="sr-only">Enregistreur</h2>
+          <h2 id="enregistreur" className="sr-only">Enregistreur libre</h2>
           <p className="student-eyebrow">{phase === "prep" ? "Préparation" : phase === "recording" ? "Enregistrement en cours" : "Prêt à commencer"}</p>
           <p className="big-timer">{formatDuration(Math.max(0, left))}</p>
           <div className="level-meter" aria-hidden="true">{levels.map((level, index) => <span key={index} style={{ height: `${8 + level * 32}px` }} />)}</div>

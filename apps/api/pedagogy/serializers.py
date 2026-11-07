@@ -280,9 +280,21 @@ class SpeakingTurnSerializer(StrictSerializer):
     text = serializers.CharField(max_length=4000, allow_blank=True, trim_whitespace=True)
 
 
+class SpeakingUsageSerializer(StrictSerializer):
+    """Jetons rapportés par la session vocale (somme des response.done), pour mesurer le coût réel."""
+
+    audio_in = serializers.IntegerField(min_value=0, max_value=50_000_000, default=0)
+    cached_audio_in = serializers.IntegerField(min_value=0, max_value=50_000_000, default=0)
+    text_in = serializers.IntegerField(min_value=0, max_value=50_000_000, default=0)
+    audio_out = serializers.IntegerField(min_value=0, max_value=50_000_000, default=0)
+    text_out = serializers.IntegerField(min_value=0, max_value=50_000_000, default=0)
+    transcription_seconds = serializers.FloatField(min_value=0, max_value=7200, default=0)
+
+
 class SpeakingFinishSerializer(StrictSerializer):
     seconds = serializers.IntegerField(min_value=0, max_value=7200)
     transcript = SpeakingTurnSerializer(many=True, max_length=400)
+    usage = SpeakingUsageSerializer(required=False)
 
 
 class SpeakingFinishedSerializer(serializers.Serializer):

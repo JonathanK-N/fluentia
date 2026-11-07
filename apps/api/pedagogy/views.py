@@ -594,8 +594,14 @@ class SpeakingFinishView(SecureView):
             saved.seconds = min(saved.seconds, max(data.validated_data["seconds"], elapsed))
             saved.transcript = data.validated_data["transcript"]
             saved.status, saved.ended_at = SpeakingSession.Status.FINISHED, now
-            saved.estimated_cost_usd = 0 if saved.provider == "demo" else speaking.estimated_cost_ceiling(saved.seconds)
-            saved.save(update_fields=["seconds", "transcript", "status", "ended_at", "estimated_cost_usd"])
+            saved.usage = data.validated_data.get("usage") or {}
+            if saved.provider == "demo":
+                saved.estimated_cost_usd = 0
+            else:
+                # Coût mesuré quand la session l’a rapporté ; sinon le plafond prudent.
+                measured = speaking.measured_cost(saved.model, saved.usage)
+                saved.estimated_cost_usd = measured if measured is not None else speaking.estimated_cost_ceiling(saved.seconds)
+            saved.save(update_fields=["seconds", "transcript", "status", "ended_at", "usage", "estimated_cost_usd"])
         return Response(SpeakingFinishedSerializer({
             "id": saved.pk, "status": saved.status, "seconds": saved.seconds, "seconds_left": speaking_seconds_left(request.user),
         }).data)

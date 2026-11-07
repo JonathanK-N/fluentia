@@ -408,6 +408,8 @@ class SpeakingSession(models.Model):
     seconds = models.PositiveIntegerField(default=0)
     transcript = models.JSONField(default=list, blank=True)
     result = models.JSONField(null=True, blank=True)
+    # Jetons rapportés par la session vocale ; vide si le navigateur n’a rien transmis.
+    usage = models.JSONField(default=dict, blank=True)
     estimated_cost_usd = models.DecimalField(max_digits=10, decimal_places=6, default=0)
 
     class Meta:

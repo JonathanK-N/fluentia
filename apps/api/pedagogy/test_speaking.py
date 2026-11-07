@@ -299,6 +299,45 @@ class OpenAISpeakingTests(SpeakingClient):
         self.finish(opened.data["id"], seconds=300, client=client)
         self.assertEqual(SpeakingSession.objects.get().estimated_cost_usd, Decimal("0.150000"))
 
+    @override_settings(OPENAI_REALTIME_MODEL="gpt-realtime-2.1-mini", OPENAI_REALTIME_TRANSCRIPTION_MODEL="gpt-live-transcribe")
+    def test_finish_measures_the_cost_from_the_reported_usage(self):
+        patcher, _ = self.fake()
+        client = self.client_for(self.student)
+        with patcher:
+            opened = self.open(self.task2, client=client)
+        usage = {"audio_in": 100_000, "cached_audio_in": 50_000, "text_in": 20_000, "audio_out": 10_000, "text_out": 1_000, "transcription_seconds": 120}
+        response = client.post(
+            f"/api/v1/speaking/sessions/{opened.data['id']}/finish/",
+            {"seconds": 300, "transcript": TRANSCRIPT, "usage": usage}, format="json", HTTP_X_CSRFTOKEN=client.csrf,
+        )
+        self.assertEqual(response.status_code, 200)
+        saved = SpeakingSession.objects.get()
+        # mini : 1,00 + 0,015 + 0,012 + 0,20 + 0,0024 = 1,2294 $ de jetons, plus 2 min × 0,017 $ de transcription.
+        self.assertEqual(saved.estimated_cost_usd, Decimal("1.263400"))
+        self.assertEqual(saved.usage["audio_out"], 10_000)
+
+    def test_unpriced_model_falls_back_to_the_ceiling(self):
+        patcher, _ = self.fake()
+        client = self.client_for(self.student)
+        with patcher:
+            opened = self.open(self.task2, client=client)
+        client.post(
+            f"/api/v1/speaking/sessions/{opened.data['id']}/finish/",
+            {"seconds": 300, "transcript": TRANSCRIPT, "usage": {"audio_in": 1000}}, format="json", HTTP_X_CSRFTOKEN=client.csrf,
+        )
+        self.assertEqual(SpeakingSession.objects.get().estimated_cost_usd, Decimal("0.150000"))
+
+    def test_unknown_usage_fields_are_refused(self):
+        patcher, _ = self.fake()
+        client = self.client_for(self.student)
+        with patcher:
+            opened = self.open(client=client)
+        response = client.post(
+            f"/api/v1/speaking/sessions/{opened.data['id']}/finish/",
+            {"seconds": 60, "transcript": TRANSCRIPT, "usage": {"audio_in": -5}}, format="json", HTTP_X_CSRFTOKEN=client.csrf,
+        )
+        self.assertEqual(response.status_code, 400)
+
     def test_openai_failure_is_reported_without_counting(self):
         patcher, client = self.fake()
         client.realtime.client_secrets.create.side_effect = openai.APIConnectionError(request=httpx.Request("POST", "https://api.openai.com"))
