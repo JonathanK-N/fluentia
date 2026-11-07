@@ -19,7 +19,7 @@ USE_TZ = True
 STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 REST_FRAMEWORK = {"DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"], "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema"}
-SPECTACULAR_SETTINGS = {"TITLE": "Fluentia API", "VERSION": "0.1.0", "ENUM_NAME_OVERRIDES": {"SubscriptionStatusEnum": ["free", "premium", "expired"], "AttemptStatusEnum": "exams.models.Attempt.Status", "ExamSkillEnum": "exams.models.Exam.Skill", "SeriesSkillEnum": ["reading", "listening", "writing", "speaking"], "SeriesStatusEnum": ["draft", "review", "approved", "published"]}}
+SPECTACULAR_SETTINGS = {"TITLE": "Fluentia API", "VERSION": "0.1.0", "ENUM_NAME_OVERRIDES": {"SubscriptionStatusEnum": ["free", "premium", "expired"], "AttemptStatusEnum": "exams.models.Attempt.Status", "ExamSkillEnum": "exams.models.Exam.Skill", "SeriesSkillEnum": ["reading", "listening", "writing", "speaking"], "SeriesStatusEnum": ["draft", "review", "approved", "published"], "ExamModeEnum": "exams.models.Exam.Mode", "SpeakingModeEnum": ["practice", "simulation"]}}
 INSTALLED_APPS += ["accounts"]
 INSTALLED_APPS += ["pedagogy"]
 PRIVATE_MEDIA_ROOT = Path(os.getenv("PRIVATE_MEDIA_ROOT", str(BASE_DIR / ".private-media")))
@@ -30,6 +30,14 @@ WRITING_CORRECTION_DAILY_LIMIT = int(os.getenv("WRITING_CORRECTION_DAILY_LIMIT",
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "")
 OPENAI_REASONING_EFFORT = os.getenv("OPENAI_REASONING_EFFORT", "low")
+# Oral avec examinateur IA : « demo » ne contacte rien ; « openai » ouvre une session Realtime par clé éphémère.
+SPEAKING_PROVIDER = os.getenv("SPEAKING_PROVIDER", "demo")
+SPEAKING_DAILY_MINUTES = int(os.getenv("SPEAKING_DAILY_MINUTES", "15"))
+# 1 : Premium requis (sauf une tâche 1 offerte). 0 : oral ouvert à tous les comptes connectés, quota compris.
+SPEAKING_REQUIRE_PREMIUM = os.getenv("SPEAKING_REQUIRE_PREMIUM", "1") == "1"
+OPENAI_REALTIME_MODEL = os.getenv("OPENAI_REALTIME_MODEL", "gpt-realtime-2.1-mini")
+OPENAI_REALTIME_VOICE = os.getenv("OPENAI_REALTIME_VOICE", "marin")
+OPENAI_REALTIME_TRANSCRIPTION_MODEL = os.getenv("OPENAI_REALTIME_TRANSCRIPTION_MODEL", "gpt-live-transcribe")
 AUTHENTICATION_BACKENDS = ["accounts.backends.EmailBackend"]
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},

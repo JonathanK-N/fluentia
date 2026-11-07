@@ -7,6 +7,11 @@ from django.utils import timezone
 from .models import Subscription
 
 
+def is_premium(user):
+    sub = Subscription.objects.filter(user=user).first()
+    return bool(sub) and sub.state() == "premium"
+
+
 def payload(user):
     sub = Subscription.objects.filter(user=user).first()
     now = timezone.now()

@@ -1,5 +1,6 @@
 """Format des trois tâches de Rédaction et d’Oral ; les sujets viennent du jeu actif en base."""
 
+from . import speaking
 from .correction import recipient
 from .models import TaskSet
 
@@ -36,7 +37,7 @@ def tasks_payload(task_set):
         else:
             task.update(
                 goal=form["goal"], seconds=first.speak_seconds, prepSeconds=first.prep_seconds,
-                subjects=[{"title": s.title, "prompt": s.prompt, "cues": s.cues} for s in subjects],
+                subjects=[{"id": s.id, "title": s.title, "prompt": s.prompt, "cues": s.cues} for s in subjects],
             )
         tasks.append(task)
     return {"title": task_set.title, "tasks": tasks}
@@ -47,4 +48,6 @@ def active_tasks(skill):
     payload = tasks_payload(task_set) if task_set else {"title": "", "tasks": []}
     if skill == "writing":
         payload["corrector"] = recipient()
+    else:
+        payload["examiner"] = speaking.recipient()
     return payload
