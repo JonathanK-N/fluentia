@@ -1,0 +1,13 @@
+{% extends "emails/base.html" %}
+{% block preheader %}Une connexion depuis un nouvel appareil a été détectée.{% endblock %}
+{% block title %}Nouvelle connexion à votre compte{% endblock %}
+{% block body %}
+<p style="margin:0 0 16px; font-size:16px; line-height:1.6; color:#2b3047;">Votre compte <strong>Fluentia</strong> vient d’être utilisé depuis un appareil ou un navigateur que nous ne connaissions pas.</p>
+<p style="margin:0 0 16px; font-size:16px; line-height:1.6; color:#2b3047;">Si c’est bien vous, vous n’avez rien à faire. Sinon, changez votre mot de passe sans attendre.</p>
+{% include "emails/_button.html" with url=url label="Ce n’était pas moi" %}
+{% endblock %}
+{% block notice_row %}<tr><td style="padding:20px 32px; background-color:#f4f5fa; border-top:1px solid #e2e5ef;">
+<p style="margin:0; font-size:14px; line-height:1.6; color:#2b3047;"><strong>Date :</strong> {{ when }}</p>
+<p style="margin:8px 0 0; font-size:14px; line-height:1.6; color:#2b3047;"><strong>Appareil :</strong> {{ device }}</p>
+</td></tr>{% endblock %}
+{% block footnote %}Ce message de sécurité est envoyé lors de la première connexion depuis un nouvel appareil.{% endblock %}

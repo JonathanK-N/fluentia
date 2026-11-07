@@ -22,6 +22,16 @@ class VerifySerializer(serializers.Serializer):
     token = serializers.RegexField(r"^[A-Za-z0-9_-]{43}$", write_only=True)
 
 
+class PasswordForgotSerializer(serializers.Serializer):
+    email = serializers.EmailField(max_length=254)
+
+
+class PasswordResetSerializer(serializers.Serializer):
+    uid = serializers.RegexField(r"^[A-Za-z0-9_-]{1,32}$", write_only=True)
+    token = serializers.RegexField(r"^[0-9a-z]{1,13}-[0-9a-f]{20,64}$", write_only=True)
+    password = serializers.CharField(write_only=True, max_length=128, trim_whitespace=False)
+
+
 class ProfileSerializer(serializers.Serializer):
     display_name = serializers.CharField(max_length=80, required=False)
     live_correction = serializers.BooleanField(required=False)

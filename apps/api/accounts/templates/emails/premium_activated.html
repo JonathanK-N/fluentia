@@ -1,0 +1,13 @@
+{% extends "emails/base.html" %}
+{% block preheader %}Votre accès Premium est actif jusqu’au {{ until }}.{% endblock %}
+{% block title %}Votre accès Premium est activé{% endblock %}
+{% block body %}
+<p style="margin:0 0 16px; font-size:16px; line-height:1.6; color:#2b3047;">Bonne nouvelle : votre accès <strong>Premium</strong> est actif jusqu’au <strong>{{ until }}</strong>.</p>
+{% include "emails/_p.html" with text="Vous pouvez passer les trois tâches d’expression orale face à l’examinateur IA, dans les conditions du jour J." %}
+{% include "emails/_button.html" with url=url label="Ouvrir mon espace" %}
+{% endblock %}
+{% block notice_row %}<tr><td style="padding:20px 32px; background-color:#f4f5fa; border-top:1px solid #e2e5ef;">
+<p style="margin:0; font-size:14px; line-height:1.6; color:#2b3047;">Votre accès reste valable jusqu’à sa date de fin, sans renouvellement automatique.</p>
+<p style="margin:8px 0 0; font-size:14px; line-height:1.6; color:#2b3047;">Vous retrouvez la date de fin à tout moment dans votre Profil.</p>
+</td></tr>{% endblock %}
+{% block footnote %}Ce message confirme l’activation ou la prolongation de votre accès Premium.{% endblock %}

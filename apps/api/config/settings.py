@@ -51,6 +51,11 @@ CSRF_TRUSTED_ORIGINS = [PUBLIC_WEB_ORIGIN]
 EMAIL_BACKEND = os.getenv("DJANGO_EMAIL_BACKEND", "django.core.mail.backends.locmem.EmailBackend")
 EMAIL_FILE_PATH = os.getenv("DJANGO_EMAIL_FILE_PATH", str(BASE_DIR / ".local-mail"))
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "Fluentia <no-reply@localhost>")
+# Adresse de contact affichée dans les courriels, et fuseau des dates qui y figurent.
+SUPPORT_EMAIL = os.getenv("SUPPORT_EMAIL", "contact@cognito-inc.ca")
+EMAIL_TIME_ZONE = os.getenv("EMAIL_TIME_ZONE", "America/Toronto")
+# Lien de réinitialisation du mot de passe : 60 minutes, à usage unique.
+PASSWORD_RESET_TIMEOUT = 3600
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SAMESITE = "Lax"

@@ -1,0 +1,8 @@
+Ne partagez jamais les liens de ce courriel.
+
+Cordialement,
+L’équipe Fluentia
+
+—
+Vous recevez ce message car un compte Fluentia est associé à {{ email }}.
+Fluentia · un produit Cognito Inc. · Sherbrooke (Québec) · {{ support }}

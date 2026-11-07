@@ -1,0 +1,10 @@
+{% autoescape off %}{% include "emails/_greeting.txt" %}
+Votre accès Premium se termine le {{ until }}, dans {{ days }} jour{{ days|pluralize }}.
+
+Profitez-en pour faire une simulation orale complète et mesurer vos progrès avant la fin.
+
+Voir mon abonnement : {{ url }}
+
+Après cette date, votre compte reste actif et vos résultats sont conservés. Pour prolonger votre accès : {{ support }}
+
+{% include "emails/_signature.txt" %}{% endautoescape %}
