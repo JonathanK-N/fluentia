@@ -6,7 +6,9 @@ from urllib.parse import urlencode
 
 from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model, login, logout
-from django.core.mail import send_mail
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.db import IntegrityError, transaction
 from django.db.models import F
 from django.middleware.csrf import get_token
@@ -23,12 +25,15 @@ from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from rest_framework.views import APIView
 
 from .models import EmailVerification, StudentProfile
+from . import emails
 from . import subscription as premium
 from .serializers import (
     AccountSerializer,
     CsrfSerializer,
     LoginSerializer,
     MessageSerializer,
+    PasswordForgotSerializer,
+    PasswordResetSerializer,
     ProfileSerializer,
     RegisterSerializer,
     VerifySerializer,
@@ -75,16 +80,18 @@ def account(user):
 def verification_mail(user):
     token = EmailVerification.issue(user)
     # L'origine vient de la configuration, jamais de Host ou d'une entrée cliente.
-    url = (
-        settings.PUBLIC_WEB_ORIGIN + "/etudiant/verifier#" + urlencode({"token": token})
-    )
-    send_mail(
-        "Vérifiez votre adresse Fluentia",
-        "Pour confirmer votre adresse sous 24 heures, ouvrez ce lien :\n" + url,
-        settings.DEFAULT_FROM_EMAIL,
-        [user.email],
-        fail_silently=False,
-    )
+    url = emails.link("/etudiant/verifier#" + urlencode({"token": token}))
+    emails.send("verify", user, required=True, url=url)
+
+
+DEVICE_COOKIE = "fluentia_device"
+DEVICE_SALT = "fluentia.known-device"
+
+
+def known_accounts(request):
+    """Comptes déjà connectés depuis ce navigateur (cookie signé, sans donnée personnelle en clair)."""
+    value = request.get_signed_cookie(DEVICE_COOKIE, default="", salt=DEVICE_SALT)
+    return [item for item in value.split(",") if item.isdigit()][-20:]
 
 
 @method_decorator([never_cache, csrf_protect], name="dispatch")
@@ -148,8 +155,22 @@ class LoginView(SecureView):
         )
         if user is None:
             raise ValidationError({"detail": "Adresse ou mot de passe incorrect."})
+        returning = user.last_login is not None
+        known = known_accounts(request)
         login(request, user)
-        return Response(account(user))
+        response = Response(account(user))
+        if str(user.pk) not in known:
+            # Alerte seulement pour un compte déjà utilisé ailleurs : pas à la toute première connexion.
+            if returning:
+                emails.send(
+                    "new_device", user, url=emails.link("/etudiant/mot-de-passe"),
+                    when=emails.day_and_time(timezone.now()), device=emails.device_label(request.META.get("HTTP_USER_AGENT")),
+                )
+            response.set_signed_cookie(
+                DEVICE_COOKIE, ",".join([*known, str(user.pk)]), salt=DEVICE_SALT, max_age=2 * 365 * 86400,
+                httponly=True, secure=settings.SESSION_COOKIE_SECURE, samesite="Lax",
+            )
+        return response
 
 
 class LogoutView(SecureView):
@@ -210,6 +231,8 @@ class VerifyView(SecureView):
             StudentProfile.objects.filter(user_id=ticket.user_id).update(
                 email_verified_at=timezone.now(), verified_email=ticket.email
             )
+            user = User.objects.get(pk=ticket.user_id)
+            transaction.on_commit(lambda: emails.send("welcome", user, url=emails.link("/etudiant")))
         return Response({"detail": "Adresse vérifiée. Vous pouvez vous connecter."})
 
 
@@ -229,3 +252,54 @@ class ResendView(SecureView):
             ):
                 verification_mail(user)
         return Response({"detail": "Si nécessaire, un nouveau message a été préparé."})
+
+
+RESET_SENT = "Si un compte est associé à cette adresse, un lien de réinitialisation vient d’être envoyé."
+RESET_INVALID = "Ce lien est invalide ou a expiré. Demandez un nouveau lien de réinitialisation."
+
+
+class PasswordForgotView(SecureView):
+    permission_classes = [AllowAny]
+
+    @extend_schema(request=PasswordForgotSerializer, responses={202: MessageSerializer})
+    def post(self, request):
+        data = PasswordForgotSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        user = User.objects.filter(email__iexact=data.validated_data["email"].strip(), is_active=True).first()
+        if user is not None and user.has_usable_password():
+            # Jeton Django : lié au mot de passe actuel et à la dernière connexion, donc à usage unique.
+            url = emails.link("/etudiant/mot-de-passe#" + urlencode({
+                "uid": urlsafe_base64_encode(force_bytes(user.pk)), "token": default_token_generator.make_token(user),
+            }))
+            emails.send("password_reset", user, url=url)
+        # Même réponse que le compte existe ou non : pas d’énumération des adresses.
+        return Response({"detail": RESET_SENT}, status=202)
+
+
+class PasswordResetView(SecureView):
+    permission_classes = [AllowAny]
+
+    @extend_schema(request=PasswordResetSerializer, responses=MessageSerializer)
+    def post(self, request):
+        data = PasswordResetSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        try:
+            pk = force_str(urlsafe_base64_decode(data.validated_data["uid"]))
+            user = User.objects.get(pk=pk, is_active=True)
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            raise ValidationError({"detail": RESET_INVALID})
+        if not default_token_generator.check_token(user, data.validated_data["token"]):
+            raise ValidationError({"detail": RESET_INVALID})
+        check_password(data.validated_data["password"], user)
+        with transaction.atomic():
+            # Le nouveau hachage invalide le lien et les sessions ouvertes ailleurs.
+            user.set_password(data.validated_data["password"])
+            user.save(update_fields=["password"])
+            # Recevoir le lien prouve la possession de l’adresse.
+            profile, _ = StudentProfile.objects.get_or_create(user=user)
+            if not profile.email_verified_at:
+                StudentProfile.objects.filter(pk=profile.pk).update(
+                    email_verified_at=timezone.now(), verified_email=user.email.strip().lower()
+                )
+        emails.send("password_changed", user, url=emails.link("/etudiant/mot-de-passe"), when=emails.day_and_time(timezone.now()))
+        return Response({"detail": "Mot de passe modifié. Vous pouvez vous connecter avec le nouveau mot de passe."})

@@ -9,7 +9,7 @@ const faq = [
   { q: "Que se passe-t-il quand le temps est écoulé ?", a: "Le délai est contrôlé par le serveur. À l’échéance, les réponses déjà enregistrées sont conservées, mais la tentative ne peut plus être modifiée. Une tentative non soumise ne produit pas de score." },
   { q: "Puis-je réécouter un document d’Écoute ?", a: "Oui. Appuyez sur ▶ autant de fois que vous le souhaitez, tant que la séance est en cours. En entraînement, la transcription s’affiche aussi pour comparer avec ce que vous avez compris." },
   { q: "Le score obtenu correspond-il à un niveau officiel ?", a: "Non. Les exercices sont originaux et non officiels. Les difficultés sont proposées par les auteurs et ne sont pas calibrées. Seul le test officiel délivre un résultat reconnu." },
-  { q: "Où sont conservés mes textes et mes enregistrements d’expression ?", a: "Dans votre navigateur uniquement. Les textes restent sur cet appareil ; les enregistrements disparaissent à la fermeture de la page. Téléchargez-les si vous souhaitez les garder." },
+  { q: "Où sont conservés mes textes et ma voix à l’oral ?", a: "Vos brouillons de Rédaction restent sur cet appareil ; un texte envoyé en correction est conservé avec sa correction. À l’Oral, votre voix est envoyée à l’examinateur IA pendant la conversation pour être comprise et transcrite ; Fluentia ne conserve pas l’audio, seulement la transcription de l’échange." },
   { q: "Je n’ai pas reçu le courriel de vérification.", a: "Depuis Profil, utilisez « Renvoyer le lien de vérification ». Le lien est valable 24 heures et ne fonctionne qu’une fois. Pensez à vérifier vos courriers indésirables." },
 ];
 

@@ -31,9 +31,24 @@ class Subscription(models.Model):
     )
     premium_until = models.DateTimeField(null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
+    # Date de fin pour laquelle le rappel d’expiration a déjà été envoyé : un seul rappel par période.
+    reminder_sent_for = models.DateTimeField(null=True, blank=True, editable=False)
 
     def __str__(self):
         return f"Abonnement de {self.user}"
+
+    def save(self, *args, **kwargs):
+        previous = Subscription.objects.filter(pk=self.pk).values_list("premium_until", flat=True).first() if self.pk else None
+        super().save(*args, **kwargs)
+        # Activation ou prolongation dans le futur : l’étudiant est prévenu, une fois l’enregistrement validé.
+        if self.premium_until and self.premium_until > timezone.now() and self.premium_until != previous:
+            from django.db import transaction
+            from . import emails
+
+            until, user = self.premium_until, self.user
+            transaction.on_commit(lambda: emails.send(
+                "premium_activated", user, url=emails.link("/etudiant"), until=emails.day(until),
+            ))
 
     def state(self, now=None):
         if self.premium_until is None:

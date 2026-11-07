@@ -3,25 +3,29 @@
 import json
 import re
 
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone as dt_timezone
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.db import transaction, IntegrityError
+from django.db.models import Sum
 from django.http import HttpResponse, StreamingHttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema, OpenApiTypes, OpenApiParameter
 from rest_framework import generics
 from rest_framework.authentication import SessionAuthentication
-from rest_framework.exceptions import NotFound, Throttled, ValidationError
+from rest_framework.exceptions import NotFound, PermissionDenied, Throttled, ValidationError
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
+from accounts.subscription import is_premium
 from accounts.views import SecureView
 from exams.serializers import ExamListSerializer
 from exams.views import CataloguePagination
-from .models import BankItem, ImageAsset, TaskSubject, WritingCorrection
+from .models import BankItem, ImageAsset, SpeakingSession, TaskSubject, WritingCorrection
+from . import speaking
 from .correction import NCLC_GOAL, WORD, AnswerIncomplete, CorrectionUnavailable, correct, nclc, provider, stored_answer
 from . import series as workflow
 from .importer import SKILLS, ImportRejected, build_template, import_series
@@ -45,6 +49,10 @@ from .serializers import (
     CorrectionRequestSerializer,
     CorrectionSerializer,
     ModelAnswerSerializer,
+    SpeakingRequestSerializer,
+    SpeakingSessionSerializer,
+    SpeakingFinishSerializer,
+    SpeakingFinishedSerializer,
 )
 from .services import (
     create_item,
@@ -482,6 +490,122 @@ class WritingCorrectionDetailView(SecureView):
             "subject": subject_link(subject) | {"prompt": subject.prompt, "min_words": subject.min_words, "max_words": subject.max_words} if subject else None,
             "next": subject_link(following) if following else None,
         })
+
+
+def speaking_seconds_left(user):
+    """Minutes d’oral du jour comptées en base sur 24 h glissantes ; une session échouée ne compte pas."""
+    since = timezone.now() - timedelta(days=1)
+    used = (
+        SpeakingSession.objects.filter(user=user, started_at__gte=since)
+        .exclude(status=SpeakingSession.Status.FAILED)
+        .aggregate(total=Sum("seconds"))["total"]
+        or 0
+    )
+    return max(0, settings.SPEAKING_DAILY_MINUTES * 60 - used)
+
+
+def free_trial_left(user, subject):
+    """Sans Premium : une seule tâche 1 offerte par compte, quelle que soit la date."""
+    if subject.task_number != 1:
+        return False
+    return not (
+        SpeakingSession.objects.filter(user=user, subject__task_number=1)
+        .exclude(status=SpeakingSession.Status.FAILED)
+        .exists()
+    )
+
+
+class SpeakingSessionView(SecureView):
+    permission_classes = [IsAuthenticated]
+    # La limite est comptée en base, en minutes par jour : elle protège le coût de la voix en direct.
+    throttle_classes = []
+    MIN_SECONDS = 60
+
+    @extend_schema(request=SpeakingRequestSerializer, responses={201: SpeakingSessionSerializer})
+    def post(self, request):
+        data = SpeakingRequestSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        subject = get_object_or_404(
+            TaskSubject, pk=data.validated_data["subject_id"], task_set__skill="speaking", task_set__is_active=True
+        )
+        try:
+            speaking.provider()
+        except speaking.SpeakingUnavailable as error:
+            return Response({"detail": str(error)}, status=503)
+        with transaction.atomic():
+            # Verrou par compte : deux onglets ne peuvent pas dépasser la limite ni rejouer l’essai gratuit.
+            get_user_model().objects.select_for_update().get(pk=request.user.pk)
+            # Réglage provisoire : SPEAKING_REQUIRE_PREMIUM=0 ouvre l’oral à tous les comptes (le quota reste actif).
+            if settings.SPEAKING_REQUIRE_PREMIUM and not is_premium(request.user) and not free_trial_left(request.user, subject):
+                raise PermissionDenied(
+                    "L’oral avec examinateur est réservé aux comptes Premium. "
+                    "Votre essai gratuit de la tâche 1 a déjà été utilisé, ou ce sujet n’en fait pas partie."
+                )
+            left = speaking_seconds_left(request.user)
+            if left < self.MIN_SECONDS:
+                minutes = settings.SPEAKING_DAILY_MINUTES
+                raise Throttled(detail=f"Vous avez utilisé vos {minutes} minutes d’oral des dernières 24 heures. Réessayez demain.")
+            saved = SpeakingSession.objects.create(
+                user=request.user,
+                subject=subject,
+                mode=data.validated_data["mode"],
+                provider=settings.SPEAKING_PROVIDER,
+                seconds=min(subject.speak_seconds or left, left),
+            )
+        try:
+            opened = speaking.provider()["session"](subject, request.user)
+        except speaking.SpeakingUnavailable as error:
+            saved.status, saved.ended_at = SpeakingSession.Status.FAILED, timezone.now()
+            saved.save(update_fields=["status", "ended_at"])
+            return Response({"detail": str(error)}, status=503)
+        saved.model = opened["model"]
+        saved.save(update_fields=["model"])
+        return Response(
+            SpeakingSessionSerializer({
+                "id": saved.pk,
+                "demo": opened["demo"],
+                "client_secret": opened["client_secret"],
+                "expires_at": datetime.fromtimestamp(opened["expires_at"], tz=dt_timezone.utc),
+                "model": opened["model"],
+                "voice": opened["voice"],
+                "seconds": saved.seconds,
+                "prep_seconds": subject.prep_seconds or 0,
+            }).data,
+            status=201,
+        )
+
+
+class SpeakingFinishView(SecureView):
+    permission_classes = [IsAuthenticated]
+    throttle_classes = []
+
+    @extend_schema(request=SpeakingFinishSerializer, responses=SpeakingFinishedSerializer)
+    def post(self, request, session_id):
+        data = SpeakingFinishSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        with transaction.atomic():
+            saved = get_object_or_404(SpeakingSession.objects.select_for_update(), pk=session_id, user=request.user)
+            if saved.status not in (SpeakingSession.Status.PENDING, SpeakingSession.Status.LIVE):
+                return Response({"detail": "Cette session est déjà terminée."}, status=409)
+            # Le temps écoulé est mesuré par le serveur, préparation déduite : le navigateur ne peut pas
+            # se rembourser des minutes en envoyant moins, ni dépasser les secondes réservées à l’ouverture.
+            now = timezone.now()
+            prep = (saved.subject.prep_seconds or 0) if saved.subject else 0
+            elapsed = max(0, int((now - saved.started_at).total_seconds()) - prep)
+            saved.seconds = min(saved.seconds, max(data.validated_data["seconds"], elapsed))
+            saved.transcript = data.validated_data["transcript"]
+            saved.status, saved.ended_at = SpeakingSession.Status.FINISHED, now
+            saved.usage = data.validated_data.get("usage") or {}
+            if saved.provider == "demo":
+                saved.estimated_cost_usd = 0
+            else:
+                # Coût mesuré quand la session l’a rapporté ; sinon le plafond prudent.
+                measured = speaking.measured_cost(saved.model, saved.usage)
+                saved.estimated_cost_usd = measured if measured is not None else speaking.estimated_cost_ceiling(saved.seconds)
+            saved.save(update_fields=["seconds", "transcript", "status", "ended_at", "usage", "estimated_cost_usd"])
+        return Response(SpeakingFinishedSerializer({
+            "id": saved.pk, "status": saved.status, "seconds": saved.seconds, "seconds_left": speaking_seconds_left(request.user),
+        }).data)
 
 
 class ModelAnswerView(SecureView):

@@ -19,7 +19,7 @@ USE_TZ = True
 STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 REST_FRAMEWORK = {"DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"], "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema"}
-SPECTACULAR_SETTINGS = {"TITLE": "Fluentia API", "VERSION": "0.1.0", "ENUM_NAME_OVERRIDES": {"SubscriptionStatusEnum": ["free", "premium", "expired"], "AttemptStatusEnum": "exams.models.Attempt.Status", "ExamSkillEnum": "exams.models.Exam.Skill", "SeriesSkillEnum": ["reading", "listening", "writing", "speaking"], "SeriesStatusEnum": ["draft", "review", "approved", "published"]}}
+SPECTACULAR_SETTINGS = {"TITLE": "Fluentia API", "VERSION": "0.1.0", "ENUM_NAME_OVERRIDES": {"SubscriptionStatusEnum": ["free", "premium", "expired"], "AttemptStatusEnum": "exams.models.Attempt.Status", "ExamSkillEnum": "exams.models.Exam.Skill", "SeriesSkillEnum": ["reading", "listening", "writing", "speaking"], "SeriesStatusEnum": ["draft", "review", "approved", "published"], "ExamModeEnum": "exams.models.Exam.Mode", "SpeakingModeEnum": ["practice", "simulation"]}}
 INSTALLED_APPS += ["accounts"]
 INSTALLED_APPS += ["pedagogy"]
 PRIVATE_MEDIA_ROOT = Path(os.getenv("PRIVATE_MEDIA_ROOT", str(BASE_DIR / ".private-media")))
@@ -30,6 +30,14 @@ WRITING_CORRECTION_DAILY_LIMIT = int(os.getenv("WRITING_CORRECTION_DAILY_LIMIT",
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "")
 OPENAI_REASONING_EFFORT = os.getenv("OPENAI_REASONING_EFFORT", "low")
+# Oral avec examinateur IA : « demo » ne contacte rien ; « openai » ouvre une session Realtime par clé éphémère.
+SPEAKING_PROVIDER = os.getenv("SPEAKING_PROVIDER", "demo")
+SPEAKING_DAILY_MINUTES = int(os.getenv("SPEAKING_DAILY_MINUTES", "15"))
+# 1 : Premium requis (sauf une tâche 1 offerte). 0 : oral ouvert à tous les comptes connectés, quota compris.
+SPEAKING_REQUIRE_PREMIUM = os.getenv("SPEAKING_REQUIRE_PREMIUM", "1") == "1"
+OPENAI_REALTIME_MODEL = os.getenv("OPENAI_REALTIME_MODEL", "gpt-realtime-2.1-mini")
+OPENAI_REALTIME_VOICE = os.getenv("OPENAI_REALTIME_VOICE", "marin")
+OPENAI_REALTIME_TRANSCRIPTION_MODEL = os.getenv("OPENAI_REALTIME_TRANSCRIPTION_MODEL", "gpt-live-transcribe")
 AUTHENTICATION_BACKENDS = ["accounts.backends.EmailBackend"]
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -43,6 +51,11 @@ CSRF_TRUSTED_ORIGINS = [PUBLIC_WEB_ORIGIN]
 EMAIL_BACKEND = os.getenv("DJANGO_EMAIL_BACKEND", "django.core.mail.backends.locmem.EmailBackend")
 EMAIL_FILE_PATH = os.getenv("DJANGO_EMAIL_FILE_PATH", str(BASE_DIR / ".local-mail"))
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "Fluentia <no-reply@localhost>")
+# Adresse de contact affichée dans les courriels, et fuseau des dates qui y figurent.
+SUPPORT_EMAIL = os.getenv("SUPPORT_EMAIL", "contact@cognito-inc.ca")
+EMAIL_TIME_ZONE = os.getenv("EMAIL_TIME_ZONE", "America/Toronto")
+# Lien de réinitialisation du mot de passe : 60 minutes, à usage unique.
+PASSWORD_RESET_TIMEOUT = 3600
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SAMESITE = "Lax"

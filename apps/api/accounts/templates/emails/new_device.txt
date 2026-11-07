@@ -1,0 +1,11 @@
+{% autoescape off %}{% include "emails/_greeting.txt" %}
+Votre compte Fluentia vient d’être utilisé depuis un appareil ou un navigateur que nous ne connaissions pas.
+
+Date : {{ when }}
+Appareil : {{ device }}
+
+Si c’est bien vous, vous n’avez rien à faire. Sinon, changez votre mot de passe sans attendre :
+
+{{ url }}
+
+{% include "emails/_signature.txt" %}{% endautoescape %}

@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { Button } from "../../../components/ui/primitives";
 import { Icon } from "../../../components/app-shell/icons";
@@ -100,6 +101,7 @@ export default function AccountPage() {
         <label>Mot de passe<input name="password" type="password" autoComplete={mode === "login" ? "current-password" : "new-password"} minLength={mode === "register" ? 12 : undefined} maxLength={128} required /></label>
         {mode === "register" && <p className="student-hint">Au moins 12 caractères. Évitez les mots de passe courants et vos informations personnelles.</p>}
         <Button type="submit" loading={busy}>{mode === "login" ? "Se connecter" : "Créer mon compte"}</Button>
+        {mode === "login" && <Link className="student-hint" href="/etudiant/mot-de-passe">Mot de passe oublié ?</Link>}
       </form>
       {status}
     </section>

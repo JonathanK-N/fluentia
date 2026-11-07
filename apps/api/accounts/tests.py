@@ -217,7 +217,7 @@ class AccountTests(TestCase):
 
     def test_mail_failure_rolls_back_registration(self):
         with patch(
-            "accounts.views.send_mail", side_effect=RuntimeError("mail indisponible")
+            "accounts.emails.EmailMultiAlternatives.send", side_effect=RuntimeError("mail indisponible")
         ):
             with self.assertRaises(RuntimeError):
                 self.register()

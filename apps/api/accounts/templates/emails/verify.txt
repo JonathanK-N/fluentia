@@ -1,0 +1,10 @@
+{% autoescape off %}{% include "emails/_greeting.txt" %}
+Merci d’avoir créé votre compte Fluentia. Pour activer votre espace, confirmez votre adresse e-mail en ouvrant ce lien :
+
+{{ url }}
+
+Ce lien est personnel et associé à l’adresse {{ email }}. Il est valable pendant 24 heures et ne peut être utilisé qu’une seule fois.
+
+Si vous n’avez pas créé de compte Fluentia, ignorez ce message : aucun compte ne sera activé.
+
+{% include "emails/_signature.txt" %}{% endautoescape %}
