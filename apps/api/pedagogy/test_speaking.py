@@ -118,6 +118,19 @@ class PremiumAndTrialTests(SpeakingClient):
         self.assertEqual(second.status_code, 403)
         self.assertIn("Premium", second.data["detail"])
 
+    @override_settings(SPEAKING_REQUIRE_PREMIUM=False)
+    def test_premium_can_be_switched_off_while_testing(self):
+        client = self.client_for(self.student)
+        for subject in (self.task1, self.task1, self.task2):
+            self.assertEqual(self.open(subject, client=client).status_code, 201)
+
+    @override_settings(SPEAKING_REQUIRE_PREMIUM=False, SPEAKING_DAILY_MINUTES=3)
+    def test_quota_still_applies_without_premium(self):
+        client = self.client_for(self.student)
+        self.assertEqual(self.open(self.task1, client=client).status_code, 201)
+        self.assertEqual(self.open(self.task1, client=client).status_code, 201)
+        self.assertEqual(self.open(self.task1, client=client).status_code, 429)
+
     def test_free_trial_is_task_1_only(self):
         self.assertEqual(self.open(self.task2).status_code, 403)
         self.assertEqual(self.open(self.task3).status_code, 403)

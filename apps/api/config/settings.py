@@ -33,6 +33,8 @@ OPENAI_REASONING_EFFORT = os.getenv("OPENAI_REASONING_EFFORT", "low")
 # Oral avec examinateur IA : « demo » ne contacte rien ; « openai » ouvre une session Realtime par clé éphémère.
 SPEAKING_PROVIDER = os.getenv("SPEAKING_PROVIDER", "demo")
 SPEAKING_DAILY_MINUTES = int(os.getenv("SPEAKING_DAILY_MINUTES", "15"))
+# 1 : Premium requis (sauf une tâche 1 offerte). 0 : oral ouvert à tous les comptes connectés, quota compris.
+SPEAKING_REQUIRE_PREMIUM = os.getenv("SPEAKING_REQUIRE_PREMIUM", "1") == "1"
 OPENAI_REALTIME_MODEL = os.getenv("OPENAI_REALTIME_MODEL", "gpt-realtime-2.1-mini")
 OPENAI_REALTIME_VOICE = os.getenv("OPENAI_REALTIME_VOICE", "marin")
 OPENAI_REALTIME_TRANSCRIPTION_MODEL = os.getenv("OPENAI_REALTIME_TRANSCRIPTION_MODEL", "gpt-live-transcribe")

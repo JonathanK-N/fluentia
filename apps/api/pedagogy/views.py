@@ -535,7 +535,8 @@ class SpeakingSessionView(SecureView):
         with transaction.atomic():
             # Verrou par compte : deux onglets ne peuvent pas dépasser la limite ni rejouer l’essai gratuit.
             get_user_model().objects.select_for_update().get(pk=request.user.pk)
-            if not is_premium(request.user) and not free_trial_left(request.user, subject):
+            # Réglage provisoire : SPEAKING_REQUIRE_PREMIUM=0 ouvre l’oral à tous les comptes (le quota reste actif).
+            if settings.SPEAKING_REQUIRE_PREMIUM and not is_premium(request.user) and not free_trial_left(request.user, subject):
                 raise PermissionDenied(
                     "L’oral avec examinateur est réservé aux comptes Premium. "
                     "Votre essai gratuit de la tâche 1 a déjà été utilisé, ou ce sujet n’en fait pas partie."
