@@ -91,3 +91,18 @@ def device_label(user_agent):
         ("Mac OS X", "macOS"), ("CrOS", "ChromeOS"), ("Linux", "Linux"),
     ) if token in agent), "système inconnu")
     return f"{browser} sur {system}"
+
+
+def send_welcome_to(users):
+    """Courriel de bienvenue à une liste de comptes ; renvoie (envoyés, adresses en échec). Un échec n’arrête pas l’envoi."""
+    sent, failed = 0, []
+    for user in users:
+        if not user.email:
+            continue
+        try:
+            send("welcome", user, required=True, url=link("/etudiant"))
+            sent += 1
+        except Exception:
+            logger.warning("Bienvenue non envoyée au compte %s", user.pk, exc_info=True)
+            failed.append(user.email)
+    return sent, failed

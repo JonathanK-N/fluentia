@@ -184,3 +184,35 @@ class PremiumEmailTests(EmailTests):
         mail.outbox.clear()
         call_command("send_premium_reminders", stdout=StringIO())
         self.assertEqual(mail.outbox, [])
+
+
+class WelcomeBroadcastTests(EmailTests):
+    def setUp(self):
+        super().setUp()
+        User.objects.create_user("lina", "lina@example.test", PASSWORD)
+        User.objects.create_user("inactif", "inactif@example.test", PASSWORD, is_active=False)
+
+    def test_command_sends_to_every_active_account(self):
+        out = StringIO()
+        call_command("send_welcome", "--all", stdout=out)
+        self.assertEqual(sorted(m.to[0] for m in mail.outbox), ["awa@example.test", "lina@example.test"])
+        self.assertIn("2 courriel(s)", out.getvalue())
+
+    def test_dry_run_sends_nothing(self):
+        out = StringIO()
+        call_command("send_welcome", "--all", "--dry-run", stdout=out)
+        self.assertEqual(mail.outbox, [])
+        self.assertIn("2 destinataire(s)", out.getvalue())
+
+    def test_one_address_only(self):
+        call_command("send_welcome", "--email", "LINA@example.test", stdout=StringIO())
+        self.assertEqual([m.to[0] for m in mail.outbox], ["lina@example.test"])
+
+    def test_admin_action(self):
+        admin = User.objects.create_superuser("chef", "chef@example.test", PASSWORD)
+        client = APIClient()
+        client.force_login(admin)
+        ids = list(User.objects.values_list("pk", flat=True))
+        response = client.post("/admin/auth/user/", {"action": "send_welcome", "_selected_action": ids}, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(sorted(m.to[0] for m in mail.outbox), ["awa@example.test", "chef@example.test", "lina@example.test"])
