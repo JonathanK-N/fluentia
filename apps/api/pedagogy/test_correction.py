@@ -12,7 +12,7 @@ from django.core.management import call_command
 from django.test import TestCase, override_settings
 from rest_framework.test import APIClient
 
-from .correction import coherent, in_band, level, nclc
+from .correction import CRITERIA, coherent, in_band, level, nclc, shape
 from .models import ModelAnswer, TaskSubject, WritingCorrection
 
 User = get_user_model()
@@ -213,7 +213,7 @@ class OpenAICorrectionTests(StudentClient):
         with patcher:
             response = self.correct()
         self.assertEqual(response.status_code, 200, response.data)
-        self.assertEqual((response.data["level"], response.data["score"]), ("A1", 3))
+        self.assertEqual((response.data["level"], response.data["score"]), ("A1", 1))
         self.assertTrue(response.data["off_topic"])
         self.assertEqual(response.data["off_topic_reason"], reason)
         self.assertEqual([c["level"] for c in response.data["criteria"]], ["B2", "B2", "B1", "A2"])  # le détail reste visible
@@ -277,8 +277,15 @@ class PrepareAnswersTests(TestCase):
 
 class CorrectionPageTests(StudentClient):
     def test_official_tcf_bands(self):
-        self.assertEqual([level(n) for n in (0, 3, 4, 5, 6, 9, 10, 13, 14, 15, 16, 18, 20)], ["A1", "A1", "A2", "A2", "B1", "B1", "B2", "B2", "C1", "C1", "C2", "C2", "C2"])
-        self.assertEqual((in_band("B1", 17), in_band("B2", 4), in_band("C1", 15), in_band("C2", 20)), (9, 10, 15, 18))
+        # Fiche France Compétences RS 6460 : 1 = A1, 2-5 = A2, 6-9 = B1, 10-13 = B2, 14-17 = C1, 18-20 = C2.
+        self.assertEqual([level(n) for n in (0, 1, 2, 5, 6, 9, 10, 13, 14, 17, 18, 20)], ["A1", "A1", "A2", "A2", "B1", "B1", "B2", "B2", "C1", "C1", "C2", "C2"])
+        self.assertEqual((in_band("B1", 17), in_band("B2", 4), in_band("C1", 18), in_band("C2", 20)), (9, 10, 17, 18))
+
+    def test_a_perfect_text_has_no_improved_version(self):
+        levels = [{"id": key, "level": "C2"} for key, _ in CRITERIA]
+        perfect = shape({"levels": levels, "level": "C2", "score": 18, "errors": [], "improved": "Autre texte"})
+        flawed = shape({"levels": levels, "level": "C2", "score": 18, "errors": [{"original": "a", "correction": "à", "explanation": "préposition"}], "improved": "Autre texte"})
+        self.assertEqual((perfect["improved"], flawed["improved"]), ("", "Autre texte"))
         self.assertEqual((coherent("B2", ["C1", "C1"]), coherent("C2", ["B1", "B2"]), coherent("B2", ["B1", "C1"])), ("C1", "B2", "B2"))
 
     def test_score_is_converted_with_the_ircc_scale(self):

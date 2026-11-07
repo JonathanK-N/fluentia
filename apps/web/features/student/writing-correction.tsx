@@ -21,14 +21,14 @@ const SCALE = [
   { nclc: "9", label: "9", range: "14–15", from: 14 },
   { nclc: "10+", label: "10+", range: "16–20", from: 16 },
 ];
-// Niveaux de A1 à C2 : chacun couvre une ou deux colonnes NCLC, car leurs fourchettes de notes s’emboîtent.
+// Niveaux de A1 à C2, barème officiel du TCF (fiche France Compétences RS 6460) ; la correction s’arrête à 18/20.
 const LEVELS = [
-  { name: "A1", hint: "Débutant", span: 1, from: 0 },
-  { name: "A2", hint: "Élémentaire", span: 1, from: 4 },
-  { name: "B1", hint: "Intermédiaire", span: 2, from: 6 },
-  { name: "B2", hint: "Avancé", span: 2, from: 10 },
-  { name: "C1", hint: "Autonome", span: 1, from: 14 },
-  { name: "C2", hint: "Maîtrise", span: 1, from: 16 },
+  { name: "A1", hint: "Débutant", from: 0 },
+  { name: "A2", hint: "Élémentaire", from: 2 },
+  { name: "B1", hint: "Intermédiaire", from: 6 },
+  { name: "B2", hint: "Avancé", from: 10 },
+  { name: "C1", hint: "Autonome", from: 14 },
+  { name: "C2", hint: "Maîtrise", from: 18 },
 ];
 // Déduit de la note : toujours cohérent avec la colonne NCLC, même pour une correction faite avant le barème officiel.
 const levelOf = (score: number) => [...LEVELS].reverse().find(step => score >= step.from)!.name;
@@ -80,7 +80,7 @@ export function WritingCorrectionPage({ id }: { id: string }) {
         <span className="hero-chip-row"><span className="hero-chip">{data.subject ? `Tâche ${data.subject.task_number}` : "Rédaction"}</span><span>Correction{data.subject ? ` · ${data.subject.title}` : ""}</span>{result.off_topic && <span className="hero-chip hero-chip-alert">Hors sujet</span>}</span>
         <h1 id="correction-titre" className="epreuve-title"><Icon name="trophy" size={30} />{scored ? `Votre niveau : NCLC ${level}` : "Correction en cours…"}</h1>
         <p aria-live="polite">{scored
-          ? <>{result.score} / 20{` · niveau ${band} (${LEVELS.find(step => step.name === band)!.hint.toLowerCase()})`}. {result.off_topic ? "Un texte hors sujet est classé A1, note ramenée à 3/20 au maximum." : result.summary}</>
+          ? <>{result.score} / 20{` · niveau ${band} (${LEVELS.find(step => step.name === band)!.hint.toLowerCase()})`}. {result.off_topic ? "Un texte hors sujet est classé A1, note ramenée à 1/20 au maximum." : result.summary}</>
           : "Votre texte est en cours de lecture. La note s’affiche dans quelques secondes."}</p>
       </section>
       <section className="status-card" aria-labelledby="objectif">
@@ -98,8 +98,8 @@ export function WritingCorrectionPage({ id }: { id: string }) {
     <section className="student-card result-level" aria-label="Votre niveau parmi tous les niveaux" aria-busy={!scored}>
       <ol className="level-scale" aria-label="Niveaux de A1 à C2">{LEVELS.map(step => {
         const current = step.name === band;
-        return <li key={step.name} style={{ gridColumn: `span ${step.span}` }} data-current={current || undefined} aria-current={current ? "step" : undefined}>
-          <strong>{step.name}</strong><span>{step.hint}</span>
+        return <li key={step.name} data-current={current || undefined} aria-current={current ? "step" : undefined}>
+          <strong>{step.name}</strong><span>{step.hint}</span><small>{bandRange(step.name)} / 20</small>
         </li>;
       })}</ol>
       <ol className="nclc-scale" aria-label="Niveaux NCLC">{SCALE.map(step => {
@@ -146,10 +146,12 @@ export function WritingCorrectionPage({ id }: { id: string }) {
     <section className="student-card result-block" aria-label="Version améliorée">
       {result.improved
         ? <>
-          <p className="student-hint">{result.off_topic ? "Un exemple de réponse qui traite la consigne : repérez ce qu’elle demande, puis réessayez avec vos propres mots." : "Votre texte avec les fautes corrigées et un vocabulaire plus précis : comparez-le au vôtre pour repérer chaque changement."}</p>
+          <p className="student-hint">{result.off_topic ? "Un exemple de réponse qui traite la consigne : repérez ce qu’elle demande, puis réessayez avec vos propres mots." : "Votre texte réécrit par un excellent rédacteur, avec vos idées : comparez les tournures, le vocabulaire et les liens entre les phrases."}</p>
           <p className="correction-text">{result.improved}</p>
         </>
-        : <Waiting />}
+        : data.status === "done"
+          ? <p className="student-hint">Votre texte est déjà parfait : il n’y a rien à améliorer.</p>
+          : <Waiting />}
     </section>
 
 
@@ -165,7 +167,8 @@ export function WritingCorrectionPage({ id }: { id: string }) {
 const levelIndex = (name?: string) => LEVELS.findIndex(step => step.name === name);
 const bandRange = (name: string) => {
   const index = levelIndex(name), next = LEVELS[index + 1];
-  return `${LEVELS[index]!.from}–${next ? next.from - 1 : MAX_SCORE}`;
+  const low = LEVELS[index]!.from, high = next ? next.from - 1 : MAX_SCORE;
+  return low === high ? `${low}` : `${low}–${high}`;
 };
 const nextStep = (score: number) => {
   const next = LEVELS.find(step => step.from > score);

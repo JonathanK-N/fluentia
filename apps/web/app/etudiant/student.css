@@ -648,7 +648,9 @@ button.seance-quit { background: transparent; font-family: inherit; cursor: poin
 @keyframes correction-pulse { 50% { opacity: 0.45; } }
 @media (prefers-reduced-motion: reduce) { .correction-waiting { animation: none; } }
 /* Niveaux A1 à C2, alignés au-dessus des colonnes NCLC */
-.level-scale { list-style: none; padding: 0; margin: 0 0 0.4rem; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 0.4rem; }
+.level-scale { list-style: none; padding: 0; margin: 0 0 0.6rem; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.4rem; }
+.level-scale li { flex-wrap: wrap; } .level-scale small { flex-basis: 100%; text-align: center; font-size: 0.68rem; }
+.level-scale li[data-current] small { color: #e4e2ff; }
 .level-scale li { display: flex; align-items: baseline; justify-content: center; gap: 0.4rem; padding: 0.45rem 0.3rem; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); font-size: 0.72rem; color: var(--muted); }
 .level-scale strong { font-size: 0.85rem; color: var(--text); }
 .level-scale li[data-current] { background: var(--indigo); border-color: var(--indigo); color: #e4e2ff; }
@@ -689,3 +691,4 @@ button.seance-quit { background: transparent; font-family: inherit; cursor: poin
 .student-card.correction-next { justify-content: center; }
 @media (max-width: 760px) { .result-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .result-explanation { margin: 0; line-height: 1.7; }
+.level-scale li { border-radius: 14px; }

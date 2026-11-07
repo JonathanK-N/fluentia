@@ -241,7 +241,7 @@ class CorrectionSerializer(serializers.Serializer):
     feedback = serializers.CharField(required=False, allow_blank=True, default="")
     criteria = CorrectionCriterionSerializer(many=True)
     errors = CorrectionErrorSerializer(many=True)
-    improved = serializers.CharField()
+    improved = serializers.CharField(allow_blank=True)  # vide quand le texte est parfait
     advice = serializers.ListField(child=serializers.CharField())
     goal = serializers.CharField()
     off_topic = serializers.BooleanField(default=False)
