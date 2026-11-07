@@ -7,7 +7,7 @@ export const skills: { id: "reading" | "listening" | "writing" | "speaking"; num
   { id: "reading", number: "01", name: "Lecture", href: "/etudiant/comprehension-ecrite", title: "Compréhension écrite", icon: "book", tone: "lavender", summary: "Des documents du quotidien à décoder : repérez l’idée clé, puis relisez chaque correction.", facts: ["39 questions", "60 min"] },
   { id: "listening", number: "02", name: "Écoute", href: "/etudiant/comprehension-orale", title: "Compréhension orale", icon: "headphones", tone: "mint", summary: "Annonces, dialogues, extraits : affûtez votre oreille, la transcription vous attend après.", facts: ["39 questions", "35 min"] },
   { id: "writing", number: "03", name: "Rédaction", href: "/etudiant/expression-ecrite", title: "Expression écrite", icon: "pen", tone: "lavender", summary: "Trois sujets à rédiger, avec compteur de mots, chrono et grille pour vous auto-évaluer.", facts: ["3 tâches", "60 min"] },
-  { id: "speaking", number: "04", name: "Oral", href: "/etudiant/expression-orale", title: "Expression orale", icon: "mic", tone: "mint", summary: "Parlez comme le jour J, réécoutez votre enregistrement et améliorez chaque prise.", facts: ["3 tâches", "12 min"] },
+  { id: "speaking", number: "04", name: "Oral", href: "/etudiant/expression-orale", title: "Expression orale", icon: "mic", tone: "mint", summary: "Parlez comme le jour J, face à un examinateur qui vous écoute et vous relance.", facts: ["3 tâches", "12 min"] },
 ];
 
 export type WritingTask = { slug: string; number: number; title: string; genre: string; min: number; max: number; minutes: number; advice: string[]; subjects: { id?: number; title: string; prompt: string; documents?: { label: string; text: string }[] }[] };

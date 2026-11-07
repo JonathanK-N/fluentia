@@ -274,18 +274,6 @@ button.seance-quit { background: transparent; font-family: inherit; cursor: poin
 .checklist > li:not(:has(label))::before { content: "•"; color: var(--accent); font-weight: 700; margin-right: 0.5rem; }
 .checklist label { display: flex; gap: 0.6rem; align-items: flex-start; font-size: 0.84rem; cursor: pointer; }
 .checklist input { accent-color: var(--accent); margin-top: 0.3rem; }
-.student-space .big-timer { font-size: 2.2rem; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; margin: 0; color: var(--text); }
-.recorder { display: grid; gap: 1rem; justify-items: center; text-align: center; padding: 1.75rem 1rem; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--border); }
-.record-button { display: grid; place-items: center; width: 84px; height: 84px; border-radius: 50%; border: 0; background: var(--indigo); color: #fff; cursor: pointer; transition: box-shadow var(--duration); }
-.record-button:hover { box-shadow: 0 0 0 6px color-mix(in srgb, var(--indigo) 18%, transparent); }
-.record-button[data-recording] { background: var(--danger); }
-.record-button:disabled { opacity: 0.5; cursor: not-allowed; }
-.level-meter { display: flex; align-items: flex-end; gap: 4px; height: 40px; }
-.level-meter span { width: 6px; border-radius: 3px; background: #7dd3c0; min-height: 4px; transition: height 80ms linear; }
-.take-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.75rem; }
-.take-list li { display: grid; gap: 0.5rem; padding: 0.75rem; border-radius: 12px; border: 1px solid var(--border); }
-.take-list audio { width: 100%; }
-.take-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 
 /* Programme */
 .plan-week { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr)); gap: 0.75rem; }
