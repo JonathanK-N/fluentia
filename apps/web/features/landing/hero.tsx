@@ -1,69 +1,45 @@
-/** Entrée publique du pilote v3, sans décor animé. Propriétaire : Jonathan Kakesa. */
+/** Héro de l’accueil : promesse, appels à l’action et aperçu de l’oral. Propriétaire : Jonathan Kakesa. */
 import Link from "next/link";
+import { highlights, SIGNUP } from "./content";
+import { SessionPreview } from "./session-preview";
+
 export function Hero() {
   return (
-    <section className="landing-hero" aria-labelledby="hero-title">
-      <div className="container landing-hero-grid">
-        <div className="hero-copy">
-          <p className="eyebrow">Préparer le TCF pour votre projet au Québec</p>
-          <h1 id="hero-title">
-            Maîtrisez le français,
-            <br />
-            <span>allez plus loin.</span>
-          </h1>
-          <p className="lead">
-            Une préparation pour comprendre, pratiquer et prendre confiance.
-            Retrouvez vos compétences et votre prochaine étape dans un espace
-            simple.
+    <section className="home-hero" aria-labelledby="hero-title">
+      <div className="container home-hero-grid">
+        <div className="home-hero-copy">
+          <p className="home-pill">
+            <span aria-hidden="true" className="home-pill-dot" />
+            Nouveau : l’oral avec un examinateur IA vocal
           </p>
-          <div className="actions">
-            <Link href="/etudiant" className="button button-primary">
-              Voir le tableau de bord
+          <h1 id="hero-title">
+            Préparez le TCF Canada <span>comme le jour de l’examen.</span>
+          </h1>
+          <p className="home-lead">
+            Les quatre épreuves au format officiel, des rédactions corrigées par l’IA et un examinateur
+            qui vous parle, vous écoute et vous relance à l’oral.
+          </p>
+          <div className="home-actions">
+            <Link href={SIGNUP} className="button button-primary">
+              Créer mon compte gratuit <span aria-hidden="true">→</span>
             </Link>
-            <a href="#approche" className="landing-text-link">
-              Découvrir la méthode
+            <a href="#examinateur" className="button button-secondary">
+              Découvrir l’oral
             </a>
           </div>
-          <p className="landing-small">
-            Fluentia est en développement. Les aperçus et démonstrations sont
-            accessibles sans compte.
-          </p>
+          <p className="home-reassure">Gratuit pour commencer · Sans carte bancaire · En français, sur tous vos appareils</p>
         </div>
-        <aside
-          className="learning-preview"
-          aria-label="Exemple d’organisation du parcours"
-        >
-          <div className="learning-preview-header">
-            <strong>Une séance, une intention</strong>
-            <span className="badge">Exemple de parcours</span>
-          </div>
-          <ol>
-            <li>
-              <span>1</span>
-              <div>
-                <h2>Choisir une compétence</h2>
-                <p>Écouter, lire, écrire ou prendre la parole.</p>
-              </div>
-            </li>
-            <li>
-              <span>2</span>
-              <div>
-                <h2>Pratiquer à votre rythme</h2>
-                <p>Se concentrer sur une activité et ses consignes.</p>
-              </div>
-            </li>
-            <li>
-              <span>3</span>
-              <div>
-                <h2>Préparer la prochaine étape</h2>
-                <p>Revenir sur vos acquis et garder un cap.</p>
-              </div>
-            </li>
-          </ol>
-          <p className="landing-small">
-            Aucun score ni résultat personnel dans cet aperçu.
-          </p>
-        </aside>
+        <SessionPreview />
+      </div>
+      <div className="container">
+        <dl className="home-highlights">
+          {highlights.map((item) => (
+            <div key={item.label}>
+              <dt>{item.label}</dt>
+              <dd>{item.value}</dd>
+            </div>
+          ))}
+        </dl>
       </div>
     </section>
   );

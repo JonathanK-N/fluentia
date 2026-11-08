@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Button } from "../../../components/ui/primitives";
 import { Icon } from "../../../components/app-shell/icons";
 import { api, type Profile } from "../../../lib/student-api";
@@ -61,6 +61,8 @@ export default function AccountPage() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  // Les liens « Créer mon compte » de l’accueil pointent vers #inscription.
+  useEffect(() => { if (window.location.hash === "#inscription") setMode("register"); }, []);
   async function act(work: () => Promise<Profile | null>, done?: string) {
     setBusy(true); setError(""); setMessage("");
     try {

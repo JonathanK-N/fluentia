@@ -18,8 +18,8 @@ export function Header() {
       <div className="container header-inner">
         <Logo />
         <nav className="desktop-nav" aria-label="Navigation principale">
-          <Link href="/#modules">Les compétences</Link>
-          <Link href="/#approche">Notre approche</Link>
+          <Link href="/#epreuves">Les épreuves</Link>
+          <Link href="/#examinateur">L’oral avec l’IA</Link>
           <Link href="/design-system">Design system</Link>
           <Link href="/etudiant">Espace étudiant</Link>
         </nav>
@@ -27,11 +27,11 @@ export function Header() {
           <details ref={menuRef} className="mobile-menu">
             <summary>Menu</summary>
             <nav aria-label="Navigation mobile">
-              <Link onClick={closeMenu} href="/#modules">
-                Les compétences
+              <Link onClick={closeMenu} href="/#epreuves">
+                Les épreuves
               </Link>
-              <Link onClick={closeMenu} href="/#approche">
-                Notre approche
+              <Link onClick={closeMenu} href="/#examinateur">
+                L’oral avec l’IA
               </Link>
               <Link onClick={closeMenu} href="/design-system">
                 Design system

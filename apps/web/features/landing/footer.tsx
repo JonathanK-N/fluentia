@@ -24,42 +24,40 @@ export function Footer() {
           <div>
             <Logo appearance="light" />
             <p>
-              Apprendre avec clarté.
-              <br />
-              Pratiquer avec confiance.
+              La préparation au TCF Canada, avec un examinateur IA pour
+              l’oral.
             </p>
           </div>
           <nav aria-label="Navigation de pied de page">
-            <h2>Explorer</h2>
-            <a href="#fonctionnalites">Les compétences</a>
-            <a href="#voice">Fluentia Voice</a>
-            <a href="#approche">Notre méthode</a>
-            <Link href="/design-system">Design system</Link>
-            <Link href="/apercu/etudiant">Aperçu étudiant</Link>
+            <h2>Préparation</h2>
+            <a href="#epreuves">Les 4 épreuves</a>
+            <a href="#examinateur">L’oral avec l’IA</a>
+            <a href="#tarifs">Tarifs</a>
+            <a href="#faq">Questions fréquentes</a>
+          </nav>
+          <nav aria-label="Compte">
+            <h2>Compte</h2>
+            <Link href="/etudiant/compte#inscription">Créer un compte</Link>
+            <Link href="/etudiant/compte">Connexion</Link>
+            <Link href="/etudiant/mot-de-passe">Mot de passe oublié</Link>
+            <Link href="/etudiant">Espace étudiant</Link>
           </nav>
           <div>
-            <h2>Informations</h2>
-            <p>Conditions — en préparation</p>
-            <p>Confidentialité — en préparation</p>
-            <p>Support — ouverture à venir</p>
-          </div>
-          <div>
-            <h2>Le projet</h2>
-            <p>Fluentia est en développement.</p>
+            <h2>Contact</h2>
             <p>
-              Responsable et propriétaire :<br />
-              {brand.owner}
+              <a href="mailto:support@fluentia.ca">support@fluentia.ca</a>
             </p>
-            <p>
-              Informations d’entreprise : à compléter avant commercialisation.
-            </p>
+            <p>Une question sur votre compte ou sur Premium ? Écrivez-nous.</p>
           </div>
         </div>
         <div className="footer-bottom">
           <span>
             © {new Date().getFullYear()} Fluentia · {brand.owner}
           </span>
-          <span>Préparation indépendante. Aucun résultat garanti au TCF.</span>
+          <span>
+            Préparation indépendante, sans lien avec France Éducation
+            international. Aucun résultat garanti.
+          </span>
         </div>
       </div>
     </footer>
