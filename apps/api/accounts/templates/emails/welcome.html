@@ -1,0 +1,15 @@
+{% extends "emails/base.html" %}
+{% block preheader %}Votre adresse est confirmée : vos quatre épreuves vous attendent.{% endblock %}
+{% block title %}Bienvenue sur Fluentia !{% endblock %}
+{% block body %}
+{% include "emails/_p.html" with text="Votre adresse est confirmée. Votre espace est prêt : préparez les quatre épreuves du TCF Canada à votre rythme." %}
+<p style="margin:0 0 10px; font-size:15px; line-height:1.6; color:#2b3047;">&#10003;&nbsp; <strong>Compréhension orale et écrite</strong> : des séries chronométrées comme le jour J, avec le bilan de chaque réponse.</p>
+<p style="margin:0 0 10px; font-size:15px; line-height:1.6; color:#2b3047;">&#10003;&nbsp; <strong>Expression écrite</strong> : une correction détaillée, avec votre niveau estimé et le NCLC visé.</p>
+<p style="margin:0 0 10px; font-size:15px; line-height:1.6; color:#2b3047;">&#10003;&nbsp; <strong>Expression orale</strong> : un examinateur qui vous parle, vous écoute et vous relance.</p>
+{% include "emails/_button.html" with url=url label="Commencer mon entraînement" %}
+{% endblock %}
+{% block notice_row %}<tr><td style="padding:20px 32px; background-color:#f4f5fa; border-top:1px solid #e2e5ef;">
+<p style="margin:0; font-size:14px; line-height:1.6; color:#2b3047;">Vos réponses sont enregistrées à chaque choix : reprenez où vous voulez, quand vous voulez.</p>
+<p style="margin:8px 0 0; font-size:14px; line-height:1.6; color:#2b3047;">Les scores de Fluentia sont des estimations pédagogiques, pas des résultats officiels du TCF.</p>
+</td></tr>{% endblock %}
+{% block footnote %}Vous recevez ce message une seule fois, après la confirmation de votre adresse.{% endblock %}

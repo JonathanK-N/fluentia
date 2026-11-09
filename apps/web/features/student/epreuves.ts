@@ -48,7 +48,7 @@ export const epreuves: Record<EpreuveId, Epreuve> = {
   writing: {
     id: "writing", number: "03", name: "Rédaction", subtitle: "Expression écrite", icon: "pen",
     lead: "Trois tâches à rédiger : un message, un récit, puis une argumentation à partir de deux documents. Votre brouillon est sauvegardé sur cet appareil.",
-    notice: "La correction détaillée par un évaluateur arrivera dans une prochaine version ; aucune note n’est simulée.",
+    notice: "Ces sujets sont des entraînements non officiels. La correction par l’IA donne une note indicative, critère par critère.",
     brief: [
       { label: "Tâches", value: "3", hint: "Message, récit, argumentation" },
       { label: "Chrono", value: "60 min", hint: "Durée indicative" },
@@ -62,12 +62,12 @@ export const epreuves: Record<EpreuveId, Epreuve> = {
   },
   speaking: {
     id: "speaking", number: "04", name: "Oral", subtitle: "Expression orale", icon: "mic",
-    lead: "Trois tâches à l’oral : un entretien, une interaction, puis un point de vue. Enregistrez-vous, réécoutez chaque prise et progressez.",
-    notice: "Vos enregistrements restent dans votre navigateur. L’évaluation par un examinateur arrivera dans une prochaine version.",
+    lead: "Trois tâches à l’oral : un entretien, une interaction, puis un point de vue, face à un examinateur IA qui vous écoute, vous répond et vous relance.",
+    notice: "Votre voix est transmise en direct à l’examinateur IA ; Fluentia n’enregistre pas l’audio et conserve seulement la transcription.",
     brief: [
       { label: "Tâches", value: "3", hint: "Entretien, interaction, point de vue" },
       { label: "Chrono", value: "12 min", hint: "Durée indicative" },
-      { label: "Enregistrement", value: "Local", hint: "Rien n’est envoyé au serveur" },
+      { label: "Examinateur", value: "IA vocale", hint: "Conversation en temps réel, transcription à relire" },
     ],
     reflexes: [
       { title: "Développer", text: "Deux ou trois phrases par réponse, avec un exemple concret." },

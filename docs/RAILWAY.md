@@ -110,7 +110,14 @@ Puis, dans un navigateur : inscription → courriel de vérification reçu → c
 - [ ] `WRITING_CORRECTOR=openai` + clé et modèle seulement après validation du coût et de la politique de données.
 - [ ] Alertes Railway (crash, mémoire) et journaux consultés après chaque déploiement.
 
-## 7. Retour arrière
+## 7. Courriels
+
+Sept courriels transactionnels partent du backend (gabarits dans `apps/api/accounts/templates/emails/`) : confirmation d'adresse, bienvenue, mot de passe oublié, mot de passe modifié, nouvel appareil, Premium activé, Premium bientôt terminé.
+
+- Sans SMTP configuré (`DJANGO_EMAIL_BACKEND=…console.EmailBackend`), ils s'affichent dans les journaux du service `api`.
+- Le rappel « Premium bientôt terminé » est envoyé par une commande à lancer une fois par jour : créer un service Railway **Cron** sur le même dépôt (`/apps/api`), mêmes variables, horaire `0 13 * * *` (8 h à Toronto), commande `python manage.py send_premium_reminders --days 7`.
+
+## 8. Retour arrière
 
 Railway → service → **Deployments** → déploiement précédent → **Redeploy**. Les migrations Django ne sont pas annulées automatiquement : une migration destructive se prépare en deux déploiements (ajout, puis suppression).
 

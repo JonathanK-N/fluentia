@@ -1,86 +1,61 @@
-/** Offres non commerciales et FAQ native. Propriétaire : Jonathan Kakesa. */
-import { Card } from "../../components/ui/primitives";
+/** Offres, FAQ native et appel final. Propriétaire : Jonathan Kakesa. */
+import Link from "next/link";
 import { Reveal } from "../../components/animations/reveal";
-import { faqs, plans } from "./content";
+import { faqs, plans, SIGNUP, SUPPORT_EMAIL } from "./content";
+
 export function Pricing() {
   return (
-    <section
-      className="landing-section"
-      id="tarifs"
-      aria-labelledby="pricing-title"
-    >
+    <section id="tarifs" className="home-section home-tinted" aria-labelledby="pricing-title">
       <div className="container">
         <Reveal subtle>
-          <div className="landing-section-heading">
-            <div>
-              <p className="eyebrow">Des offres en préparation</p>
-              <h2 id="pricing-title">
-                Choisir votre rythme.
-                <br />
-                <span>Préparer la suite.</span>
-              </h2>
-            </div>
-            <p>
-              Trois pistes d’accompagnement à l’étude. Les prix et conditions ne
-              sont pas encore approuvés ; aucune offre n’est commercialisée.
-            </p>
-          </div>
-          <div className="pricing-grid">
-            {plans.map((plan, index) => (
-              <Card
-                key={plan.name}
-                className={`pricing-card ${index === 1 ? "pricing-featured" : ""}`}
-              >
-                <span className="pricing-index">FORMULE / 0{index + 1}</span>
-                <h3>{plan.name}</h3>
-                <p>{plan.description}</p>
-                <div className="price-label">
-                  {plan.price === null
-                    ? "Prix à confirmer"
-                    : new Intl.NumberFormat("fr-CA", {
-                        style: "currency",
-                        currency: "CAD",
-                      }).format(plan.price)}
-                </div>
-                <p className="landing-small">
-                  Structure de démonstration · À venir
-                </p>
-                <ul>
-                  {plan.features.map((feature) => (
-                    <li key={feature}>
-                      <span aria-hidden="true">✓</span>
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-                <a
-                  className={`button button-${index === 1 ? "primary" : "secondary"}`}
-                  href="#disponibilite"
-                >
-                  Consulter la disponibilité <span aria-hidden="true">↗</span>
-                </a>
-              </Card>
-            ))}
+          <div className="home-heading home-heading-center">
+            <p className="eyebrow">Tarifs</p>
+            <h2 id="pricing-title">Commencez gratuitement. Passez à Premium pour l’oral.</h2>
+            <p>Prix en dollars canadiens, taxes en sus. Sans engagement.</p>
           </div>
         </Reveal>
+        <div className="plan-grid">
+          {plans.map((plan) => (
+            <article key={plan.name} className={`plan-card${plan.featured ? " plan-featured" : ""}`} aria-labelledby={`plan-${plan.name}`}>
+              <div className="plan-head">
+                <h3 id={`plan-${plan.name}`}>{plan.name}</h3>
+                {plan.featured && <span className="plan-badge">Recommandé</span>}
+              </div>
+              <p className="plan-description">{plan.description}</p>
+              <p className="plan-price">
+                <strong>{plan.price}</strong> <span>{plan.period}</span>
+              </p>
+              <ul className="check-list">
+                {plan.features.map((feature) => (
+                  <li key={feature}>{feature}</li>
+                ))}
+              </ul>
+              {plan.cta.href.startsWith("mailto:") ? (
+                <a className={`button ${plan.featured ? "button-primary" : "button-secondary"}`} href={plan.cta.href}>
+                  {plan.cta.label}
+                </a>
+              ) : (
+                <Link className={`button ${plan.featured ? "button-primary" : "button-secondary"}`} href={plan.cta.href}>
+                  {plan.cta.label}
+                </Link>
+              )}
+            </article>
+          ))}
+        </div>
       </div>
     </section>
   );
 }
+
 export function Faq() {
   return (
-    <section
-      className="landing-section faq-section"
-      id="faq"
-      aria-labelledby="faq-title"
-    >
-      <div className="container faq-grid">
-        <div>
+    <section id="faq" className="home-section" aria-labelledby="faq-title">
+      <div className="container faq-layout">
+        <div className="home-heading">
           <p className="eyebrow">Questions fréquentes</p>
-          <h2 id="faq-title">Questions fréquentes.</h2>
+          <h2 id="faq-title">Vos questions, nos réponses.</h2>
           <p>
-            Quelques repères pour découvrir Fluentia, ses ambitions et ses
-            limites actuelles.
+            Une autre question ? Écrivez-nous à <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>.
           </p>
         </div>
         <div className="faq-list">
@@ -88,7 +63,7 @@ export function Faq() {
             <details key={item.question}>
               <summary>
                 {item.question}
-                <span aria-hidden="true">+</span>
+                <span aria-hidden="true" className="faq-icon" />
               </summary>
               <p>{item.answer}</p>
             </details>
@@ -98,35 +73,23 @@ export function Faq() {
     </section>
   );
 }
+
 export function FinalCallToAction() {
   return (
-    <section
-      className="landing-section landing-final"
-      id="disponibilite"
-      aria-labelledby="availability-title"
-    >
+    <section id="commencer" className="home-section" aria-labelledby="final-title">
       <div className="container">
-        <p className="eyebrow">Et ensuite ?</p>
-        <h2 id="availability-title">
-          Fluentia se prépare.
-          <br />
-          <span>Vous pouvez déjà explorer.</span>
-        </h2>
-        <p className="lead">
-          Fluentia prend forme. Créez votre compte et entraînez-vous dès
-          aujourd’hui ; les abonnements ouvriront ultérieurement.
-        </p>
-        <div className="actions">
-          <a className="button button-primary" href="/etudiant">
-            Ouvrir mon espace étudiant
-          </a>
-          <a className="button button-secondary" href="#voice">
-            Explorer la démo Voice
-          </a>
+        <div className="home-final">
+          <h2 id="final-title">Votre prochaine étape commence aujourd’hui.</h2>
+          <p>Créez votre compte en deux minutes et faites votre première série dès maintenant.</p>
+          <div className="home-actions">
+            <Link href={SIGNUP} className="button button-light">
+              Créer mon compte gratuit <span aria-hidden="true">→</span>
+            </Link>
+            <Link href="/etudiant/compte" className="button button-outline-light">
+              J’ai déjà un compte
+            </Link>
+          </div>
         </div>
-        <p className="landing-small">
-          L’inscription se fait dans l’espace étudiant ; aucune coordonnée n’est collectée sur cette page.
-        </p>
       </div>
     </section>
   );

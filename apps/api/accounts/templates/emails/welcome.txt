@@ -1,0 +1,12 @@
+{% autoescape off %}{% include "emails/_greeting.txt" %}
+Votre adresse est confirmée. Votre espace est prêt : préparez les quatre épreuves du TCF Canada à votre rythme.
+
+- Compréhension orale et écrite : des séries chronométrées comme le jour J, avec le bilan de chaque réponse.
+- Expression écrite : une correction détaillée, avec votre niveau estimé et le NCLC visé.
+- Expression orale : un examinateur qui vous parle, vous écoute et vous relance.
+
+Commencer mon entraînement : {{ url }}
+
+Les scores de Fluentia sont des estimations pédagogiques, pas des résultats officiels du TCF.
+
+{% include "emails/_signature.txt" %}{% endautoescape %}

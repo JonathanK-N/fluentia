@@ -1,5 +1,6 @@
 "use client";
-import { useState, type FormEvent } from "react";
+import Link from "next/link";
+import { useEffect, useState, type FormEvent } from "react";
 import { Button } from "../../../components/ui/primitives";
 import { Icon } from "../../../components/app-shell/icons";
 import { api, type Profile } from "../../../lib/student-api";
@@ -60,6 +61,8 @@ export default function AccountPage() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  // Les liens « Créer mon compte » de l’accueil pointent vers #inscription.
+  useEffect(() => { if (window.location.hash === "#inscription") setMode("register"); }, []);
   async function act(work: () => Promise<Profile | null>, done?: string) {
     setBusy(true); setError(""); setMessage("");
     try {
@@ -100,6 +103,7 @@ export default function AccountPage() {
         <label>Mot de passe<input name="password" type="password" autoComplete={mode === "login" ? "current-password" : "new-password"} minLength={mode === "register" ? 12 : undefined} maxLength={128} required /></label>
         {mode === "register" && <p className="student-hint">Au moins 12 caractères. Évitez les mots de passe courants et vos informations personnelles.</p>}
         <Button type="submit" loading={busy}>{mode === "login" ? "Se connecter" : "Créer mon compte"}</Button>
+        {mode === "login" && <Link className="student-hint" href="/etudiant/mot-de-passe">Mot de passe oublié ?</Link>}
       </form>
       {status}
     </section>

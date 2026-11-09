@@ -1,0 +1,10 @@
+{% autoescape off %}{% include "emails/_greeting.txt" %}
+Bonne nouvelle : votre accès Premium est actif jusqu’au {{ until }}.
+
+Vous pouvez passer les trois tâches d’expression orale face à l’examinateur IA, dans les conditions du jour J.
+
+Ouvrir mon espace : {{ url }}
+
+Votre accès reste valable jusqu’à sa date de fin, sans renouvellement automatique.
+
+{% include "emails/_signature.txt" %}{% endautoescape %}
