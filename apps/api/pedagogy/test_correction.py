@@ -1,4 +1,5 @@
 import json
+from datetime import timedelta
 from io import StringIO
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
@@ -10,6 +11,7 @@ from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.core.management import call_command
 from django.test import TestCase, override_settings
+from django.utils import timezone
 from rest_framework.test import APIClient
 
 from .correction import CRITERIA, coherent, in_band, level, nclc, shape
@@ -280,13 +282,22 @@ class CorrectionPageTests(StudentClient):
         # Fiche France Compétences RS 6460 : 1 = A1, 2-5 = A2, 6-9 = B1, 10-13 = B2, 14-17 = C1, 18-20 = C2.
         self.assertEqual([level(n) for n in (0, 1, 2, 5, 6, 9, 10, 13, 14, 17, 18, 20)], ["A1", "A1", "A2", "A2", "B1", "B1", "B2", "B2", "C1", "C1", "C2", "C2"])
         self.assertEqual((in_band("B1", 17), in_band("B2", 4), in_band("C1", 18), in_band("C2", 20)), (9, 10, 17, 18))
+        self.assertEqual((coherent("B2", ["C1", "C1"]), coherent("C2", ["B1", "B2"]), coherent("B2", ["B1", "C1"])), ("C1", "B2", "B2"))
 
     def test_a_perfect_text_has_no_improved_version(self):
         levels = [{"id": key, "level": "C2"} for key, _ in CRITERIA]
         perfect = shape({"levels": levels, "level": "C2", "score": 18, "errors": [], "improved": "Autre texte"})
         flawed = shape({"levels": levels, "level": "C2", "score": 18, "errors": [{"original": "a", "correction": "à", "explanation": "préposition"}], "improved": "Autre texte"})
         self.assertEqual((perfect["improved"], flawed["improved"]), ("", "Autre texte"))
-        self.assertEqual((coherent("B2", ["C1", "C1"]), coherent("C2", ["B1", "B2"]), coherent("B2", ["B1", "C1"])), ("C1", "B2", "B2"))
+
+    def test_an_interrupted_correction_is_removed_and_not_counted(self):
+        client = self.client_for(self.student)
+        correction_id = self.post(client=client).data["id"]
+        WritingCorrection.objects.filter(pk=correction_id).update(status=WritingCorrection.Status.RUNNING)
+        self.assertEqual(client.get(f"/api/v1/tasks/writing/corrections/{correction_id}/").status_code, 200)
+        WritingCorrection.objects.filter(pk=correction_id).update(created_at=timezone.now() - timedelta(minutes=6))
+        self.assertEqual(client.get(f"/api/v1/tasks/writing/corrections/{correction_id}/").status_code, 410)
+        self.assertFalse(WritingCorrection.objects.exists())
 
     def test_score_is_converted_with_the_ircc_scale(self):
         self.assertEqual([nclc(n) for n in (3, 4, 6, 9, 10, 11, 12, 15, 16, 20)], ["3 ou moins", "4", "5", "6", "7", "7", "8", "9", "10+", "10+"])

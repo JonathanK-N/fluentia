@@ -209,13 +209,33 @@ export const DEMO_SCRIPT: Record<number, string[]> = {
   ],
 };
 export const DEMO_CLOSING = "Merci, l’épreuve est terminée.";
-const DEMO_LISTEN_MS = 15_000;
+// L’examinateur scripté attend que le candidat ait fini : un silence de 2,5 s après avoir parlé.
+const DEMO_SILENCE_MS = 2_500;
+const DEMO_VOICE_LEVEL = 0.08;      // niveau sonore à partir duquel on considère que le candidat parle
+const DEMO_NUDGE_MS = 30_000;       // sans un mot pendant 30 s, il passe quand même à la question suivante
+const DEMO_MAX_TURN_MS = 120_000;   // une réponse ne dure jamais plus de 2 minutes
 
-/** Examinateur scripté : la synthèse vocale du navigateur lit une question, puis laisse 15 secondes au candidat. */
+/** Examinateur scripté : la synthèse vocale du navigateur lit une question, puis attend que le candidat ait fini de parler. */
 export function connectDemo(taskNumber: number, microphone: MediaStream, handlers: ExaminerHandlers): ExaminerConnection {
   const lines = DEMO_SCRIPT[taskNumber] ?? DEMO_SCRIPT[1]!;
   const track = microphone.getAudioTracks()[0];
   let index = 0, timer: ReturnType<typeof setTimeout> | undefined, closed = false;
+  // Écoute du micro : on sait quand le candidat parle et quand il s’est tu.
+  let level = 0;
+  const stopListening = watchLevel(microphone, value => { level = value; });
+  const waitForAnswer = (then: () => void) => {
+    const start = Date.now();
+    let spoke = false, lastVoice = start;
+    const check = () => {
+      if (closed) return;
+      const now = Date.now();
+      if (track?.enabled !== false && level > DEMO_VOICE_LEVEL) { spoke = true; lastVoice = now; }
+      const finished = spoke && now - lastVoice > DEMO_SILENCE_MS;
+      if (finished || (!spoke && now - start > DEMO_NUDGE_MS) || now - start > DEMO_MAX_TURN_MS) then();
+      else timer = setTimeout(check, 200);
+    };
+    timer = setTimeout(check, 200);
+  };
   const say = (text: string, then?: () => void) => {
     const id = `demo-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     handlers.onActivity("examiner");
@@ -235,7 +255,7 @@ export function connectDemo(taskNumber: number, microphone: MediaStream, handler
     if (closed || index >= lines.length) { handlers.onActivity("candidate"); return; }
     say(lines[index++]!, () => {
       handlers.onActivity("candidate");
-      timer = setTimeout(next, DEMO_LISTEN_MS);
+      waitForAnswer(next);
     });
   };
   setTimeout(next, 400);
@@ -253,6 +273,7 @@ export function connectDemo(taskNumber: number, microphone: MediaStream, handler
     close: () => {
       closed = true;
       clearTimeout(timer);
+      stopListening();
       stopSpeech();
       microphone.getTracks().forEach(t => t.stop());
     },

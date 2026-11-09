@@ -1,5 +1,7 @@
 "use client";
 /** Passage d’une tâche d’Oral face à l’examinateur IA : préparation, conversation vocale, conclusion, transcription. */
+import Link from "next/link";
+import * as Dialog from "@radix-ui/react-dialog";
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { Button } from "../../components/ui/primitives";
 import { Icon } from "../../components/app-shell/icons";
@@ -9,7 +11,8 @@ import {
   addUsage, connectDemo, connectRealtime, emptyUsage, upsertTurn, watchLevel,
   type Activity, type ExaminerConnection, type SpeakingSession, type Turn, type Usage,
 } from "../../lib/examiner";
-import { formatDuration, type SpeakingTask } from "./content";
+import { formatDuration, sentTo, sentToParts, type SpeakingTask } from "./content";
+import { SeanceBar, SeanceHead, Timer } from "./seance";
 
 type Subject = SpeakingTask["subjects"][number];
 type Phase = "intro" | "prep" | "connecting" | "live" | "closing" | "done" | "error";
@@ -28,7 +31,8 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
   const [left, setLeft] = useState(0);
   const [activity, setActivity] = useState<Activity>("connecting");
   const [turns, setTurns] = useState<Turn[]>([]);
-  const [captions, setCaptions] = useState(true);
+  const [transcript, setTranscript] = useState(false);
+  const [quitting, setQuitting] = useState(false);
   const [muted, setMuted] = useState(false);
   const [notes, setNotes] = useState("");
   const [level, setLevel] = useState({ mic: 0, examiner: 0 });
@@ -145,83 +149,134 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
   const total = phase === "prep" ? session?.prep_seconds ?? 1 : session?.seconds ?? 1;
   const progress = total ? left / total : 0;
   const speakingLevel = activity === "examiner" ? level.examiner : level.mic;
-  const lastTurns = turns.filter(t => t.text).slice(-3);
+  const spoken = turns.filter(t => t.text);
+  const latest = spoken[spoken.length - 1];
+  const inSession = phase === "prep" || phase === "connecting" || phase === "live" || phase === "closing";
+  const demo = session?.demo;
 
-  return <div className="examiner-layer" role="dialog" aria-modal="true" aria-labelledby="examiner-title">
-    <header className="examiner-head">
-      <div>
-        <p className="student-eyebrow">Tâche {task.number} · {task.title}</p>
-        <h2 id="examiner-title">{subject.title}</h2>
-      </div>
-      {(phase === "intro" || phase === "done" || phase === "error") &&
-        <Button variant="ghost" onClick={() => { release(); exitFullscreen(); onExit(); }}><Icon name="close" size={18} />Fermer</Button>}
-    </header>
+  function leave() { release(); exitFullscreen(); onExit(); }
+  function restart() {
+    setError(""); setTurns([]); turnsRef.current = []; usage.current = emptyUsage();
+    finishing.current = false; setSession(null); setSummary(null); setPhase("intro");
+  }
 
-    {session?.demo && phase !== "intro" && <p className="examiner-demo" role="note">Mode démonstration : l’examinateur est scripté, aucune IA ne vous écoute.</p>}
+  // Une seule scène pour toutes les étapes : orbe et chronomètre, état, message, consigne, commandes.
+  const stage: { pill: string; tone?: string; who: string; message: string } = {
+    intro: { pill: "Prêt quand vous l’êtes", who: "L’examinateur", message: `Vous allez passer cette tâche face à un examinateur qui vous parle et vous écoute, dans le temps officiel : ${formatDuration(task.seconds)}${task.prepSeconds ? `, après ${task.prepSeconds / 60} minutes de préparation` : ", sans préparation"}.` },
+    prep: { pill: "Préparez-vous", who: "Le sujet", message: subject.prompt },
+    connecting: { pill: ACTIVITY.connecting, who: "L’examinateur", message: "Connexion en cours : l’examinateur va prendre la parole." },
+    live: {
+      pill: muted ? "Micro coupé" : activity === "examiner" ? "L’examinateur vous parle" : ACTIVITY[activity],
+      tone: muted ? "warn" : activity === "candidate" || activity === "waiting" ? "mint" : undefined,
+      who: latest?.role === "candidate" ? "Vous" : "L’examinateur",
+      message: latest?.text ?? "L’examinateur va prendre la parole.",
+    },
+    closing: { pill: "L’examinateur conclut", who: "L’examinateur", message: latest?.text ?? "L’examinateur conclut l’épreuve…" },
+    done: { pill: "Tâche terminée", tone: "mint", who: "Bilan", message: `Durée de parole comptée : ${formatDuration(summary?.seconds ?? 0)}${summary && summary.secondsLeft >= 0 ? `. Il vous reste ${Math.floor(summary.secondsLeft / 60)} min d’oral aujourd’hui.` : "."} Votre correction est prête à être calculée : note sur 20, niveau, NCLC et conseils.` },
+    error: { pill: "Problème", tone: "danger", who: "Fluentia", message: error },
+  }[phase];
+  const showTranscript = phase === "done" || (transcript && inSession);
 
-    {phase === "intro" && <section className="examiner-card">
-      <p className="examiner-lead">Vous allez passer cette tâche face à un examinateur qui vous parle et vous écoute, dans le temps officiel : {formatDuration(task.seconds)}{task.prepSeconds ? `, après ${task.prepSeconds / 60} minutes de préparation` : ", sans préparation"}.</p>
-      <ul className="checklist">
-        <li>Installez-vous au calme ; un casque ou des écouteurs évitent l’écho.</li>
-        <li>L’examinateur ne vous corrige pas pendant l’épreuve. Parlez naturellement, il vous relance.</li>
-        <li>Vous pouvez couper votre micro à tout moment (touche Espace).</li>
-      </ul>
-      <p className="examiner-consent">Votre voix est envoyée à <strong>{examiner || "l’examinateur"}</strong> pendant la conversation pour être comprise et transcrite. Fluentia conserve uniquement la transcription, que vous pouvez relire ensuite.</p>
-      <Button onClick={start}><Icon name="mic" size={18} />Commencer avec l’examinateur</Button>
-    </section>}
+  return <div className="examiner-layer" role="dialog" aria-modal="true" aria-labelledby="seance-title">
+    <SeanceBar label="Oral">
+      {inSession
+        ? <Dialog.Root open={quitting} onOpenChange={setQuitting}>
+          <Dialog.Trigger className="seance-quit"><Icon name="close" size={14} />Quitter la séance</Dialog.Trigger>
+          <Dialog.Portal>
+            <Dialog.Overlay className="dialog-overlay" />
+            <Dialog.Content className="dialog-content quit-dialog">
+              <Dialog.Title>Quitter la séance ?</Dialog.Title>
+              <Dialog.Description>La tâche s’arrête maintenant : le temps déjà parlé est compté et vous pourrez relire votre échange.</Dialog.Description>
+              <div className="quit-actions">
+                <Button onClick={() => { setQuitting(false); finish(); }}>Terminer la tâche</Button>
+                <Dialog.Close asChild><Button variant="secondary">Continuer</Button></Dialog.Close>
+              </div>
+            </Dialog.Content>
+          </Dialog.Portal>
+        </Dialog.Root>
+        : <button type="button" className="seance-quit" onClick={leave}><Icon name="close" size={14} />Quitter la séance</button>}
+    </SeanceBar>
 
-    {phase === "prep" && <section className="examiner-card examiner-prep" aria-live="polite">
-      <Timer left={left} progress={progress} label="Préparation" />
-      <div className="examiner-subject"><p>{subject.prompt}</p>{subject.cues.length > 0 && <div className="pill-row">{subject.cues.map(cue => <span className="pill" key={cue}>{cue}</span>)}</div>}</div>
-      <label className="examiner-notes">Vos notes (elles restent sur cet appareil)
-        <textarea value={notes} onChange={event => setNotes(event.target.value)} rows={5} placeholder="Questions à poser, idées, mots utiles…" />
-      </label>
-      <Button variant="secondary" onClick={() => session && connect(session)}>Je suis prêt, commencer</Button>
-    </section>}
+    <div className="seance-body oral-body">
+      <SeanceHead
+        chips={[{ label: "Épreuve 04" }, { label: demo ? "Démo · questions préenregistrées" : "Entraînement non officiel", tone: "warn" }]}
+        title={subject.title}
+        subtitle={`${task.title} · ${demo ? "votre voix n’est pas analysée dans cette démo" : `votre voix est envoyée ${sentTo(examiner)} pendant la conversation`}`}
+        base="/etudiant/expression-orale" current={task.number} locked={inSession} onLeave={() => { release(); exitFullscreen(); }}
+      />
 
-    {(phase === "connecting" || phase === "live" || phase === "closing") && <section className="examiner-stage">
-      <div className="examiner-center">
-        <div className="examiner-orb" data-activity={phase === "connecting" ? "connecting" : activity} style={{ "--level": speakingLevel.toFixed(3) } as CSSProperties} aria-hidden="true">
-          <span /><span /><span />
+      <section className="oral-card" aria-live="polite">
+        <div className="oral-visual">
+          <div className="oral-orb-wrap">
+            <div className="examiner-orb" data-activity={phase === "connecting" ? "connecting" : phase === "live" ? activity : "idle"} style={{ "--level": (phase === "live" ? speakingLevel : 0).toFixed(3) } as CSSProperties} aria-hidden="true">
+              <span /><span /><span />
+              <i className="oral-wave"><b /><b /><b /><b /><b /></i>
+            </div>
+            <p className="oral-pill" data-tone={stage.tone}><span aria-hidden="true" />{stage.pill}</p>
+          </div>
+          {phase === "done"
+            ? <Timer left={summary?.seconds ?? 0} progress={Math.min(1, (summary?.seconds ?? 0) / task.seconds)} label="Parlé" total={task.seconds} />
+            : phase === "prep" || phase === "live" || phase === "closing"
+              ? <Timer left={left} progress={progress} label={phase === "prep" ? "Préparation" : "Il reste"} total={total} />
+              : <Timer left={task.seconds} progress={1} label="Durée" total={task.seconds} />}
         </div>
-        <p className="examiner-activity" aria-live="polite">{phase === "closing" ? "L’examinateur conclut l’épreuve…" : muted && phase === "live" ? "Micro coupé" : ACTIVITY[phase === "connecting" ? "connecting" : activity]}</p>
-        {phase === "live" && <Timer left={left} progress={progress} label="Restant" />}
-      </div>
-      {captions && lastTurns.length > 0 && <ol className="examiner-captions" aria-label="Sous-titres">
-        {lastTurns.map(turn => <li key={turn.id} data-role={turn.role}><span>{turn.role === "examiner" ? "Examinateur" : "Vous"}</span>{turn.text}</li>)}
-      </ol>}
-      {notes && <details className="examiner-notes-recall"><summary>Mes notes</summary><p>{notes}</p></details>}
-      <details className="examiner-notes-recall"><summary>Le sujet</summary><p>{subject.prompt}</p></details>
-      {phase === "live" && <div className="examiner-controls">
-        <Button variant="secondary" aria-pressed={muted} onClick={toggleMute}><Icon name={muted ? "volume" : "mic"} size={18} />{muted ? "Rétablir le micro" : "Couper le micro"}</Button>
-        <Button variant="secondary" aria-pressed={captions} onClick={() => setCaptions(value => !value)}>Sous-titres</Button>
-        <Button variant="ghost" onClick={finish}><Icon name="stop" size={18} />Terminer</Button>
-      </div>}
-      {error && <p role="alert" className="examiner-error">{error}</p>}
-    </section>}
 
-    {phase === "done" && <section className="examiner-card">
-      <h3>Épreuve terminée</h3>
-      <p>Durée de parole comptée : <strong>{formatDuration(summary?.seconds ?? 0)}</strong>{summary && summary.secondsLeft >= 0 ? ` · il vous reste ${Math.floor(summary.secondsLeft / 60)} min d’oral aujourd’hui.` : "."}</p>
-      <p className="student-hint">La note détaillée (sur 20, niveau et NCLC) arrive bientôt. En attendant, relisez votre échange.</p>
-      <ol className="examiner-transcript">
-        {turns.filter(t => t.text).map(turn => <li key={turn.id} data-role={turn.role}><span>{turn.role === "examiner" ? "Examinateur" : "Vous"}</span>{turn.text}</li>)}
-        {!turns.some(t => t.text) && <li>Aucune transcription n’a été reçue pour cette séance.</li>}
-      </ol>
-      <Button variant="secondary" onClick={onExit}>Revenir à la tâche</Button>
-    </section>}
+        {stage.message && <div className="oral-message" data-role={stage.who === "Vous" ? "candidate" : stage.tone === "danger" ? "error" : undefined} role={phase === "error" ? "alert" : undefined}>
+          <span className="oral-message-icon" aria-hidden="true"><Icon name={stage.who === "Vous" ? "user" : "chat"} size={16} /></span>
+          <div>
+            <small>{stage.who}</small>
+            <p>{stage.message}</p>
+            {phase === "prep" && subject.cues.length > 0 && <div className="pill-row">{subject.cues.map(cue => <span className="pill" key={cue}>{cue}</span>)}</div>}
+          </div>
+        </div>}
 
-    {phase === "error" && <section className="examiner-card">
-      <p role="alert" className="examiner-error">{error}</p>
-      <Button variant="secondary" onClick={() => { setError(""); finishing.current = false; setPhase("intro"); }}>Réessayer</Button>
-    </section>}
-  </div>;
-}
+        {phase === "intro" && <div className="oral-details">
+          <ul className="checklist">
+            <li>Installez-vous au calme ; un casque ou des écouteurs évitent l’écho.</li>
+            <li>L’examinateur ne vous corrige pas pendant l’épreuve. Parlez naturellement, il vous relance.</li>
+            <li>Vous pouvez couper votre micro à tout moment (touche Espace).</li>
+          </ul>
+          <p className="examiner-consent">Votre voix est envoyée {sentToParts(examiner)[0]} <strong>{sentToParts(examiner)[1]}</strong> pendant la conversation pour être comprise et transcrite. Fluentia conserve uniquement la transcription, que vous pouvez relire ensuite.</p>
+        </div>}
 
-function Timer({ left, progress, label }: { left: number; progress: number; label: string }) {
-  const circumference = 2 * Math.PI * 26;
-  return <div className="examiner-timer" role="timer" aria-label={`${label} : ${formatDuration(left)}`}>
-    <svg viewBox="0 0 60 60" aria-hidden="true"><circle cx="30" cy="30" r="26" /><circle cx="30" cy="30" r="26" data-progress strokeDasharray={circumference} strokeDashoffset={circumference * (1 - progress)} /></svg>
-    <span><small>{label}</small>{formatDuration(left)}</span>
+        {phase === "prep" && <label className="examiner-notes">Vos notes (elles restent sur cet appareil)
+          <textarea value={notes} onChange={event => setNotes(event.target.value)} rows={4} placeholder="Questions à poser, idées, mots utiles…" />
+        </label>}
+
+        {showTranscript && <ol className="examiner-transcript" aria-label="Transcription">
+          {spoken.map(turn => <li key={turn.id} data-role={turn.role}><span>{turn.role === "examiner" ? "Examinateur" : "Vous"}</span>{turn.text}</li>)}
+          {!spoken.length && <li>{phase === "done" ? "Aucune transcription n’a été reçue pour cette séance." : "La transcription apparaîtra ici."}</li>}
+        </ol>}
+
+        {phase !== "prep" && phase !== "intro" && <details className="oral-consigne">
+          <summary><Icon name="chevron" size={14} />Voir la consigne</summary>
+          <p>{subject.prompt}</p>
+          {subject.cues.length > 0 && <div className="pill-row">{subject.cues.map(cue => <span className="pill" key={cue}>{cue}</span>)}</div>}
+          {notes && <><strong>Mes notes</strong><p>{notes}</p></>}
+        </details>}
+
+        {phase === "live" && error && <p role="alert" className="examiner-error">{error}</p>}
+
+        <div className="oral-actions">
+          {phase === "intro" && <Button onClick={start}><Icon name="mic" size={16} />Commencer avec l’examinateur</Button>}
+          {phase === "prep" && <Button onClick={() => session && connect(session)}>Je suis prêt, commencer<Icon name="arrow" size={16} /></Button>}
+          {(phase === "live" || phase === "connecting" || phase === "closing") && <>
+            <Button variant="secondary" aria-pressed={muted} disabled={phase !== "live"} onClick={toggleMute}><Icon name={muted ? "volume" : "mic"} size={16} />{muted ? "Rétablir mon micro" : "Couper mon micro"}</Button>
+            <Button variant="secondary" className="oral-toggle" aria-pressed={transcript} onClick={() => setTranscript(value => !value)}><Icon name="copy" size={16} />Transcription</Button>
+            <Button disabled={phase !== "live"} onClick={finish}>Terminer la tâche<Icon name="arrow" size={16} /></Button>
+          </>}
+          {phase === "done" && <>
+            <Button variant="secondary" onClick={restart}><Icon name="refresh" size={16} />Refaire la tâche</Button>
+            {summary && summary.secondsLeft !== -1 && session
+              ? <Link className="button button-primary" href={`/etudiant/expression-orale/correction/${session.id}`} onClick={() => exitFullscreen()}>Voir ma correction<Icon name="arrow" size={16} /></Link>
+              : <Button onClick={leave}>Revenir à l’oral<Icon name="arrow" size={16} /></Button>}
+          </>}
+          {phase === "error" && <>
+            <Button variant="secondary" onClick={leave}>Quitter</Button>
+            <Button onClick={restart}><Icon name="refresh" size={16} />Réessayer</Button>
+          </>}
+        </div>
+      </section>
+    </div>
   </div>;
 }

@@ -1,13 +1,13 @@
 "use client";
 /**
- * Page de correction d’un texte de Rédaction : niveau NCLC, ce qu’il manque pour le NCLC 7, détail, puis réessayer
- * ou passer au sujet suivant. La correction arrive au fil de l’eau : la note d’abord, le détail ensuite.
+ * Page de correction d’une tâche de Rédaction ou d’Oral : niveau NCLC, ce qu’il manque pour le NCLC 7, détail, puis
+ * réessayer ou passer au sujet suivant. La correction arrive au fil de l’eau : la note d’abord, le détail ensuite.
  */
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "../../components/app-shell/icons";
 import { api, streamLines, type CorrectionPage, type WritingCorrection } from "../../lib/student-api";
-import { countWords } from "./content";
+import { countWords, formatDuration } from "./content";
 import { SectionTitle } from "./ui";
 
 // Barème IRCC du TCF Canada, expression écrite (note sur 20) : note minimale de chaque niveau.
@@ -35,10 +35,33 @@ const levelOf = (score: number) => [...LEVELS].reverse().find(step => score >= s
 const GOAL = "7";
 const MAX_SCORE = 18; // note la plus haute donnée par la correction automatique
 const nclc = (score: number) => [...SCALE].reverse().find(step => score >= step.from)!.nclc;
-const subjectHref = (link: { task_slug: string; id: number }) => `/etudiant/expression-ecrite/${link.task_slug}?sujet=${link.id}`;
 type Partial = { [K in keyof WritingCorrection]?: WritingCorrection[K] };
+type Kind = "writing" | "speaking";
 
-export function WritingCorrectionPage({ id }: { id: string }) {
+// Ce qui change entre la Rédaction et l’Oral ; tout le reste de la page est commun.
+const KINDS = {
+  writing: {
+    base: "/etudiant/expression-ecrite", page: (id: string) => `tasks/writing/corrections/${id}/`, stream: (id: string) => `tasks/writing/corrections/${id}/stream/`,
+    home: "Retour à la Rédaction", scale: "Barème du TCF Canada, expression écrite", reading: "Votre texte est en cours de lecture.",
+    offTopic: "Texte hors sujet.", offTopicNote: "Un texte hors sujet est classé A1, note ramenée à 1/20 au maximum.", offTopicFallback: "Votre texte ne traite pas la situation demandée par la consigne.",
+    improvedTitle: "Version améliorée de votre texte", improvedHint: "Votre texte réécrit par un excellent rédacteur, avec vos idées : comparez les tournures, le vocabulaire et les liens entre les phrases.",
+    modelTitle: "Ce qu’il fallait écrire", perfect: "Votre texte est déjà parfait : il n’y a rien à améliorer.", failed: "Elle n’est pas comptée dans vos corrections du jour.",
+  },
+  speaking: {
+    base: "/etudiant/expression-orale", page: (id: string) => `speaking/sessions/${id}/`, stream: (id: string) => `speaking/sessions/${id}/correction/`,
+    home: "Retour à l’Oral", scale: "Barème du TCF Canada, expression orale", reading: "La transcription de votre échange est en cours de lecture.",
+    offTopic: "Réponse hors sujet.", offTopicNote: "Une réponse hors sujet est classée A1, note ramenée à 1/20 au maximum.", offTopicFallback: "Vos réponses ne traitent pas la situation demandée par la tâche.",
+    improvedTitle: "Ce que vous auriez pu dire", improvedHint: "Vos réponses reformulées par un excellent locuteur, avec vos idées : repérez les tournures, le vocabulaire et les liens à réutiliser à l’oral.",
+    modelTitle: "Ce qu’il fallait dire", perfect: "Votre prestation est déjà excellente : il n’y a rien à reformuler.", failed: "Vous pouvez relancer la correction depuis cette page.",
+  },
+};
+
+export function WritingCorrectionPage({ id }: { id: string }) { return <CorrectionView id={id} kind="writing" />; }
+export function SpeakingCorrectionPage({ id }: { id: string }) { return <CorrectionView id={id} kind="speaking" />; }
+
+function CorrectionView({ id, kind }: { id: string; kind: Kind }) {
+  const copy = KINDS[kind];
+  const subjectHref = (link: { task_slug: string; id: number }) => `${copy.base}/${link.task_slug}?sujet=${link.id}`;
   const [data, setData] = useState<CorrectionPage | null>(null);
   const [partial, setPartial] = useState<Partial>({});
   const [error, setError] = useState("");
@@ -48,16 +71,18 @@ export function WritingCorrectionPage({ id }: { id: string }) {
     let active = true, timer: ReturnType<typeof setTimeout> | undefined;
     async function load() {
       try {
-        const page = await api<CorrectionPage>(`tasks/writing/corrections/${id}/`);
+        const page = await api<CorrectionPage>(copy.page(id));
         if (!active) return;
         setData(page);
         if (page.status === "pending" && started.current !== id) {
           started.current = id;  // une seule correction, même si React relance l’effet
-          await streamLines(`tasks/writing/corrections/${id}/stream/`, line => {
+          let ended = false;
+          await streamLines(copy.stream(id), line => {
             if (line.partial) setPartial(line.partial as Partial);
-            if (line.error) setError(line.error as string);
-            if (line.done) setData(current => current && { ...current, status: "done", result: line.result as WritingCorrection, remaining: line.remaining as number });
+            if (line.error) { ended = true; setError(line.error as string); }
+            if (line.done) { ended = true; setData(current => current && { ...current, status: "done", result: line.result as WritingCorrection, remaining: (line.remaining as number | undefined) ?? current.remaining }); }
           });
+          if (!ended && active) setError("La connexion a été coupée pendant la correction.");
         } else if (page.status === "running") {
           timer = setTimeout(load, 2000);  // correction lancée depuis un autre onglet : on attend qu’elle se termine
         }
@@ -65,9 +90,11 @@ export function WritingCorrectionPage({ id }: { id: string }) {
     }
     load();
     return () => { active = false; clearTimeout(timer); };
-  }, [id]);
+  }, [id, copy]);
 
-  if (error) return <div className="empty-block"><h2>La correction n’a pas pu se terminer</h2><p>{error} Elle n’est pas comptée dans vos corrections du jour.</p><Link className="button button-primary tile-link" href="/etudiant/expression-ecrite">Retour à la Rédaction</Link></div>;
+  if (error) return <div className="empty-block"><h2>La correction n’a pas pu se terminer</h2><p>{error} {copy.failed}</p>
+    {kind === "speaking" && <button type="button" className="button button-secondary tile-link" onClick={() => window.location.reload()}><Icon name="refresh" size={15} />Relancer la correction</button>}
+    <Link className="button button-primary tile-link" href={copy.base}>{copy.home}</Link></div>;
   if (!data) return <p className="student-hint">Chargement de la correction…</p>;
   const result: Partial = data.result ?? partial;
   const scored = typeof result.score === "number";
@@ -77,11 +104,11 @@ export function WritingCorrectionPage({ id }: { id: string }) {
   return <>
     <div className="home-top">
       <section className="hero-card" aria-labelledby="correction-titre" aria-busy={!scored}>
-        <span className="hero-chip-row"><span className="hero-chip">{data.subject ? `Tâche ${data.subject.task_number}` : "Rédaction"}</span><span>Correction{data.subject ? ` · ${data.subject.title}` : ""}</span>{result.off_topic && <span className="hero-chip hero-chip-alert">Hors sujet</span>}</span>
+        <span className="hero-chip-row"><span className="hero-chip">{data.subject ? `Tâche ${data.subject.task_number}` : kind === "writing" ? "Rédaction" : "Oral"}</span><span>Correction{data.subject ? ` · ${data.subject.title}` : ""}</span>{result.off_topic && <span className="hero-chip hero-chip-alert">Hors sujet</span>}</span>
         <h1 id="correction-titre" className="epreuve-title"><Icon name="trophy" size={30} />{scored ? `Votre niveau : NCLC ${level}` : "Correction en cours…"}</h1>
         <p aria-live="polite">{scored
-          ? <>{result.score} / 20{` · niveau ${band} (${LEVELS.find(step => step.name === band)!.hint.toLowerCase()})`}. {result.off_topic ? "Un texte hors sujet est classé A1, note ramenée à 1/20 au maximum." : result.summary}</>
-          : "Votre texte est en cours de lecture. La note s’affiche dans quelques secondes."}</p>
+          ? <>{result.score} / 20{` · niveau ${band} (${LEVELS.find(step => step.name === band)!.hint.toLowerCase()})`}. {result.off_topic ? copy.offTopicNote : result.summary}</>
+          : `${copy.reading} La note s’affiche dans quelques secondes.`}</p>
       </section>
       <section className="status-card" aria-labelledby="objectif">
         <div className="status-head"><h2 id="objectif" className="badge-warn"><Icon name="target" size={14} />{scored && !missing ? "NCLC 7 atteint" : "Objectif NCLC 7"}</h2></div>
@@ -92,9 +119,9 @@ export function WritingCorrectionPage({ id }: { id: string }) {
 
     {result.off_topic && <div className="off-topic" role="note">
       <Icon name="flag" size={18} />
-      <p><strong>Texte hors sujet.</strong> {result.off_topic_reason || "Votre texte ne traite pas la situation demandée par la consigne."}{data.subject && <><br /><span className="student-hint">Consigne : {data.subject.prompt}</span></>}</p>
+      <p><strong>{copy.offTopic}</strong> {result.off_topic_reason || copy.offTopicFallback}{data.subject && <><br /><span className="student-hint">Consigne : {data.subject.prompt}</span></>}</p>
     </div>}
-    <SectionTitle title="Votre niveau" note="Barème du TCF Canada, expression écrite" />
+    <SectionTitle title="Votre niveau" note={copy.scale} />
     <section className="student-card result-level" aria-label="Votre niveau parmi tous les niveaux" aria-busy={!scored}>
       <ol className="level-scale" aria-label="Niveaux de A1 à C2">{LEVELS.map(step => {
         const current = step.name === band;
@@ -129,37 +156,49 @@ export function WritingCorrectionPage({ id }: { id: string }) {
       <section className="student-card result-block" aria-label="Sujet">
         <p className="result-prompt">{data.subject.prompt}</p>
         {data.subject.min_words && data.subject.max_words && <p className="student-hint">{data.subject.min_words} mots minimum, {data.subject.max_words} mots maximum.</p>}
+        {data.subject.cues && data.subject.cues.length > 0 && <div className="pill-row">{data.subject.cues.map(cue => <span className="pill" key={cue}>{cue}</span>)}</div>}
       </section>
     </>}
 
-    <SectionTitle title="Votre réponse" note={`${countWords(data.text)} mots`} />
-    <section className="student-card result-block" aria-label="Votre réponse">
-      <p className="correction-text result-answer">{data.text}</p>
-    </section>
+    {kind === "writing"
+      ? <>
+        <SectionTitle title="Votre réponse" note={`${countWords(data.text)} mots`} />
+        <section className="student-card result-block" aria-label="Votre réponse">
+          <p className="correction-text result-answer">{data.text}</p>
+        </section>
+      </>
+      : <>
+        <SectionTitle title="Votre échange" note={`${formatDuration(data.seconds ?? 0)} de parole · ${countWords(data.text)} mots de votre part`} />
+        <section className="student-card result-block" aria-label="Votre échange">
+          {data.transcript?.length
+            ? <ol className="examiner-transcript result-transcript">{data.transcript.map((turn, index) => <li key={index} data-role={turn.role}><span>{turn.role === "candidate" ? "Vous" : "Examinateur"}</span>{turn.text}</li>)}</ol>
+            : <p className="student-hint">Aucune transcription n’a été reçue pour cette séance.</p>}
+        </section>
+      </>}
 
-    <SectionTitle title="Retour du correcteur" note={data.status !== "done" ? "En préparation…" : result.demo ? "Correction de démonstration" : `${data.remaining} correction${data.remaining > 1 ? "s" : ""} restante${data.remaining > 1 ? "s" : ""} sur 24 h`} />
+    <SectionTitle title="Retour du correcteur" note={data.status !== "done" ? "En préparation…" : result.demo ? "Correction de démonstration" : data.remaining == null ? "Correction de la transcription" : `${data.remaining} correction${data.remaining > 1 ? "s" : ""} restante${data.remaining > 1 ? "s" : ""} sur 24 h`} />
     <section className="student-card correction result-feedback" aria-label="Retour du correcteur" aria-busy={data.status !== "done"}>
       <Feedback result={result} />
     </section>
 
-    <SectionTitle title={result.off_topic ? "Ce qu’il fallait écrire" : "Version améliorée de votre texte"} />
+    <SectionTitle title={result.off_topic ? copy.modelTitle : copy.improvedTitle} />
     <section className="student-card result-block" aria-label="Version améliorée">
       {result.improved
         ? <>
-          <p className="student-hint">{result.off_topic ? "Un exemple de réponse qui traite la consigne : repérez ce qu’elle demande, puis réessayez avec vos propres mots." : "Votre texte réécrit par un excellent rédacteur, avec vos idées : comparez les tournures, le vocabulaire et les liens entre les phrases."}</p>
+          <p className="student-hint">{result.off_topic ? "Un exemple de réponse qui traite la consigne : repérez ce qu’elle demande, puis réessayez avec vos propres mots." : copy.improvedHint}</p>
           <p className="correction-text">{result.improved}</p>
         </>
         : data.status === "done"
-          ? <p className="student-hint">Votre texte est déjà parfait : il n’y a rien à améliorer.</p>
+          ? <p className="student-hint">{result.score === 0 ? "Pas assez de matière pour proposer une version améliorée." : copy.perfect}</p>
           : <Waiting />}
     </section>
 
 
     <section className="student-card correction-next" aria-label="Suite">
-      <Link className="button button-secondary tile-link" href={data.subject ? `${subjectHref(data.subject)}&vide=1` : "/etudiant/expression-ecrite"}><Icon name="refresh" size={15} />Réessayer ce sujet</Link>
+      <Link className="button button-secondary tile-link" href={data.subject ? `${subjectHref(data.subject)}${kind === "writing" ? "&vide=1" : ""}` : copy.base}><Icon name="refresh" size={15} />Réessayer ce sujet</Link>
       {data.next
         ? <Link className="button button-primary tile-link" href={subjectHref(data.next)}>Sujet suivant : {data.next.title}<Icon name="arrow" size={15} /></Link>
-        : <Link className="button button-primary tile-link" href="/etudiant/expression-ecrite">Toutes les tâches<Icon name="arrow" size={15} /></Link>}
+        : <Link className="button button-primary tile-link" href={copy.base}>Toutes les tâches<Icon name="arrow" size={15} /></Link>}
     </section>
   </>;
 }

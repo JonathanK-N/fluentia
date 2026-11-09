@@ -354,15 +354,15 @@ def completed_fields(chunks):
     yield json.loads(text)
 
 
-def shape(data):
+def shape(data, criteria=CRITERIA, disclaimer=DISCLAIMER):
     """Format commun à partir de la réponse d’OpenAI, même incomplète : note dans la fourchette du niveau, critères dans l’ordre."""
     levels = {c.get("id"): c.get("level") for c in data.get("levels", []) if isinstance(c, dict)}
     fields = ("off_topic", "off_topic_reason", "level", "goal", "summary", "feedback", "errors", "improved", "advice")
     result = {key: data[key] for key in fields if key in data}
-    result.update(demo=False, disclaimer=DISCLAIMER)
-    complete = set(levels) == {key for key, _ in CRITERIA} and all(v in BANDS for v in levels.values())
+    result.update(demo=False, disclaimer=disclaimer)
+    complete = set(levels) == {key for key, _ in criteria} and all(v in BANDS for v in levels.values())
     if complete:
-        result["criteria"] = [{"id": key, "label": label, "level": levels[key]} for key, label in CRITERIA]
+        result["criteria"] = [{"id": key, "label": label, "level": levels[key]} for key, label in criteria]
     if data.get("level") in BANDS and isinstance(data.get("score"), int):
         overall = coherent(data["level"], levels.values()) if complete else data["level"]
         result["level"] = overall

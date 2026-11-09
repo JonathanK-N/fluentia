@@ -220,7 +220,8 @@ class CorrectionRequestSerializer(serializers.Serializer):
 
 
 class CorrectionCriterionSerializer(serializers.Serializer):
-    id = serializers.ChoiceField(choices=["consigne", "organisation", "lexique", "grammaire"])
+    # Rédaction : consigne, organisation, lexique, grammaire ; Oral : tache, aisance, lexique, grammaire.
+    id = serializers.ChoiceField(choices=["consigne", "organisation", "lexique", "grammaire", "tache", "aisance"])
     label = serializers.CharField()
     level = serializers.ChoiceField(choices=["A1", "A2", "B1", "B2", "C1", "C2"])
     comment = serializers.CharField(required=False, allow_blank=True)

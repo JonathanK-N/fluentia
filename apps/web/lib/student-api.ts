@@ -38,7 +38,7 @@ export type Results = { correct_count: number; question_count: number; percentag
 export type WritingCorrection = { demo: boolean; level: string; score: number; summary: string; feedback?: string; criteria: { id: string; label: string; level?: string; score?: number; comment: string }[]; errors: { original: string; correction: string; explanation: string }[]; improved: string; advice: string[]; goal?: string; off_topic?: boolean; off_topic_reason?: string; disclaimer: string; remaining?: number; id?: number };
 export type ModelAnswer = { demo: boolean; text: string; words: number };
 type SubjectLink = { id: number; title: string; task_number: number; task_slug: string };
-export type CorrectionPage = { id: number; status: "pending" | "running" | "done"; created_at: string; text: string; result: WritingCorrection | null; nclc: string | null; nclc_goal: number; remaining: number; subject: (SubjectLink & { prompt: string; min_words: number | null; max_words: number | null }) | null; next: SubjectLink | null };
+export type CorrectionPage = { id: number; status: "pending" | "running" | "done"; created_at: string; text: string; result: WritingCorrection | null; nclc: string | null; nclc_goal: number; remaining: number | null; subject: (SubjectLink & { prompt: string; min_words: number | null; max_words: number | null; cues?: string[] }) | null; next: SubjectLink | null; transcript?: { role: string; text: string }[]; seconds?: number };
 
 /** POST dont la réponse arrive ligne par ligne (JSON par ligne) ; onLine est appelé à chaque ligne reçue. */
 export async function streamLines(path: string, onLine: (line: Record<string, unknown>) => void): Promise<void> {
