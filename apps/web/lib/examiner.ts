@@ -61,8 +61,8 @@ export const QUESTIONS_SENTENCE = "Les deux minutes de préparation sont termin�
 export const sayExactly = (sentence: string, situation: string) =>
   `Tu es l’examinateur d’une épreuve orale en français et tu parles uniquement en français. ${situation} Dis exactement cette phrase, en français, d’une voix calme, et rien d’autre : « ${sentence} »`;
 export const CLOSING_INSTRUCTIONS = sayExactly(CLOSING_SENTENCE, "Le temps de l’épreuve est écoulé : tu arrêtes le candidat poliment.");
-// Écoute du candidat : la même que celle réglée par le serveur pour les tâches sans préparation.
-const TURN_DETECTION = { type: "semantic_vad", eagerness: "low" };
+// Tâche 2 : questions et réponses courtes, l’examinateur répond dès que la question est posée (2 s au plus).
+const QUESTIONS_TURN_DETECTION = { type: "semantic_vad", eagerness: "high" };
 
 const CLOSING_TIMEOUT_MS = 12_000;
 
@@ -186,7 +186,7 @@ export async function connectRealtime(session: SpeakingSession, microphone: Medi
     startQuestions: () => {
       send({ type: "input_audio_buffer.clear" }); // rien de la préparation n’est écouté
       send({ type: "response.create", response: { instructions: sayExactly(QUESTIONS_SENTENCE, "La préparation du candidat est terminée.") } });
-      send({ type: "session.update", session: { type: "realtime", audio: { input: { turn_detection: TURN_DETECTION } } } });
+      send({ type: "session.update", session: { type: "realtime", audio: { input: { turn_detection: QUESTIONS_TURN_DETECTION } } } });
     },
     conclude: (sentence = CLOSING_SENTENCE) => new Promise<void>(resolve => {
       track.enabled = false; // le candidat n’est plus enregistré : ce qu’il dirait après la fin ne compte pas

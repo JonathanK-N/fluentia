@@ -112,7 +112,9 @@ def safety_id(user):
     return hashlib.sha256(str(user.pk).encode()).hexdigest()
 
 
-TURN_DETECTION = {"type": "semantic_vad", "eagerness": "low"}
+# Fin de parole détectée selon le sens de la phrase. « medium » : l’examinateur relance en 1 à 4 s, et une
+# hésitation au milieu d’une idée ne le fait pas parler (« low » attendait jusqu’à 8 s : trop lent).
+TURN_DETECTION = {"type": "semantic_vad", "eagerness": "medium"}
 
 
 def talk_seconds(subject):

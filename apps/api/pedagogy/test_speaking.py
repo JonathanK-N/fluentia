@@ -310,7 +310,7 @@ class OpenAISpeakingTests(SpeakingClient):
         with patcher:
             self.open(self.task1)
         session = client.realtime.client_secrets.create.call_args.kwargs["session"]
-        self.assertEqual(session["audio"]["input"]["turn_detection"], {"type": "semantic_vad", "eagerness": "low"})
+        self.assertEqual(session["audio"]["input"]["turn_detection"], {"type": "semantic_vad", "eagerness": "medium"})
         self.assertIn("RELANCER LE CANDIDAT", session["instructions"])
 
     def test_safety_identifier_is_a_hash_never_the_email(self):
