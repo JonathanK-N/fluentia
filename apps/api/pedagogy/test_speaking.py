@@ -360,6 +360,20 @@ class OpenAISpeakingTests(SpeakingClient):
         # 0,06 $ de texte + 0,006 $ de texte en cache + 5 min × 0,003 $ de transcription.
         self.assertEqual(SpeakingSession.objects.get().estimated_cost_usd, Decimal("0.081000"))
 
+    @override_settings(OPENAI_REALTIME_MODEL="gpt-realtime-2.1-mini", OPENAI_REALTIME_TRANSCRIPTION_MODEL="gpt-4o-mini-transcribe")
+    def test_transcription_declared_in_tokens_is_priced(self):
+        patcher, _ = self.fake()
+        client = self.client_for(self.student)
+        with patcher:
+            opened = self.open(self.task2, client=client)
+        usage = {"transcription_in": 200_000, "transcription_out": 20_000}
+        client.post(
+            f"/api/v1/speaking/sessions/{opened.data['id']}/finish/",
+            {"seconds": 200, "transcript": TRANSCRIPT, "usage": usage}, format="json", HTTP_X_CSRFTOKEN=client.csrf,
+        )
+        # 200 000 jetons audio à 1,25 $/M + 20 000 jetons texte à 5 $/M = 0,35 $.
+        self.assertEqual(SpeakingSession.objects.get().estimated_cost_usd, Decimal("0.350000"))
+
     @override_settings(SPEAKING_DAILY_BUDGET_USD=Decimal("0.50"))
     def test_the_daily_budget_pauses_the_oral_for_everyone(self):
         SpeakingSession.objects.create(user=self.student, subject=self.task2, mode="practice", provider="openai",
@@ -413,3 +427,26 @@ class OpenAISpeakingTests(SpeakingClient):
 
     def test_students_are_told_who_receives_their_voice(self):
         self.assertEqual(APIClient().get("/api/v1/tasks/speaking/").data["examiner"], "OpenAI")
+
+
+@override_settings(SPEAKING_REQUIRE_PREMIUM=False, SPEAKING_DAILY_MINUTES=10)
+class AbandonTests(SpeakingClient):
+    def abandon(self, session_id, client):
+        return client.post(f"/api/v1/speaking/sessions/{session_id}/abandon/", HTTP_X_CSRFTOKEN=client.csrf)
+
+    def test_a_session_left_at_once_costs_no_minutes_and_keeps_the_free_trial(self):
+        client = self.client_for(self.student)
+        opened = self.open(self.task1, client=client)
+        response = self.abandon(opened.data["id"], client)
+        self.assertEqual((response.status_code, response.data["status"], response.data["seconds_left"]), (200, "failed", 600))
+        self.assertEqual(self.open(self.task1, client=client).status_code, 201)  # l’essai de la tâche 1 reste disponible
+
+    def test_a_session_left_later_counts_the_time_spent_without_correction(self):
+        client = self.client_for(self.student)
+        opened = self.open(self.task1, client=client)
+        started = SpeakingSession.objects.get().started_at
+        with patch("pedagogy.views.timezone.now", return_value=started + timedelta(seconds=75)):
+            response = self.abandon(opened.data["id"], client)
+        self.assertEqual((response.data["status"], response.data["seconds"]), ("finished", 75))
+        self.assertEqual(SpeakingSession.objects.get().correction_status, "")
+        self.assertEqual(self.abandon(opened.data["id"], client).status_code, 409)

@@ -26,6 +26,7 @@ from .views import (
     SpeakingCorrectionDetailView,
     SpeakingCorrectionStreamView,
     SpeakingFinishView,
+    SpeakingAbandonView,
 )
 from .progress import ProgressView
 
@@ -49,6 +50,7 @@ urlpatterns = [
     path("tasks/writing/corrections/<int:correction_id>/stream/", CorrectionStreamView.as_view()),
     path("speaking/sessions/", SpeakingSessionView.as_view()),
     path("speaking/sessions/<int:session_id>/finish/", SpeakingFinishView.as_view()),
+    path("speaking/sessions/<int:session_id>/abandon/", SpeakingAbandonView.as_view()),
     path("speaking/sessions/<int:session_id>/", SpeakingCorrectionDetailView.as_view()),
     path("speaking/sessions/<int:session_id>/correction/", SpeakingCorrectionStreamView.as_view()),
     path("bank/<uuid:item_id>/", BankDetailView.as_view()),

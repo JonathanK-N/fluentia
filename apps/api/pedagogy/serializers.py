@@ -293,6 +293,9 @@ class SpeakingUsageSerializer(StrictSerializer):
     audio_out = serializers.IntegerField(min_value=0, max_value=50_000_000, default=0)
     text_out = serializers.IntegerField(min_value=0, max_value=50_000_000, default=0)
     transcription_seconds = serializers.FloatField(min_value=0, max_value=7200, default=0)
+    # Certains modèles de transcription (gpt-4o-mini-transcribe) déclarent des jetons plutôt que des secondes.
+    transcription_in = serializers.IntegerField(min_value=0, max_value=50_000_000, default=0)
+    transcription_out = serializers.IntegerField(min_value=0, max_value=50_000_000, default=0)
 
 
 class SpeakingFinishSerializer(StrictSerializer):

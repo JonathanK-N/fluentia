@@ -616,6 +616,39 @@ class SpeakingSessionView(SecureView):
         )
 
 
+class SpeakingAbandonView(SecureView):
+    """Séance quittée sans être terminée (connexion échouée, page fermée) : pas de correction.
+
+    Abandonnée dans les premières secondes, elle n’a presque rien coûté : elle ne compte ni dans le quota ni
+    comme essai gratuit. Plus tard, le temps écoulé est compté, pour qu’on ne puisse pas parler puis se
+    faire rembourser ses minutes en quittant la page."""
+
+    permission_classes = [IsAuthenticated]
+    throttle_classes = []
+    FREE_SECONDS = 20
+
+    @extend_schema(request=None, responses=SpeakingFinishedSerializer)
+    def post(self, request, session_id):
+        with transaction.atomic():
+            saved = get_object_or_404(SpeakingSession.objects.select_for_update(), pk=session_id, user=request.user)
+            if saved.status not in (SpeakingSession.Status.PENDING, SpeakingSession.Status.LIVE):
+                return Response({"detail": "Cette session est déjà terminée."}, status=409)
+            now = timezone.now()
+            elapsed = max(0, int((now - saved.started_at).total_seconds()))
+            saved.ended_at = now
+            if elapsed <= self.FREE_SECONDS:
+                saved.status = SpeakingSession.Status.FAILED
+            else:
+                saved.status = SpeakingSession.Status.FINISHED
+                saved.seconds = min(saved.seconds, elapsed)
+                if saved.provider != "demo":
+                    saved.estimated_cost_usd = speaking.estimated_cost_ceiling(saved.seconds)
+            saved.save(update_fields=["status", "ended_at", "seconds", "estimated_cost_usd"])
+        return Response(SpeakingFinishedSerializer({
+            "id": saved.pk, "status": saved.status, "seconds": saved.seconds, "seconds_left": speaking_seconds_left(request.user),
+        }).data)
+
+
 class SpeakingFinishView(SecureView):
     permission_classes = [IsAuthenticated]
     throttle_classes = []

@@ -45,7 +45,7 @@ describe("événements de l’examinateur", () => {
     } } };
     readEvent(done, c.handlers);
     readEvent(done, c.handlers);
-    expect(c.usage()).toEqual({ audio_in: 1200, cached_audio_in: 800, text_in: 400, cached_text_in: 200, audio_out: 500, text_out: 80, transcription_seconds: 0 });
+    expect(c.usage()).toEqual({ audio_in: 1200, cached_audio_in: 800, text_in: 400, cached_text_in: 200, audio_out: 500, text_out: 80, transcription_seconds: 0, transcription_in: 0, transcription_out: 0 });
   });
 
   it("signale une erreur du fournisseur", () => {
@@ -70,7 +70,7 @@ describe("réponses du candidat passées en texte", () => {
     expect(sent).toEqual([
       { type: "conversation.item.delete", item_id: "item_a" },
       { type: "conversation.item.create", previous_item_id: "item_exam1",
-        item: { id: "fl_txt_1", type: "message", role: "user", content: [{ type: "input_text", text: "Je viens de Guinée." }] } },
+        item: { id: "fl_txt_1", type: "message", role: "user", content: [{ type: "input_text", text: "[Réponse orale du candidat, transcrite] Je viens de Guinée." }] } },
     ]);
   });
 

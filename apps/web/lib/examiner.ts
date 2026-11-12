@@ -8,7 +8,7 @@
 
 export type Speaker = "examiner" | "candidate";
 export type Turn = { id: string; role: Speaker; text: string; final: boolean };
-export type Usage = { audio_in: number; cached_audio_in: number; text_in: number; cached_text_in: number; audio_out: number; text_out: number; transcription_seconds: number };
+export type Usage = { audio_in: number; cached_audio_in: number; text_in: number; cached_text_in: number; audio_out: number; text_out: number; transcription_seconds: number; transcription_in: number; transcription_out: number };
 export type Activity = "connecting" | "examiner" | "candidate" | "waiting";
 
 export type SpeakingSession = {
@@ -34,7 +34,7 @@ export type ExaminerConnection = {
   close: () => void;
 };
 
-export const emptyUsage = (): Usage => ({ audio_in: 0, cached_audio_in: 0, text_in: 0, cached_text_in: 0, audio_out: 0, text_out: 0, transcription_seconds: 0 });
+export const emptyUsage = (): Usage => ({ audio_in: 0, cached_audio_in: 0, text_in: 0, cached_text_in: 0, audio_out: 0, text_out: 0, transcription_seconds: 0, transcription_in: 0, transcription_out: 0 });
 
 export function addUsage(total: Usage, part: Partial<Usage>): Usage {
   const next = { ...total };
@@ -88,8 +88,10 @@ export function readEvent(event: RealtimeEvent, handlers: ExaminerHandlers) {
       break;
     case "conversation.item.input_audio_transcription.completed": {
       if (typeof event.item_id === "string") handlers.onTurn({ id: event.item_id, role: "candidate", text: String(event.transcript ?? "").trim(), final: true });
-      const usage = event.usage as { type?: string; seconds?: number } | undefined;
+      // Selon le modèle de transcription, la consommation est déclarée en secondes ou en jetons.
+      const usage = event.usage as { type?: string; seconds?: number; input_tokens?: number; output_tokens?: number } | undefined;
       if (usage?.type === "duration" && typeof usage.seconds === "number") handlers.onUsage({ transcription_seconds: usage.seconds });
+      if (usage?.type === "tokens") handlers.onUsage({ transcription_in: usage.input_tokens ?? 0, transcription_out: usage.output_tokens ?? 0 });
       break;
     }
     case "output_audio_buffer.started":
@@ -146,7 +148,7 @@ export function audioToText(send: (event: RealtimeEvent) => void) {
       send({ type: "conversation.item.delete", item_id: id });
       send({
         type: "conversation.item.create", ...(previous ? { previous_item_id: previous } : {}),
-        item: { id: textId, type: "message", role: "user", content: [{ type: "input_text", text: item.transcript }] },
+        item: { id: textId, type: "message", role: "user", content: [{ type: "input_text", text: `[Réponse orale du candidat, transcrite] ${item.transcript}` }] },
       });
       renamed.set(id, textId);
     }

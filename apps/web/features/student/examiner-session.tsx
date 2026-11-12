@@ -57,13 +57,22 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
     connection.current?.close(); connection.current = null;
     microphone.current?.getTracks().forEach(track => track.stop()); microphone.current = null;
   }, []);
-  useEffect(() => () => { release(); exitFullscreen(); }, [release]);
+  // Séance ouverte côté serveur et pas encore terminée : à abandonner si l’étudiant part ou si la connexion échoue.
+  const openId = useRef<number | null>(null);
+  const abandon = useCallback(() => {
+    const id = openId.current;
+    if (id === null || finishing.current) return;
+    openId.current = null;
+    api(`speaking/sessions/${id}/abandon/`, "POST").catch(() => {});
+  }, []);
+  useEffect(() => () => { abandon(); release(); exitFullscreen(); }, [abandon, release]);
 
-  const fail = useCallback((message: string) => { release(); setError(message); setPhase("error"); }, [release]);
+  const fail = useCallback((message: string) => { abandon(); release(); setError(message); setPhase("error"); }, [abandon, release]);
 
   const finish = useCallback(async () => {
     if (finishing.current || !session) return;
     finishing.current = true;
+    openId.current = null;
     // Le chrono s’arrête maintenant : la phrase de fin de l’examinateur n’est pas comptée.
     const seconds = startedAt.current ? Math.min(session.seconds, Math.round((Date.now() - startedAt.current) / 1000)) : 0;
     setPhase("closing");
@@ -129,6 +138,8 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
       onTurn: (turn: Turn) => {
         // Après la fin du temps, une nouvelle prise de parole du candidat n’est plus enregistrée.
         if (finishing.current && turn.role === "candidate" && !turnsRef.current.some(t => t.id === turn.id)) return;
+        // Après la fin, seule la phrase d’au revoir s’affiche : une réponse annulée au dernier moment n’apparaît pas.
+        if (finishing.current && turn.role === "examiner" && turn.text && !/au revoir/i.test(turn.text)) return;
         turnsRef.current = upsertTurn(turnsRef.current, turn); setTurns(turnsRef.current);
       },
       onUsage: (part: Partial<Usage>) => { usage.current = addUsage(usage.current, part); },
@@ -167,6 +178,7 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
       return fail(status === 403 || status === 429 || status === 503 ? (e as Error).message : "La session n’a pas pu être ouverte. Réessayez dans un instant.");
     }
     setSession(opened);
+    openId.current = opened.id;
     connect(opened);
   }
 
@@ -210,7 +222,7 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
   const inSession = phase === "prep" || phase === "connecting" || phase === "briefing" || phase === "live" || phase === "closing";
   const demo = session?.demo;
 
-  function leave() { release(); exitFullscreen(); onExit(); }
+  function leave() { abandon(); release(); exitFullscreen(); onExit(); }
   function restart() {
     setError(""); setTurns([]); turnsRef.current = []; usage.current = emptyUsage();
     finishing.current = false; startedAt.current = 0; setCounting(false);
@@ -261,7 +273,7 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
         chips={[{ label: "Épreuve 04" }, { label: demo ? "Démo · questions préenregistrées" : "Entraînement non officiel", tone: "warn" }]}
         title={subject.title}
         subtitle={`${task.title} · ${demo ? "votre voix n’est pas analysée dans cette démo" : `votre voix est envoyée ${sentTo(examiner)} pendant la conversation`}`}
-        base="/etudiant/expression-orale" current={task.number} locked={inSession} onLeave={() => { release(); exitFullscreen(); }}
+        base="/etudiant/expression-orale" current={task.number} locked={inSession} onLeave={() => { abandon(); release(); exitFullscreen(); }}
       />
 
       <section className="oral-card" aria-live="polite">
