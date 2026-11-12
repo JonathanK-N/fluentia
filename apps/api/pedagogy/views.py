@@ -525,6 +525,12 @@ def free_trial_left(user, subject):
     )
 
 
+def duration(seconds):
+    """« 3 min 05 », « 4 min 30 », « 2 min »."""
+    minutes, rest = divmod(int(seconds), 60)
+    return f"{minutes} min {rest:02d}" if rest else f"{minutes} min"
+
+
 class SpeakingSessionView(SecureView):
     permission_classes = [IsAuthenticated]
     # La limite est comptée en base, en minutes par jour : elle protège le coût de la voix en direct.
@@ -555,12 +561,19 @@ class SpeakingSessionView(SecureView):
             if left < self.MIN_SECONDS:
                 minutes = settings.SPEAKING_DAILY_MINUTES
                 raise Throttled(detail=f"Vous avez utilisé vos {minutes} minutes d’oral des dernières 24 heures. Réessayez demain.")
+            # Une tâche se passe toujours en entier, dans son temps officiel : jamais raccourcie par le quota.
+            talk = speaking.talk_seconds(subject)
+            if talk and left < talk:
+                raise Throttled(detail=(
+                    f"Il vous reste {duration(left)} d’oral aujourd’hui, et cette tâche dure {duration(talk)}. "
+                    "Choisissez une tâche plus courte, ou réessayez demain."
+                ))
             saved = SpeakingSession.objects.create(
                 user=request.user,
                 subject=subject,
                 mode=data.validated_data["mode"],
                 provider=settings.SPEAKING_PROVIDER,
-                seconds=min(speaking.talk_seconds(subject) or left, left),
+                seconds=talk or left,
             )
         try:
             opened = speaking.provider()["session"](subject, request.user)

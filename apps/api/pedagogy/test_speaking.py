@@ -128,7 +128,7 @@ class PremiumAndTrialTests(SpeakingClient):
     def test_quota_still_applies_without_premium(self):
         client = self.client_for(self.student)
         self.assertEqual(self.open(self.task1, client=client).status_code, 201)
-        self.assertEqual(self.open(self.task1, client=client).status_code, 201)
+        # Il reste 1 min sur 3 : une deuxième tâche 1 (2 min) n’est pas raccourcie, elle est refusée.
         self.assertEqual(self.open(self.task1, client=client).status_code, 429)
 
     def test_free_trial_is_task_1_only(self):
@@ -159,11 +159,16 @@ class QuotaTests(SpeakingClient):
     def test_daily_minutes_are_counted_per_student(self):
         client = self.client_for(self.student)
         # Tâche 2 : 5 min 30 officielles dont 2 min de préparation, donc 210 s d’échange réservées sur 600.
-        opened = [self.open(self.task2, client=client).data["seconds"] for _ in range(3)]
-        self.assertEqual(opened, [210, 210, 180])  # il reste 180 s : la troisième session est raccourcie
-        third = self.open(self.task1, client=client)
+        first, second = (self.open(self.task2, client=client).data["seconds"] for _ in range(2))
+        self.assertEqual((first, second), (210, 210))
+        # Il reste 180 s : une tâche de 3 min 30 n’est jamais raccourcie, elle est refusée avec un message clair.
+        refused = self.open(self.task2, client=client)
+        self.assertEqual(refused.status_code, 429)
+        self.assertIn("Il vous reste 3 min d’oral aujourd’hui, et cette tâche dure 3 min 30", refused.data["detail"])
+        self.assertEqual(self.open(self.task1, client=client).data["seconds"], 120)  # une tâche plus courte passe
+        third = self.open(self.task1, client=client)  # il reste 60 s, la tâche 1 en dure 120
         self.assertEqual(third.status_code, 429)
-        self.assertIn("10 minutes", third.data["detail"])
+        self.assertIn("Il vous reste 1 min d’oral", third.data["detail"])
         other = User.objects.create_user(username="autre", email="autre@example.test")
         self.premium(other)
         self.assertEqual(self.open(self.task2, client=self.client_for(other)).status_code, 201)
@@ -180,10 +185,10 @@ class QuotaTests(SpeakingClient):
         client = self.client_for(self.student)
         first = self.open(self.task2, client=client)
         self.open(self.task2, client=client)
-        self.open(self.task2, client=client)  # 210 + 210 + 180 s : les 10 minutes sont réservées
+        self.open(self.task1, client=client)  # 210 + 210 + 120 s réservées : il reste 60 s
         self.assertEqual(self.open(self.task1, client=client).status_code, 429)
         finished = self.finish(first.data["id"], seconds=90, client=client)
-        self.assertEqual((finished.data["seconds"], finished.data["seconds_left"]), (90, 120))
+        self.assertEqual((finished.data["seconds"], finished.data["seconds_left"]), (90, 180))
         self.assertEqual(self.open(self.task1, client=client).data["seconds"], 120)
 
 
