@@ -180,23 +180,32 @@ export async function connectRealtime(session: SpeakingSession, microphone: Medi
       send({ type: "session.update", session: { type: "realtime", audio: { input: { turn_detection: null } } } });
       // Une phrase commencée avant la fin est quand même transcrite et comptée.
       if (candidateSpeaking) send({ type: "input_audio_buffer.commit" });
-      let asked = false, answered = false;
-      const ask = () => { asked = true; send({ type: "response.create", response: { instructions: CLOSING_INSTRUCTIONS } }); };
+      let asked = false, answered = false, playing = false;
+      const ask = () => {
+        asked = true;
+        send({ type: "response.create", response: { instructions: CLOSING_INSTRUCTIONS, metadata: { fluentia: "closing" } } });
+      };
+      // L’examinateur est coupé net, au milieu de sa phrase s’il le faut.
+      const silence = () => { send({ type: "response.cancel" }); send({ type: "output_audio_buffer.clear" }); };
       const done = () => { const i = waiters.indexOf(wait); if (i >= 0) waiters.splice(i, 1); clearTimeout(timer); resolve(); };
       const wait = (event: RealtimeEvent) => {
-        // Une réponse en cours est d’abord annulée : l’API refuse une deuxième réponse simultanée.
-        if (!asked && event.type === "response.done") ask();
-        else if (asked && !answered && event.type === "error") asked = false; // refusée : on redemande après la réponse en cours
-        else if (asked && event.type === "response.created") answered = true;
-        else if (answered && event.type === "output_audio_buffer.stopped") done();
+        if (event.type === "response.created") {
+          const response = event.response as { metadata?: { fluentia?: string } | null } | undefined;
+          // Une réponse au candidat qui démarre au dernier moment est annulée : seule la phrase de fin passe.
+          if (response?.metadata?.fluentia === "closing") answered = true;
+          else silence();
+        }
+        // L’API refuse une deuxième réponse simultanée : la phrase de fin est demandée quand l’autre est terminée.
+        else if (!answered && event.type === "response.done") { if (!asked || !responding) ask(); }
+        else if (asked && !answered && event.type === "error") asked = false;
+        // La fin de la voix annulée ne compte pas : on attend que la phrase de fin ait commencé puis se termine.
+        else if (answered && event.type === "output_audio_buffer.started") playing = true;
+        else if (playing && event.type === "output_audio_buffer.stopped") done();
       };
       const timer = setTimeout(done, CLOSING_TIMEOUT_MS);
       waiters.push(wait);
-      if (responding) {
-        // L’examinateur est coupé net, au milieu de sa phrase s’il le faut.
-        send({ type: "response.cancel" });
-        send({ type: "output_audio_buffer.clear" });
-      } else ask();
+      if (responding) silence();
+      else ask();
     }),
     close,
   };

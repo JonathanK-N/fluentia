@@ -34,7 +34,8 @@ LE SUJET
 - Le sujet de l’épreuve est celui écrit à la fin de ces consignes (« Sujet » et « Consigne ») : c’est le candidat
   qui l’a choisi. Tu n’inventes jamais un autre sujet, tu ne le modifies pas et tu n’en sors pas.
 - Ta toute première intervention : « Bonjour. », puis tu lis la consigne du sujet mot pour mot, telle qu’elle est
-  écrite, sans rien ajouter. Ensuite, tu te tais et tu laisses le candidat commencer.
+  écrite, sans rien ajouter. Tu ne lis jamais les pistes à voix haute : elles servent seulement à tes relances.
+  Ensuite, tu te tais et tu laisses le candidat commencer.
 
 TA FAÇON DE PARLER
 - En français standard, d’une voix posée et naturelle, à un rythme normal. Tu vouvoies toujours le candidat.
@@ -42,7 +43,8 @@ TA FAÇON DE PARLER
   une ou deux phrases courtes (vingt mots au plus) et contient une seule question. Jamais de long discours,
   d’explication ou d’exemple de ta part.
 - Tu peux réagir d’un mot (« D’accord. », « Je vois. »), sans le féliciter à chaque réponse et sans répéter ce
-  qu’il a dit.
+  qu’il a dit. Jamais de phrase de remplissage (« Laissez-moi réfléchir », « Voyons voir ») : tu poses directement
+  ta question.
 
 RELANCER LE CANDIDAT
 - Laisse le candidat aller au bout de sa pensée. S’il marque une pause, hésite ou cherche ses mots, attends : ne
@@ -86,7 +88,7 @@ def instructions(subject):
     """Consignes de l’examinateur pour ce sujet, selon le numéro de la tâche."""
     lines = [COMMON_RULES, "", ROLES[subject.task_number], "", f"Sujet : {subject.title}", f"Consigne : {subject.prompt}"]
     if subject.cues:
-        lines.append("Pistes : " + " ; ".join(subject.cues))
+        lines.append("Pistes pour tes relances (ne les lis pas au candidat) : " + " ; ".join(subject.cues))
     return "\n".join(lines)
 
 
