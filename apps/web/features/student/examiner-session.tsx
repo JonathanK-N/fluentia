@@ -16,6 +16,8 @@ import { SeanceBar, SeanceHead, Timer } from "./seance";
 
 type Subject = SpeakingTask["subjects"][number];
 type Phase = "intro" | "prep" | "connecting" | "live" | "closing" | "done" | "error";
+const START_IF_SILENT_MS = 10_000;     // le candidat ne dit rien après la lecture du sujet
+const START_AT_THE_LATEST_MS = 60_000; // filet de sécurité : la séance ne dure jamais indéfiniment
 
 const ACTIVITY: Record<Activity, string> = {
   connecting: "Connexion à l’examinateur…",
@@ -42,6 +44,8 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
   const stops = useRef<(() => void)[]>([]);
   const usage = useRef<Usage>(emptyUsage());
   const turnsRef = useRef<Turn[]>([]);
+  // Le chrono ne démarre qu’après la lecture du sujet, quand le candidat commence à parler.
+  const [counting, setCounting] = useState(false);
   const startedAt = useRef(0);
   const finishing = useRef(false);
 
@@ -57,9 +61,10 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
   const finish = useCallback(async () => {
     if (finishing.current || !session) return;
     finishing.current = true;
+    // Le chrono s’arrête maintenant : la phrase de fin de l’examinateur n’est pas comptée.
+    const seconds = startedAt.current ? Math.min(session.seconds, Math.round((Date.now() - startedAt.current) / 1000)) : 0;
     setPhase("closing");
     await connection.current?.conclude().catch(() => {});
-    const seconds = Math.round((Date.now() - startedAt.current) / 1000);
     release();
     const transcript = turnsRef.current.filter(t => t.text).map(t => ({ role: t.role, text: t.text.slice(0, 4000) })).slice(0, 400);
     try {
@@ -78,9 +83,27 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
     const mic = microphone.current;
     if (!mic) return fail("Le microphone n’est plus disponible.");
     setPhase("connecting"); setActivity("connecting");
+    const begin = () => {
+      if (startedAt.current || finishing.current) return;
+      startedAt.current = Date.now();
+      setCounting(true);
+    };
+    // Si le candidat ne dit rien, le chrono part quand même : 10 s après la lecture du sujet, 60 s au plus tard.
+    let examinerSpoke = false, nudge: ReturnType<typeof setTimeout> | undefined;
+    const latest = setTimeout(begin, START_AT_THE_LATEST_MS);
+    stops.current.push(() => { clearTimeout(latest); clearTimeout(nudge); });
     const handlers = {
-      onActivity: setActivity,
-      onTurn: (turn: Turn) => { turnsRef.current = upsertTurn(turnsRef.current, turn); setTurns(turnsRef.current); },
+      onActivity: (next: Activity) => {
+        setActivity(next);
+        if (next === "candidate") begin();
+        if (next === "examiner") { examinerSpoke = true; clearTimeout(nudge); }
+        if (next === "waiting" && examinerSpoke && !startedAt.current && !nudge) nudge = setTimeout(begin, START_IF_SILENT_MS);
+      },
+      onTurn: (turn: Turn) => {
+        // Après la fin du temps, une nouvelle prise de parole du candidat n’est plus enregistrée.
+        if (finishing.current && turn.role === "candidate" && !turnsRef.current.some(t => t.id === turn.id)) return;
+        turnsRef.current = upsertTurn(turnsRef.current, turn); setTurns(turnsRef.current);
+      },
       onUsage: (part: Partial<Usage>) => { usage.current = addUsage(usage.current, part); },
       onError: (message: string) => setError(message),
       onRemoteStream: (stream: MediaStream) => { stops.current.push(watchLevel(stream, value => setLevel(l => ({ ...l, examiner: value })))); },
@@ -91,7 +114,6 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
       return fail((e as Error).message);
     }
     stops.current.push(watchLevel(mic, value => setLevel(l => ({ ...l, mic: value }))));
-    startedAt.current = Date.now();
     setLeft(opened.seconds);
     setPhase("live");
   }, [fail, task.number]);
@@ -117,12 +139,13 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
     else connect(opened);
   }
 
-  // Un seul chronomètre : préparation, puis temps de parole.
+  // Un seul chronomètre : préparation, puis temps de parole (à partir de la première prise de parole du candidat).
+  const running = phase === "prep" || (phase === "live" && counting);
   useEffect(() => {
-    if (phase !== "prep" && phase !== "live") return;
+    if (!running) return;
     const timer = setInterval(() => setLeft(value => Math.max(0, value - 1)), 1000);
     return () => clearInterval(timer);
-  }, [phase]);
+  }, [running]);
   useEffect(() => {
     if (left > 0 || !session) return;
     if (phase === "prep") connect(session);
@@ -157,7 +180,8 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
   function leave() { release(); exitFullscreen(); onExit(); }
   function restart() {
     setError(""); setTurns([]); turnsRef.current = []; usage.current = emptyUsage();
-    finishing.current = false; setSession(null); setSummary(null); setPhase("intro");
+    finishing.current = false; startedAt.current = 0; setCounting(false);
+    setSession(null); setSummary(null); setPhase("intro");
   }
 
   // Une seule scène pour toutes les étapes : orbe et chronomètre, état, message, consigne, commandes.
@@ -217,7 +241,7 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
           {phase === "done"
             ? <Timer left={summary?.seconds ?? 0} progress={Math.min(1, (summary?.seconds ?? 0) / task.seconds)} label="Parlé" total={task.seconds} />
             : phase === "prep" || phase === "live" || phase === "closing"
-              ? <Timer left={left} progress={progress} label={phase === "prep" ? "Préparation" : "Il reste"} total={total} />
+              ? <Timer left={left} progress={progress} label={phase === "prep" ? "Préparation" : phase === "live" && !counting ? "Dès que vous parlez" : "Il reste"} total={total} />
               : <Timer left={task.seconds} progress={1} label="Durée" total={task.seconds} />}
         </div>
 

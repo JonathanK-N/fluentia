@@ -49,8 +49,11 @@ export function upsertTurn(turns: Turn[], turn: Turn): Turn[] {
   return next;
 }
 
+/** Phrase de fin, dite telle quelle quand le temps est écoulé. */
+export const CLOSING_SENTENCE = "Merci beaucoup pour vos réponses. Le temps est écoulé, nous allons nous arrêter ici. Au revoir.";
+// Ces consignes remplacent celles de la session pour cette seule réponse : la langue doit donc y être redite.
 export const CLOSING_INSTRUCTIONS =
-  "Le temps de l’épreuve est écoulé. Remercie le candidat en une seule phrase courte, sans aucune évaluation, et termine l’entretien.";
+  `Tu es l’examinateur d’une épreuve orale en français et tu parles uniquement en français. Le temps de l’épreuve est écoulé : tu arrêtes le candidat poliment. Dis exactement cette phrase, en français, d’une voix calme, et rien d’autre : « ${CLOSING_SENTENCE} »`;
 
 const CLOSING_TIMEOUT_MS = 12_000;
 
@@ -129,12 +132,14 @@ export async function connectRealtime(session: SpeakingSession, microphone: Medi
   pc.addTrack(track, microphone);
   const channel = pc.createDataChannel("oai-events");
   const waiters: ((event: RealtimeEvent) => void)[] = [];
-  let responding = false;
+  let responding = false, candidateSpeaking = false;
   channel.onmessage = message => {
     let event: RealtimeEvent;
     try { event = JSON.parse(String(message.data)); } catch { return; }
     if (event.type === "response.created") responding = true;
     if (event.type === "response.done") responding = false;
+    if (event.type === "input_audio_buffer.speech_started") candidateSpeaking = true;
+    if (event.type === "input_audio_buffer.speech_stopped" || event.type === "input_audio_buffer.committed") candidateSpeaking = false;
     readEvent(event, handlers);
     waiters.slice().forEach(wait => wait(event));
   };
@@ -170,20 +175,28 @@ export async function connectRealtime(session: SpeakingSession, microphone: Medi
     microphone,
     setMuted: muted => { track.enabled = !muted; },
     conclude: () => new Promise<void>(resolve => {
-      track.enabled = false; // le candidat n’est plus enregistré pendant la conclusion
+      track.enabled = false; // le candidat n’est plus enregistré : ce qu’il dirait après la fin ne compte pas
+      // Plus de réponse automatique à ce que le candidat vient de dire : seule la phrase de fin sera prononcée.
+      send({ type: "session.update", session: { type: "realtime", audio: { input: { turn_detection: null } } } });
+      // Une phrase commencée avant la fin est quand même transcrite et comptée.
+      if (candidateSpeaking) send({ type: "input_audio_buffer.commit" });
       let asked = false, answered = false;
       const ask = () => { asked = true; send({ type: "response.create", response: { instructions: CLOSING_INSTRUCTIONS } }); };
       const done = () => { const i = waiters.indexOf(wait); if (i >= 0) waiters.splice(i, 1); clearTimeout(timer); resolve(); };
       const wait = (event: RealtimeEvent) => {
         // Une réponse en cours est d’abord annulée : l’API refuse une deuxième réponse simultanée.
         if (!asked && event.type === "response.done") ask();
+        else if (asked && !answered && event.type === "error") asked = false; // refusée : on redemande après la réponse en cours
         else if (asked && event.type === "response.created") answered = true;
         else if (answered && event.type === "output_audio_buffer.stopped") done();
       };
       const timer = setTimeout(done, CLOSING_TIMEOUT_MS);
       waiters.push(wait);
-      if (responding) send({ type: "response.cancel" });
-      else ask();
+      if (responding) {
+        // L’examinateur est coupé net, au milieu de sa phrase s’il le faut.
+        send({ type: "response.cancel" });
+        send({ type: "output_audio_buffer.clear" });
+      } else ask();
     }),
     close,
   };
@@ -208,7 +221,7 @@ export const DEMO_SCRIPT: Record<number, string[]> = {
     "Certaines personnes pensent le contraire. Que leur répondriez-vous ?",
   ],
 };
-export const DEMO_CLOSING = "Merci, l’épreuve est terminée.";
+export const DEMO_CLOSING = CLOSING_SENTENCE;
 // L’examinateur scripté attend que le candidat ait fini : un silence de 2,5 s après avoir parlé.
 const DEMO_SILENCE_MS = 2_500;
 const DEMO_VOICE_LEVEL = 0.08;      // niveau sonore à partir duquel on considère que le candidat parle

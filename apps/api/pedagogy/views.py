@@ -676,7 +676,7 @@ class SpeakingCorrectionDetailView(SecureView):
             "transcript": transcript,
             "seconds": saved.seconds,
             "result": saved.result,
-            "nclc": nclc(saved.result["score"]) if saved.result else None,
+            "nclc": nclc(saved.result.get("tcf_score", saved.result["score"])) if saved.result else None,
             "nclc_goal": NCLC_GOAL,
             "remaining": None,
             "subject": subject_link(subject) | {"prompt": subject.prompt, "cues": subject.cues, "min_words": None, "max_words": None} if subject else None,
