@@ -53,8 +53,8 @@ export function upsertTurn(turns: Turn[], turn: Turn): Turn[] {
 
 /** Phrase de fin, dite telle quelle quand le temps est écoulé. */
 export const CLOSING_SENTENCE = "Merci beaucoup pour vos réponses. Le temps est écoulé, nous allons nous arrêter ici. Au revoir.";
-/** Tâche 2 : l’examinateur reste dans son personnage pour prendre congé. */
-export const ROLEPLAY_CLOSING_SENTENCE = "Merci pour votre visite. Si vous avez d’autres questions, n’hésitez pas à nous laisser un message, à nous appeler ou à repasser nous voir. Au revoir.";
+/** Tâche 2 : l’examinateur prend congé dans son rôle, quelle que soit la situation (appel, visite, courriel…). */
+export const ROLEPLAY_CLOSING_SENTENCE = "Merci pour vos questions. Si vous avez besoin d’autres informations, n’hésitez pas à nous recontacter. Au revoir.";
 /** Tâche 2 : fin des deux minutes de préparation ; c’est ensuite le candidat qui mène. */
 export const QUESTIONS_SENTENCE = "Les deux minutes de préparation sont terminées. Nous pouvons commencer : je vous écoute.";
 // Ces consignes remplacent celles de la session pour cette seule réponse : la langue doit donc y être redite.
