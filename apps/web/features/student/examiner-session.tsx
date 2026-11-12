@@ -140,6 +140,9 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
         if (finishing.current && turn.role === "candidate" && !turnsRef.current.some(t => t.id === turn.id)) return;
         // Après la fin, seule la phrase d’au revoir s’affiche : une réponse annulée au dernier moment n’apparaît pas.
         if (finishing.current && turn.role === "examiner" && turn.text && !/au revoir/i.test(turn.text)) return;
+        // La phrase d’au revoir ne s’affiche qu’une fois.
+        if (finishing.current && turn.role === "examiner" && turn.text
+          && turnsRef.current.some(t => t.id !== turn.id && t.role === "examiner" && t.text === turn.text)) return;
         turnsRef.current = upsertTurn(turnsRef.current, turn); setTurns(turnsRef.current);
       },
       onUsage: (part: Partial<Usage>) => { usage.current = addUsage(usage.current, part); },

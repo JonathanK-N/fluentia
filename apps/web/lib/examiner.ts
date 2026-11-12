@@ -60,7 +60,28 @@ export const QUESTIONS_SENTENCE = "Les deux minutes de préparation sont termin�
 // Ces consignes remplacent celles de la session pour cette seule réponse : la langue doit donc y être redite.
 export const sayExactly = (sentence: string, situation: string) =>
   `Tu es l’examinateur d’une épreuve orale en français et tu parles uniquement en français. ${situation} Dis exactement cette phrase, en français, d’une voix calme, et rien d’autre : « ${sentence} »`;
-export const CLOSING_INSTRUCTIONS = sayExactly(CLOSING_SENTENCE, "Le temps de l’épreuve est écoulé : tu arrêtes le candidat poliment.");
+// Les phrases de fin, enregistrées une fois pour toutes avec la voix de synthèse d’OpenAI (public/audio).
+const CLOSING_AUDIO: Record<string, string> = {
+  [CLOSING_SENTENCE]: "/audio/oral-fin.mp3",
+  [ROLEPLAY_CLOSING_SENTENCE]: "/audio/oral-fin-tache2.mp3",
+};
+
+/** Joue la phrase de fin et l’ajoute à la transcription ; se résout quand elle est terminée. */
+function playClosing(sentence: string, handlers: ExaminerHandlers): Promise<void> {
+  return new Promise(resolve => {
+    let finished = false;
+    const finish = () => { if (finished) return; finished = true; clearTimeout(timer); handlers.onActivity("waiting"); resolve(); };
+    const timer = setTimeout(finish, CLOSING_TIMEOUT_MS);
+    handlers.onActivity("examiner");
+    handlers.onTurn({ id: `fin-${Date.now()}`, role: "examiner", text: sentence, final: true });
+    const source = CLOSING_AUDIO[sentence];
+    if (!source || typeof Audio === "undefined") return void setTimeout(finish, 2_500);
+    const player = new Audio(source);
+    player.onended = finish;
+    player.onerror = finish;
+    player.play().catch(finish);
+  });
+}
 // Tâche 2 : questions et réponses courtes, l’examinateur répond dès que la question est posée (2 s au plus).
 const QUESTIONS_TURN_DETECTION = { type: "semantic_vad", eagerness: "high" };
 
@@ -186,7 +207,6 @@ export async function connectRealtime(session: SpeakingSession, microphone: Medi
   if (!track) throw new Error("Aucun microphone disponible.");
   pc.addTrack(track, microphone);
   const channel = pc.createDataChannel("oai-events");
-  const waiters: ((event: RealtimeEvent) => void)[] = [];
   let responding = false, candidateSpeaking = false;
   const replacing = audioToText(event => send(event));
   channel.onmessage = message => {
@@ -198,7 +218,6 @@ export async function connectRealtime(session: SpeakingSession, microphone: Medi
     if (event.type === "input_audio_buffer.speech_stopped" || event.type === "input_audio_buffer.committed") candidateSpeaking = false;
     replacing.read(event, responding);
     readEvent(event, handlers);
-    waiters.slice().forEach(wait => wait(event));
   };
   const send = (event: RealtimeEvent) => { if (channel.readyState === "open") channel.send(JSON.stringify(event)); };
   channel.onopen = () => send({ type: "response.create" }); // l’examinateur ouvre l’épreuve
@@ -236,45 +255,18 @@ export async function connectRealtime(session: SpeakingSession, microphone: Medi
       send({ type: "response.create", response: { instructions: sayExactly(QUESTIONS_SENTENCE, "La préparation du candidat est terminée.") } });
       send({ type: "session.update", session: { type: "realtime", audio: { input: { turn_detection: QUESTIONS_TURN_DETECTION } } } });
     },
-    conclude: (sentence = CLOSING_SENTENCE) => new Promise<void>(resolve => {
+    conclude: (sentence = CLOSING_SENTENCE) => {
       track.enabled = false; // le candidat n’est plus enregistré : ce qu’il dirait après la fin ne compte pas
-      // Plus de réponse automatique à ce que le candidat vient de dire : seule la phrase de fin sera prononcée.
+      // Plus de réponse de l’IA : elle n’écoute plus, sa réponse en cours est annulée et sa voix est coupée.
       send({ type: "session.update", session: { type: "realtime", audio: { input: { turn_detection: null } } } });
       // Une phrase commencée avant la fin est quand même transcrite et comptée.
       if (candidateSpeaking) send({ type: "input_audio_buffer.commit" });
-      // La phrase de fin est demandée une seule fois ; redemandée seulement si l’API l’a refusée.
-      let asked = false, answered = false, playing = false;
-      const ask = () => {
-        if (asked) return;
-        asked = true;
-        const instructions = sentence === CLOSING_SENTENCE ? CLOSING_INSTRUCTIONS : sayExactly(sentence, "Le temps de l’épreuve est écoulé : tu prends congé du candidat poliment, dans ton rôle.");
-        send({ type: "response.create", response: { instructions, metadata: { fluentia: "closing" } } });
-      };
-      // L’examinateur est coupé net, au milieu de sa phrase s’il le faut.
-      const silence = () => { send({ type: "response.cancel" }); send({ type: "output_audio_buffer.clear" }); };
-      const done = () => { const i = waiters.indexOf(wait); if (i >= 0) waiters.splice(i, 1); clearTimeout(timer); resolve(); };
-      const wait = (event: RealtimeEvent) => {
-        if (event.type === "response.created") {
-          const metadata = (event.response as { metadata?: { fluentia?: string } | null } | undefined)?.metadata;
-          // C’est la phrase de fin si elle porte notre marque (ou, sans marque renvoyée, si elle vient d’être demandée).
-          const closing = metadata ? metadata.fluentia === "closing" : asked && !answered;
-          // Une réponse au candidat qui démarre au dernier moment est annulée ; la phrase de fin, jamais.
-          if (closing) answered = true;
-          else silence();
-        }
-        // L’API refuse une deuxième réponse simultanée : la phrase de fin est demandée quand l’autre est terminée.
-        else if (!answered && event.type === "response.done") ask();
-        else if (asked && !answered && event.type === "error"
-          && (event.error as { code?: string } | undefined)?.code === "conversation_already_has_active_response") asked = false;
-        // La fin de la voix annulée ne compte pas : on attend que la phrase de fin ait commencé puis se termine.
-        else if (answered && event.type === "output_audio_buffer.started") playing = true;
-        else if (playing && event.type === "output_audio_buffer.stopped") done();
-      };
-      const timer = setTimeout(done, CLOSING_TIMEOUT_MS);
-      waiters.push(wait);
-      if (responding) silence();
-      else ask();
-    }),
+      if (responding) send({ type: "response.cancel" });
+      send({ type: "output_audio_buffer.clear" });
+      audio.muted = true;
+      // La phrase d’au revoir est un enregistrement : toujours la même, une seule fois, en français, sans coût.
+      return playClosing(sentence, handlers);
+    },
     close,
   };
 }
