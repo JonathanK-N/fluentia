@@ -1,10 +1,8 @@
 """Correction automatique des tâches d’Oral, à partir de la transcription de la séance avec l’examinateur.
 
-Deux notes :
-- la note Fluentia (« score ») : un barème simple et encourageant, 5, 10, 15, 16, 17 ou 18 sur 20 ;
-- la note du barème officiel (« tcf_score ») : même barème que la Rédaction (fiche France Compétences RS 6460 :
-  A1 1, A2 2-5, B1 6-9, B2 10-13, C1 14-17, C2 18-20 ; correction automatique plafonnée à 18). Le niveau CECR et
-  le NCLC affichés en découlent (IRCC, TCF Canada, expression orale) : la note Fluentia ne les gonfle jamais.
+Même barème que la Rédaction (fiche France Compétences RS 6460 : A1 1, A2 2-5, B1 6-9, B2 10-13, C1 14-17,
+C2 18-20 ; correction automatique plafonnée à 18) et même conversion NCLC (IRCC, TCF Canada, expression orale),
+mais jugé comme un examinateur qui écoute de l’oral spontané, pas comme un texte écrit.
 Seule la transcription est lue : la prononciation n’est pas évaluée, et l’étudiant en est averti.
 Le fournisseur est celui de la Rédaction (WRITING_CORRECTOR) : « demo » sur le serveur, « openai » sinon.
 """
@@ -15,7 +13,7 @@ import openai
 from django.conf import settings
 
 from .correction import (
-    BANDS, OFF_TOPIC_CAP, UNREACHABLE, WORD, CorrectionUnavailable, array, completed_fields, openai_client,
+    BANDS, UNREACHABLE, WORD, CorrectionUnavailable, array, completed_fields, off_topic_rule, openai_client,
     openai_request, record, shape, string,
 )
 
@@ -30,18 +28,12 @@ CRITERIA = [
 DISCLAIMER = "Estimation automatique à partir de la transcription de votre voix : la prononciation n’est pas évaluée. Ce n’est pas une note officielle du TCF."
 MIN_WORDS = 15  # en dessous, il n’y a pas assez de parole à évaluer
 
-# Note Fluentia : hors sujet ou presque rien dit 5 ; message difficile à comprendre 10 ; parle correctement malgré
-# des fautes 15 ; moins de fautes 16 ; très peu de fautes et réponses développées 17 ; très convaincant 18.
-NOTES = (5, 10, 15, 16, 17, 18)
-LOWEST_NOTE = 5
-
 SCHEMA = record(
     off_topic={"type": "boolean"},
     off_topic_reason=string(),
     levels=array(record(id=string(enum=[key for key, _ in CRITERIA]), level=string(enum=list(BANDS)))),
     level=string(enum=list(BANDS)),
     score={"type": "integer"},
-    note={"type": "integer", "enum": list(NOTES)},
     goal=string(),
     summary=string(),
     feedback=string(),
@@ -130,16 +122,6 @@ CHAMPS À REMPLIR, DANS CET ORDRE
 - levels : le niveau atteint pour chacun des quatre critères ;
 - level : le niveau global (règle 1) ;
 - score : la note sur 20 (règle 5) ;
-- note : la note Fluentia sur 20, indépendante de « score » et de « level ». Elle encourage le candidat et se
-  choisit UNIQUEMENT parmi 5, 10, 15, 16, 17 et 18 :
-  5 : hors sujet, ou il dit très peu de choses ;
-  10 : il reste dans le sujet mais parle avec beaucoup de difficulté : le message passe mal ;
-  15 : il reste dans le sujet et arrive à parler correctement, sans blocage, même avec des fautes ;
-  16 : comme 15, avec moins de fautes ;
-  17 : il parle avec aisance, développe ses réponses avec des détails et des exemples, et ses fautes ne gênent
-       pas la compréhension ;
-  18 : très convaincant : à l’aise, précis, riche et presque sans faute.
-  Les « fautes » sont uniquement les vraies fautes définies plus haut, pas ce qui est normal à l’oral ;
 - goal : une seule phrase courte et concrète qui dit ce qui empêche d’atteindre le niveau suivant ; si la note est
   sous 10/20, ce qui manque pour atteindre 10/20, c’est-à-dire le NCLC 7 au TCF Canada et le début du B2 ;
 - summary : le bilan en une phrase ;
@@ -195,7 +177,7 @@ def silent(demo_session):
     return {
         "demo": demo_session, "off_topic": False, "off_topic_reason": "",
         "criteria": [{"id": key, "label": label, "level": "A1"} for key, label in CRITERIA],
-        "level": "A1", "score": LOWEST_NOTE, "tcf_score": 0, "summary": summary,
+        "level": "A1", "score": 0, "summary": summary,
         "goal": "Parlez pendant tout le temps de la tâche : répondez par des phrases complètes, avec un détail et un exemple.",
         "feedback": "La transcription contient moins de quinze mots de votre part. À l’oral du TCF, l’examinateur évalue ce que vous dites : plus vous développez vos réponses, plus il peut reconnaître votre niveau.",
         "errors": [], "improved": "",
@@ -207,12 +189,11 @@ def silent(demo_session):
 def demo_grade(subject, transcript, seconds):
     """Repère simple sur la quantité de parole : sert à construire et tester l’écran sans clé d’API."""
     count = words(candidate_text(transcript))
-    steps = [(60, "A2", 4, 10), (150, "B1", 8, 15), (300, "B2", 11, 16), (10**9, "C1", 14, 17)]
-    level_name, tcf_score, note = next((name, tcf, note) for limit, name, tcf, note in steps if count < limit)
+    level_name, score = next((name, note) for limit, name, note in [(60, "A2", 4), (150, "B1", 8), (300, "B2", 11), (10**9, "C1", 14)] if count < limit)
     yield {
         "demo": True, "off_topic": False, "off_topic_reason": "",
         "criteria": [{"id": key, "label": label, "level": level_name} for key, label in CRITERIA],
-        "level": level_name, "score": note, "tcf_score": tcf_score,
+        "level": level_name, "score": score,
         "summary": f"Correction de démonstration : seule la quantité de parole ({count} mots) a été mesurée.",
         "goal": "Développez chaque réponse avec un détail et un exemple, et reliez vos idées par des connecteurs.",
         "feedback": "Cette estimation ne lit pas vraiment vos réponses. Avec la correction par IA, chaque critère est évalué selon la grille du TCF.",
@@ -228,40 +209,13 @@ def openai_grade(subject, transcript, seconds):
         with openai_client().responses.stream(**request) as stream:
             deltas = (event.delta for event in stream if event.type == "response.output_text.delta")
             for data in completed_fields(deltas):
-                yield two_notes(shape(data, CRITERIA, DISCLAIMER), data.get("note"))
+                yield shape(data, CRITERIA, DISCLAIMER)
     except openai.APIError as error:
         logger.warning("Correction orale OpenAI indisponible : %s", error)
         raise CorrectionUnavailable(UNREACHABLE)
     except ValueError:
         logger.warning("Réponse OpenAI illisible (oral)")
         yield {}
-
-
-def two_notes(result, note):
-    """La note officielle passe dans « tcf_score » et « score » devient la note Fluentia.
-
-    Tant que la note Fluentia n’est pas arrivée, aucune note n’est montrée : jamais la note officielle à sa place.
-    """
-    if not isinstance(result.get("score"), int):
-        return result
-    result = {**result, "tcf_score": result["score"]}
-    if note in NOTES:
-        result["score"] = note
-    else:
-        del result["score"]
-    return result
-
-
-def off_topic_rule(result):
-    """Hors sujet : A1 et note officielle plafonnée (NCLC 3 ou moins) ; note Fluentia 5/20."""
-    if result.get("off_topic") is not True:
-        return result
-    result = {**result, "level": "A1"}
-    if isinstance(result.get("tcf_score"), int):
-        result["tcf_score"] = min(result["tcf_score"], OFF_TOPIC_CAP)
-    if isinstance(result.get("score"), int):
-        result["score"] = LOWEST_NOTE
-    return result
 
 
 GRADERS = {"demo": demo_grade, "openai": openai_grade}

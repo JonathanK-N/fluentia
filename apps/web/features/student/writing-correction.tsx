@@ -50,7 +50,7 @@ const KINDS = {
   speaking: {
     base: "/etudiant/expression-orale", page: (id: string) => `speaking/sessions/${id}/`, stream: (id: string) => `speaking/sessions/${id}/correction/`,
     home: "Retour à l’Oral", scale: "Barème du TCF Canada, expression orale", reading: "La transcription de votre échange est en cours de lecture.",
-    offTopic: "Réponse hors sujet.", offTopicNote: "Une réponse hors sujet obtient 5/20 et le niveau A1.", offTopicFallback: "Vos réponses ne traitent pas la situation demandée par la tâche.",
+    offTopic: "Réponse hors sujet.", offTopicNote: "Une réponse hors sujet est classée A1, note ramenée à 1/20 au maximum.", offTopicFallback: "Vos réponses ne traitent pas la situation demandée par la tâche.",
     improvedTitle: "Ce que vous auriez pu dire", improvedHint: "Vos réponses reformulées par un excellent locuteur, avec vos idées : repérez les tournures, le vocabulaire et les liens à réutiliser à l’oral.",
     modelTitle: "Ce qu’il fallait dire", perfect: "Votre prestation est déjà excellente : il n’y a rien à reformuler.", failed: "Vous pouvez relancer la correction depuis cette page.",
   },
@@ -98,9 +98,8 @@ function CorrectionView({ id, kind }: { id: string; kind: Kind }) {
   if (!data) return <p className="student-hint">Chargement de la correction…</p>;
   const result: Partial = data.result ?? partial;
   const scored = typeof result.score === "number";
-  // À l’oral, la note Fluentia encourage ; le niveau et le NCLC suivent toujours le barème officiel.
-  const speaking = kind === "speaking";
-  const official = scored ? (speaking ? result.tcf_score ?? result.score! : result.score!) : 0;
+  // Une ancienne correction d’oral avait deux notes : seule la note du barème officiel est montrée.
+  const official = scored ? result.tcf_score ?? result.score! : 0;
   const level = scored ? nclc(official) : null;
   const band = scored ? levelOf(official) : null;
   const missing = scored ? Math.max(0, data.nclc_goal - official) : 0;
@@ -109,17 +108,15 @@ function CorrectionView({ id, kind }: { id: string; kind: Kind }) {
     <div className="home-top">
       <section className="hero-card" aria-labelledby="correction-titre" aria-busy={!scored}>
         <span className="hero-chip-row"><span className="hero-chip">{data.subject ? `Tâche ${data.subject.task_number}` : kind === "writing" ? "Rédaction" : "Oral"}</span><span>Correction{data.subject ? ` · ${data.subject.title}` : ""}</span>{result.off_topic && <span className="hero-chip hero-chip-alert">Hors sujet</span>}</span>
-        <h1 id="correction-titre" className="epreuve-title"><Icon name="trophy" size={30} />{!scored ? "Correction en cours…" : speaking ? `Votre note : ${result.score} / 20` : `Votre niveau : NCLC ${level}`}</h1>
+        <h1 id="correction-titre" className="epreuve-title"><Icon name="trophy" size={30} />{scored ? `Votre niveau : NCLC ${level}` : "Correction en cours…"}</h1>
         <p aria-live="polite">{scored
-          ? speaking
-            ? <>Niveau estimé {band} ({hint}) · NCLC {level}. {result.off_topic ? copy.offTopicNote : result.summary}</>
-            : <>{result.score} / 20{` · niveau ${band} (${hint})`}. {result.off_topic ? copy.offTopicNote : result.summary}</>
+          ? <>{official} / 20{` · niveau ${band} (${hint})`}. {result.off_topic ? copy.offTopicNote : result.summary}</>
           : `${copy.reading} La note s’affiche dans quelques secondes.`}</p>
       </section>
       <section className="status-card" aria-labelledby="objectif">
         <div className="status-head"><h2 id="objectif" className="badge-warn"><Icon name="target" size={14} />{scored && !missing ? "NCLC 7 atteint" : "Objectif NCLC 7"}</h2></div>
         <p className="correction-goal">{result.goal ?? "Ce qu’il vous faut pour l’atteindre arrive avec la note."}</p>
-        {scored && !speaking && <p className="status-text">{missing ? `Il vous manque ${missing} point${missing > 1 ? "s" : ""} sur 20.` : result.score! >= MAX_SCORE ? "Vous avez la note la plus haute." : "Visez maintenant le niveau suivant."}</p>}
+        {scored && <p className="status-text">{missing ? `Il vous manque ${missing} point${missing > 1 ? "s" : ""} sur 20.` : official >= MAX_SCORE ? "Vous avez la note la plus haute." : "Visez maintenant le niveau suivant."}</p>}
       </section>
     </div>
 
@@ -132,27 +129,27 @@ function CorrectionView({ id, kind }: { id: string; kind: Kind }) {
       <ol className="level-scale" aria-label="Niveaux de A1 à C2">{LEVELS.map(step => {
         const current = step.name === band;
         return <li key={step.name} data-current={current || undefined} aria-current={current ? "step" : undefined}>
-          <strong>{step.name}</strong><span>{step.hint}</span>{!speaking && <small>{bandRange(step.name)} / 20</small>}
+          <strong>{step.name}</strong><span>{step.hint}</span><small>{bandRange(step.name)} / 20</small>
         </li>;
       })}</ol>
       <ol className="nclc-scale" aria-label="Niveaux NCLC">{SCALE.map(step => {
         const current = step.nclc === level;
         return <li key={step.nclc} data-current={current || undefined} data-goal={step.nclc === GOAL || undefined} aria-current={current ? "step" : undefined}>
           <strong>NCLC {step.label}</strong>
-          {!speaking && <span>{step.range} / 20</span>}
+          <span>{step.range} / 20</span>
           {current ? <em>Vous</em> : step.nclc === GOAL ? <em>Objectif</em> : null}
         </li>;
       })}</ol>
       {scored && <>
         <dl className="result-facts">
-          <div><dt>{speaking ? "Niveau estimé" : "Niveau obtenu"}</dt><dd>{band} · {LEVELS[levelIndex(band!)]!.hint}</dd></div>
+          <div><dt>Niveau obtenu</dt><dd>{band} · {LEVELS[levelIndex(band!)]!.hint}</dd></div>
           <div><dt>Équivalent NCLC</dt><dd>{level}</dd></div>
-          {!speaking && <div><dt>Plage du niveau</dt><dd>{bandRange(band!)} / 20</dd></div>}
-          {!speaking && <div><dt>Pour le niveau suivant</dt><dd>{nextStep(result.score!)}</dd></div>}
+          <div><dt>Plage du niveau</dt><dd>{bandRange(band!)} / 20</dd></div>
+          <div><dt>Pour le niveau suivant</dt><dd>{nextStep(official)}</dd></div>
         </dl>
         <div className="result-score">
-          <span className="result-score-head"><span>{speaking ? "Note Fluentia" : "Note"}</span><strong>{result.score} / 20</strong></span>
-          <span className="bar-track" aria-hidden="true"><span className="bar-fill" style={{ width: `${result.score! * 5}%` }} /></span>
+          <span className="result-score-head"><span>Note</span><strong>{official} / 20</strong></span>
+          <span className="bar-track" aria-hidden="true"><span className="bar-fill" style={{ width: `${official * 5}%` }} /></span>
         </div>
       </>}
     </section>

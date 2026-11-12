@@ -560,7 +560,7 @@ class SpeakingSessionView(SecureView):
                 subject=subject,
                 mode=data.validated_data["mode"],
                 provider=settings.SPEAKING_PROVIDER,
-                seconds=min(subject.speak_seconds or left, left),
+                seconds=min(speaking.talk_seconds(subject) or left, left),
             )
         try:
             opened = speaking.provider()["session"](subject, request.user)

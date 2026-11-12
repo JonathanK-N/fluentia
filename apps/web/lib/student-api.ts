@@ -35,7 +35,7 @@ export type Attempt = {id: string; exam_id: string; status: string; skill: strin
 export type AttemptSummary = Pick<Attempt, "id" | "status" | "expires_at" | "skill" | "mode" | "exam_title">;
 export type Results = { correct_count: number; question_count: number; percentage: number; score: number; max_score: number; disclaimer: string; details: {question_id: string; selected_choice_id: string | null; correct_choice_id: string; explanation: string; points: number; statement: string; reading_passage: string; image_available: boolean; image_text: string; choices: {id: string; position: number; label: string}[]; selected_label: string | null; correct_label: string; transcript?: string}[] };
 
-// Oral : « score » est la note Fluentia ; « tcf_score », la note du barème officiel qui donne le niveau et le NCLC.
+// « tcf_score » : note du barème officiel des anciennes corrections d’oral, qui avaient aussi une note Fluentia.
 export type WritingCorrection = { demo: boolean; level: string; score: number; tcf_score?: number; summary: string; feedback?: string; criteria: { id: string; label: string; level?: string; score?: number; comment: string }[]; errors: { original: string; correction: string; explanation: string }[]; improved: string; advice: string[]; goal?: string; off_topic?: boolean; off_topic_reason?: string; disclaimer: string; remaining?: number; id?: number };
 export type ModelAnswer = { demo: boolean; text: string; words: number };
 type SubjectLink = { id: number; title: string; task_number: number; task_slug: string };

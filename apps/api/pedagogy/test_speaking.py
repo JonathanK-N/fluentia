@@ -158,9 +158,9 @@ class QuotaTests(SpeakingClient):
     @override_settings(SPEAKING_DAILY_MINUTES=10)
     def test_daily_minutes_are_counted_per_student(self):
         client = self.client_for(self.student)
-        first = self.open(self.task2, client=client)  # 330 s réservées sur 600
-        second = self.open(self.task2, client=client)  # il reste 270 s : la session est raccourcie
-        self.assertEqual((first.data["seconds"], second.data["seconds"]), (330, 270))
+        # Tâche 2 : 5 min 30 officielles dont 2 min de préparation, donc 210 s d’échange réservées sur 600.
+        opened = [self.open(self.task2, client=client).data["seconds"] for _ in range(3)]
+        self.assertEqual(opened, [210, 210, 180])  # il reste 180 s : la troisième session est raccourcie
         third = self.open(self.task1, client=client)
         self.assertEqual(third.status_code, 429)
         self.assertIn("10 minutes", third.data["detail"])
@@ -180,9 +180,10 @@ class QuotaTests(SpeakingClient):
         client = self.client_for(self.student)
         first = self.open(self.task2, client=client)
         self.open(self.task2, client=client)
+        self.open(self.task2, client=client)  # 210 + 210 + 180 s : les 10 minutes sont réservées
         self.assertEqual(self.open(self.task1, client=client).status_code, 429)
         finished = self.finish(first.data["id"], seconds=90, client=client)
-        self.assertEqual((finished.data["seconds"], finished.data["seconds_left"]), (90, 240))
+        self.assertEqual((finished.data["seconds"], finished.data["seconds_left"]), (90, 120))
         self.assertEqual(self.open(self.task1, client=client).data["seconds"], 120)
 
 
@@ -238,7 +239,7 @@ class FinishTests(SpeakingClient):
     def test_preparation_time_is_not_counted(self):
         self.premium()
         client = self.client_for(self.student)
-        opened = self.open(self.task2, client=client)  # 2 min de préparation, 330 s réservées
+        opened = self.open(self.task2, client=client)  # 2 min de préparation, 210 s d’échange réservées
         started = SpeakingSession.objects.get().started_at
         with patch("pedagogy.views.timezone.now", return_value=started + timedelta(minutes=5)):
             self.assertEqual(self.finish(opened.data["id"], seconds=0, client=client).data["seconds"], 180)
@@ -282,7 +283,7 @@ class OpenAISpeakingTests(SpeakingClient):
             (response.data["demo"], response.data["client_secret"], response.data["model"], response.data["voice"]),
             (False, "ek_cle_ephemere", "modele-realtime", "cedar"),
         )
-        self.assertEqual((response.data["seconds"], response.data["prep_seconds"]), (330, 120))
+        self.assertEqual((response.data["seconds"], response.data["prep_seconds"]), (210, 120))
         self.assertNotIn(b"sk-cle-secrete-du-serveur", response.content)
         call = client.realtime.client_secrets.create.call_args.kwargs
         session = call["session"]
@@ -291,10 +292,21 @@ class OpenAISpeakingTests(SpeakingClient):
         self.assertIn("personnage", session["instructions"])
         self.assertEqual(session["audio"]["output"]["voice"], "cedar")
         self.assertEqual(session["audio"]["input"]["transcription"]["language"], "fr")
-        self.assertEqual(session["audio"]["input"]["turn_detection"], {"type": "semantic_vad", "eagerness": "low"})
+        # Tâche 2 : l’examinateur n’écoute pas pendant la préparation ; le site active l’écoute ensuite.
+        self.assertIsNone(session["audio"]["input"]["turn_detection"])
+        self.assertIn("deux minutes pour préparer vos questions", session["instructions"])
+        self.assertIn("Tu ne poses jamais de question", session["instructions"])
         self.assertEqual(call["expires_after"], {"anchor": "created_at", "seconds": 240})
         saved = SpeakingSession.objects.get()
         self.assertEqual((saved.provider, saved.model, saved.mode), ("openai", "modele-realtime", "simulation"))
+
+    def test_without_preparation_the_examiner_listens_at_once(self):
+        patcher, client = self.fake()
+        with patcher:
+            self.open(self.task1)
+        session = client.realtime.client_secrets.create.call_args.kwargs["session"]
+        self.assertEqual(session["audio"]["input"]["turn_detection"], {"type": "semantic_vad", "eagerness": "low"})
+        self.assertIn("RELANCER LE CANDIDAT", session["instructions"])
 
     def test_safety_identifier_is_a_hash_never_the_email(self):
         patcher, client = self.fake()
@@ -309,8 +321,8 @@ class OpenAISpeakingTests(SpeakingClient):
         client = self.client_for(self.student)
         with patcher:
             opened = self.open(self.task2, client=client)
-        self.finish(opened.data["id"], seconds=300, client=client)
-        self.assertEqual(SpeakingSession.objects.get().estimated_cost_usd, Decimal("0.150000"))
+        self.finish(opened.data["id"], seconds=300, client=client)  # plafonné aux 210 s réservées : 3,5 min × 0,03 $
+        self.assertEqual(SpeakingSession.objects.get().estimated_cost_usd, Decimal("0.105000"))
 
     @override_settings(OPENAI_REALTIME_MODEL="gpt-realtime-2.1-mini", OPENAI_REALTIME_TRANSCRIPTION_MODEL="gpt-live-transcribe")
     def test_finish_measures_the_cost_from_the_reported_usage(self):
@@ -338,7 +350,7 @@ class OpenAISpeakingTests(SpeakingClient):
             f"/api/v1/speaking/sessions/{opened.data['id']}/finish/",
             {"seconds": 300, "transcript": TRANSCRIPT, "usage": {"audio_in": 1000}}, format="json", HTTP_X_CSRFTOKEN=client.csrf,
         )
-        self.assertEqual(SpeakingSession.objects.get().estimated_cost_usd, Decimal("0.150000"))
+        self.assertEqual(SpeakingSession.objects.get().estimated_cost_usd, Decimal("0.105000"))
 
     def test_unknown_usage_fields_are_refused(self):
         patcher, _ = self.fake()

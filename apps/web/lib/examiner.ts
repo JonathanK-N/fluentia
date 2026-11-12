@@ -27,8 +27,10 @@ export type ExaminerHandlers = {
 export type ExaminerConnection = {
   microphone: MediaStream;
   setMuted: (muted: boolean) => void;
+  /** Tâche 2 : fin de la préparation. L’examinateur annonce le début des questions, puis écoute le candidat. */
+  startQuestions: () => void;
   /** Demande à l’examinateur de conclure poliment ; se résout quand il a fini de parler (ou après le délai). */
-  conclude: () => Promise<void>;
+  conclude: (sentence?: string) => Promise<void>;
   close: () => void;
 };
 
@@ -51,9 +53,16 @@ export function upsertTurn(turns: Turn[], turn: Turn): Turn[] {
 
 /** Phrase de fin, dite telle quelle quand le temps est écoulé. */
 export const CLOSING_SENTENCE = "Merci beaucoup pour vos réponses. Le temps est écoulé, nous allons nous arrêter ici. Au revoir.";
+/** Tâche 2 : l’examinateur reste dans son personnage pour prendre congé. */
+export const ROLEPLAY_CLOSING_SENTENCE = "Merci pour votre visite. Si vous avez d’autres questions, n’hésitez pas à nous laisser un message, à nous appeler ou à repasser nous voir. Au revoir.";
+/** Tâche 2 : fin des deux minutes de préparation ; c’est ensuite le candidat qui mène. */
+export const QUESTIONS_SENTENCE = "Les deux minutes de préparation sont terminées. Nous pouvons commencer : je vous écoute.";
 // Ces consignes remplacent celles de la session pour cette seule réponse : la langue doit donc y être redite.
-export const CLOSING_INSTRUCTIONS =
-  `Tu es l’examinateur d’une épreuve orale en français et tu parles uniquement en français. Le temps de l’épreuve est écoulé : tu arrêtes le candidat poliment. Dis exactement cette phrase, en français, d’une voix calme, et rien d’autre : « ${CLOSING_SENTENCE} »`;
+export const sayExactly = (sentence: string, situation: string) =>
+  `Tu es l’examinateur d’une épreuve orale en français et tu parles uniquement en français. ${situation} Dis exactement cette phrase, en français, d’une voix calme, et rien d’autre : « ${sentence} »`;
+export const CLOSING_INSTRUCTIONS = sayExactly(CLOSING_SENTENCE, "Le temps de l’épreuve est écoulé : tu arrêtes le candidat poliment.");
+// Écoute du candidat : la même que celle réglée par le serveur pour les tâches sans préparation.
+const TURN_DETECTION = { type: "semantic_vad", eagerness: "low" };
 
 const CLOSING_TIMEOUT_MS = 12_000;
 
@@ -174,7 +183,12 @@ export async function connectRealtime(session: SpeakingSession, microphone: Medi
   return {
     microphone,
     setMuted: muted => { track.enabled = !muted; },
-    conclude: () => new Promise<void>(resolve => {
+    startQuestions: () => {
+      send({ type: "input_audio_buffer.clear" }); // rien de la préparation n’est écouté
+      send({ type: "response.create", response: { instructions: sayExactly(QUESTIONS_SENTENCE, "La préparation du candidat est terminée.") } });
+      send({ type: "session.update", session: { type: "realtime", audio: { input: { turn_detection: TURN_DETECTION } } } });
+    },
+    conclude: (sentence = CLOSING_SENTENCE) => new Promise<void>(resolve => {
       track.enabled = false; // le candidat n’est plus enregistré : ce qu’il dirait après la fin ne compte pas
       // Plus de réponse automatique à ce que le candidat vient de dire : seule la phrase de fin sera prononcée.
       send({ type: "session.update", session: { type: "realtime", audio: { input: { turn_detection: null } } } });
@@ -183,7 +197,8 @@ export async function connectRealtime(session: SpeakingSession, microphone: Medi
       let asked = false, answered = false, playing = false;
       const ask = () => {
         asked = true;
-        send({ type: "response.create", response: { instructions: CLOSING_INSTRUCTIONS, metadata: { fluentia: "closing" } } });
+        const instructions = sentence === CLOSING_SENTENCE ? CLOSING_INSTRUCTIONS : sayExactly(sentence, "Le temps de l’épreuve est écoulé : tu prends congé du candidat poliment, dans ton rôle.");
+        send({ type: "response.create", response: { instructions, metadata: { fluentia: "closing" } } });
       };
       // L’examinateur est coupé net, au milieu de sa phrase s’il le faut.
       const silence = () => { send({ type: "response.cancel" }); send({ type: "output_audio_buffer.clear" }); };
@@ -220,9 +235,10 @@ export const DEMO_SCRIPT: Record<number, string[]> = {
     "Pourquoi souhaitez-vous vous installer au Canada ?",
   ],
   2: [
-    "Bonjour, je vous écoute. Quelles informations souhaitez-vous obtenir ?",
-    "Oui, bien sûr. Avez-vous d’autres questions ?",
-    "C’est une bonne question. Que voulez-vous savoir d’autre ?",
+    "Bonjour. Lisez la consigne affichée à l’écran. Vous avez deux minutes pour préparer vos questions. Prenez des notes, je vous préviens quand nous commençons.",
+    "Oui, bien sûr.",
+    "D’accord, c’est noté.",
+    "Du lundi au vendredi, de 8 h à 16 h.",
   ],
   3: [
     "Voici le sujet. Donnez votre point de vue, je vous écoute.",
@@ -238,7 +254,7 @@ const DEMO_NUDGE_MS = 30_000;       // sans un mot pendant 30 s, il passe quand 
 const DEMO_MAX_TURN_MS = 120_000;   // une réponse ne dure jamais plus de 2 minutes
 
 /** Examinateur scripté : la synthèse vocale du navigateur lit une question, puis attend que le candidat ait fini de parler. */
-export function connectDemo(taskNumber: number, microphone: MediaStream, handlers: ExaminerHandlers): ExaminerConnection {
+export function connectDemo(taskNumber: number, microphone: MediaStream, handlers: ExaminerHandlers, prep = false): ExaminerConnection {
   const lines = DEMO_SCRIPT[taskNumber] ?? DEMO_SCRIPT[1]!;
   const track = microphone.getAudioTracks()[0];
   let index = 0, timer: ReturnType<typeof setTimeout> | undefined, closed = false;
@@ -280,16 +296,18 @@ export function connectDemo(taskNumber: number, microphone: MediaStream, handler
       waitForAnswer(next);
     });
   };
-  setTimeout(next, 400);
+  // Avec préparation, la première phrase annonce les deux minutes : on n’attend pas de réponse.
+  setTimeout(prep ? () => say(lines[index++]!, () => handlers.onActivity("waiting")) : next, 400);
   const stopSpeech = () => { if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.cancel(); };
   return {
     microphone,
     setMuted: muted => { if (track) track.enabled = !muted; },
-    conclude: () => new Promise<void>(resolve => {
+    startQuestions: () => say(QUESTIONS_SENTENCE, () => { handlers.onActivity("candidate"); waitForAnswer(next); }),
+    conclude: (sentence = DEMO_CLOSING) => new Promise<void>(resolve => {
       clearTimeout(timer);
       stopSpeech();
       if (track) track.enabled = false;
-      say(DEMO_CLOSING, resolve);
+      say(sentence, resolve);
       setTimeout(resolve, CLOSING_TIMEOUT_MS);
     }),
     close: () => {

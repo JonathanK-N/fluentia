@@ -20,7 +20,7 @@ LONG = [
 GRADED = {
     "off_topic": False, "off_topic_reason": "",
     "levels": [{"id": key, "level": "B2"} for key, _ in CRITERIA],
-    "level": "B2", "score": 12, "note": 16, "goal": "Variez davantage vos connecteurs.", "summary": "Bonne présentation.",
+    "level": "B2", "score": 12, "goal": "Variez davantage vos connecteurs.", "summary": "Bonne présentation.",
     "feedback": "Vos réponses sont développées.", "errors": [{"original": "je vis à Montréal depuis deux ans", "correction": "j’habite à Montréal depuis deux ans", "explanation": "plus naturel"}],
     "improved": "Je m’appelle Awa…", "advice": ["Parlez plus longtemps.", "Ajoutez des exemples."],
 }
@@ -59,7 +59,7 @@ class SpeakingCorrectionTests(SpeakingClient):
             _, events = self.stream(session_id, client)
         grader.assert_not_called()
         result = events[-1]["result"]
-        self.assertEqual((result["level"], result["score"], result["tcf_score"]), ("A1", 5, 0))
+        self.assertEqual((result["level"], result["score"]), ("A1", 0))
 
     def test_only_its_author_can_read_or_correct_it(self):
         session_id, _ = self.finished()
@@ -95,25 +95,17 @@ class SpeakingCorrectionTests(SpeakingClient):
         session_id, client, lines, fake = self.graded_by_openai()
         self.assertTrue(lines[-1].get("done"), lines[-1])
         result = lines[-1]["result"]
-        # Note Fluentia 16/20, mais niveau et NCLC suivent la note officielle (12/20 : B2, NCLC 8).
-        self.assertEqual((result["level"], result["score"], result["tcf_score"]), ("B2", 16, 12))
+        self.assertEqual((result["level"], result["score"]), ("B2", 12))
         self.assertEqual(client.get(f"/api/v1/speaking/sessions/{session_id}/").data["nclc"], "8")
         self.assertIn("prononciation", result["disclaimer"])
         sent = fake.responses.stream.call_args.kwargs
         self.assertEqual(sent["instructions"], RULES)
         self.assertIn("Candidat : Bonjour, je m’appelle Awa", sent["input"])
 
-    def test_the_official_score_is_never_shown_as_the_fluentia_note(self):
-        _, _, lines, _ = self.graded_by_openai()
-        for line in lines:
-            partial = line.get("partial") or {}
-            if "score" in partial:
-                self.assertEqual(partial["score"], 16)
-
-    def test_off_topic_gets_five_and_the_lowest_official_level(self):
+    def test_off_topic_is_a1_with_the_lowest_score(self):
         _, _, lines, _ = self.graded_by_openai({**GRADED, "off_topic": True, "off_topic_reason": "Il parle d’autre chose."})
         result = lines[-1]["result"]
-        self.assertEqual((result["level"], result["score"], result["tcf_score"]), ("A1", 5, 1))
+        self.assertEqual((result["level"], result["score"]), ("A1", 1))
 
     def test_the_brief_names_the_task_and_counts_the_words(self):
         session = SpeakingSession(subject=self.task2, transcript=LONG, seconds=210)

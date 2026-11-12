@@ -239,7 +239,7 @@ class CorrectionSerializer(serializers.Serializer):
     demo = serializers.BooleanField()
     level = serializers.ChoiceField(choices=["A1", "A2", "B1", "B2", "C1", "C2"])
     score = serializers.IntegerField(min_value=0, max_value=20)
-    # Oral : « score » est la note Fluentia, « tcf_score » la note du barème officiel (niveau et NCLC).
+    # Anciennes corrections d’oral : note du barème officiel, à côté d’une note Fluentia retirée depuis.
     tcf_score = serializers.IntegerField(min_value=0, max_value=20, required=False)
     summary = serializers.CharField()
     feedback = serializers.CharField(required=False, allow_blank=True, default="")
