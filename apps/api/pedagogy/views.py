@@ -1,9 +1,11 @@
 """API éditoriale privée et médias servis sous contrôle de la tentative."""
 
 import json
+import logging
 import re
 
 from datetime import datetime, timedelta, timezone as dt_timezone
+from decimal import Decimal
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -28,6 +30,8 @@ from .models import BankItem, ImageAsset, SpeakingSession, TaskSubject, WritingC
 from . import speaking, speaking_correction
 from .correction import NCLC_GOAL, WORD, AnswerIncomplete, CorrectionUnavailable, correct, nclc, provider, stored_answer
 from . import series as workflow
+
+logger = logging.getLogger(__name__)
 from .importer import SKILLS, ImportRejected, build_template, import_series
 from .tasks import active_tasks
 from .serializers import (
@@ -502,6 +506,16 @@ class WritingCorrectionDetailView(SecureView):
         })
 
 
+def speaking_spent_today():
+    """Dépense de l’oral sur 24 h glissantes, tout le site : coût mesuré des séances terminées, plafond prudent
+    pour celles en cours (leur coût n’est connu qu’à la fin)."""
+    since = timezone.now() - timedelta(days=1)
+    recent = SpeakingSession.objects.filter(started_at__gte=since, provider="openai")
+    spent = recent.filter(status=SpeakingSession.Status.FINISHED).aggregate(total=Sum("estimated_cost_usd"))["total"] or Decimal(0)
+    running = recent.filter(status__in=[SpeakingSession.Status.PENDING, SpeakingSession.Status.LIVE]).aggregate(total=Sum("seconds"))["total"] or 0
+    return spent + speaking.estimated_cost_ceiling(running)
+
+
 def speaking_seconds_left(user):
     """Minutes d’oral du jour comptées en base sur 24 h glissantes ; une session échouée ne compte pas."""
     since = timezone.now() - timedelta(days=1)
@@ -548,6 +562,10 @@ class SpeakingSessionView(SecureView):
             speaking.provider()
         except speaking.SpeakingUnavailable as error:
             return Response({"detail": str(error)}, status=503)
+        budget = settings.SPEAKING_DAILY_BUDGET_USD
+        if budget > 0 and speaking_spent_today() + speaking.estimated_cost_ceiling(speaking.talk_seconds(subject) or 0) > budget:
+            logger.warning("Plafond de dépense de l’oral atteint (%s $ sur 24 h)", budget)
+            return Response({"detail": "L’oral avec examinateur est momentanément indisponible. Réessayez un peu plus tard."}, status=503)
         with transaction.atomic():
             # Verrou par compte : deux onglets ne peuvent pas dépasser la limite ni rejouer l’essai gratuit.
             get_user_model().objects.select_for_update().get(pk=request.user.pk)

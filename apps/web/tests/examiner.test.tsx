@@ -1,7 +1,7 @@
 /** Logique de la conversation avec l’examinateur IA, testée sans micro ni WebRTC. */
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { addUsage, emptyUsage, readEvent, upsertTurn, type ExaminerHandlers, type Turn, type Usage } from "../lib/examiner";
+import { addUsage, audioToText, emptyUsage, readEvent, upsertTurn, type ExaminerHandlers, type RealtimeEvent, type Turn, type Usage } from "../lib/examiner";
 import { ExaminerSession } from "../features/student/examiner-session";
 
 function collect() {
@@ -40,18 +40,55 @@ describe("événements de l’examinateur", () => {
   it("additionne la consommation de chaque réponse, cache déduit", () => {
     const c = collect();
     const done = { type: "response.done", response: { usage: {
-      input_token_details: { audio_tokens: 1000, text_tokens: 300, cached_tokens_details: { audio_tokens: 400 } },
+      input_token_details: { audio_tokens: 1000, text_tokens: 300, cached_tokens_details: { audio_tokens: 400, text_tokens: 100 } },
       output_token_details: { audio_tokens: 250, text_tokens: 40 },
     } } };
     readEvent(done, c.handlers);
     readEvent(done, c.handlers);
-    expect(c.usage()).toEqual({ audio_in: 1200, cached_audio_in: 800, text_in: 600, audio_out: 500, text_out: 80, transcription_seconds: 0 });
+    expect(c.usage()).toEqual({ audio_in: 1200, cached_audio_in: 800, text_in: 400, cached_text_in: 200, audio_out: 500, text_out: 80, transcription_seconds: 0 });
   });
 
   it("signale une erreur du fournisseur", () => {
     const c = collect();
     readEvent({ type: "error", error: { message: "quota" } }, c.handlers);
     expect(c.errors[0]).toContain("quota");
+  });
+});
+
+describe("réponses du candidat passées en texte", () => {
+  function replay(events: RealtimeEvent[], responding = false) {
+    const sent: RealtimeEvent[] = [];
+    const replacing = audioToText(event => sent.push(event));
+    events.forEach(event => replacing.read(event, responding));
+    return sent;
+  }
+  const committed = (id: string, previous: string) => ({ type: "input_audio_buffer.committed", item_id: id, previous_item_id: previous });
+  const transcribed = (id: string, transcript: string) => ({ type: "conversation.item.input_audio_transcription.completed", item_id: id, transcript });
+
+  it("remplace l’audio par son texte, à sa place, quand l’examinateur a réagi", () => {
+    const sent = replay([committed("item_a", "item_exam1"), transcribed("item_a", "Je viens de Guinée."), { type: "response.done" }]);
+    expect(sent).toEqual([
+      { type: "conversation.item.delete", item_id: "item_a" },
+      { type: "conversation.item.create", previous_item_id: "item_exam1",
+        item: { id: "fl_txt_1", type: "message", role: "user", content: [{ type: "input_text", text: "Je viens de Guinée." }] } },
+    ]);
+  });
+
+  it("garde l’audio tant que la réponse n’est pas transcrite ou que l’examinateur n’a pas réagi", () => {
+    expect(replay([committed("item_a", "x"), transcribed("item_a", "Bonjour.")])).toEqual([]);
+    expect(replay([committed("item_a", "x"), { type: "response.done" }])).toEqual([]);
+  });
+
+  it("n’envoie rien pendant que l’examinateur répond", () => {
+    expect(replay([committed("item_a", "x"), transcribed("item_a", "Bonjour."), { type: "response.done" }], true)).toEqual([]);
+  });
+
+  it("garde l’ordre quand la réponse précédente a déjà été remplacée", () => {
+    const sent = replay([
+      committed("item_a", "item_exam1"), transcribed("item_a", "Un."), { type: "response.done" },
+      committed("item_b", "item_a"), transcribed("item_b", "Deux."), { type: "response.done" },
+    ]);
+    expect(sent[3]).toMatchObject({ type: "conversation.item.create", previous_item_id: "fl_txt_1" });
   });
 });
 

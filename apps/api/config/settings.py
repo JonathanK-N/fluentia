@@ -1,5 +1,6 @@
 """Paramètres du backend Fluentia. Auteur : Jonathan Kakesa."""
 import os
+from decimal import Decimal
 from pathlib import Path
 import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -33,6 +34,8 @@ OPENAI_REASONING_EFFORT = os.getenv("OPENAI_REASONING_EFFORT", "low")
 # Oral avec examinateur IA : « demo » ne contacte rien ; « openai » ouvre une session Realtime par clé éphémère.
 SPEAKING_PROVIDER = os.getenv("SPEAKING_PROVIDER", "demo")
 SPEAKING_DAILY_MINUTES = int(os.getenv("SPEAKING_DAILY_MINUTES", "15"))
+# Plafond de dépense de l’oral pour tout le site, en dollars sur 24 h glissantes ; 0 = pas de plafond.
+SPEAKING_DAILY_BUDGET_USD = Decimal(os.getenv("SPEAKING_DAILY_BUDGET_USD", "0"))
 # 1 : Premium requis (sauf une tâche 1 offerte). 0 : oral ouvert à tous les comptes connectés, quota compris.
 SPEAKING_REQUIRE_PREMIUM = os.getenv("SPEAKING_REQUIRE_PREMIUM", "1") == "1"
 OPENAI_REALTIME_MODEL = os.getenv("OPENAI_REALTIME_MODEL", "gpt-realtime-2.1-mini")

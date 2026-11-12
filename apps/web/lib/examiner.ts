@@ -8,7 +8,7 @@
 
 export type Speaker = "examiner" | "candidate";
 export type Turn = { id: string; role: Speaker; text: string; final: boolean };
-export type Usage = { audio_in: number; cached_audio_in: number; text_in: number; audio_out: number; text_out: number; transcription_seconds: number };
+export type Usage = { audio_in: number; cached_audio_in: number; text_in: number; cached_text_in: number; audio_out: number; text_out: number; transcription_seconds: number };
 export type Activity = "connecting" | "examiner" | "candidate" | "waiting";
 
 export type SpeakingSession = {
@@ -34,7 +34,7 @@ export type ExaminerConnection = {
   close: () => void;
 };
 
-export const emptyUsage = (): Usage => ({ audio_in: 0, cached_audio_in: 0, text_in: 0, audio_out: 0, text_out: 0, transcription_seconds: 0 });
+export const emptyUsage = (): Usage => ({ audio_in: 0, cached_audio_in: 0, text_in: 0, cached_text_in: 0, audio_out: 0, text_out: 0, transcription_seconds: 0 });
 
 export function addUsage(total: Usage, part: Partial<Usage>): Usage {
   const next = { ...total };
@@ -66,7 +66,7 @@ const QUESTIONS_TURN_DETECTION = { type: "semantic_vad", eagerness: "high" };
 
 const CLOSING_TIMEOUT_MS = 12_000;
 
-type RealtimeEvent = { type: string; [key: string]: unknown };
+export type RealtimeEvent = { type: string; [key: string]: unknown };
 type ResponseUsage = {
   input_token_details?: { audio_tokens?: number; text_tokens?: number; cached_tokens_details?: { audio_tokens?: number; text_tokens?: number } };
   output_token_details?: { audio_tokens?: number; text_tokens?: number };
@@ -105,11 +105,12 @@ export function readEvent(event: RealtimeEvent, handlers: ExaminerHandlers) {
       const usage = (event.response as { usage?: ResponseUsage } | undefined)?.usage;
       if (!usage) break;
       const cached = usage.input_token_details?.cached_tokens_details;
-      const cachedAudio = cached?.audio_tokens ?? 0;
+      const cachedAudio = cached?.audio_tokens ?? 0, cachedText = cached?.text_tokens ?? 0;
       handlers.onUsage({
         audio_in: Math.max(0, (usage.input_token_details?.audio_tokens ?? 0) - cachedAudio),
         cached_audio_in: cachedAudio,
-        text_in: usage.input_token_details?.text_tokens ?? 0,
+        text_in: Math.max(0, (usage.input_token_details?.text_tokens ?? 0) - cachedText),
+        cached_text_in: cachedText,
         audio_out: usage.output_token_details?.audio_tokens ?? 0,
         text_out: usage.output_token_details?.text_tokens ?? 0,
       });
@@ -121,6 +122,49 @@ export function readEvent(event: RealtimeEvent, handlers: ExaminerHandlers) {
       break;
     }
   }
+}
+
+/**
+ * Économie : une réponse du candidat déjà transcrite et à laquelle l’examinateur a réagi est remplacée, dans la
+ * mémoire de la conversation, par son texte. Sinon l’IA réécoute tout l’audio depuis le début à chaque relance
+ * (10 $ le million de jetons audio, contre 0,60 $ en texte). Seule la dernière réponse reste en audio.
+ * Fonction pure côté événements : testée sans WebRTC.
+ */
+export function audioToText(send: (event: RealtimeEvent) => void) {
+  type Spoken = { previous: string | null; transcript?: string; answered: boolean };
+  const spoken = new Map<string, Spoken>();   // réponses du candidat encore en audio
+  const renamed = new Map<string, string>();  // réponse remplacée → son texte, pour garder l’ordre
+  let count = 0;
+  const flush = (responding: boolean) => {
+    if (responding) return; // jamais pendant que l’examinateur répond
+    for (const [id, item] of spoken) {
+      if (!item.answered || item.transcript === undefined) continue;
+      spoken.delete(id);
+      if (!item.transcript.trim()) continue; // rien d’audible : on laisse l’audio
+      const textId = `fl_txt_${++count}`;
+      const previous = item.previous ? renamed.get(item.previous) ?? item.previous : null;
+      send({ type: "conversation.item.delete", item_id: id });
+      send({
+        type: "conversation.item.create", ...(previous ? { previous_item_id: previous } : {}),
+        item: { id: textId, type: "message", role: "user", content: [{ type: "input_text", text: item.transcript }] },
+      });
+      renamed.set(id, textId);
+    }
+  };
+  return {
+    read(event: RealtimeEvent, responding: boolean) {
+      if (event.type === "input_audio_buffer.committed" && typeof event.item_id === "string")
+        spoken.set(event.item_id, { previous: typeof event.previous_item_id === "string" ? event.previous_item_id : null, answered: false });
+      else if (event.type === "conversation.item.input_audio_transcription.completed" && typeof event.item_id === "string") {
+        const item = spoken.get(event.item_id);
+        if (item) item.transcript = String(event.transcript ?? "");
+      } else if (event.type === "response.done") {
+        // L’examinateur a réagi à tout ce qui était déjà dit : ces réponses peuvent passer en texte.
+        for (const item of spoken.values()) item.answered = true;
+      } else return;
+      flush(responding);
+    },
+  };
 }
 
 const REALTIME_CALLS = "https://api.openai.com/v1/realtime/calls";
@@ -142,6 +186,7 @@ export async function connectRealtime(session: SpeakingSession, microphone: Medi
   const channel = pc.createDataChannel("oai-events");
   const waiters: ((event: RealtimeEvent) => void)[] = [];
   let responding = false, candidateSpeaking = false;
+  const replacing = audioToText(event => send(event));
   channel.onmessage = message => {
     let event: RealtimeEvent;
     try { event = JSON.parse(String(message.data)); } catch { return; }
@@ -149,6 +194,7 @@ export async function connectRealtime(session: SpeakingSession, microphone: Medi
     if (event.type === "response.done") responding = false;
     if (event.type === "input_audio_buffer.speech_started") candidateSpeaking = true;
     if (event.type === "input_audio_buffer.speech_stopped" || event.type === "input_audio_buffer.committed") candidateSpeaking = false;
+    replacing.read(event, responding);
     readEvent(event, handlers);
     waiters.slice().forEach(wait => wait(event));
   };

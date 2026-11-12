@@ -346,6 +346,33 @@ class OpenAISpeakingTests(SpeakingClient):
         self.assertEqual(saved.estimated_cost_usd, Decimal("1.263400"))
         self.assertEqual(saved.usage["audio_out"], 10_000)
 
+    @override_settings(OPENAI_REALTIME_MODEL="gpt-realtime-2.1-mini", OPENAI_REALTIME_TRANSCRIPTION_MODEL="gpt-4o-mini-transcribe")
+    def test_cheaper_transcription_and_cached_text_are_priced(self):
+        patcher, _ = self.fake()
+        client = self.client_for(self.student)
+        with patcher:
+            opened = self.open(self.task2, client=client)
+        usage = {"text_in": 100_000, "cached_text_in": 100_000, "transcription_seconds": 300}
+        client.post(
+            f"/api/v1/speaking/sessions/{opened.data['id']}/finish/",
+            {"seconds": 200, "transcript": TRANSCRIPT, "usage": usage}, format="json", HTTP_X_CSRFTOKEN=client.csrf,
+        )
+        # 0,06 $ de texte + 0,006 $ de texte en cache + 5 min × 0,003 $ de transcription.
+        self.assertEqual(SpeakingSession.objects.get().estimated_cost_usd, Decimal("0.081000"))
+
+    @override_settings(SPEAKING_DAILY_BUDGET_USD=Decimal("0.50"))
+    def test_the_daily_budget_pauses_the_oral_for_everyone(self):
+        SpeakingSession.objects.create(user=self.student, subject=self.task2, mode="practice", provider="openai",
+                                       seconds=210, status="finished", estimated_cost_usd=Decimal("0.45"))
+        patcher, _ = self.fake()
+        with patcher:
+            response = self.open(self.task2)
+        self.assertEqual(response.status_code, 503)
+        self.assertIn("momentanément indisponible", response.data["detail"])
+        SpeakingSession.objects.update(estimated_cost_usd=Decimal("0.10"))
+        with patcher:
+            self.assertEqual(self.open(self.task2).status_code, 201)
+
     def test_unpriced_model_falls_back_to_the_ceiling(self):
         patcher, _ = self.fake()
         client = self.client_for(self.student)

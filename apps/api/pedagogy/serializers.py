@@ -289,6 +289,7 @@ class SpeakingUsageSerializer(StrictSerializer):
     audio_in = serializers.IntegerField(min_value=0, max_value=50_000_000, default=0)
     cached_audio_in = serializers.IntegerField(min_value=0, max_value=50_000_000, default=0)
     text_in = serializers.IntegerField(min_value=0, max_value=50_000_000, default=0)
+    cached_text_in = serializers.IntegerField(min_value=0, max_value=50_000_000, default=0)
     audio_out = serializers.IntegerField(min_value=0, max_value=50_000_000, default=0)
     text_out = serializers.IntegerField(min_value=0, max_value=50_000_000, default=0)
     transcription_seconds = serializers.FloatField(min_value=0, max_value=7200, default=0)

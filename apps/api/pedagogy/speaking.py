@@ -211,15 +211,21 @@ OUTPUT_TOKENS_PER_MINUTE = 1200
 PRICES = {
     "gpt-realtime-2.1-mini": {
         "audio_in": Decimal(10), "cached_audio_in": Decimal("0.30"), "text_in": Decimal("0.60"),
-        "audio_out": Decimal(20), "text_out": Decimal("2.40"),
+        "cached_text_in": Decimal("0.06"), "audio_out": Decimal(20), "text_out": Decimal("2.40"),
     },
     "gpt-realtime-2.1": {
         "audio_in": Decimal(32), "cached_audio_in": Decimal("0.40"), "text_in": Decimal(4),
-        "audio_out": Decimal(64), "text_out": Decimal(24),
+        "cached_text_in": Decimal("0.40"), "audio_out": Decimal(64), "text_out": Decimal(24),
     },
 }
-# Transcription de la voix du candidat, facturée à la minute.
-TRANSCRIPTION_USD_PER_MINUTE = {"gpt-live-transcribe": Decimal("0.017")}
+# Transcription de la voix du candidat, facturée à la minute (page Pricing d’OpenAI, novembre 2026).
+# gpt-4o-mini-transcribe coûte près de 6 fois moins que gpt-live-transcribe : OPENAI_REALTIME_TRANSCRIPTION_MODEL.
+TRANSCRIPTION_USD_PER_MINUTE = {
+    "gpt-live-transcribe": Decimal("0.017"),
+    "gpt-realtime-whisper": Decimal("0.017"),
+    "gpt-transcribe": Decimal("0.0045"),
+    "gpt-4o-mini-transcribe": Decimal("0.003"),
+}
 
 
 def measured_cost(model, usage):
