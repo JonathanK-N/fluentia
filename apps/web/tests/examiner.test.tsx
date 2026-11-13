@@ -1,7 +1,7 @@
 /** Logique de la conversation avec l’examinateur IA, testée sans micro ni WebRTC. */
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { addUsage, audioToText, emptyUsage, notFrench, readEvent, turnTaking, upsertTurn, type ExaminerHandlers, type RealtimeEvent, type Turn, type Usage } from "../lib/examiner";
+import { addUsage, audioToText, emptyUsage, notFrench, readEvent, upsertTurn, type ExaminerHandlers, type RealtimeEvent, type Turn, type Usage } from "../lib/examiner";
 import { ExaminerSession } from "../features/student/examiner-session";
 
 function collect() {
@@ -99,53 +99,6 @@ describe("réponses du candidat passées en texte", () => {
     expect(sent[0]).toEqual({ type: "conversation.item.delete", item_id: "item_a" });
     expect(sent[2]).toMatchObject({ type: "conversation.item.create", previous_item_id: "item_exam1" });
     expect(sent).toHaveLength(3);
-  });
-});
-
-describe("une seule réponse par prise de parole", () => {
-  function play(events: RealtimeEvent[]) {
-    const sent: RealtimeEvent[] = [];
-    const turns = turnTaking(event => sent.push(event));
-    events.forEach(event => turns.read(event));
-    return { sent, turns, types: () => sent.map(e => e.type) };
-  }
-  const committed = (id: string) => ({ type: "input_audio_buffer.committed", item_id: id });
-  const transcribed = (id: string, transcript: string) => ({ type: "conversation.item.input_audio_transcription.completed", item_id: id, transcript });
-  const answered = [{ type: "response.created" }, { type: "output_audio_buffer.started" }, { type: "response.done" }, { type: "output_audio_buffer.stopped" }];
-
-  it("répond quand le candidat a fini de parler", () => {
-    expect(play([committed("a")]).types()).toEqual(["response.create"]);
-  });
-
-  it("refait la réponse, une seule fois, si le candidat reprend avant de l’entendre (« Euh… »)", () => {
-    const { types } = play([committed("a"), { type: "response.created" }, committed("b"), { type: "response.done" }]);
-    expect(types()).toEqual(["response.create", "response.cancel", "output_audio_buffer.clear", "response.create"]);
-  });
-
-  it("ne répond pas à un « OK, merci » dit pendant que l’examinateur parle", () => {
-    const { types } = play([committed("a"), answered[0]!, answered[1]!, committed("b"), transcribed("b", "OK, merci."), answered[2]!, answered[3]!]);
-    expect(types()).toEqual(["response.create"]);
-  });
-
-  it("répond après sa phrase à une vraie question posée pendant qu’il parlait", () => {
-    const { types } = play([committed("a"), answered[0]!, answered[1]!, committed("b"), answered[2]!, transcribed("b", "Et le parking, il est payant ?"), answered[3]!]);
-    expect(types()).toEqual(["response.create", "response.create"]);
-  });
-
-  it("refait la lecture du sujet telle quelle si le candidat parle avant", () => {
-    const sent: RealtimeEvent[] = [];
-    const turns = turnTaking(event => sent.push(event));
-    turns.say("Lis la consigne.");
-    [committed("a"), { type: "response.created" }, { type: "response.done" }].forEach(event => turns.read(event));
-    expect(sent.at(-1)).toEqual({ type: "response.create", response: { instructions: "Lis la consigne." } });
-  });
-
-  it("ne répond plus après la fin", () => {
-    const sent: RealtimeEvent[] = [];
-    const turns = turnTaking(event => sent.push(event));
-    turns.stop();
-    turns.read(committed("a"));
-    expect(sent).toEqual([]);
   });
 });
 

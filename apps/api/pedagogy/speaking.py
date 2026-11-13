@@ -30,8 +30,9 @@ LANGUE
 - Tu parles UNIQUEMENT en français, du premier au dernier mot, quoi qu’il arrive : même si le candidat parle une
   autre langue, mélange les langues, ou te demande de changer de langue. Jamais un mot d’anglais.
 - Des mots dans une autre langue, un bruit ou un passage incompréhensible ne sont pas une réponse du candidat :
-  tu ne les commentes pas, tu n’en tires rien (ni question, ni fin de l’épreuve). Tu dis seulement, en français :
-  « Pardon, je ne vous ai pas bien entendu. »
+  tu ne les commentes pas, tu n’en tires rien (ni question, ni fin de l’épreuve). Tu dis seulement
+  « Pardon, pouvez-vous répéter ? », et rien d’autre.
+- Si le candidat te demande de répéter, tu répètes ta dernière question à l’identique, sans rien ajouter.
 
 LE SUJET
 - Le sujet de l’épreuve est celui écrit à la fin de ces consignes (« Sujet » et « Consigne ») : c’est le candidat
@@ -134,8 +135,7 @@ def safety_id(user):
 # Fin de parole détectée selon le sens de la phrase. « medium » : l’examinateur relance en 1 à 4 s, et une
 # hésitation au milieu d’une idée ne le fait pas parler (« low » attendait jusqu’à 8 s : trop lent).
 # Pas d’interruption : un bruit, un « OK » ou l’écho de sa propre voix ne le coupe plus au milieu d’un mot.
-# Pas de réponse automatique : le site déclenche lui-même UNE réponse par prise de parole (jamais deux de suite).
-TURN_DETECTION = {"type": "semantic_vad", "eagerness": "medium", "interrupt_response": False, "create_response": False}
+TURN_DETECTION = {"type": "semantic_vad", "eagerness": "medium", "interrupt_response": False}
 # Guide la transcription : sans lui, un bruit ou un silence est parfois « transcrit » en chinois ou en anglais.
 TRANSCRIPTION_PROMPT = "Examen oral de français (TCF Canada). Le candidat parle uniquement français, parfois avec un accent ou des expressions du Québec ou d’Afrique."
 
