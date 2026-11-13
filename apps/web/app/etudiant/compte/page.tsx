@@ -38,7 +38,8 @@ function Connected({ profile, busy, act, setMessage }: { profile: Profile; busy:
     <SectionTitle title="Mon abonnement" />
     <Summary label="Mon abonnement" items={[
       { label: "Temps restant", value: sub.status === "premium" ? days : "—", hint: sub.status === "premium" ? "Avant la fin du Premium" : "Aucun Premium en cours" },
-      { label: "Valable jusqu’au", value: sub.premium_until ? longDate(sub.premium_until) : "—", hint: sub.status === "premium" ? "Premium actif" : sub.status === "expired" ? "Premium terminé" : "Formule gratuite" },
+      { label: "Valable jusqu’au", value: sub.premium_until ? longDate(sub.premium_until) : "—", hint: sub.status === "premium" ? sub.plan_label ?? "Premium actif" : sub.status === "expired" ? "Premium terminé" : "Formule gratuite" },
+      { label: "Essais d’oral", value: sub.speaking_attempts_left !== null ? `${sub.speaking_attempts_left} sur ${sub.speaking_attempts}` : "—", hint: sub.status === "premium" ? "Une tâche = un essai, jusqu’à la fin de la formule" : "Une tâche 1 offerte sans Premium" },
       { label: "Identifiant", value: <span className="summary-email">{profile.email}</span>, hint: "Adresse de connexion" },
     ]} />
     <div className="student-nav" style={{ marginTop: "1rem" }}>

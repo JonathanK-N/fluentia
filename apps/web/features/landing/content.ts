@@ -114,7 +114,7 @@ export const plans = [
     features: [
       "Tout le contenu du compte gratuit",
       "Les 3 tâches orales avec l’examinateur IA",
-      "Jusqu’à 15 minutes d’oral par jour",
+      "25 tâches orales par mois (15 en formule 2 semaines, 40 en formule 2 mois)",
       "Transcription de chaque conversation",
     ],
     cta: { label: "Passer à Premium", href: PREMIUM_REQUEST },

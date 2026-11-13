@@ -136,8 +136,6 @@ def safety_id(user):
 # hésitation au milieu d’une idée ne le fait pas parler (« low » attendait jusqu’à 8 s : trop lent).
 # Pas d’interruption : un bruit, un « OK » ou l’écho de sa propre voix ne le coupe plus au milieu d’un mot.
 TURN_DETECTION = {"type": "semantic_vad", "eagerness": "medium", "interrupt_response": False}
-# Guide la transcription : sans lui, un bruit ou un silence est parfois « transcrit » en chinois ou en anglais.
-TRANSCRIPTION_PROMPT = "Examen oral de français (TCF Canada). Le candidat parle uniquement français, parfois avec un accent ou des expressions du Québec ou d’Afrique."
 
 
 def talk_seconds(subject):
@@ -176,9 +174,8 @@ def openai_request(subject):
             "output_modalities": ["audio"],
             "audio": {
                 "input": {
-                    "transcription": {
-                        "model": settings.OPENAI_REALTIME_TRANSCRIPTION_MODEL, "language": "fr", "prompt": TRANSCRIPTION_PROMPT,
-                    },
+                    # Pas de « prompt » de transcription : sur un silence, le modèle le recopiait comme une parole du candidat.
+                    "transcription": {"model": settings.OPENAI_REALTIME_TRANSCRIPTION_MODEL, "language": "fr"},
                     # Micro proche (ordinateur, casque) : le bruit de fond est filtré avant la détection de parole,
                     # pour qu’il ne déclenche pas de réponse ni de transcription inventée (chinois, anglais…).
                     "noise_reduction": {"type": "near_field"},

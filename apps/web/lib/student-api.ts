@@ -26,7 +26,11 @@ export async function api<T>(path: string, method = "GET", body?: unknown): Prom
   }
   return data as T;
 }
-export type Subscription = { status: "free" | "premium" | "expired"; premium_until: string | null; days_remaining: number };
+export type Subscription = {
+  status: "free" | "premium" | "expired"; plan: string | null; plan_label: string | null; premium_until: string | null; days_remaining: number;
+  /** Essais d’oral de la période en cours (une tâche = un essai) ; null sans Premium actif. */
+  speaking_attempts_left: number | null; speaking_attempts: number | null;
+};
 export type Profile = { id: number; email: string; display_name: string; email_verified: boolean; editor: boolean; preferences: { live_correction: boolean; answer_sound: boolean }; subscription: Subscription };
 export type SavedAnswer = { question_id: string; choice_id: string; saved: boolean; correct: boolean | null };
 export type Exam = { id: string; title: string; description: string; skill: string; mode: string; version: number; question_count: number; total_points: number; duration_seconds: number };

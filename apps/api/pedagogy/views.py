@@ -22,7 +22,7 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
-from accounts.subscription import is_premium
+from accounts.subscription import is_premium, speaking_allowance
 from accounts.views import SecureView
 from exams.serializers import ExamListSerializer
 from exams.views import CataloguePagination
@@ -529,6 +529,12 @@ def speaking_seconds_left(user):
     return max(0, settings.SPEAKING_DAILY_MINUTES * 60 - used)
 
 
+def attempts_left(user):
+    """Essais d’oral restants sur l’abonnement Premium ; None sans Premium (le quota est alors en minutes)."""
+    allowance = speaking_allowance(user)
+    return allowance[0] if allowance else None
+
+
 def free_trial_left(user, subject):
     """Sans Premium : une seule tâche 1 offerte par compte, quelle que soit la date."""
     if subject.task_number != 1:
@@ -548,7 +554,7 @@ def duration(seconds):
 
 class SpeakingSessionView(SecureView):
     permission_classes = [IsAuthenticated]
-    # La limite est comptée en base, en minutes par jour : elle protège le coût de la voix en direct.
+    # Limite comptée en base : essais de l’abonnement Premium, ou minutes par jour sans Premium.
     throttle_classes = []
     MIN_SECONDS = 60
 
@@ -576,24 +582,21 @@ class SpeakingSessionView(SecureView):
                     "L’oral avec examinateur est réservé aux comptes Premium. "
                     "Votre essai gratuit de la tâche 1 a déjà été utilisé, ou ce sujet n’en fait pas partie."
                 )
-            left = speaking_seconds_left(request.user)
-            if left < self.MIN_SECONDS:
-                minutes = settings.SPEAKING_DAILY_MINUTES
-                raise Throttled(detail=f"Vous avez utilisé vos {minutes} minutes d’oral des dernières 24 heures. Réessayez demain.")
-            # Une tâche se passe toujours en entier, dans son temps officiel : jamais raccourcie par le quota.
             talk = speaking.talk_seconds(subject)
-            if talk and left < talk:
-                raise Throttled(detail=(
-                    f"Il vous reste {duration(left)} d’oral aujourd’hui, et cette tâche dure {duration(talk)}. "
-                    "Choisissez une tâche plus courte, ou réessayez demain."
-                ))
-            saved = SpeakingSession.objects.create(
-                user=request.user,
-                subject=subject,
-                mode=data.validated_data["mode"],
-                provider=settings.SPEAKING_PROVIDER,
-                seconds=talk or left,
-            )
+            # Premium : un nombre d’essais pour toute la période (15, 25 ou 40 selon la formule), sans limite par jour.
+            allowance = speaking_allowance(request.user)
+            if allowance is not None:
+                if allowance[0] <= 0:
+                    raise Throttled(detail=(
+                        f"Vous avez utilisé les {allowance[1]} essais d’oral de votre abonnement. "
+                        "Renouvelez votre Premium pour en obtenir de nouveaux."
+                    ))
+                saved = SpeakingSession.objects.create(
+                    user=request.user, subject=subject, mode=data.validated_data["mode"],
+                    provider=settings.SPEAKING_PROVIDER, seconds=talk or settings.SPEAKING_DAILY_MINUTES * 60,
+                )
+            else:
+                saved = self.limited_by_minutes(request, subject, data, talk)
         try:
             opened = speaking.provider()["session"](subject, request.user)
         except speaking.SpeakingUnavailable as error:
@@ -615,6 +618,23 @@ class SpeakingSessionView(SecureView):
                 "opening": speaking.opening(subject),
             }).data,
             status=201,
+        )
+
+    def limited_by_minutes(self, request, subject, data, talk):
+        """Sans Premium (essai gratuit, ou oral ouvert à tous en test) : minutes d’oral sur 24 h glissantes."""
+        left = speaking_seconds_left(request.user)
+        if left < self.MIN_SECONDS:
+            minutes = settings.SPEAKING_DAILY_MINUTES
+            raise Throttled(detail=f"Vous avez utilisé vos {minutes} minutes d’oral des dernières 24 heures. Réessayez demain.")
+        # Une tâche se passe toujours en entier, dans son temps officiel : jamais raccourcie par le quota.
+        if talk and left < talk:
+            raise Throttled(detail=(
+                f"Il vous reste {duration(left)} d’oral aujourd’hui, et cette tâche dure {duration(talk)}. "
+                "Choisissez une tâche plus courte, ou réessayez demain."
+            ))
+        return SpeakingSession.objects.create(
+            user=request.user, subject=subject, mode=data.validated_data["mode"],
+            provider=settings.SPEAKING_PROVIDER, seconds=talk or left,
         )
 
 
@@ -652,7 +672,7 @@ class SpeakingAbandonView(SecureView):
                     saved.estimated_cost_usd = speaking.estimated_cost_ceiling(saved.seconds)
             saved.save(update_fields=["status", "ended_at", "seconds", "estimated_cost_usd"])
         return Response(SpeakingFinishedSerializer({
-            "id": saved.pk, "status": saved.status, "seconds": saved.seconds, "seconds_left": speaking_seconds_left(request.user),
+            "id": saved.pk, "status": saved.status, "seconds": saved.seconds, "seconds_left": speaking_seconds_left(request.user), "attempts_left": attempts_left(request.user),
         }).data)
 
 
@@ -686,7 +706,7 @@ class SpeakingFinishView(SecureView):
                 saved.estimated_cost_usd = measured if measured is not None else speaking.estimated_cost_ceiling(saved.seconds)
             saved.save(update_fields=["seconds", "transcript", "status", "ended_at", "usage", "estimated_cost_usd", "correction_status"])
         return Response(SpeakingFinishedSerializer({
-            "id": saved.pk, "status": saved.status, "seconds": saved.seconds, "seconds_left": speaking_seconds_left(request.user),
+            "id": saved.pk, "status": saved.status, "seconds": saved.seconds, "seconds_left": speaking_seconds_left(request.user), "attempts_left": attempts_left(request.user),
         }).data)
 
 

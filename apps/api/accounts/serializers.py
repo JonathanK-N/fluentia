@@ -50,8 +50,13 @@ class PreferencesSerializer(serializers.Serializer):
 
 class SubscriptionSerializer(serializers.Serializer):
     status = serializers.ChoiceField(choices=["free", "premium", "expired"], read_only=True)
+    plan = serializers.CharField(read_only=True, allow_null=True)
+    plan_label = serializers.CharField(read_only=True, allow_null=True)
     premium_until = serializers.DateTimeField(read_only=True, allow_null=True)
     days_remaining = serializers.IntegerField(read_only=True)
+    # Essais d’oral de la période en cours (une tâche = un essai) ; null sans Premium actif.
+    speaking_attempts_left = serializers.IntegerField(read_only=True, allow_null=True)
+    speaking_attempts = serializers.IntegerField(read_only=True, allow_null=True)
 
 
 class AccountSerializer(serializers.Serializer):

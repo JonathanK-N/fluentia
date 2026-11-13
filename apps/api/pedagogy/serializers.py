@@ -316,6 +316,8 @@ class SpeakingFinishedSerializer(serializers.Serializer):
     status = serializers.CharField()
     seconds = serializers.IntegerField()
     seconds_left = serializers.IntegerField()
+    # Premium : essais d’oral restants sur l’abonnement ; null sans Premium.
+    attempts_left = serializers.IntegerField(allow_null=True)
 
 
 class SeriesDetailSerializer(SeriesSerializer):

@@ -22,10 +22,19 @@ admin.site.login_form = EmailLoginForm
 
 @admin.register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
-    list_display = ["user", "premium_until", "updated_at"]
+    list_display = ["user", "plan", "premium_until", "speaking_attempts_left", "updated_at"]
+    list_filter = ["plan"]
     search_fields = ["user__email"]
-    readonly_fields = ["updated_at"]
+    fields = ["user", "plan", "premium_until", "period_start", "speaking_attempts_left", "updated_at"]
+    readonly_fields = ["period_start", "speaking_attempts_left", "updated_at"]
     autocomplete_fields = ["user"]
+
+    @admin.display(description="Essais d’oral restants")
+    def speaking_attempts_left(self, sub):
+        from .subscription import speaking_allowance
+
+        allowance = speaking_allowance(sub.user) if sub.pk else None
+        return f"{allowance[0]} sur {allowance[1]}" if allowance else "—"
 
 
 @admin.action(description="Envoyer le courriel de bienvenue")

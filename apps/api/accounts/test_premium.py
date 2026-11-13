@@ -43,7 +43,33 @@ class PremiumTests(TestCase):
         self.assertTrue(self.client.get("/api/v1/auth/profile/").data["editor"])
 
     def test_free_account_has_no_premium(self):
-        self.assertEqual(self.subscription(), {"status": "free", "premium_until": None, "days_remaining": 0})
+        self.assertEqual(self.subscription(), {
+            "status": "free", "plan": None, "plan_label": None, "premium_until": None, "days_remaining": 0,
+            "speaking_attempts_left": None, "speaking_attempts": None,
+        })
+
+    def test_each_plan_starts_today_with_its_length_and_oral_attempts(self):
+        for plan, days, attempts in (("2_semaines", 14, 15), ("1_mois", 30, 25), ("2_mois", 60, 40)):
+            Subscription.objects.filter(user=self.user).delete()
+            Subscription.objects.create(user=self.user, plan=plan)  # date de fin laissée vide
+            data = self.subscription()
+            self.assertEqual((data["status"], data["days_remaining"], data["speaking_attempts_left"], data["speaking_attempts"]),
+                             ("premium", days, attempts, attempts), plan)
+
+    def test_a_renewal_gives_new_oral_attempts(self):
+        from pedagogy.models import SpeakingSession
+        sub = Subscription.objects.create(user=self.user, plan="2_semaines")
+        SpeakingSession.objects.create(user=self.user, provider="demo", seconds=120)
+        SpeakingSession.objects.create(user=self.user, provider="demo", seconds=120, status=SpeakingSession.Status.FAILED)
+        # Dates nettes : la période a commencé il y a une heure, les séances il y a une minute.
+        Subscription.objects.filter(pk=sub.pk).update(period_start=timezone.now() - timedelta(hours=1))
+        SpeakingSession.objects.update(started_at=timezone.now() - timedelta(minutes=1))
+        sub.refresh_from_db()
+        self.assertEqual(self.subscription()["speaking_attempts_left"], 14)  # une séance échouée ne compte pas
+        sub.plan = "1_mois"
+        sub.premium_until = None
+        sub.save()
+        self.assertEqual(self.subscription()["speaking_attempts_left"], 25)
 
     def test_pause_endpoints_do_not_exist(self):
         self.assertEqual(self.call("auth/subscription/pause/").status_code, 404)

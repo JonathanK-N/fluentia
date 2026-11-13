@@ -152,10 +152,9 @@ class PremiumAndTrialTests(SpeakingClient):
         self.assertEqual(self.open().status_code, 201)
 
 
+@override_settings(SPEAKING_REQUIRE_PREMIUM=False)
 class QuotaTests(SpeakingClient):
-    def setUp(self):
-        super().setUp()
-        self.premium()
+    """Sans Premium (oral ouvert à tous en test) : minutes d’oral sur 24 h glissantes."""
 
     @override_settings(SPEAKING_DAILY_MINUTES=10)
     def test_daily_minutes_are_counted_per_student(self):
@@ -172,7 +171,6 @@ class QuotaTests(SpeakingClient):
         self.assertEqual(third.status_code, 429)
         self.assertIn("Il vous reste 1 min d’oral", third.data["detail"])
         other = User.objects.create_user(username="autre", email="autre@example.test")
-        self.premium(other)
         self.assertEqual(self.open(self.task2, client=self.client_for(other)).status_code, 201)
 
     @override_settings(SPEAKING_DAILY_MINUTES=10)
@@ -192,6 +190,46 @@ class QuotaTests(SpeakingClient):
         finished = self.finish(first.data["id"], seconds=90, client=client)
         self.assertEqual((finished.data["seconds"], finished.data["seconds_left"]), (90, 180))
         self.assertEqual(self.open(self.task1, client=client).data["seconds"], 120)
+
+
+class AttemptsTests(SpeakingClient):
+    """Premium : un nombre d’essais d’oral pour toute la période de la formule, sans limite par jour."""
+
+    def subscribe(self, plan):
+        Subscription.objects.filter(user=self.student).delete()
+        return Subscription.objects.create(user=self.student, plan=plan)
+
+    @override_settings(SPEAKING_DAILY_MINUTES=3)
+    def test_each_task_is_one_attempt_whatever_the_minutes_of_the_day(self):
+        self.subscribe("2_semaines")
+        client = self.client_for(self.student)
+        opened = [self.open(s, client=client) for s in (self.task2, self.task3, self.task2)]  # bien plus de 3 min
+        self.assertEqual([o.status_code for o in opened], [201] * 3)
+        self.assertEqual(opened[1].data["seconds"], 270)  # la tâche 3 garde ses 4 min 30
+        finished = self.finish(opened[0].data["id"], seconds=210, client=client)
+        self.assertEqual(finished.data["attempts_left"], 12)
+
+    def test_attempts_run_out_then_come_back_with_a_renewal(self):
+        sub = self.subscribe("2_semaines")
+        SpeakingSession.objects.bulk_create([
+            SpeakingSession(user=self.student, subject=self.task1, mode="practice", provider="demo", seconds=120) for _ in range(15)
+        ])
+        # Dates nettes : la période a commencé il y a une heure, les séances il y a une minute.
+        Subscription.objects.filter(pk=sub.pk).update(period_start=timezone.now() - timedelta(hours=1))
+        SpeakingSession.objects.update(started_at=timezone.now() - timedelta(minutes=1))
+        sub.refresh_from_db()
+        refused = self.open(self.task1)
+        self.assertEqual(refused.status_code, 429)
+        self.assertIn("les 15 essais d’oral de votre abonnement", refused.data["detail"])
+        sub.premium_until = None  # renouvellement : nouvelle période à partir d’aujourd’hui
+        sub.save()
+        self.assertEqual(self.open(self.task1).status_code, 201)
+
+    def test_plans_give_15_25_and_40_attempts(self):
+        from accounts.subscription import speaking_allowance
+        for plan, attempts in (("2_semaines", 15), ("1_mois", 25), ("2_mois", 40)):
+            self.subscribe(plan)
+            self.assertEqual(speaking_allowance(self.student), (attempts, attempts))
 
 
 class FinishTests(SpeakingClient):
@@ -300,7 +338,7 @@ class OpenAISpeakingTests(SpeakingClient):
         self.assertIn("personnage", session["instructions"])
         self.assertEqual(session["audio"]["output"]["voice"], "cedar")
         self.assertEqual(session["audio"]["input"]["transcription"]["language"], "fr")
-        self.assertIn("français", session["audio"]["input"]["transcription"]["prompt"])
+        self.assertNotIn("prompt", session["audio"]["input"]["transcription"])
         self.assertEqual(session["audio"]["input"]["noise_reduction"], {"type": "near_field"})
         # Tâche 2 : l’examinateur n’écoute pas pendant la préparation ; le site active l’écoute ensuite.
         self.assertIsNone(session["audio"]["input"]["turn_detection"])

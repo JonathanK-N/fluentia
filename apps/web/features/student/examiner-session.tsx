@@ -43,7 +43,7 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
   useEffect(() => { mutedRef.current = muted; }, [muted]);
   const [notes, setNotes] = useState("");
   const [level, setLevel] = useState({ mic: 0, examiner: 0 });
-  const [summary, setSummary] = useState<{ seconds: number; secondsLeft: number } | null>(null);
+  const [summary, setSummary] = useState<{ seconds: number; secondsLeft: number; attemptsLeft: number | null } | null>(null);
   const [cutShort, setCutShort] = useState(false);
   const connection = useRef<ExaminerConnection | null>(null);
   const microphone = useRef<MediaStream | null>(null);
@@ -87,12 +87,12 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
     release();
     const transcript = turnsRef.current.filter(t => t.text).map(t => ({ role: t.role, text: t.text.slice(0, 4000) })).slice(0, 400);
     try {
-      const saved = await api<{ seconds: number; seconds_left: number }>(`speaking/sessions/${session.id}/finish/`, "POST", {
+      const saved = await api<{ seconds: number; seconds_left: number; attempts_left: number | null }>(`speaking/sessions/${session.id}/finish/`, "POST", {
         seconds, transcript, usage: { ...usage.current, transcription_seconds: Math.min(7200, usage.current.transcription_seconds) },
       });
-      setSummary({ seconds: saved.seconds, secondsLeft: saved.seconds_left });
+      setSummary({ seconds: saved.seconds, secondsLeft: saved.seconds_left, attemptsLeft: saved.attempts_left ?? null });
     } catch {
-      setSummary({ seconds, secondsLeft: -1 });
+      setSummary({ seconds, secondsLeft: -1, attemptsLeft: null });
     }
     exitFullscreen();
     setPhase("done");
@@ -266,7 +266,7 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
       message: latest?.text ?? "L’examinateur va prendre la parole.",
     },
     closing: { pill: "L’examinateur conclut", who: "L’examinateur", message: latest?.text ?? "L’examinateur conclut l’épreuve…" },
-    done: { pill: "Tâche terminée", tone: "mint", who: "Bilan", message: `${cutShort ? "La connexion avec l’examinateur a été coupée avant la fin : ce que vous avez dit est enregistré. " : ""}Durée de parole comptée : ${formatDuration(summary?.seconds ?? 0)}${summary && summary.secondsLeft >= 0 ? `. Il vous reste ${Math.floor(summary.secondsLeft / 60)} min d’oral aujourd’hui.` : "."} Votre correction est prête à être calculée : note sur 20, niveau, NCLC et conseils.` },
+    done: { pill: "Tâche terminée", tone: "mint", who: "Bilan", message: `${cutShort ? "La connexion avec l’examinateur a été coupée avant la fin : ce que vous avez dit est enregistré. " : ""}Durée de parole comptée : ${formatDuration(summary?.seconds ?? 0)}${summary?.attemptsLeft != null ? `. Il vous reste ${summary.attemptsLeft} essai${summary.attemptsLeft > 1 ? "s" : ""} d’oral sur votre abonnement.` : summary && summary.secondsLeft >= 0 ? `. Il vous reste ${Math.floor(summary.secondsLeft / 60)} min d’oral aujourd’hui.` : "."} Votre correction est prête à être calculée : note sur 20, niveau, NCLC et conseils.` },
     error: { pill: "Problème", tone: "danger", who: "Fluentia", message: error },
   }[phase];
   const showTranscript = phase === "done" || (transcript && inSession);
