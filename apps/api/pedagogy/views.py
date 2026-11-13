@@ -612,6 +612,7 @@ class SpeakingSessionView(SecureView):
                 "voice": opened["voice"],
                 "seconds": saved.seconds,
                 "prep_seconds": subject.prep_seconds or 0,
+                "opening": speaking.opening(subject),
             }).data,
             status=201,
         )

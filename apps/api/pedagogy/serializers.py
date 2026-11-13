@@ -276,6 +276,8 @@ class SpeakingSessionSerializer(serializers.Serializer):
     voice = serializers.CharField()
     seconds = serializers.IntegerField()
     prep_seconds = serializers.IntegerField()
+    # Première intervention de l’examinateur, à dire mot pour mot : « Bonjour. » et la consigne.
+    opening = serializers.CharField()
 
 
 class SpeakingTurnSerializer(StrictSerializer):

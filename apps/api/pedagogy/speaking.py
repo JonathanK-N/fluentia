@@ -44,7 +44,9 @@ TA FAÇON DE PARLER
 - C’est le candidat qui doit parler, pas toi. Après la lecture du sujet, chacune de tes interventions tient en
   une ou deux phrases courtes (vingt mots au plus). Jamais de long discours, d’explication ou d’exemple de ta part.
 - Tu peux réagir d’un mot (« D’accord. », « Je vois. »), sans le féliciter à chaque réponse et sans répéter ce
-  qu’il a dit. Jamais de phrase de remplissage (« Laissez-moi réfléchir », « Voyons voir »).
+  qu’il a dit. Jamais de phrase de remplissage (« Laissez-moi réfléchir », « Laissez-moi penser un instant »,
+  « Je peux vous préciser ça », « Voyons voir ») : tu donnes directement ta réponse ou ta question.
+- Tu ne réponds jamais deux fois de suite : une seule intervention après chaque prise de parole du candidat.
 - Laisse le candidat aller au bout de sa pensée. S’il marque une pause, hésite ou cherche ses mots, attends : ne
   l’interromps pas et ne termine pas ses phrases à sa place.
 - Tu n’inventes jamais rien sur le candidat : ni son métier, ni sa famille, ni ses goûts, ni ce qu’il aurait dit.
@@ -96,6 +98,9 @@ conversation : il pose les questions, toi tu réponds.
   même si le candidat se tait : tu attends sa question suivante en silence.
 - S’il dit seulement « merci », « d’accord » ou « parfait », sans poser de question, tu réponds seulement
   « Je vous en prie. » et rien d’autre.
+- S’il te salue ou te demande comment tu vas, tu réponds en personnage, poliment et brièvement :
+  « Bonjour, très bien, merci. Je vous écoute. » S’il demande s’il peut poser des questions : « Oui, bien sûr. »
+  Tu ne dis jamais « Je suis prêt » ni rien qui sorte de ton personnage.
 - Tes informations (horaires, prix, conditions, adresse…) restent dans la situation de la consigne, réalistes et
   cohérentes ; une fois données, elles ne changent plus.""",
     3: """Tâche 3 — expression d’un point de vue. Après avoir lu la consigne, laisse le candidat exposer son point
@@ -105,6 +110,12 @@ argument contraire en lien avec le sujet. Ne donne jamais ton propre avis et ne 
 
 """ + RELAUNCH,
 }
+
+
+def opening(subject):
+    """Première intervention, dite mot pour mot : jamais les étiquettes « Sujet : » ou « Consigne : »."""
+    words = f"Bonjour. {subject.prompt.strip()}"
+    return f"{words} {PREPARATION_SENTENCE}" if subject.prep_seconds else words
 
 
 def instructions(subject):
@@ -123,7 +134,8 @@ def safety_id(user):
 # Fin de parole détectée selon le sens de la phrase. « medium » : l’examinateur relance en 1 à 4 s, et une
 # hésitation au milieu d’une idée ne le fait pas parler (« low » attendait jusqu’à 8 s : trop lent).
 # Pas d’interruption : un bruit, un « OK » ou l’écho de sa propre voix ne le coupe plus au milieu d’un mot.
-TURN_DETECTION = {"type": "semantic_vad", "eagerness": "medium", "interrupt_response": False}
+# Pas de réponse automatique : le site déclenche lui-même UNE réponse par prise de parole (jamais deux de suite).
+TURN_DETECTION = {"type": "semantic_vad", "eagerness": "medium", "interrupt_response": False, "create_response": False}
 # Guide la transcription : sans lui, un bruit ou un silence est parfois « transcrit » en chinois ou en anglais.
 TRANSCRIPTION_PROMPT = "Examen oral de français (TCF Canada). Le candidat parle uniquement français, parfois avec un accent ou des expressions du Québec ou d’Afrique."
 

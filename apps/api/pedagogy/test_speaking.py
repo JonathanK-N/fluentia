@@ -61,11 +61,13 @@ class SpeakingSessionTests(SpeakingClient):
         response = self.open()
         self.assertEqual(response.status_code, 201, response.data)
         self.assertEqual(
-            set(response.data), {"id", "demo", "client_secret", "expires_at", "model", "voice", "seconds", "prep_seconds"}
+            set(response.data), {"id", "demo", "client_secret", "expires_at", "model", "voice", "seconds", "prep_seconds", "opening"}
         )
         self.assertTrue(response.data["demo"])
         self.assertTrue(response.data["client_secret"].startswith("demo-"))
         self.assertEqual((response.data["seconds"], response.data["prep_seconds"]), (120, 0))
+        # Lue mot pour mot : « Bonjour. » et la consigne, sans les étiquettes « Sujet : » ou « Consigne : ».
+        self.assertEqual(response.data["opening"], f"Bonjour. {self.task1.prompt.strip()}")
         saved = SpeakingSession.objects.get()
         self.assertEqual((saved.user, saved.subject, saved.mode, saved.provider, saved.status), (self.student, self.task1, "practice", "demo", "pending"))
 
@@ -289,6 +291,7 @@ class OpenAISpeakingTests(SpeakingClient):
             (False, "ek_cle_ephemere", "modele-realtime", "cedar"),
         )
         self.assertEqual((response.data["seconds"], response.data["prep_seconds"]), (210, 120))
+        self.assertTrue(response.data["opening"].endswith("je vous préviens quand nous commençons."))
         self.assertNotIn(b"sk-cle-secrete-du-serveur", response.content)
         call = client.realtime.client_secrets.create.call_args.kwargs
         session = call["session"]
@@ -312,7 +315,7 @@ class OpenAISpeakingTests(SpeakingClient):
         with patcher:
             self.open(self.task1)
         session = client.realtime.client_secrets.create.call_args.kwargs["session"]
-        self.assertEqual(session["audio"]["input"]["turn_detection"], {"type": "semantic_vad", "eagerness": "medium", "interrupt_response": False})
+        self.assertEqual(session["audio"]["input"]["turn_detection"], {"type": "semantic_vad", "eagerness": "medium", "interrupt_response": False, "create_response": False})
         self.assertIn("RELANCER LE CANDIDAT", session["instructions"])
 
     def test_safety_identifier_is_a_hash_never_the_email(self):

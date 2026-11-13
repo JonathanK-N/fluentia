@@ -14,6 +14,8 @@ export type Activity = "connecting" | "examiner" | "candidate" | "waiting";
 export type SpeakingSession = {
   id: number; demo: boolean; client_secret: string; expires_at: string;
   model: string; voice: string; seconds: number; prep_seconds: number;
+  /** Première intervention de l’examinateur, à dire mot pour mot. */
+  opening?: string;
 };
 
 export type ExaminerHandlers = {
@@ -115,7 +117,7 @@ function playClosing(sentence: string, handlers: ExaminerHandlers): Promise<void
 }
 // Tâche 2 : questions et réponses courtes, l’examinateur répond dès que la question est posée (2 s au plus).
 // Pas d’interruption : un bruit ou l’écho de sa voix ne coupe plus l’examinateur au milieu d’un mot.
-const QUESTIONS_TURN_DETECTION = { type: "semantic_vad", eagerness: "high", interrupt_response: false };
+const QUESTIONS_TURN_DETECTION = { type: "semantic_vad", eagerness: "high", interrupt_response: false, create_response: false };
 
 const CLOSING_TIMEOUT_MS = 12_000;
 
@@ -225,6 +227,73 @@ export function audioToText(send: (event: RealtimeEvent) => void) {
   };
 }
 
+/** Une vraie prise de parole, en français, de quelques mots : pas un « OK » ou un « merci » glissé sur la voix de l’examinateur. */
+function substantial(text: string) {
+  return !notFrench(text) && (text.match(/[a-zà-ÿœæ]+/gi) ?? []).length >= 3;
+}
+
+/**
+ * Tour de parole, décidé par le site (le fournisseur ne répond plus tout seul) : l’examinateur répond UNE fois
+ * après chaque prise de parole du candidat, jamais deux fois de suite.
+ * - Le candidat reprend la parole avant que la réponse ne se fasse entendre : elle est annulée et refaite avec
+ *   tout ce qu’il a dit.
+ * - Il parle pendant que l’examinateur parle : on attend la fin de la phrase de l’examinateur, et on ne répond
+ *   que si c’était une vraie prise de parole (pas un « OK » ou un « merci »).
+ * Fonction pure côté événements : testée sans WebRTC.
+ */
+export function turnTaking(send: (event: RealtimeEvent) => void) {
+  let requested = false, responding = false, audible = false, speaking = false, listening = true, redo = false;
+  const waiting = new Map<string, string | undefined>(); // dit pendant que l’examinateur parlait → transcription
+  let current: string | undefined; // consigne de la réponse demandée (ex. la lecture du sujet), à refaire telle quelle
+  const busy = () => requested || responding || speaking;
+  const say = (instructions?: string) => {
+    requested = true; current = instructions;
+    send({ type: "response.create", ...(instructions ? { response: { instructions } } : {}) });
+  };
+  const cancel = () => { send({ type: "response.cancel" }); send({ type: "output_audio_buffer.clear" }); };
+  const settle = () => {
+    if (!listening || busy()) return;
+    if (redo) { redo = false; waiting.clear(); return say(current); }
+    const said = [...waiting.values()];
+    if (!said.length || said.some(text => text === undefined)) return;
+    waiting.clear();
+    if (substantial(said.join(" "))) say();
+  };
+  return {
+    say,
+    /** Fin de l’épreuve : plus aucune réponse. */
+    stop() { listening = false; redo = false; waiting.clear(); },
+    read(event: RealtimeEvent) {
+      const id = typeof event.item_id === "string" ? event.item_id : "";
+      switch (event.type) {
+        case "response.created":
+          requested = false; responding = true; audible = false;
+          if (redo) cancel(); // le candidat a parlé entre la demande et le début de la réponse
+          break;
+        case "output_audio_buffer.started": audible = true; speaking = true; break;
+        case "output_audio_buffer.stopped": case "output_audio_buffer.cleared": speaking = false; break;
+        case "response.done": responding = false; break;
+        case "error": requested = false; break;
+        case "input_audio_buffer.committed":
+          if (!listening) return;
+          if ((requested || responding) && !audible) {
+            // Réponse pas encore entendue : on la refait avec tout ce que le candidat a dit.
+            if (responding && !redo) cancel();
+            redo = true;
+          } else if (busy()) waiting.set(id, undefined);
+          else say();
+          break;
+        case "conversation.item.input_audio_transcription.completed":
+          if (!waiting.has(id)) return;
+          waiting.set(id, String(event.transcript ?? ""));
+          break;
+        default: return;
+      }
+      settle();
+    },
+  };
+}
+
 const REALTIME_CALLS = "https://api.openai.com/v1/realtime/calls";
 const OPENING_RETRY_MS = 6_000;
 const CONNECT_TIMEOUT_MS = 15_000;
@@ -246,6 +315,7 @@ export async function connectRealtime(session: SpeakingSession, microphone: Medi
   const channel = pc.createDataChannel("oai-events");
   let responding = false, candidateSpeaking = false, opened = false, closed = false;
   const replacing = audioToText(event => send(event));
+  const turns = turnTaking(event => send(event));
   channel.onmessage = message => {
     let event: RealtimeEvent;
     try { event = JSON.parse(String(message.data)); } catch { return; }
@@ -253,14 +323,17 @@ export async function connectRealtime(session: SpeakingSession, microphone: Medi
     if (event.type === "response.done") responding = false;
     if (event.type === "input_audio_buffer.speech_started") candidateSpeaking = true;
     if (event.type === "input_audio_buffer.speech_stopped" || event.type === "input_audio_buffer.committed") candidateSpeaking = false;
+    turns.read(event);
     replacing.read(event, responding);
     readEvent(event, handlers);
   };
   const send = (event: RealtimeEvent) => { if (channel.readyState === "open") channel.send(JSON.stringify(event)); };
-  // L’examinateur ouvre l’épreuve. Si le fournisseur n’a pas pris la demande en compte, elle est renvoyée une fois.
+  // L’examinateur ouvre l’épreuve : « Bonjour. » et la consigne, mot pour mot (jamais « Sujet : » ou « Consigne : »).
+  const opening = session.opening ? sayExactly(session.opening, "Tu ouvres l’épreuve en lisant la consigne au candidat.") : undefined;
+  // Si le fournisseur n’a pas pris la demande en compte, elle est renvoyée une fois.
   channel.onopen = () => {
-    send({ type: "response.create" });
-    setTimeout(() => { if (!opened && !closed) send({ type: "response.create" }); }, OPENING_RETRY_MS);
+    turns.say(opening);
+    setTimeout(() => { if (!opened && !closed) turns.say(opening); }, OPENING_RETRY_MS);
   };
   let gone = false; // coupure signalée une seule fois ; une fermeture voulue par le site n’en est pas une
   const lost = () => { if (!closed && !gone) { gone = true; handlers.onLost?.(); } };
@@ -296,11 +369,12 @@ export async function connectRealtime(session: SpeakingSession, microphone: Medi
     setMuted: muted => { track.enabled = !muted; },
     startQuestions: () => {
       send({ type: "input_audio_buffer.clear" }); // rien de la préparation n’est écouté
-      send({ type: "response.create", response: { instructions: sayExactly(QUESTIONS_SENTENCE, "La préparation du candidat est terminée.") } });
+      turns.say(sayExactly(QUESTIONS_SENTENCE, "La préparation du candidat est terminée."));
       send({ type: "session.update", session: { type: "realtime", audio: { input: { turn_detection: QUESTIONS_TURN_DETECTION } } } });
     },
     conclude: (sentence = CLOSING_SENTENCE) => {
       track.enabled = false; // le candidat n’est plus enregistré : ce qu’il dirait après la fin ne compte pas
+      turns.stop();
       // Plus de réponse de l’IA : elle n’écoute plus, sa réponse en cours est annulée et sa voix est coupée.
       send({ type: "session.update", session: { type: "realtime", audio: { input: { turn_detection: null } } } });
       // Une phrase commencée avant la fin est quand même transcrite et comptée.
