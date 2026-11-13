@@ -22,7 +22,38 @@ export type ExaminerHandlers = {
   onUsage: (usage: Partial<Usage>) => void;
   onError: (message: string) => void;
   onRemoteStream?: (stream: MediaStream) => void;
+  /** La connexion avec l’examinateur est coupée pour de bon (réseau, fournisseur). */
+  onLost?: () => void;
 };
+
+const FOREIGN_SCRIPT = /[Ͱ-ϿЀ-ԯ֐-ۿऀ-෿฀-໿ᄀ-ᇿ぀-ヿ㐀-鿿가-힯＀-￯]/;
+// Petits mots très fréquents : une phrase française en contient presque toujours au moins un.
+const FRENCH_WORDS = new Set((
+  "a à je j tu il elle on nous vous ils elles le la les l un une des du de d et ou mais donc car que qu qui quoi est c ce cet cette ces ça ca " +
+  "pas ne n oui non merci bonjour au aux en dans pour par avec sur sous chez mon ma mes ton ta tes son sa ses notre votre nos vos leur leurs " +
+  "suis es sommes êtes sont ai avons avez ont était été fait faire fais va vais vas allez peux peut pouvez veux veut voudrais aimerais " +
+  "bien très plus moins aussi alors parce comme tout tous toute toutes quand où comment combien pourquoi quel quelle quels quelles y là ici " +
+  "accord exactement voilà euh ben bah ok aussi déjà encore même autre autres beaucoup peu trop rien personne quelque chose"
+).split(" "));
+// Mots anglais courants qui n’existent pas en français.
+const ENGLISH_WORDS = new Set((
+  "the is are was were this that these those our my your you he she they we what which who whose with have has had do does did " +
+  "don not and of to it its for from will would can could should be been there their them here time last yes thank thanks please " +
+  "hello hi i im it's okay just about because very really want know think going get got like"
+).split(" "));
+
+/**
+ * L’épreuve est en français : la transcription ne garde que le français. Un passage dans une autre écriture
+ * (chinois, arabe, cyrillique…) ou dans une autre langue (anglais, espagnol, portugais…) est une transcription
+ * inventée sur un bruit ou un silence, ou une phrase hors épreuve : il n’est ni affiché, ni enregistré, ni corrigé.
+ */
+export function notFrench(text: string) {
+  if (FOREIGN_SCRIPT.test(text)) return true;
+  const words = text.toLowerCase().match(/[a-zà-ÿœæ]+/g) ?? [];
+  const french = words.filter(word => FRENCH_WORDS.has(word)).length;
+  const english = words.filter(word => ENGLISH_WORDS.has(word)).length;
+  return (english >= 2 && english > french) || (words.length >= 3 && french === 0);
+}
 
 export type ExaminerConnection = {
   microphone: MediaStream;
@@ -83,7 +114,8 @@ function playClosing(sentence: string, handlers: ExaminerHandlers): Promise<void
   });
 }
 // Tâche 2 : questions et réponses courtes, l’examinateur répond dès que la question est posée (2 s au plus).
-const QUESTIONS_TURN_DETECTION = { type: "semantic_vad", eagerness: "high" };
+// Pas d’interruption : un bruit ou l’écho de sa voix ne coupe plus l’examinateur au milieu d’un mot.
+const QUESTIONS_TURN_DETECTION = { type: "semantic_vad", eagerness: "high", interrupt_response: false };
 
 const CLOSING_TIMEOUT_MS = 12_000;
 
@@ -108,7 +140,8 @@ export function readEvent(event: RealtimeEvent, handlers: ExaminerHandlers) {
         handlers.onTurn({ id: event.item_id, role: "candidate", text: "", final: false });
       break;
     case "conversation.item.input_audio_transcription.completed": {
-      if (typeof event.item_id === "string") handlers.onTurn({ id: event.item_id, role: "candidate", text: String(event.transcript ?? "").trim(), final: true });
+      const text = String(event.transcript ?? "").trim();
+      if (typeof event.item_id === "string") handlers.onTurn({ id: event.item_id, role: "candidate", text: notFrench(text) ? "" : text, final: true });
       // Selon le modèle de transcription, la consommation est déclarée en secondes ou en jetons.
       const usage = event.usage as { type?: string; seconds?: number; input_tokens?: number; output_tokens?: number } | undefined;
       if (usage?.type === "duration" && typeof usage.seconds === "number") handlers.onUsage({ transcription_seconds: usage.seconds });
@@ -164,9 +197,11 @@ export function audioToText(send: (event: RealtimeEvent) => void) {
       if (!item.answered || item.transcript === undefined) continue;
       spoken.delete(id);
       if (!item.transcript.trim()) continue; // rien d’audible : on laisse l’audio
-      const textId = `fl_txt_${++count}`;
       const previous = item.previous ? renamed.get(item.previous) ?? item.previous : null;
       send({ type: "conversation.item.delete", item_id: id });
+      // Un bruit « transcrit » en chinois, en anglais ou autre : retiré de la conversation, sans le remplacer.
+      if (notFrench(item.transcript)) { renamed.set(id, previous ?? ""); continue; }
+      const textId = `fl_txt_${++count}`;
       send({
         type: "conversation.item.create", ...(previous ? { previous_item_id: previous } : {}),
         item: { id: textId, type: "message", role: "user", content: [{ type: "input_text", text: `[Réponse orale du candidat, transcrite] ${item.transcript}` }] },
@@ -191,6 +226,8 @@ export function audioToText(send: (event: RealtimeEvent) => void) {
 }
 
 const REALTIME_CALLS = "https://api.openai.com/v1/realtime/calls";
+const OPENING_RETRY_MS = 6_000;
+const CONNECT_TIMEOUT_MS = 15_000;
 
 /** Conversation réelle : micro → fournisseur, voix de l’examinateur ← fournisseur, événements par canal de données. */
 export async function connectRealtime(session: SpeakingSession, microphone: MediaStream, handlers: ExaminerHandlers): Promise<ExaminerConnection> {
@@ -207,12 +244,12 @@ export async function connectRealtime(session: SpeakingSession, microphone: Medi
   if (!track) throw new Error("Aucun microphone disponible.");
   pc.addTrack(track, microphone);
   const channel = pc.createDataChannel("oai-events");
-  let responding = false, candidateSpeaking = false;
+  let responding = false, candidateSpeaking = false, opened = false, closed = false;
   const replacing = audioToText(event => send(event));
   channel.onmessage = message => {
     let event: RealtimeEvent;
     try { event = JSON.parse(String(message.data)); } catch { return; }
-    if (event.type === "response.created") responding = true;
+    if (event.type === "response.created") { responding = true; opened = true; }
     if (event.type === "response.done") responding = false;
     if (event.type === "input_audio_buffer.speech_started") candidateSpeaking = true;
     if (event.type === "input_audio_buffer.speech_stopped" || event.type === "input_audio_buffer.committed") candidateSpeaking = false;
@@ -220,10 +257,15 @@ export async function connectRealtime(session: SpeakingSession, microphone: Medi
     readEvent(event, handlers);
   };
   const send = (event: RealtimeEvent) => { if (channel.readyState === "open") channel.send(JSON.stringify(event)); };
-  channel.onopen = () => send({ type: "response.create" }); // l’examinateur ouvre l’épreuve
-  pc.onconnectionstatechange = () => {
-    if (pc.connectionState === "failed") handlers.onError("La connexion avec l’examinateur a été perdue. Vérifiez votre réseau.");
+  // L’examinateur ouvre l’épreuve. Si le fournisseur n’a pas pris la demande en compte, elle est renvoyée une fois.
+  channel.onopen = () => {
+    send({ type: "response.create" });
+    setTimeout(() => { if (!opened && !closed) send({ type: "response.create" }); }, OPENING_RETRY_MS);
   };
+  let gone = false; // coupure signalée une seule fois ; une fermeture voulue par le site n’en est pas une
+  const lost = () => { if (!closed && !gone) { gone = true; handlers.onLost?.(); } };
+  pc.onconnectionstatechange = () => { if (pc.connectionState === "failed" || pc.connectionState === "closed") lost(); };
+  channel.onclose = lost;
 
   const offer = await pc.createOffer();
   await pc.setLocalDescription(offer);
@@ -231,14 +273,16 @@ export async function connectRealtime(session: SpeakingSession, microphone: Medi
     method: "POST",
     body: offer.sdp,
     headers: { Authorization: `Bearer ${session.client_secret}`, "Content-Type": "application/sdp" },
+    // OpenAI qui ne répond pas : on abandonne vite au lieu de laisser le candidat attendre une minute.
+    signal: AbortSignal.timeout(CONNECT_TIMEOUT_MS),
   }).catch(() => null);
   if (!response?.ok) {
+    closed = true;
     pc.close();
     throw new Error("Impossible de joindre l’examinateur. Vérifiez votre connexion, puis réessayez.");
   }
   await pc.setRemoteDescription({ type: "answer", sdp: await response.text() });
 
-  let closed = false;
   const close = () => {
     if (closed) return;
     closed = true;

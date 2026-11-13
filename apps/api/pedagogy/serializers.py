@@ -304,6 +304,11 @@ class SpeakingFinishSerializer(StrictSerializer):
     usage = SpeakingUsageSerializer(required=False)
 
 
+class SpeakingAbandonSerializer(StrictSerializer):
+    # Temps de parole déjà compté par le chrono du site ; absent (ancienne version du site) : le temps écoulé.
+    seconds = serializers.IntegerField(min_value=0, max_value=7200, required=False)
+
+
 class SpeakingFinishedSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     status = serializers.CharField()

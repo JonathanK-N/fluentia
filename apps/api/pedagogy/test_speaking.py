@@ -297,6 +297,8 @@ class OpenAISpeakingTests(SpeakingClient):
         self.assertIn("personnage", session["instructions"])
         self.assertEqual(session["audio"]["output"]["voice"], "cedar")
         self.assertEqual(session["audio"]["input"]["transcription"]["language"], "fr")
+        self.assertIn("français", session["audio"]["input"]["transcription"]["prompt"])
+        self.assertEqual(session["audio"]["input"]["noise_reduction"], {"type": "near_field"})
         # Tâche 2 : l’examinateur n’écoute pas pendant la préparation ; le site active l’écoute ensuite.
         self.assertIsNone(session["audio"]["input"]["turn_detection"])
         self.assertIn("deux minutes pour préparer vos questions", session["instructions"])
@@ -310,7 +312,7 @@ class OpenAISpeakingTests(SpeakingClient):
         with patcher:
             self.open(self.task1)
         session = client.realtime.client_secrets.create.call_args.kwargs["session"]
-        self.assertEqual(session["audio"]["input"]["turn_detection"], {"type": "semantic_vad", "eagerness": "medium"})
+        self.assertEqual(session["audio"]["input"]["turn_detection"], {"type": "semantic_vad", "eagerness": "medium", "interrupt_response": False})
         self.assertIn("RELANCER LE CANDIDAT", session["instructions"])
 
     def test_safety_identifier_is_a_hash_never_the_email(self):
@@ -450,3 +452,17 @@ class AbandonTests(SpeakingClient):
         self.assertEqual((response.data["status"], response.data["seconds"]), ("finished", 75))
         self.assertEqual(SpeakingSession.objects.get().correction_status, "")
         self.assertEqual(self.abandon(opened.data["id"], client).status_code, 409)
+
+    def test_only_the_time_already_counted_is_charged_when_the_examiner_fails(self):
+        client = self.client_for(self.student)
+        opened = self.open(self.task1, client=client)
+        started = SpeakingSession.objects.get().started_at
+        with patch("pedagogy.views.timezone.now", return_value=started + timedelta(seconds=90)):
+            response = client.post(f"/api/v1/speaking/sessions/{opened.data['id']}/abandon/", {"seconds": 0},
+                                   format="json", HTTP_X_CSRFTOKEN=client.csrf)
+        self.assertEqual((response.data["status"], response.data["seconds_left"]), ("failed", 600))
+        second = self.open(self.task3, client=client)
+        with patch("pedagogy.views.timezone.now", return_value=SpeakingSession.objects.get(pk=second.data["id"]).started_at + timedelta(seconds=90)):
+            response = client.post(f"/api/v1/speaking/sessions/{second.data['id']}/abandon/", {"seconds": 45},
+                                   format="json", HTTP_X_CSRFTOKEN=client.csrf)
+        self.assertEqual((response.data["status"], response.data["seconds"]), ("finished", 45))

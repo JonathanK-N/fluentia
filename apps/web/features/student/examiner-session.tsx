@@ -19,6 +19,8 @@ type Subject = SpeakingTask["subjects"][number];
 type Phase = "intro" | "connecting" | "briefing" | "prep" | "live" | "closing" | "done" | "error";
 const START_IF_SILENT_MS = 10_000;     // le candidat ne dit rien après la lecture du sujet
 const START_AT_THE_LATEST_MS = 60_000; // filet de sécurité : la séance ne dure jamais indéfiniment
+const OPENING_TIMEOUT_MS = 20_000;     // l’examinateur doit avoir commencé à parler 20 s après la connexion
+const NOT_COUNTED = "Aucune minute n’a été décomptée : vérifiez votre connexion, puis réessayez.";
 
 const ACTIVITY: Record<Activity, string> = {
   connecting: "Connexion à l’examinateur…",
@@ -42,6 +44,7 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
   const [notes, setNotes] = useState("");
   const [level, setLevel] = useState({ mic: 0, examiner: 0 });
   const [summary, setSummary] = useState<{ seconds: number; secondsLeft: number } | null>(null);
+  const [cutShort, setCutShort] = useState(false);
   const connection = useRef<ExaminerConnection | null>(null);
   const microphone = useRef<MediaStream | null>(null);
   const stops = useRef<(() => void)[]>([]);
@@ -63,20 +66,24 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
     const id = openId.current;
     if (id === null || finishing.current) return;
     openId.current = null;
-    api(`speaking/sessions/${id}/abandon/`, "POST").catch(() => {});
+    // Seul le temps déjà compté par le chrono est décompté : un examinateur qui n’a jamais pu commencer ne coûte rien.
+    const seconds = startedAt.current ? Math.round((Date.now() - startedAt.current) / 1000) : 0;
+    api(`speaking/sessions/${id}/abandon/`, "POST", { seconds }).catch(() => {});
   }, []);
   useEffect(() => () => { abandon(); release(); exitFullscreen(); }, [abandon, release]);
 
   const fail = useCallback((message: string) => { abandon(); release(); setError(message); setPhase("error"); }, [abandon, release]);
 
-  const finish = useCallback(async () => {
+  // `cut` : la connexion a été coupée en cours d’échange ; ce qui a été dit est gardé, sans phrase d’au revoir.
+  const finish = useCallback(async (cut = false) => {
     if (finishing.current || !session) return;
     finishing.current = true;
     openId.current = null;
     // Le chrono s’arrête maintenant : la phrase de fin de l’examinateur n’est pas comptée.
     const seconds = startedAt.current ? Math.min(session.seconds, Math.round((Date.now() - startedAt.current) / 1000)) : 0;
     setPhase("closing");
-    await connection.current?.conclude(task.number === 2 ? ROLEPLAY_CLOSING_SENTENCE : CLOSING_SENTENCE).catch(() => {});
+    setCutShort(cut);
+    if (!cut) await connection.current?.conclude(task.number === 2 ? ROLEPLAY_CLOSING_SENTENCE : CLOSING_SENTENCE).catch(() => {});
     release();
     const transcript = turnsRef.current.filter(t => t.text).map(t => ({ role: t.role, text: t.text.slice(0, 4000) })).slice(0, 400);
     try {
@@ -90,6 +97,8 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
     exitFullscreen();
     setPhase("done");
   }, [release, session, task.number]);
+  const finishRef = useRef(finish);
+  useEffect(() => { finishRef.current = finish; }, [finish]);
 
   // Le chrono de l’échange : il part à la première prise de parole du candidat.
   const talking = useRef(false);
@@ -148,12 +157,23 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
       onUsage: (part: Partial<Usage>) => { usage.current = addUsage(usage.current, part); },
       onError: (message: string) => setError(message),
       onRemoteStream: (stream: MediaStream) => { stops.current.push(watchLevel(stream, value => setLevel(l => ({ ...l, examiner: value })))); },
+      // Connexion coupée : si le candidat a déjà parlé, ce qu’il a dit est gardé et corrigé ; sinon rien n’est décompté.
+      onLost: () => {
+        if (finishing.current) return;
+        if (startedAt.current) finishRef.current(true);
+        else fail(`La connexion avec l’examinateur a été coupée. ${NOT_COUNTED}`);
+      },
     };
     try {
       connection.current = opened.demo ? connectDemo(task.number, mic, handlers, prep) : await connectRealtime(opened, mic, handlers);
     } catch (e) {
       return fail((e as Error).message);
     }
+    // L’examinateur ne commence pas (fournisseur lent ou réseau) : on arrête plutôt que de laisser le candidat attendre.
+    const opening = setTimeout(() => {
+      if (!examinerSpoke.current && !finishing.current) fail(`L’examinateur n’a pas pu commencer l’épreuve. ${NOT_COUNTED}`);
+    }, OPENING_TIMEOUT_MS);
+    stops.current.push(() => clearTimeout(opening));
     stops.current.push(watchLevel(mic, value => setLevel(l => ({ ...l, mic: value }))));
     if (!prep) return startTalking(opened);
     // Le candidat ne parle pas pendant la lecture du sujet ni pendant la préparation.
@@ -230,7 +250,7 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
     setError(""); setTurns([]); turnsRef.current = []; usage.current = emptyUsage();
     finishing.current = false; startedAt.current = 0; setCounting(false);
     talking.current = false; examinerSpoke.current = false; nudge.current = undefined;
-    setSession(null); setSummary(null); setPhase("intro");
+    setSession(null); setSummary(null); setCutShort(false); setPhase("intro");
   }
 
   // Une seule scène pour toutes les étapes : orbe et chronomètre, état, message, consigne, commandes.
@@ -246,7 +266,7 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
       message: latest?.text ?? "L’examinateur va prendre la parole.",
     },
     closing: { pill: "L’examinateur conclut", who: "L’examinateur", message: latest?.text ?? "L’examinateur conclut l’épreuve…" },
-    done: { pill: "Tâche terminée", tone: "mint", who: "Bilan", message: `Durée de parole comptée : ${formatDuration(summary?.seconds ?? 0)}${summary && summary.secondsLeft >= 0 ? `. Il vous reste ${Math.floor(summary.secondsLeft / 60)} min d’oral aujourd’hui.` : "."} Votre correction est prête à être calculée : note sur 20, niveau, NCLC et conseils.` },
+    done: { pill: "Tâche terminée", tone: "mint", who: "Bilan", message: `${cutShort ? "La connexion avec l’examinateur a été coupée avant la fin : ce que vous avez dit est enregistré. " : ""}Durée de parole comptée : ${formatDuration(summary?.seconds ?? 0)}${summary && summary.secondsLeft >= 0 ? `. Il vous reste ${Math.floor(summary.secondsLeft / 60)} min d’oral aujourd’hui.` : "."} Votre correction est prête à être calculée : note sur 20, niveau, NCLC et conseils.` },
     error: { pill: "Problème", tone: "danger", who: "Fluentia", message: error },
   }[phase];
   const showTranscript = phase === "done" || (transcript && inSession);
@@ -337,7 +357,7 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
           {(phase === "live" || phase === "connecting" || phase === "briefing" || phase === "closing") && <>
             <Button variant="secondary" aria-pressed={muted} disabled={phase !== "live"} onClick={toggleMute}><Icon name={muted ? "volume" : "mic"} size={16} />{muted ? "Rétablir mon micro" : "Couper mon micro"}</Button>
             <Button variant="secondary" className="oral-toggle" aria-pressed={transcript} onClick={() => setTranscript(value => !value)}><Icon name="copy" size={16} />Transcription</Button>
-            <Button disabled={phase !== "live"} onClick={finish}>Terminer la tâche<Icon name="arrow" size={16} /></Button>
+            <Button disabled={phase !== "live"} onClick={() => finish()}>Terminer la tâche<Icon name="arrow" size={16} /></Button>
           </>}
           {phase === "done" && <>
             <Button variant="secondary" onClick={restart}><Icon name="refresh" size={16} />Refaire la tâche</Button>

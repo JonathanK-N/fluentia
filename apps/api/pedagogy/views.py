@@ -57,6 +57,7 @@ from .serializers import (
     SpeakingSessionSerializer,
     SpeakingFinishSerializer,
     SpeakingFinishedSerializer,
+    SpeakingAbandonSerializer,
 )
 from .services import (
     create_item,
@@ -620,21 +621,26 @@ class SpeakingAbandonView(SecureView):
     """Séance quittée sans être terminée (connexion échouée, page fermée) : pas de correction.
 
     Abandonnée dans les premières secondes, elle n’a presque rien coûté : elle ne compte ni dans le quota ni
-    comme essai gratuit. Plus tard, le temps écoulé est compté, pour qu’on ne puisse pas parler puis se
-    faire rembourser ses minutes en quittant la page."""
+    comme essai gratuit. Plus tard, le temps de parole déjà compté par le chrono est décompté (ou, sans lui,
+    le temps écoulé), pour qu’on ne puisse pas parler puis se faire rembourser ses minutes en quittant la page.
+    Une séance où l’examinateur n’a jamais pu commencer (chrono à zéro) ne coûte donc rien."""
 
     permission_classes = [IsAuthenticated]
     throttle_classes = []
     FREE_SECONDS = 20
 
-    @extend_schema(request=None, responses=SpeakingFinishedSerializer)
+    @extend_schema(request=SpeakingAbandonSerializer, responses=SpeakingFinishedSerializer)
     def post(self, request, session_id):
+        body = SpeakingAbandonSerializer(data=request.data or {})
+        body.is_valid(raise_exception=True)
         with transaction.atomic():
             saved = get_object_or_404(SpeakingSession.objects.select_for_update(), pk=session_id, user=request.user)
             if saved.status not in (SpeakingSession.Status.PENDING, SpeakingSession.Status.LIVE):
                 return Response({"detail": "Cette session est déjà terminée."}, status=409)
             now = timezone.now()
             elapsed = max(0, int((now - saved.started_at).total_seconds()))
+            if "seconds" in body.validated_data:
+                elapsed = min(elapsed, body.validated_data["seconds"])
             saved.ended_at = now
             if elapsed <= self.FREE_SECONDS:
                 saved.status = SpeakingSession.Status.FAILED

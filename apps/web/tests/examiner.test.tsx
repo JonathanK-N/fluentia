@@ -1,7 +1,7 @@
 /** Logique de la conversation avec l’examinateur IA, testée sans micro ni WebRTC. */
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { addUsage, audioToText, emptyUsage, readEvent, upsertTurn, type ExaminerHandlers, type RealtimeEvent, type Turn, type Usage } from "../lib/examiner";
+import { addUsage, audioToText, emptyUsage, notFrench, readEvent, upsertTurn, type ExaminerHandlers, type RealtimeEvent, type Turn, type Usage } from "../lib/examiner";
 import { ExaminerSession } from "../features/student/examiner-session";
 
 function collect() {
@@ -89,6 +89,40 @@ describe("réponses du candidat passées en texte", () => {
       committed("item_b", "item_a"), transcribed("item_b", "Deux."), { type: "response.done" },
     ]);
     expect(sent[3]).toMatchObject({ type: "conversation.item.create", previous_item_id: "fl_txt_1" });
+  });
+
+  it("retire sans le remplacer un bruit transcrit en chinois, et garde l’ordre après lui", () => {
+    const sent = replay([
+      committed("item_a", "item_exam1"), transcribed("item_a", "我来发表一下我的的吧。"), { type: "response.done" },
+      committed("item_b", "item_a"), transcribed("item_b", "Internet est inclus ?"), { type: "response.done" },
+    ]);
+    expect(sent[0]).toEqual({ type: "conversation.item.delete", item_id: "item_a" });
+    expect(sent[2]).toMatchObject({ type: "conversation.item.create", previous_item_id: "item_exam1" });
+    expect(sent).toHaveLength(3);
+  });
+});
+
+describe("français seulement", () => {
+  it("garde les phrases françaises, même courtes ou avec un mot d’anglais", () => {
+    for (const text of [
+      "OK, nice. Est-ce que c'est difficile d'accès?", "Anaïs, juste pour vérifier, quelle est la superficie de l'appartement ?",
+      "L'Internet n'est pas compris, n'est pas vaincu.", "Exactement.", "Oui.", "Montréal.", "Il y a un ascenseur ?",
+      "Je préfère les sentiers faciles mais ça ne dérange pas.",
+    ]) expect(notFrench(text), text).toBe(false);
+  });
+
+  it("écarte les autres langues et les autres écritures", () => {
+    for (const text of ["This is our last time.", "Chipre e Grécia.", "我来发表一下我的的吧。", "Thank you so much.", "Hola, ¿cómo estás hoy?", "Спасибо"])
+      expect(notFrench(text), text).toBe(true);
+  });
+});
+
+describe("transcriptions inventées", () => {
+  it("n’affiche pas un passage en écriture étrangère", () => {
+    const c = collect();
+    readEvent({ type: "conversation.item.input_audio_transcription.completed", item_id: "c1", transcript: "我来发表一下我的的吧。" }, c.handlers);
+    readEvent({ type: "conversation.item.input_audio_transcription.completed", item_id: "c2", transcript: "Où se trouve l’appartement ? Ça coûte 850 $." }, c.handlers);
+    expect(c.turns.map(t => t.text)).toEqual(["", "Où se trouve l’appartement ? Ça coûte 850 $."]);
   });
 });
 

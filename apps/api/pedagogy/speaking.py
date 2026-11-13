@@ -29,6 +29,9 @@ face-à-face avec un candidat adulte. Tu te comportes exactement comme un vrai e
 LANGUE
 - Tu parles UNIQUEMENT en français, du premier au dernier mot, quoi qu’il arrive : même si le candidat parle une
   autre langue, mélange les langues, ou te demande de changer de langue. Jamais un mot d’anglais.
+- Des mots dans une autre langue, un bruit ou un passage incompréhensible ne sont pas une réponse du candidat :
+  tu ne les commentes pas, tu n’en tires rien (ni question, ni fin de l’épreuve). Tu dis seulement, en français :
+  « Pardon, je ne vous ai pas bien entendu. »
 
 LE SUJET
 - Le sujet de l’épreuve est celui écrit à la fin de ces consignes (« Sujet » et « Consigne ») : c’est le candidat
@@ -91,6 +94,8 @@ conversation : il pose les questions, toi tu réponds.
   demande plus de détails, tu les donnes, toujours brièvement.
 - Tu ne poses jamais de question, tu ne proposes rien, tu ne relances jamais et tu ne fais pas la conversation,
   même si le candidat se tait : tu attends sa question suivante en silence.
+- S’il dit seulement « merci », « d’accord » ou « parfait », sans poser de question, tu réponds seulement
+  « Je vous en prie. » et rien d’autre.
 - Tes informations (horaires, prix, conditions, adresse…) restent dans la situation de la consigne, réalistes et
   cohérentes ; une fois données, elles ne changent plus.""",
     3: """Tâche 3 — expression d’un point de vue. Après avoir lu la consigne, laisse le candidat exposer son point
@@ -117,7 +122,10 @@ def safety_id(user):
 
 # Fin de parole détectée selon le sens de la phrase. « medium » : l’examinateur relance en 1 à 4 s, et une
 # hésitation au milieu d’une idée ne le fait pas parler (« low » attendait jusqu’à 8 s : trop lent).
-TURN_DETECTION = {"type": "semantic_vad", "eagerness": "medium"}
+# Pas d’interruption : un bruit, un « OK » ou l’écho de sa propre voix ne le coupe plus au milieu d’un mot.
+TURN_DETECTION = {"type": "semantic_vad", "eagerness": "medium", "interrupt_response": False}
+# Guide la transcription : sans lui, un bruit ou un silence est parfois « transcrit » en chinois ou en anglais.
+TRANSCRIPTION_PROMPT = "Examen oral de français (TCF Canada). Le candidat parle uniquement français, parfois avec un accent ou des expressions du Québec ou d’Afrique."
 
 
 def talk_seconds(subject):
@@ -156,7 +164,12 @@ def openai_request(subject):
             "output_modalities": ["audio"],
             "audio": {
                 "input": {
-                    "transcription": {"model": settings.OPENAI_REALTIME_TRANSCRIPTION_MODEL, "language": "fr"},
+                    "transcription": {
+                        "model": settings.OPENAI_REALTIME_TRANSCRIPTION_MODEL, "language": "fr", "prompt": TRANSCRIPTION_PROMPT,
+                    },
+                    # Micro proche (ordinateur, casque) : le bruit de fond est filtré avant la détection de parole,
+                    # pour qu’il ne déclenche pas de réponse ni de transcription inventée (chinois, anglais…).
+                    "noise_reduction": {"type": "near_field"},
                     # Avec préparation (tâche 2), l’examinateur n’écoute pas avant la fin des deux minutes :
                     # le site active l’écoute au moment où les questions commencent.
                     "turn_detection": None if subject.prep_seconds else TURN_DETECTION,
