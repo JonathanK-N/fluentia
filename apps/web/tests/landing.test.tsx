@@ -1,62 +1,35 @@
-/** Régressions de la démo, sans audio/IA. Propriétaire : Jonathan Kakesa. */
-import { expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { VoiceDemo } from "../features/landing/voice-demo";
-import { CoachDemo } from "../features/landing/coach-demo";
-vi.mock("../features/landing/orb", () => ({
-  VoiceOrb: () => <div aria-hidden="true" />,
-}));
-it("conserve l’étape Voice lors d’une pause, gère erreur et redémarrage", async () => {
-  const user = userEvent.setup();
-  render(<VoiceDemo />);
-  await user.click(screen.getByRole("button", { name: /Lancer la démo/ }));
-  expect(screen.getByRole("status")).toHaveAttribute(
-    "data-voice-state",
-    "listening",
-  );
-  await user.click(screen.getByRole("button", { name: /Étape suivante/ }));
-  await user.click(screen.getByRole("button", { name: "Mettre en pause" }));
-  expect(screen.getByRole("status")).toHaveAttribute(
-    "data-voice-state",
-    "paused",
-  );
-  await user.click(screen.getByRole("button", { name: "Reprendre la démo" }));
-  expect(screen.getByRole("status")).toHaveAttribute(
-    "data-voice-state",
-    "analysis",
-  );
-  await user.click(screen.getByRole("button", { name: "Simuler une erreur" }));
-  expect(screen.getByRole("status")).toHaveAttribute(
-    "data-voice-state",
-    "error",
-  );
-  await user.click(screen.getByRole("button", { name: /Réessayer/ }));
-  await user.click(screen.getByRole("button", { name: "Terminer la démo" }));
-  expect(screen.getByRole("button", { name: /Recommencer/ })).toHaveFocus();
-  await user.click(screen.getByRole("button", { name: /Recommencer/ }));
-  expect(screen.getByRole("status")).toHaveAttribute(
-    "data-voice-state",
-    "listening",
-  );
+/** Accueil : aperçu animé de l’oral et contenus clés. Propriétaire : Jonathan Kakesa. */
+import { afterEach, expect, it, vi } from "vitest";
+import { act, render, screen, within } from "@testing-library/react";
+import Home from "../app/page";
+import { SessionPreview } from "../features/landing/session-preview";
+import { sampleConversation } from "../features/landing/content";
+
+vi.mock("../features/landing/home.css", () => ({}));
+vi.mock("../components/animations/reveal", () => ({ Reveal: ({ children }: { children: React.ReactNode }) => children }));
+afterEach(() => vi.useRealTimers());
+
+it("fait défiler l’exemple d’échange puis recommence", () => {
+  vi.useFakeTimers();
+  render(<SessionPreview />);
+  const lines = () => within(screen.getByRole("list", { name: /Exemple d’échange/ })).getAllByRole("listitem");
+  expect(lines()).toHaveLength(1);
+  act(() => vi.advanceTimersByTime(3400 * (sampleConversation.length - 1)));
+  expect(lines()).toHaveLength(sampleConversation.length);
+  act(() => vi.advanceTimersByTime(3400 * 2));
+  expect(lines()).toHaveLength(1);
 });
-it("termine la séquence manuelle et conserve le focus du bouton principal", async () => {
-  const user = userEvent.setup();
-  render(<VoiceDemo />);
-  await user.click(screen.getByRole("button", { name: /Lancer/ }));
-  for (let i = 0; i < 3; i++)
-    await user.click(screen.getByRole("button", { name: /Étape suivante/ }));
-  expect(screen.getByRole("status")).toHaveAttribute(
-    "data-voice-state",
-    "ended",
-  );
-  expect(screen.getByRole("button", { name: /Recommencer/ })).toHaveFocus();
-});
-it("révèle puis réinitialise un conseil explicitement prédéfini", async () => {
-  const user = userEvent.setup();
-  render(<CoachDemo />);
-  await user.click(screen.getByRole("button", { name: /Voir le conseil/ }));
-  expect(screen.getByRole("status")).toHaveTextContent("Retour prédéfini");
-  await user.click(screen.getByRole("button", { name: /Revoir la phrase/ }));
-  expect(screen.getByRole("status")).not.toHaveTextContent("Retour prédéfini");
+
+it("présente les quatre épreuves, les deux offres et des liens d’inscription réels", () => {
+  render(<Home />);
+  expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Préparez le TCF Canada");
+  for (const title of ["Compréhension orale", "Compréhension écrite", "Expression écrite", "Expression orale"])
+    expect(screen.getByRole("heading", { level: 3, name: title })).toBeInTheDocument();
+  expect(screen.getByText("19,99 $")).toBeInTheDocument();
+  expect(screen.getByText("0 $", { selector: ".plan-price strong" })).toBeInTheDocument();
+  const signups = screen.getAllByRole("link", { name: /Créer mon compte gratuit/ });
+  expect(signups.length).toBeGreaterThan(1);
+  for (const link of signups) expect(link).toHaveAttribute("href", "/etudiant/compte#inscription");
+  expect(screen.getByRole("link", { name: "Passer à Premium" }).getAttribute("href")).toMatch(/^mailto:support@fluentia\.ca/);
+  expect(screen.queryByText(/en développement|à confirmer|en préparation/i)).toBeNull();
 });

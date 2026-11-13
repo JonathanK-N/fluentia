@@ -1,10 +1,11 @@
 "use client";
 /** Sujets de Rédaction et d’Oral, lus dans le jeu actif publié depuis l’espace éditorial. */
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Icon } from "../../components/app-shell/icons";
 import { api } from "../../lib/student-api";
-import { formatDuration, type SpeakingTask, type WritingTask } from "./content";
+import { formatDuration, readDraft, type SpeakingTask, type WritingTask } from "./content";
 import { SpeakingStudio } from "./speaking-studio";
 import { WritingStudio } from "./writing-studio";
 
@@ -45,14 +46,54 @@ export function TaskCards({ kind }: { kind: Kind }) {
   </section>;
 }
 
-export function TaskStudio({ kind, slug }: { kind: Kind; slug: string }) {
+export function TaskStudio(props: { kind: Kind; slug: string }) {
+  // L’adresse (?sujet=…) choisit l’écran : il faut une frontière Suspense pour la lire côté client.
+  return <Suspense fallback={<p className="student-hint">Chargement du sujet…</p>}><TaskEntry {...props} /></Suspense>;
+}
+
+function TaskEntry({ kind, slug }: { kind: Kind; slug: string }) {
   const { data, error } = useTasks(kind);
+  const chosen = Number(useSearchParams().get("sujet"));
   if (error) return <p role="alert">{error}</p>;
   if (!data) return <p className="student-hint">Chargement du sujet…</p>;
   const task = data.tasks.find(t => t.slug === slug);
   if (!task) return <div className="empty-block"><h3>Cette tâche n’a pas encore de sujet</h3><p><Link href={base(kind)}>Revenir à l’épreuve</Link></p></div>;
   const others = data.tasks.filter(t => t.slug !== slug).map(t => ({ slug: t.slug, number: t.number, title: t.title }));
+  const index = task.subjects.findIndex(item => item.id === chosen);
+  if (index < 0) return <SubjectPicker kind={kind} task={task} />;
   return kind === "writing"
-    ? <WritingStudio key={task.slug} task={task as WritingTask} others={others} corrector={data.corrector ?? ""} />
-    : <SpeakingStudio key={task.slug} task={task as SpeakingTask} others={others} examiner={data.examiner ?? ""} />;
+    ? <WritingStudio key={`${task.slug}-${index}`} task={task as WritingTask} subject={index} others={others} corrector={data.corrector ?? ""} />
+    : <SpeakingStudio key={`${task.slug}-${index}`} task={task as SpeakingTask} subject={index} others={others} examiner={data.examiner ?? ""} />;
+}
+
+/** Première étape d’une tâche : choisir son sujet, puis commencer. */
+function SubjectPicker({ kind, task }: { kind: Kind; task: WritingTask | SpeakingTask }) {
+  const writing = kind === "writing";
+  const facts = writing
+    ? `Entre ${(task as WritingTask).min} et ${(task as WritingTask).max} mots, environ ${(task as WritingTask).minutes} minutes conseillées.`
+    : `Durée : ${formatDuration((task as SpeakingTask).seconds)}${(task as SpeakingTask).prepSeconds ? `, précédée de ${(task as SpeakingTask).prepSeconds / 60} minutes de préparation` : ", sans préparation"}.`;
+  const [drafts, setDrafts] = useState<boolean[]>([]);
+  useEffect(() => { if (writing) setDrafts(task.subjects.map((_, index) => Boolean(readDraft(task.slug, index).trim()))); }, [writing, task]);
+  return <>
+    <div className="home-top home-top-single">
+      <section className="hero-card" aria-labelledby="tache-titre">
+        <span className="hero-chip-row"><span className="hero-chip">Tâche {task.number}</span><span>{writing ? "Rédaction · Expression écrite" : "Oral · Expression orale"}</span></span>
+        <h1 id="tache-titre" className="epreuve-title"><Icon name={writing ? "pen" : "mic"} size={30} />{task.title}</h1>
+        <p>{writing ? `${(task as WritingTask).genre}. ` : `${(task as SpeakingTask).goal} `}{facts}</p>
+      </section>
+    </div>
+    <div className="section-title"><h2>Choisissez votre sujet</h2><span className="student-hint">{task.subjects.length} sujet{task.subjects.length > 1 ? "s" : ""}</span></div>
+    <ol className="subject-list">
+      {task.subjects.map((item, index) => <li key={item.id ?? item.title} className="subject-row">
+        <span className="subject-number" aria-hidden="true">{index + 1}</span>
+        <div className="subject-text">
+          <h3>{item.title}{drafts[index] && <span className="subject-badge">Brouillon en cours</span>}</h3>
+          <p>{item.prompt}</p>
+        </div>
+        <Link className="button button-primary tile-link" href={`${base(kind)}/${task.slug}?sujet=${item.id}`}>
+          {drafts[index] ? "Reprendre" : "Commencer"}<span className="sr-only"> : {item.title}</span><Icon name="arrow" size={15} />
+        </Link>
+      </li>)}
+    </ol>
+  </>;
 }

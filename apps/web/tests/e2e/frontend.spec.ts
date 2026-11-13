@@ -8,13 +8,6 @@ for (const width of [320, 375, 390, 768, 1024, 1440, 1920]) {
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/");
     await page.evaluate(() => document.fonts.ready);
-    await expect
-      .poll(() =>
-        page
-          .locator(".coach-avatar img")
-          .evaluate((image) => (image as HTMLImageElement).naturalWidth),
-      )
-      .toBeGreaterThan(0);
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     expect(
       await page.evaluate(
@@ -72,9 +65,9 @@ test("thème, menu mobile, mouvement réduit et manifest", async ({
   await page.getByText("Menu", { exact: true }).click();
   await page
     .getByRole("navigation", { name: "Navigation mobile" })
-    .getByRole("link", { name: "Design system" })
+    .getByRole("link", { name: "Tarifs" })
     .click();
-  await expect(page).toHaveURL(/design-system/);
+  await expect(page.locator("#pricing-title")).toBeInViewport();
   expect(
     await page.evaluate(
       () => getComputedStyle(document.documentElement).scrollBehavior,

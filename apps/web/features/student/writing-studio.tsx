@@ -1,5 +1,5 @@
 "use client";
-/** Studio d’expression écrite : brouillon local, compteur, minuteur, auto-évaluation et proposition de réponse ; la correction s’ouvre sur sa propre page. */
+/** Séance de Rédaction, sur le modèle de l’Oral : brouillon local, compteur, minuteur, auto-évaluation et proposition de réponse ; la correction s’ouvre sur sa propre page. */
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -8,8 +8,9 @@ import { Button } from "../../components/ui/primitives";
 import { Icon } from "../../components/app-shell/icons";
 import { api, type ModelAnswer } from "../../lib/student-api";
 import { useSession } from "../../lib/session";
-import { countWords, formatDuration, type WritingTask } from "./content";
+import { countWords, draftKey as subjectDraftKey, sentTo, type WritingTask } from "./content";
 import { FoldableAside } from "./foldable-aside";
+import { Ring, SeanceBar, SeanceHead, Timer } from "./seance";
 
 const criteria = ["J’ai respecté le type de texte et le destinataire.", "J’ai traité tous les points de la consigne.", "Mes idées sont organisées avec des connecteurs.", "J’ai varié le vocabulaire et évité les répétitions.", "J’ai relu l’accord, la conjugaison et la ponctuation."];
 
@@ -17,18 +18,19 @@ const MIN_WORDS = 20;
 
 function read(key: string) { try { return localStorage.getItem(key) ?? ""; } catch { return ""; } }
 function write(key: string, value: string) { try { localStorage.setItem(key, value); return true; } catch { return false; } }
-const draftKey = (task: WritingTask, subject: number) => `fluentia-ee-${task.slug}-${subject}`;
-// « Réessayer » et « Sujet suivant » ouvrent la tâche sur un sujet précis : ?sujet=<id>.
-// Avec &vide=1, le brouillon est effacé pour repartir d’une page blanche ; le paramètre est retiré de l’adresse.
-function requestedSubject(task: WritingTask) {
-  const params = new URLSearchParams(window.location.search);
-  const index = Math.max(0, task.subjects.findIndex(item => item.id === Number(params.get("sujet"))));
-  if (params.has("vide")) write(draftKey(task, index), "");
-  return index;
+const draftKey = (task: WritingTask, subject: number) => subjectDraftKey(task.slug, subject);
+// Le sujet est choisi dans la liste de la tâche et arrive par l’adresse : ?sujet=<id>.
+// Avec &vide=1 (« Réessayer »), le brouillon est effacé pour repartir d’une page blanche ; le paramètre est retiré de l’adresse.
+function clearIfRequested(task: WritingTask, subject: number) {
+  if (new URLSearchParams(window.location.search).has("vide")) write(draftKey(task, subject), "");
+  return subject;
 }
 
-export function WritingStudio({ task, others, corrector }: { task: WritingTask; others: { slug: string; number: number; title: string }[]; corrector: string }) {
-  const [subject, setSubject] = useState(() => requestedSubject(task));
+export function WritingStudio({ task, subject: chosen, others = [], corrector }: { task: WritingTask; subject: number; others?: { slug: string; number: number; title: string }[]; corrector: string }) {
+  // D’abord la page du sujet ; « Commencer » ouvre la séance plein écran.
+  const [started, setStarted] = useState(false);
+  const [menu, setMenu] = useState(false);
+  const [subject] = useState(() => clearIfRequested(task, chosen));
   const router = useRouter();
   // Après l’affichage (pas pendant) : modifier l’adresse en plein rendu dérange le routeur de Next.
   useEffect(() => {
@@ -93,51 +95,132 @@ export function WritingStudio({ task, others, corrector }: { task: WritingTask; 
     setChecks(criteria.map(() => false)); setRunning(false); setRemaining(task.minutes * 60);
     setRestarting(false);
   }
-  return <>
+  // Séance plein écran, comme l’Oral, la Lecture et l’Écoute : le menu du site est masqué.
+  useEffect(() => {
+    if (!started) return;
+    document.documentElement.dataset.examFocus = "";
+    window.scrollTo(0, 0);
+    return () => { delete document.documentElement.dataset.examFocus; delete document.documentElement.dataset.examMenu; };
+  }, [started]);
+  useEffect(() => {
+    if (menu) document.documentElement.dataset.examMenu = "";
+    else delete document.documentElement.dataset.examMenu;
+  }, [menu]);
+  const list = `/etudiant/expression-ecrite/${task.slug}`;
+  const total = task.minutes * 60;
+  const done = checks.filter(Boolean).length;
+  const tone = !words ? undefined : status === "Dans la cible" ? "mint" : "warn";
+
+  if (!started) return <>
     <div className="home-top">
       <section className="hero-card" aria-labelledby="tache-titre">
         <span className="hero-chip-row"><span className="hero-chip">Tâche {task.number}</span><span>Rédaction · Expression écrite</span></span>
         <h1 id="tache-titre" className="epreuve-title"><Icon name="pen" size={30} />{task.title}</h1>
         <p>{task.genre}. Entre {task.min} et {task.max} mots, environ {task.minutes} minutes conseillées.</p>
       </section>
-      <section className="status-card studio-timer" aria-labelledby="minuteur">
-        <div className="status-head"><h2 id="minuteur" className="badge-warn"><Icon name="clock" size={14} />Minuteur</h2></div>
-        <p className="studio-timer-value" aria-live="off">{formatDuration(remaining)}</p>
-        <p className="status-text">{remaining === 0 ? "Temps conseillé écoulé. Terminez votre relecture." : `${task.minutes} minutes conseillées pour cette tâche.`}</p>
-        <div className="studio-timer-actions">
-          <Button onClick={() => setRunning(value => !value)} disabled={remaining === 0}><Icon name={running ? "pause" : "play"} size={14} />{running ? "Pause" : "Démarrer"}</Button>
-          <Button variant="secondary" onClick={() => { setRunning(false); setRemaining(task.minutes * 60); }}><Icon name="refresh" size={14} />Réinitialiser</Button>
-        </div>
+      <section className="status-card" aria-labelledby="bon-a-savoir">
+        <div className="status-head"><h2 id="bon-a-savoir" className="badge-warn"><Icon name="clock" size={14} />Bon à savoir</h2></div>
+        <p className="status-text notice-text">Votre brouillon est enregistré sur cet appareil. {corrector ? `Quand vous demandez une correction, votre texte est envoyé ${sentTo(corrector)} pour être corrigé automatiquement.` : "La correction automatique n’est pas disponible pour le moment."}</p>
       </section>
     </div>
-    <div className="section-title"><h2>Votre sujet</h2>
-      {task.subjects.length > 1 && <div className="series-filter" role="group" aria-label="Choisir un sujet">
-        {task.subjects.map((item, index) => <button key={item.title} type="button" aria-pressed={subject === index} onClick={() => setSubject(index)}>{item.title}</button>)}
-      </div>}
+    <div className="section-title"><h2>Sujet {subject + 1} · {current.title}</h2>
+      <Link className="subject-change" href={list}><Icon name="back" size={14} />Changer de sujet</Link>
     </div>
     <div className="studio">
-      <section className="student-card studio-main" aria-labelledby="consigne">
-        <div className="prompt-card">
-          <h2 id="consigne" className="student-eyebrow">Consigne</h2>
+      <div style={{ display: "grid", gap: "1rem" }}>
+        <section className="prompt-card" aria-labelledby="sujet">
+          <h2 id="sujet" className="student-eyebrow">Consigne</h2>
           <p>{current.prompt}</p>
-          {current.documents && <div className="student-grid" style={{ marginTop: "1rem" }}>{current.documents.map(doc => <article key={doc.label} className="student-card" style={{ margin: 0 }}><h3>{doc.label}</h3><p>{doc.text}</p></article>)}</div>}
+          {current.documents && <div className="writing-documents">{current.documents.map(doc => <article key={doc.label}><h3>{doc.label}</h3><p>{doc.text}</p></article>)}</div>}
+          <div className="pill-row" style={{ marginTop: ".9rem" }}><span className="pill">{task.min}–{task.max} mots</span><span className="pill">{task.minutes} min conseillées</span></div>
+        </section>
+        <section className="examiner-launch" aria-labelledby="lancer">
+          <div>
+            <h2 id="lancer">{text ? "Reprendre votre texte" : "Rédiger ce sujet"}</h2>
+            <p>{text ? `Votre brouillon de ${words} mot${words > 1 ? "s" : ""} vous attend.` : "En plein écran, avec le compteur de mots et le minuteur."}</p>
+          </div>
+          <Button onClick={() => setStarted(true)}><Icon name="pen" size={18} />{text ? "Reprendre" : "Commencer"}</Button>
+        </section>
+      </div>
+      <FoldableAside className="studio-aside" label="Repères pour la rédaction" tab="Repères">
+        <section className="student-card card-muted" aria-labelledby="conseils">
+          <div className="studio-card-head"><h2 id="conseils">Conseils</h2></div>
+          <ul className="checklist">{task.advice.map(item => <li key={item}>{item}</li>)}</ul>
+        </section>
+        <nav className="student-card" aria-labelledby="autres-taches">
+          <div className="studio-card-head"><h2 id="autres-taches">Autres tâches</h2></div>
+          <ul className="activity-list">{others.map(t => <li key={t.slug}><Link href={`/etudiant/expression-ecrite/${t.slug}`}>Tâche {t.number} — {t.title}</Link><Icon name="chevron" size={16} /></li>)}</ul>
+        </nav>
+      </FoldableAside>
+    </div>
+  </>;
+
+  return <div className="seance">
+    <SeanceBar label="Rédaction" menuOpen={menu} onMenu={() => setMenu(value => !value)}>
+      <button type="button" className="seance-quit" onClick={() => { setRunning(false); setMenu(false); setStarted(false); }}><Icon name="close" size={14} />Quitter la séance</button>
+    </SeanceBar>
+    <div className="seance-body oral-body writing-body">
+      <SeanceHead
+        chips={[{ label: "Épreuve 03" }, { label: "Entraînement non officiel", tone: "warn" }]}
+        title={current.title}
+        subtitle={`${task.title} · ${task.genre} · entre ${task.min} et ${task.max} mots`}
+        current={task.number}
+      />
+
+      <section className="oral-card oral-card-wide" aria-labelledby="seance-title">
+        <div className="oral-visual">
+          <div className="oral-orb-wrap">
+            <Ring label="Mots" value={String(words)} caption={`cible ${task.min}–${task.max}`} progress={words / task.max} ariaLabel={`${words} mots sur une cible de ${task.min} à ${task.max}`} />
+            <p className="oral-pill" data-tone={tone} aria-live="polite"><span aria-hidden="true" />{status || "Commencez à écrire"}</p>
+          </div>
+          <div className="oral-orb-wrap">
+            <Timer left={remaining} progress={remaining / total} label={remaining === 0 ? "Terminé" : "Minuteur"} total={total} />
+            <div className="writing-timer-actions">
+              <Button variant="secondary" onClick={() => setRunning(value => !value)} disabled={remaining === 0}><Icon name={running ? "pause" : "play"} size={14} />{running ? "Pause" : "Démarrer"}</Button>
+              <Button variant="ghost" aria-label="Réinitialiser le minuteur" onClick={() => { setRunning(false); setRemaining(total); }}><Icon name="refresh" size={14} /></Button>
+            </div>
+          </div>
         </div>
-        <label htmlFor="redaction" className="sr-only">Votre texte</label>
-        <textarea id="redaction" className="writing-area" value={text} onChange={e => setText(e.target.value)} placeholder="Rédigez votre texte ici…" spellCheck={false} aria-describedby="compteur" />
-        <div className="word-meter" id="compteur">
-          <span><strong>{words}</strong> mots · cible {task.min}–{task.max}</span>
-          {status && <span className={`pill ${status === "Dans la cible" ? "pill-success" : "pill-warning"}`}>{status}</span>}
-          <span className="student-hint" aria-live="polite">{saved}</span>
+
+        <div className="oral-message">
+          <span className="oral-message-icon" aria-hidden="true"><Icon name="pen" size={16} /></span>
+          <div>
+            <small>Consigne · sujet {subject + 1}</small>
+            <p>{current.prompt}</p>
+            {current.documents && <div className="writing-documents">{current.documents.map(doc => <article key={doc.label}><h3>{doc.label}</h3><p>{doc.text}</p></article>)}</div>}
+          </div>
         </div>
-        <div className="correction-ask">
-          {ready && !profile
-            ? <Link className="button button-primary tile-link" href="/etudiant/compte">Se connecter pour faire corriger<Icon name="arrow" size={15} /></Link>
-            : <>
-              <Button loading={correcting} disabled={!ready || !corrector || !current.id || words < MIN_WORDS} onClick={requestCorrection}><Icon name="spark" size={15} />Corriger mon texte</Button>
-              <Button variant="secondary" loading={answering} disabled={!ready || !corrector || !current.id} aria-expanded={showAnswer} onClick={toggleAnswer}><Icon name="book" size={15} />{showAnswer ? "Masquer la proposition" : "Proposition de réponse"}</Button>
-            </>}
+
+        <div className="writing-field">
+          <label htmlFor="redaction" className="sr-only">Votre texte</label>
+          <textarea id="redaction" className="writing-area" value={text} onChange={e => setText(e.target.value)} placeholder="Rédigez votre texte ici…" spellCheck={false} aria-describedby="compteur" />
+          <p className="student-hint" id="compteur" aria-live="polite">{words} mot{words > 1 ? "s" : ""} · cible {task.min}–{task.max}{saved ? ` · ${saved}` : ""}</p>
+        </div>
+
+        <details className="oral-consigne">
+          <summary><Icon name="chevron" size={14} />Auto-évaluation <span className="pill">{done} / {criteria.length}</span></summary>
+          <ul className="checklist">{criteria.map((label, index) => <li key={label}><label><input type="checkbox" checked={checks[index]} onChange={e => setChecks(values => values.map((v, i) => i === index ? e.target.checked : v))} />{label}</label></li>)}</ul>
+        </details>
+        <details className="oral-consigne">
+          <summary><Icon name="chevron" size={14} />Conseils pour cette tâche</summary>
+          <ul className="checklist">{task.advice.map(item => <li key={item}>{item}</li>)}</ul>
+        </details>
+
+        {showAnswer && answer && <section className="oral-message writing-answer" aria-labelledby="proposition-titre">
+          <span className="oral-message-icon" aria-hidden="true"><Icon name="book" size={16} /></span>
+          <div>
+            <small id="proposition-titre">Proposition de réponse · {answer.words} mots{answer.demo ? " · démonstration" : ""}</small>
+            <p>{answer.text}</p>
+            <p className="student-hint">{answer.demo ? "Exemple de démonstration pour ce type de tâche : la vraie IA rédigera une réponse propre à ce sujet. " : ""}Inspirez-vous de la structure et des connecteurs, puis rédigez avec vos propres mots.</p>
+          </div>
+        </section>}
+
+        {(correcting || answering) && <p className="student-hint correction-wait" aria-live="polite">{correcting ? "Ouverture de la correction…" : "Rédaction de la proposition en cours…"}</p>}
+        {correctionError && <p role="alert" className="examiner-error">{correctionError}</p>}
+
+        <div className="oral-actions">
           <Dialog.Root open={restarting} onOpenChange={setRestarting}>
-            <Dialog.Trigger asChild><Button variant="secondary" disabled={!text}><Icon name="refresh" size={15} />Recommencer</Button></Dialog.Trigger>
+            <Dialog.Trigger asChild><Button variant="secondary" disabled={!text}><Icon name="refresh" size={16} />Recommencer</Button></Dialog.Trigger>
             <Dialog.Portal>
               <Dialog.Overlay className="dialog-overlay" />
               <Dialog.Content className="dialog-content quit-dialog">
@@ -150,30 +233,15 @@ export function WritingStudio({ task, others, corrector }: { task: WritingTask; 
               </Dialog.Content>
             </Dialog.Portal>
           </Dialog.Root>
-          <p className="student-hint">{words < MIN_WORDS ? `Écrivez au moins ${MIN_WORDS} mots pour demander une correction. ` : ""}{corrector ? `Votre texte est envoyé à ${corrector} pour être corrigé automatiquement.` : "La correction automatique n’est pas disponible pour le moment."}</p>
+          {ready && !profile
+            ? <Link className="button button-primary" href="/etudiant/compte">Se connecter pour faire corriger<Icon name="arrow" size={16} /></Link>
+            : <>
+              <Button variant="secondary" className="oral-toggle" loading={answering} disabled={!ready || !corrector || !current.id} aria-pressed={showAnswer} onClick={toggleAnswer}><Icon name="book" size={16} />Proposition de réponse</Button>
+              <Button loading={correcting} disabled={!ready || !corrector || !current.id || words < MIN_WORDS} onClick={requestCorrection}>Corriger mon texte<Icon name="arrow" size={16} /></Button>
+            </>}
         </div>
-        {(correcting || answering) && <p className="student-hint correction-wait" aria-live="polite">{correcting ? "Ouverture de la correction…" : "Rédaction de la proposition en cours…"}</p>}
-        {correctionError && <p role="alert">{correctionError}</p>}
-        {showAnswer && answer && <section className="correction" aria-labelledby="proposition-titre">
-          <div className="studio-card-head"><h2 id="proposition-titre">Proposition de réponse</h2><span className="pill">{answer.words} mots</span>{answer.demo && <span className="pill pill-warning">Démonstration</span>}</div>
-          <p className="correction-text">{answer.text}</p>
-          <p className="student-hint">{answer.demo ? "Exemple de démonstration pour ce type de tâche : la vraie IA rédigera une réponse propre à ce sujet. " : ""}Inspirez-vous de la structure et des connecteurs, puis rédigez avec vos propres mots.</p>
-        </section>}
+        <p className="student-hint writing-note">{words < MIN_WORDS ? `Écrivez au moins ${MIN_WORDS} mots pour demander une correction. ` : ""}{corrector ? `Votre texte est envoyé ${sentTo(corrector)} pour être corrigé automatiquement.` : "La correction automatique n’est pas disponible pour le moment."} <Link href={list}>Changer de sujet</Link></p>
       </section>
-      <FoldableAside className="studio-aside" label="Outils de rédaction" tab="Outils">
-        <section className="student-card" aria-labelledby="auto-evaluation">
-          <div className="studio-card-head"><h2 id="auto-evaluation">Auto-évaluation</h2><span className="pill">{checks.filter(Boolean).length} / {criteria.length}</span></div>
-          <ul className="checklist">{criteria.map((label, index) => <li key={label}><label><input type="checkbox" checked={checks[index]} onChange={e => setChecks(values => values.map((v, i) => i === index ? e.target.checked : v))} />{label}</label></li>)}</ul>
-        </section>
-        <section className="student-card card-muted" aria-labelledby="conseils">
-          <div className="studio-card-head"><h2 id="conseils">Conseils</h2></div>
-          <ul className="checklist">{task.advice.map(item => <li key={item}>{item}</li>)}</ul>
-        </section>
-        <nav className="student-card" aria-labelledby="autres-taches">
-          <div className="studio-card-head"><h2 id="autres-taches">Autres tâches</h2></div>
-          <ul className="activity-list">{others.map(t => <li key={t.slug}><Link href={`/etudiant/expression-ecrite/${t.slug}`}>Tâche {t.number} — {t.title}</Link><Icon name="chevron" size={16} /></li>)}</ul>
-        </nav>
-      </FoldableAside>
     </div>
-  </>;
+  </div>;
 }

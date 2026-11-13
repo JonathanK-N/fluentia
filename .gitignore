@@ -20,3 +20,6 @@ apps/api/.private-media/
 
 # Données de la démo locale (base, médias privés) : jamais publiées.
 .local-data/
+
+# Outillage local de chacun (compétences Claude, réglages) : jamais publié.
+.claude/

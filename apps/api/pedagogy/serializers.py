@@ -220,7 +220,8 @@ class CorrectionRequestSerializer(serializers.Serializer):
 
 
 class CorrectionCriterionSerializer(serializers.Serializer):
-    id = serializers.ChoiceField(choices=["consigne", "organisation", "lexique", "grammaire"])
+    # Rédaction : consigne, organisation, lexique, grammaire ; Oral : tache, aisance, lexique, grammaire.
+    id = serializers.ChoiceField(choices=["consigne", "organisation", "lexique", "grammaire", "tache", "aisance"])
     label = serializers.CharField()
     level = serializers.ChoiceField(choices=["A1", "A2", "B1", "B2", "C1", "C2"])
     comment = serializers.CharField(required=False, allow_blank=True)
@@ -238,11 +239,13 @@ class CorrectionSerializer(serializers.Serializer):
     demo = serializers.BooleanField()
     level = serializers.ChoiceField(choices=["A1", "A2", "B1", "B2", "C1", "C2"])
     score = serializers.IntegerField(min_value=0, max_value=20)
+    # Anciennes corrections d’oral : note du barème officiel, à côté d’une note Fluentia retirée depuis.
+    tcf_score = serializers.IntegerField(min_value=0, max_value=20, required=False)
     summary = serializers.CharField()
     feedback = serializers.CharField(required=False, allow_blank=True, default="")
     criteria = CorrectionCriterionSerializer(many=True)
     errors = CorrectionErrorSerializer(many=True)
-    improved = serializers.CharField()
+    improved = serializers.CharField(allow_blank=True)  # vide quand le texte est parfait
     advice = serializers.ListField(child=serializers.CharField())
     goal = serializers.CharField()
     off_topic = serializers.BooleanField(default=False)
@@ -273,6 +276,8 @@ class SpeakingSessionSerializer(serializers.Serializer):
     voice = serializers.CharField()
     seconds = serializers.IntegerField()
     prep_seconds = serializers.IntegerField()
+    # Première intervention de l’examinateur, à dire mot pour mot : « Bonjour. » et la consigne.
+    opening = serializers.CharField()
 
 
 class SpeakingTurnSerializer(StrictSerializer):
@@ -286,15 +291,24 @@ class SpeakingUsageSerializer(StrictSerializer):
     audio_in = serializers.IntegerField(min_value=0, max_value=50_000_000, default=0)
     cached_audio_in = serializers.IntegerField(min_value=0, max_value=50_000_000, default=0)
     text_in = serializers.IntegerField(min_value=0, max_value=50_000_000, default=0)
+    cached_text_in = serializers.IntegerField(min_value=0, max_value=50_000_000, default=0)
     audio_out = serializers.IntegerField(min_value=0, max_value=50_000_000, default=0)
     text_out = serializers.IntegerField(min_value=0, max_value=50_000_000, default=0)
     transcription_seconds = serializers.FloatField(min_value=0, max_value=7200, default=0)
+    # Certains modèles de transcription (gpt-4o-mini-transcribe) déclarent des jetons plutôt que des secondes.
+    transcription_in = serializers.IntegerField(min_value=0, max_value=50_000_000, default=0)
+    transcription_out = serializers.IntegerField(min_value=0, max_value=50_000_000, default=0)
 
 
 class SpeakingFinishSerializer(StrictSerializer):
     seconds = serializers.IntegerField(min_value=0, max_value=7200)
     transcript = SpeakingTurnSerializer(many=True, max_length=400)
     usage = SpeakingUsageSerializer(required=False)
+
+
+class SpeakingAbandonSerializer(StrictSerializer):
+    # Temps de parole déjà compté par le chrono du site ; absent (ancienne version du site) : le temps écoulé.
+    seconds = serializers.IntegerField(min_value=0, max_value=7200, required=False)
 
 
 class SpeakingFinishedSerializer(serializers.Serializer):

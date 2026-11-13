@@ -4,12 +4,11 @@ import Link from "next/link";
 import { useState } from "react";
 import { Button } from "../../components/ui/primitives";
 import { Icon } from "../../components/app-shell/icons";
-import { formatDuration, type SpeakingTask } from "./content";
+import { formatDuration, sentTo, type SpeakingTask } from "./content";
 import { FoldableAside } from "./foldable-aside";
 import { ExaminerSession } from "./examiner-session";
 
-export function SpeakingStudio({ task, others, examiner = "" }: { task: SpeakingTask; others: { slug: string; number: number; title: string }[]; examiner?: string }) {
-  const [subject, setSubject] = useState(0);
+export function SpeakingStudio({ task, subject, others, examiner = "" }: { task: SpeakingTask; subject: number; others: { slug: string; number: number; title: string }[]; examiner?: string }) {
   const [withExaminer, setWithExaminer] = useState(false);
   const current = task.subjects[subject]!;
 
@@ -22,13 +21,11 @@ export function SpeakingStudio({ task, others, examiner = "" }: { task: Speaking
       </section>
       <section className="status-card" aria-labelledby="bon-a-savoir">
         <div className="status-head"><h2 id="bon-a-savoir" className="badge-warn"><Icon name="clock" size={14} />Bon à savoir</h2></div>
-        <p className="status-text notice-text">Pendant la conversation, votre voix est envoyée à {examiner || "l’examinateur"} pour être comprise et transcrite. Fluentia conserve uniquement la transcription.</p>
+        <p className="status-text notice-text">Pendant la conversation, votre voix est envoyée {sentTo(examiner)} pour être comprise et transcrite. Fluentia conserve uniquement la transcription.</p>
       </section>
     </div>
-    <div className="section-title"><h2>Votre sujet</h2>
-      {task.subjects.length > 1 && <div className="series-filter" role="group" aria-label="Choisir un sujet">
-        {task.subjects.map((item, index) => <button key={item.title} type="button" aria-pressed={subject === index} onClick={() => setSubject(index)}>{item.title}</button>)}
-      </div>}
+    <div className="section-title"><h2>Sujet {subject + 1} · {current.title}</h2>
+      <Link className="subject-change" href={`/etudiant/expression-orale/${task.slug}`}><Icon name="back" size={14} />Changer de sujet</Link>
     </div>
     <div className="studio">
       <div style={{ display: "grid", gap: "1rem" }}>

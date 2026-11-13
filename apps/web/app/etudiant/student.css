@@ -636,7 +636,9 @@ button.seance-quit { background: transparent; font-family: inherit; cursor: poin
 @keyframes correction-pulse { 50% { opacity: 0.45; } }
 @media (prefers-reduced-motion: reduce) { .correction-waiting { animation: none; } }
 /* Niveaux A1 à C2, alignés au-dessus des colonnes NCLC */
-.level-scale { list-style: none; padding: 0; margin: 0 0 0.4rem; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 0.4rem; }
+.level-scale { list-style: none; padding: 0; margin: 0 0 0.6rem; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.4rem; }
+.level-scale li { flex-wrap: wrap; } .level-scale small { flex-basis: 100%; text-align: center; font-size: 0.68rem; }
+.level-scale li[data-current] small { color: #e4e2ff; }
 .level-scale li { display: flex; align-items: baseline; justify-content: center; gap: 0.4rem; padding: 0.45rem 0.3rem; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); font-size: 0.72rem; color: var(--muted); }
 .level-scale strong { font-size: 0.85rem; color: var(--text); }
 .level-scale li[data-current] { background: var(--indigo); border-color: var(--indigo); color: #e4e2ff; }
@@ -677,53 +679,130 @@ button.seance-quit { background: transparent; font-family: inherit; cursor: poin
 .student-card.correction-next { justify-content: center; }
 @media (max-width: 760px) { .result-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .result-explanation { margin: 0; line-height: 1.7; }
+.level-scale li { border-radius: 14px; }
 
 /* --- Oral avec l’examinateur IA --- */
 .examiner-launch { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.1rem 1.25rem; border-radius: var(--radius); background: var(--lavender); border: 1px solid color-mix(in srgb, var(--indigo) 22%, transparent); }
 .examiner-launch h2 { margin: 0; font-size: 1.05rem; color: var(--text); }
 .examiner-launch p { margin: 0.2rem 0 0; color: var(--muted); font-size: 0.92rem; }
-.examiner-layer { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column; gap: 1rem; padding: clamp(1rem, 3vw, 2rem); overflow-y: auto; background: var(--bg); color: var(--text); }
-.examiner-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
-.examiner-head h2 { margin: 0.15rem 0 0; font-size: clamp(1.2rem, 2.5vw, 1.6rem); }
-.examiner-demo { margin: 0; padding: 0.55rem 0.9rem; border-radius: 10px; background: var(--mint); color: var(--mint-ink); font-size: 0.88rem; font-weight: 600; }
-.examiner-card { display: grid; gap: 1rem; width: min(100%, 44rem); margin: 0 auto; padding: 1.5rem; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--border); }
-.examiner-card h3 { margin: 0; }
-.examiner-lead { margin: 0; font-size: 1.02rem; line-height: 1.6; }
-.examiner-consent { margin: 0; padding: 0.75rem 0.9rem; border-radius: 10px; background: var(--lavender); font-size: 0.9rem; }
-.examiner-prep { justify-items: stretch; }
-.examiner-prep .examiner-timer { justify-self: center; }
-.examiner-subject { padding: 1rem; border-radius: 12px; background: var(--lavender); }
-.examiner-subject p { margin: 0 0 0.6rem; line-height: 1.6; }
-.examiner-notes { display: grid; gap: 0.4rem; font-weight: 600; font-size: 0.9rem; }
-.examiner-notes textarea { width: 100%; font: inherit; font-weight: 400; padding: 0.7rem; border-radius: 10px; border: 1px solid var(--control-border, var(--border)); background: var(--surface); color: var(--text); resize: vertical; }
-.examiner-stage { flex: 1; display: grid; align-content: center; justify-items: center; gap: 1.25rem; width: min(100%, 46rem); margin: 0 auto; }
-.examiner-center { display: grid; justify-items: center; gap: 1rem; }
-.examiner-orb { --level: 0; position: relative; display: grid; place-items: center; width: clamp(11rem, 34vw, 15rem); aspect-ratio: 1; }
+.examiner-layer { position: fixed; inset: 0; z-index: 60; overflow-y: auto; background: var(--bg); color: var(--text); }
+/* Séance d’oral : même scène pour toutes les étapes et toutes les tâches. */
+.oral-body { max-width: 1040px; padding-bottom: 2rem; }
+.oral-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 0.75rem 1.5rem; margin-bottom: 1.1rem; }
+.oral-head .seance-head { margin: 0; }
+.oral-tasks { display: inline-flex; gap: 0.2rem; padding: 0.25rem; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); }
+.student-space .oral-tasks > * { padding: 0.45rem 0.9rem; border-radius: 999px; font-size: 0.76rem; font-weight: 600; color: var(--indigo) !important; text-decoration: none !important; white-space: nowrap; }
+.student-space .oral-tasks a:hover { background: var(--lavender); }
+.oral-tasks [aria-current] { background: var(--side-bg); color: #fff !important; }
+.oral-tasks [aria-disabled] { opacity: 0.45; cursor: not-allowed; }
+.oral-card { display: grid; justify-items: center; gap: 1.25rem; padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1rem, 4vw, 2.5rem); border-radius: 22px; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-soft); }
+.oral-card > * { width: min(100%, 34rem); }
+.oral-card > .oral-visual { width: auto; }
+.oral-visual { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 1.5rem 3.5rem; }
+.oral-orb-wrap { display: grid; justify-items: center; gap: 0.9rem; }
+.examiner-orb { --level: 0; position: relative; display: grid; place-items: center; aspect-ratio: 1; }
 .examiner-orb span { position: absolute; inset: 0; border-radius: 50%; transition: transform 90ms linear, opacity 200ms; }
-.examiner-orb span:nth-child(1) { background: radial-gradient(circle at 35% 30%, #8f87ff, var(--indigo) 62%); box-shadow: 0 18px 50px color-mix(in srgb, var(--indigo) 35%, transparent); transform: scale(calc(0.78 + var(--level) * 0.16)); }
-.examiner-orb span:nth-child(2) { border: 2px solid color-mix(in srgb, var(--indigo) 35%, transparent); transform: scale(calc(0.9 + var(--level) * 0.3)); opacity: calc(0.35 + var(--level)); }
-.examiner-orb span:nth-child(3) { border: 1px solid color-mix(in srgb, var(--indigo) 18%, transparent); transform: scale(calc(1 + var(--level) * 0.45)); opacity: calc(0.2 + var(--level)); }
-.examiner-orb[data-activity="candidate"] span:nth-child(1) { background: radial-gradient(circle at 35% 30%, #7fe0c9, var(--mint-ink) 65%); box-shadow: 0 18px 50px color-mix(in srgb, var(--mint-ink) 30%, transparent); }
+.examiner-orb span:nth-child(1) { background: radial-gradient(circle at 35% 30%, #8f87ff, var(--indigo) 62%); box-shadow: 0 14px 40px color-mix(in srgb, var(--indigo) 30%, transparent); transform: scale(calc(0.7 + var(--level) * 0.12)); }
+.examiner-orb span:nth-child(2) { background: color-mix(in srgb, var(--lavender) 80%, transparent); transform: scale(calc(0.86 + var(--level) * 0.2)); z-index: -1; }
+.examiner-orb span:nth-child(3) { border: 1px solid color-mix(in srgb, var(--indigo) 16%, transparent); transform: scale(calc(1 + var(--level) * 0.3)); opacity: calc(0.6 + var(--level)); }
+.examiner-orb[data-activity="candidate"] span:nth-child(1) { background: radial-gradient(circle at 35% 30%, #7fe0c9, var(--mint-ink) 65%); box-shadow: 0 14px 40px color-mix(in srgb, var(--mint-ink) 26%, transparent); }
 .examiner-orb[data-activity="connecting"] span:nth-child(1) { animation: examiner-breathe 1.6s ease-in-out infinite; }
-@keyframes examiner-breathe { 50% { transform: scale(0.86); opacity: 0.7; } }
-.examiner-activity { margin: 0; font-size: 1.15rem; font-weight: 600; }
-.examiner-timer { position: relative; display: grid; place-items: center; width: 7.5rem; aspect-ratio: 1; }
+@keyframes examiner-breathe { 50% { transform: scale(0.62); opacity: 0.7; } }
+.oral-card .examiner-orb { isolation: isolate; width: clamp(8.5rem, 22vw, 10rem); }
+.examiner-orb[data-activity="idle"] span:nth-child(1) { background: radial-gradient(circle at 35% 30%, #8f87ff, var(--indigo) 62%); }
+.oral-wave { position: relative; z-index: 1; display: flex; align-items: center; gap: 4px; height: 2.4rem; }
+.oral-wave b { width: 4px; border-radius: 4px; background: #9fe3d2; height: calc(35% + var(--level) * 60%); transition: height 90ms linear; }
+.oral-wave b:nth-child(2), .oral-wave b:nth-child(4) { background: #fff; height: calc(60% + var(--level) * 40%); }
+.oral-wave b:nth-child(3) { background: #fff; height: 100%; }
+.oral-pill { display: inline-flex; align-items: center; gap: 0.45rem; margin: 0; padding: 0.35rem 0.8rem; border-radius: 999px; background: var(--lavender); color: var(--indigo); font-size: 0.74rem; font-weight: 600; }
+.oral-pill span { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.oral-pill[data-tone="mint"] { background: var(--mint); color: var(--mint-ink); }
+.oral-pill[data-tone="warn"] { background: var(--warn-bg); color: var(--warning); }
+.oral-pill[data-tone="danger"] { background: color-mix(in srgb, var(--danger) 12%, transparent); color: var(--danger); }
+.examiner-timer { position: relative; display: grid; place-items: center; width: 6.5rem; aspect-ratio: 1; }
 .examiner-timer svg { position: absolute; inset: 0; transform: rotate(-90deg); }
-.examiner-timer circle { fill: none; stroke: var(--border); stroke-width: 4; }
-.examiner-timer circle[data-progress] { stroke: var(--indigo); stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
-.examiner-timer span { display: grid; justify-items: center; font-size: 1.25rem; font-weight: 700; font-variant-numeric: tabular-nums; }
-.examiner-timer small { font-size: 0.6rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
-.examiner-captions, .examiner-transcript { display: grid; gap: 0.5rem; width: 100%; margin: 0; padding: 0; list-style: none; }
-.examiner-captions li, .examiner-transcript li { padding: 0.6rem 0.85rem; border-radius: 12px; background: var(--lavender); line-height: 1.5; }
-.examiner-captions li[data-role="candidate"], .examiner-transcript li[data-role="candidate"] { background: var(--mint); }
-.examiner-captions li span, .examiner-transcript li span { display: block; font-size: 0.72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
-.examiner-notes-recall { width: 100%; font-size: 0.9rem; }
-.examiner-notes-recall summary { cursor: pointer; font-weight: 600; }
-.examiner-notes-recall p { white-space: pre-wrap; margin: 0.4rem 0 0; }
-.examiner-controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem; }
+.examiner-timer circle { fill: none; stroke: var(--border); stroke-width: 4.5; }
+.examiner-timer circle[data-progress] { stroke: var(--side-bg); stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
+.examiner-timer span { display: grid; justify-items: center; line-height: 1.1; }
+.examiner-timer strong { font-size: 1.35rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.examiner-timer small { font-size: 0.56rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.examiner-timer small:last-child { text-transform: none; letter-spacing: 0; font-weight: 500; }
+.oral-message { display: flex; gap: 0.8rem; padding: 0.9rem 1rem; border-radius: 14px; background: color-mix(in srgb, var(--lavender) 55%, var(--surface)); }
+.oral-message[data-role="candidate"] { background: var(--mint); }
+.oral-message[data-role="error"] { background: color-mix(in srgb, var(--danger) 8%, var(--surface)); }
+.oral-message-icon { flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; background: var(--side-bg); color: #fff; }
+.oral-message small { display: block; margin-bottom: 0.2rem; font-size: 0.64rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.oral-message p { margin: 0; line-height: 1.55; font-size: 0.9rem; white-space: pre-wrap; }
+.oral-message .pill-row { margin-top: 0.6rem; }
+.oral-details { display: grid; gap: 0.75rem; font-size: 0.86rem; }
+.oral-details .checklist { margin: 0; }
+.examiner-consent { margin: 0; padding: 0.75rem 0.9rem; border-radius: 10px; background: var(--lavender); font-size: 0.82rem; line-height: 1.5; }
+.examiner-notes { display: grid; gap: 0.4rem; font-weight: 600; font-size: 0.82rem; }
+.examiner-notes textarea { width: 100%; font: inherit; font-weight: 400; padding: 0.7rem; border-radius: 10px; border: 1px solid var(--control-border, var(--border)); background: var(--surface); color: var(--text); resize: vertical; }
+.examiner-transcript { display: grid; gap: 0.5rem; margin: 0; padding: 0; list-style: none; max-height: 18rem; overflow-y: auto; }
+.examiner-transcript li { padding: 0.6rem 0.85rem; border-radius: 12px; background: var(--lavender); line-height: 1.5; font-size: 0.86rem; }
+.examiner-transcript li[data-role="candidate"] { background: var(--mint); }
+.examiner-transcript li span { display: block; font-size: 0.64rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.oral-consigne { padding-bottom: 1rem; border-bottom: 1px solid var(--border); font-size: 0.86rem; }
+.oral-consigne summary { display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; list-style: none; font-weight: 600; color: var(--indigo); }
+.oral-consigne summary::-webkit-details-marker { display: none; }
+.oral-consigne summary svg { transition: transform var(--duration); }
+.oral-consigne[open] summary svg { transform: rotate(90deg); }
+.oral-consigne p { margin: 0.5rem 0 0; line-height: 1.55; white-space: pre-wrap; }
+.oral-consigne strong { display: block; margin-top: 0.7rem; font-size: 0.78rem; }
+.oral-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem; }
+.oral-toggle[aria-pressed="true"] { background: var(--lavender); border-color: color-mix(in srgb, var(--indigo) 35%, transparent); color: var(--indigo); }
 .examiner-error { margin: 0; color: var(--danger); font-weight: 600; }
 @media (prefers-reduced-motion: reduce) {
-  .examiner-orb span { transition: none; transform: none !important; }
+  .examiner-orb span, .oral-wave b { transition: none; transform: none !important; }
   .examiner-orb[data-activity="connecting"] span:nth-child(1) { animation: none; }
   .examiner-timer circle[data-progress] { transition: none; }
 }
+
+/* Choix du sujet avant de commencer une tâche (Rédaction, Oral). */
+.home-top-single { grid-template-columns: minmax(0, 1fr); }
+.subject-list { display: grid; gap: 0.75rem; margin: 0; padding: 0; list-style: none; }
+.subject-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 1rem; padding: 1rem 1.15rem; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--border); transition: border-color var(--duration), box-shadow var(--duration); }
+.subject-row:hover { border-color: color-mix(in srgb, var(--indigo) 35%, var(--border)); box-shadow: var(--shadow-soft); }
+.subject-number { display: grid; place-items: center; width: 2.25rem; height: 2.25rem; border-radius: 10px; background: var(--lavender); color: var(--indigo); font-weight: 700; font-size: 0.9rem; }
+.student-space .subject-text h3 { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin: 0 0 0.25rem; font-size: 0.98rem; }
+.student-space .subject-text p { margin: 0; font-size: 0.82rem; line-height: 1.5; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.subject-badge { padding: 0.15rem 0.55rem; border-radius: 999px; background: var(--warn-bg); color: var(--warning); font-size: 0.66rem; font-weight: 600; }
+.subject-row .button { white-space: nowrap; }
+.student-space a.subject-change { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.8rem; font-weight: 600; text-decoration: none !important; }
+@media (max-width: 640px) { .subject-row { grid-template-columns: auto minmax(0, 1fr); } .subject-row .button { grid-column: 1 / -1; justify-content: center; } }
+
+/* Séance de Rédaction : la scène de l’Oral, élargie pour écrire. */
+.oral-card-wide > * { width: 100%; }
+.oral-card-wide > .oral-visual { width: auto; }
+.oral-card-wide .writing-area { min-height: 26rem; margin: 0; font-size: 1rem; line-height: 1.75; }
+.writing-field { display: grid; gap: 0.4rem; }
+.writing-field .student-hint { margin: 0; font-size: 0.78rem; }
+.writing-timer-actions { display: flex; align-items: center; gap: 0.35rem; }
+.writing-timer-actions .button { min-height: 34px; padding-inline: 0.75rem; font-size: 0.78rem; }
+.writing-documents { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: 0.75rem; margin-top: 0.75rem; }
+.writing-documents article { padding: 0.75rem 0.9rem; border-radius: 10px; background: var(--surface); }
+.student-space .writing-documents h3 { margin: 0 0 0.3rem; font-size: 0.82rem; }
+.writing-documents p { font-size: 0.84rem; }
+.oral-consigne summary .pill { margin-left: 0.35rem; font-size: 0.68rem; }
+.oral-consigne .checklist { margin: 0.6rem 0 0; }
+.oral-consigne + .oral-consigne { margin-top: -0.6rem; }
+.writing-answer { background: var(--mint); }
+.writing-answer .student-hint { margin-top: 0.6rem; font-size: 0.78rem; }
+.writing-note { margin: -0.4rem 0 0; text-align: center; font-size: 0.76rem; }
+@media (max-width: 640px) { .oral-visual { flex-wrap: nowrap; gap: 1rem; } .oral-card .examiner-orb { width: 7.5rem; } .oral-pill { font-size: 0.68rem; text-align: center; } }
+
+/* Séance de Rédaction : toute la largeur, et le menu du site qu’on ouvre ou ferme avec ☰. */
+.writing-body { max-width: none; padding-inline: clamp(1rem, 2vw, 1.5rem); }
+.oral-card-wide { padding: clamp(1.25rem, 2.5vw, 1.75rem); }
+.seance-menu { display: grid; place-items: center; width: 36px; height: 36px; margin-right: 0.3rem; border: 1px solid #3a4370; border-radius: 10px; background: transparent; color: #fff; cursor: pointer; transition: background var(--duration); }
+.seance-menu:hover { background: var(--side-active); }
+html[data-exam-focus][data-exam-menu] .app-shell { grid-template-columns: var(--sidebar) minmax(0, 1fr); grid-template-areas: "side main"; }
+html[data-exam-focus][data-exam-menu] .shell-sidebar { display: flex !important; }
+@media (max-width: 960px) {
+  html[data-exam-focus][data-exam-menu] .app-shell { grid-template-columns: minmax(0, 1fr); grid-template-areas: "main"; }
+  html[data-exam-focus][data-exam-menu] .shell-sidebar { position: fixed; top: 60px; left: 0; z-index: 40; width: min(280px, 85vw); height: calc(100vh - 60px); overflow-y: auto; box-shadow: 0 20px 50px rgb(0 0 0 / 0.3); }
+}
+html[data-exam-focus][data-exam-menu] .shell-fold { display: none; }
+.seance-menu[aria-expanded="true"] { background: var(--side-active); }
+.result-transcript { max-height: none; }
