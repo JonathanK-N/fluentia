@@ -123,6 +123,13 @@ button.hero-button { font: inherit; font-size: 0.78rem; font-weight: 700; cursor
 .student-form label:has(input[type="checkbox"]) { display: flex; align-items: flex-start; gap: 0.6rem; font-weight: 400; }
 .student-form input:focus-visible, .student-form select:focus-visible, .student-form textarea:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 .student-form > .button, .student-form fieldset > .button { justify-self: start; }
+.password-field { position: relative; display: block; }
+.student-form .password-field input { padding-right: 2.9rem; }
+.password-toggle { position: absolute; inset-block: 0; right: 0.25rem; display: grid; place-items: center; width: 2.5rem; margin: auto 0; height: 2.5rem; padding: 0; color: var(--muted); background: none; border: 0; border-radius: 8px; cursor: pointer; }
+.password-toggle:hover, .password-toggle[aria-pressed="true"] { color: var(--text); }
+.password-toggle:focus-visible { outline: 3px solid var(--focus); outline-offset: 0; }
+.password-label { display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem; }
+.password-label a { font-size: 0.8rem; font-weight: 600; color: var(--accent); }
 .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: 1rem; }
 .editorial-history { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 0.8rem; background: var(--sand); padding: 0.75rem; border-radius: 8px; }
 .student-hint { color: var(--muted); font-size: 0.8rem !important; }

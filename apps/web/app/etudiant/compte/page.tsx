@@ -1,11 +1,12 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent, type MouseEvent } from "react";
 import { Button } from "../../../components/ui/primitives";
 import { Icon } from "../../../components/app-shell/icons";
 import { api, type Profile } from "../../../lib/student-api";
 import { initials, useSession } from "../../../lib/session";
 import { SectionTitle, Summary } from "../../../features/student/ui";
+import { FORGOT_EMAIL, PasswordInput } from "../../../features/student/password-input";
 
 const benefits = ["Vos réponses enregistrées à chaque choix, reprise sur tous vos appareils.", "Des corrections expliquées après chaque série envoyée.", "Des résultats calculés uniquement sur vos réponses réelles."];
 const longDate = (value: string) => new Date(value.length === 10 ? value + "T12:00:00" : value).toLocaleDateString("fr-CA", { day: "numeric", month: "short", year: "numeric" });
@@ -74,9 +75,18 @@ export default function AccountPage() {
   }
   function authenticate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const values = Object.fromEntries(new FormData(event.currentTarget));
+    const { confirmation, ...values } = Object.fromEntries(new FormData(event.currentTarget));
+    if (mode === "register" && values.password !== confirmation) {
+      setMessage(""); setError("Les deux mots de passe ne sont pas identiques. Retapez-les.");
+      return;
+    }
     if (mode === "login") act(() => api<Profile>("auth/login/", "POST", values));
     else act(async () => { const data = await api<{ detail: string }>("auth/register/", "POST", values); setMessage(data.detail + " Consultez votre boîte e-mail, puis connectez-vous."); return null; });
+  }
+  // L’adresse déjà tapée suit vers « Mot de passe oublié » (jamais dans l’adresse de la page).
+  function rememberEmail(event: MouseEvent<HTMLAnchorElement>) {
+    const email = event.currentTarget.closest("form")?.querySelector<HTMLInputElement>("input[name=email]")?.value.trim();
+    try { if (email) sessionStorage.setItem(FORGOT_EMAIL, email); } catch { /* stockage indisponible : on retape l’adresse */ }
   }
   function switchMode(next: "login" | "register") { setMode(next); setError(""); setMessage(""); }
   const status = <><p role="status" className="student-save-status">{message}</p>{error && <p role="alert">{error}</p>}</>;
@@ -101,10 +111,15 @@ export default function AccountPage() {
       <form onSubmit={authenticate} className="student-form">
         {mode === "register" && <label>Prénom ou nom d’usage<input name="display_name" autoComplete="nickname" maxLength={80} required /></label>}
         <label>Adresse e-mail<input name="email" type="email" autoComplete="email" maxLength={254} required /></label>
-        <label>Mot de passe<input name="password" type="password" autoComplete={mode === "login" ? "current-password" : "new-password"} minLength={mode === "register" ? 12 : undefined} maxLength={128} required /></label>
+        <label>
+          <span className="password-label">Mot de passe
+            {mode === "login" && <Link href="/etudiant/mot-de-passe" onClick={rememberEmail}>Mot de passe oublié ?</Link>}
+          </span>
+          <PasswordInput key={mode} name="password" autoComplete={mode === "login" ? "current-password" : "new-password"} minLength={mode === "register" ? 12 : undefined} maxLength={128} required />
+        </label>
+        {mode === "register" && <label>Confirmer le mot de passe<PasswordInput name="confirmation" autoComplete="new-password" minLength={12} maxLength={128} required /></label>}
         {mode === "register" && <p className="student-hint">Au moins 12 caractères. Évitez les mots de passe courants et vos informations personnelles.</p>}
         <Button type="submit" loading={busy}>{mode === "login" ? "Se connecter" : "Créer mon compte"}</Button>
-        {mode === "login" && <Link className="student-hint" href="/etudiant/mot-de-passe">Mot de passe oublié ?</Link>}
       </form>
       {status}
     </section>
