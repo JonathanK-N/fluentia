@@ -42,6 +42,7 @@ class Subscription(models.Model):
     premium_until = models.DateTimeField(
         null=True, blank=True,
         help_text="Laisser vide puis enregistrer pour démarrer la formule aujourd’hui (date calculée selon la durée). "
+                  "Changer de formule sans toucher à la date la redémarre aussi aujourd’hui avec sa durée. "
                   "Changer la formule ou repousser la date démarre une nouvelle période : les essais d’oral repartent à zéro. "
                   "Pour retirer le Premium, mettre une date passée.",
     )
@@ -67,8 +68,10 @@ class Subscription(models.Model):
         before = Subscription.objects.filter(pk=self.pk).values("premium_until", "plan").first() if self.pk else None
         previous = before["premium_until"] if before else None
         now = timezone.now()
-        # Date de fin laissée vide : la formule démarre aujourd’hui (pour retirer le Premium, mettre une date passée).
-        if self.premium_until is None:
+        # Date de fin laissée vide, ou autre formule choisie sans toucher à la date : la formule démarre aujourd’hui
+        # avec sa vraie durée (sinon un « 2 mois » garderait la fin de l’ancienne formule). Pour retirer le Premium,
+        # mettre une date passée.
+        if self.premium_until is None or (before and self.plan != before["plan"] and self.premium_until == previous):
             self.premium_until = now + timedelta(days=self.DAYS[self.plan])
         # Nouvelle période (activation, renouvellement, autre formule) : les essais repartent à zéro.
         if self.premium_until and self.premium_until > now and (

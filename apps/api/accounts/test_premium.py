@@ -71,6 +71,16 @@ class PremiumTests(TestCase):
         sub.save()
         self.assertEqual(self.subscription()["speaking_attempts_left"], 25)
 
+    def test_changing_plan_without_touching_the_date_restarts_it_with_its_length(self):
+        sub = Subscription.objects.create(user=self.user, plan="2_semaines")
+        sub.plan = "2_mois"
+        sub.save()  # date de fin inchangée dans le formulaire
+        self.assertEqual(self.subscription()["days_remaining"], 60)
+        chosen = timezone.now() + timedelta(days=5, hours=1)
+        sub.plan, sub.premium_until = "1_mois", chosen
+        sub.save()  # date choisie à la main : elle est respectée
+        self.assertEqual(self.subscription()["days_remaining"], 6)
+
     def test_pause_endpoints_do_not_exist(self):
         self.assertEqual(self.call("auth/subscription/pause/").status_code, 404)
         self.assertEqual(self.call("auth/subscription/resume/").status_code, 404)
