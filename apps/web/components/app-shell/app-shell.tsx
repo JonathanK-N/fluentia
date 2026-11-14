@@ -140,15 +140,15 @@ function UserCard({ onNavigate, folded }: { onNavigate: () => void; folded: bool
     {open && <div ref={menuRef} id={menuId} className="account-menu" style={place}>
       <div className="account-menu-head">
         <strong>{name}</strong><span>{profile.email}</span>
-        <span className="account-menu-badge" data-status={profile.subscription.status}><Icon name="trophy" size={12} />{badge}</span>
+        <span className="account-menu-badge" data-status={profile.subscription.status}><Icon name="trophy" size={11} />{badge}</span>
       </div>
       <ul>
         {accountLinks.map(item => <li key={item.href}><Link href={item.href} className="account-menu-item" onClick={() => { setOpen(false); onNavigate(); }}>
-          <Icon name={item.icon} size={16} /><span>{item.label}</span>
+          <Icon name={item.icon} size={14} /><span>{item.label}</span>
         </Link></li>)}
       </ul>
       <button type="button" className="account-menu-item account-menu-logout" disabled={leaving} onClick={logout}>
-        <Icon name="logout" size={16} /><span>{leaving ? "Déconnexion…" : "Se déconnecter"}</span>
+        <Icon name="logout" size={14} /><span>{leaving ? "Déconnexion…" : "Se déconnecter"}</span>
       </button>
     </div>}
   </>;
