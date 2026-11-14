@@ -9,17 +9,40 @@ from .models import Attempt, Answer, Choice, Question, Exam
 
 
 def create_attempt(*, user, exam: Exam) -> Attempt:
+    return start_attempt(user=user, exam=exam, resume=False)[0]
+
+
+def start_attempt(*, user, exam: Exam, resume=True) -> tuple[Attempt, bool]:
+    """Ouvre une séance ; avec ``resume``, reprend celle de la même série dont le chrono tourne encore.
+
+    Renvoie (séance, créée). Le verrou sur l’examen évite deux séances ouvertes par un double clic.
+    """
     with transaction.atomic():
         locked = Exam.objects.select_for_update().get(pk=exam.pk)
         if not locked.is_published or not locked.published_at:
             raise NotFound("Examen indisponible.")
         now = timezone.now()
+        if resume:
+            running = (
+                Attempt.objects.filter(user=user, exam=locked, status=Attempt.Status.ACTIVE, expires_at__gt=now)
+                .order_by("-started_at")
+                .first()
+            )
+            if running is not None:
+                return running, False
         return Attempt.objects.create(
             user=user,
             exam=locked,
             started_at=now,
             expires_at=now + timedelta(seconds=locked.duration_seconds),
-        )
+        ), True
+
+
+def expire_overdue(user) -> int:
+    """Ferme les séances dont le chrono est écoulé : elles ne restent pas « en cours » indéfiniment."""
+    return Attempt.objects.filter(
+        user=user, status=Attempt.Status.ACTIVE, expires_at__lte=timezone.now()
+    ).update(status=Attempt.Status.EXPIRED)
 
 
 def _locked_attempt(attempt_id, user) -> Attempt:

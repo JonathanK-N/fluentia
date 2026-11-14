@@ -21,7 +21,7 @@ from .serializers import (
     SaveAnswerResponseSerializer,
     ResultSerializer,
 )
-from .services import create_attempt, save_answer, submit_attempt, get_attempt
+from .services import expire_overdue, save_answer, start_attempt, submit_attempt, get_attempt
 from accounts.models import StudentProfile
 from accounts.permissions import VerifiedEmail
 
@@ -77,13 +77,14 @@ class StartAttemptView(APIView):
     permission_classes = [IsAuthenticated, VerifiedEmail]
     throttle_classes = [StartThrottle]
 
-    @extend_schema(request=None, responses={201: AttemptSerializer})
+    @extend_schema(request=None, responses={200: AttemptSerializer, 201: AttemptSerializer})
     def post(self, request, exam_id):
         if request.data:
             raise ValidationError("Le délai et l’examen sont définis par le serveur.")
         exam = get_object_or_404(Exam.objects.filter(is_published=True), pk=exam_id)
-        attempt = create_attempt(user=request.user, exam=exam)
-        return Response(AttemptSerializer(attempt).data, status=status.HTTP_201_CREATED)
+        # Séance de la même série encore ouverte : on la reprend (200) au lieu d’en ouvrir une autre (201).
+        attempt, created = start_attempt(user=request.user, exam=exam)
+        return Response(AttemptSerializer(attempt).data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
 
 
 class AttemptView(APIView):
@@ -218,4 +219,5 @@ class MyAttemptsView(generics.ListAPIView):
     pagination_class = CataloguePagination
 
     def get_queryset(self):
+        expire_overdue(self.request.user)
         return Attempt.objects.filter(user=self.request.user).order_by("-started_at")

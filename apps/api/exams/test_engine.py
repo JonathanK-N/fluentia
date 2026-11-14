@@ -267,13 +267,14 @@ class EngineAcceptanceTests(TestCase):
         self.assertEqual(client.post(route).status_code, 403)
         client.get("/admin/login/")
         token = client.cookies["csrftoken"].value
-        self.assertEqual(client.post(route, HTTP_X_CSRFTOKEN=token).status_code, 201)
+        # 200 : la séance ouverte dans setUp est reprise au lieu d’en créer une autre.
+        self.assertEqual(client.post(route, HTTP_X_CSRFTOKEN=token).status_code, 200)
 
     def test_start_throttle_returns_429(self):
         cache.clear()
         with patch.object(StartThrottle, "rate", "1/minute"):
             route = f"/api/v1/exams/{self.exam.pk}/attempts/"
-            self.assertEqual(self.client.post(route).status_code, 201)
+            self.assertEqual(self.client.post(route).status_code, 200)  # reprise de la séance de setUp
             self.assertEqual(self.client.post(route).status_code, 429)
 
     def test_published_instances_and_raw_updates_are_frozen(self):

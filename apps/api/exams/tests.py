@@ -141,3 +141,21 @@ class ExamEngineTests(TestCase):
         self.assertEqual(
             self.client.post(f"/api/v1/attempts/{aid}/submit/").status_code, 400
         )
+
+    def test_starting_the_same_series_again_resumes_the_running_session(self):
+        aid = self.start()
+        again = self.client.post(f"/api/v1/exams/{self.exam.id}/attempts/")
+        self.assertEqual((again.status_code, again.data["id"]), (200, aid))
+        self.assertEqual(Attempt.objects.filter(user=self.user).count(), 1)
+
+    def test_overdue_sessions_are_closed_and_not_resumed(self):
+        aid = self.start()
+        Attempt.objects.filter(pk=aid).update(
+            started_at=timezone.now() - timedelta(seconds=121),
+            expires_at=timezone.now() - timedelta(seconds=1),
+        )
+        listed = self.client.get("/api/v1/attempts/").data["results"]
+        self.assertEqual([(a["id"], a["status"]) for a in listed], [(aid, "expired")])
+        fresh = self.client.post(f"/api/v1/exams/{self.exam.id}/attempts/")
+        self.assertEqual(fresh.status_code, 201)
+        self.assertNotEqual(fresh.data["id"], aid)
