@@ -901,3 +901,10 @@ html[data-exam-focus] .shell-content.student-space:has(.seance) { padding-bottom
 .doc-viewer-fit[open] { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; width: 100vw; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 0; }
 .doc-viewer-fit img { width: auto; height: auto; max-width: 92vw; max-height: 90dvh; }
 @media (max-width: 760px), (max-height: 560px) { .seance-rail { flex-direction: row; align-items: center; } .rail-legend { display: none; } }
+
+/* Zoom A− / A+ : seulement le texte (document écrit, question, choix) ; 80 % = taille habituelle. */
+.seance-main { --text-zoom: 0.8; }
+.seance .question-card .student-passage { font-size: calc(1.08rem * var(--text-zoom)) !important; }
+.seance .question-card legend { font-size: calc(1.12rem * var(--text-zoom)); }
+.seance .question-card .student-choice { font-size: calc(1.08rem * var(--text-zoom)); }
+.seance .question-card details p { font-size: calc(1.08rem * var(--text-zoom)); }

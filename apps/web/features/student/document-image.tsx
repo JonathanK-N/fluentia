@@ -1,11 +1,15 @@
 "use client";
 /** Image d’un document (journal, lettre…) : un clic l’agrandit à la taille de l’écran, un autre clic la referme. */
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Icon } from "../../components/app-shell/icons";
 
 export function DocumentImage({ src, text, compact = false }: { src: string; text: string; compact?: boolean }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [open, setOpen] = useState(false);
+  // Fenêtre posée directement dans la page : ni le zoom ni la mise en page de la séance ne la décalent.
+  const [host, setHost] = useState<HTMLElement | null>(null);
+  useEffect(() => setHost(document.body), []);
   useEffect(() => {
     const node = dialog.current;
     if (!node) return;
@@ -20,9 +24,9 @@ export function DocumentImage({ src, text, compact = false }: { src: string; tex
       <span className="doc-hint" aria-hidden="true"><Icon name="expand" size={14} />Agrandir</span>
     </button>
     {/* Un clic n’importe où sur le document agrandi le referme ; Échap aussi. */}
-    <dialog ref={dialog} className="doc-viewer doc-viewer-fit" aria-label="Document agrandi" onClose={() => setOpen(false)} onClick={() => setOpen(false)}>
+    {host && createPortal(<dialog ref={dialog} className="doc-viewer doc-viewer-fit" aria-label="Document agrandi" onClose={() => setOpen(false)} onClick={() => setOpen(false)}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       {open && <img src={src} alt={text} />}
-    </dialog>
+    </dialog>, host)}
   </figure>;
 }

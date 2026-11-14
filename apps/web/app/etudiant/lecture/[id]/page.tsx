@@ -27,7 +27,7 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const [confirm, setConfirm] = useState(false);
-  // Taille de la question (texte, document et choix) : chaque séance commence à 80 %.
+  // Taille du texte (document écrit, question et choix ; l’image garde sa place) : chaque séance commence à 80 %.
   const [zoom, setZoom] = useState(ZOOMS[0]!);
   function zoomBy(step: number) {
     setZoom(ZOOMS[Math.min(ZOOMS.length - 1, Math.max(0, ZOOMS.indexOf(zoom) + step))]!);
@@ -272,7 +272,7 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
           </div>
           <p role="status" className="sr-only">{message}</p>
           <p className="sr-only" aria-live="polite">{spoken}</p>
-          <div className="seance-main" style={{ zoom }}>
+          <div className="seance-main" style={{ ["--text-zoom" as string]: zoom }}>
             {question && <section className="student-card question-card" id={`q-${question.id}`} key={question.id} aria-labelledby="question-titre">
               <div className="question-head"><h2 id="question-titre" ref={headingRef} tabIndex={-1}>Question {question.position} <span className="question-of">/ {total}</span></h2><span className="pill question-points">{question.points} pt{question.points > 1 ? "s" : ""}</span></div>
               {listening && (question.audio_available ? <AudioPlayer attemptId={id} questionId={question.id} /> : <p role="alert">Le document audio n’est pas disponible pour cette version.</p>)}
