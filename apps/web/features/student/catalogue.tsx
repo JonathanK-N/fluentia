@@ -1,5 +1,5 @@
 "use client";
-/** Séries publiées d’une épreuve : filtre par type, puis page de présentation avant la séance. */
+/** Séries publiées d’une épreuve, au format de l’examen (simulations seulement), puis page de présentation avant la séance. */
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Button } from "../../components/ui/primitives";
@@ -7,10 +7,7 @@ import { Icon } from "../../components/app-shell/icons";
 import { api, type Exam } from "../../lib/student-api";
 
 type Skill = "reading" | "listening";
-type Mode = "all" | "training" | "simulation";
-
-export function Catalogue({ skill, mode: fixedMode, title = "Vos séries", emptyText }: { skill?: Skill; mode?: Exclude<Mode, "all">; title?: string; emptyText?: string }) {
-  const [mode, setMode] = useState<Mode>(fixedMode ?? "all");
+export function Catalogue({ skill, title = "Vos séries", emptyText }: { skill?: Skill; title?: string; emptyText?: string }) {
   const [exams, setExams] = useState<Exam[] | null>(null);
   const [error, setError] = useState("");
   const [offset, setOffset] = useState(0);
@@ -24,14 +21,11 @@ export function Catalogue({ skill, mode: fixedMode, title = "Vos séries", empty
     }).catch(e => { if (active) setError(e.message); }).finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [offset, skill]);
-  const visible = exams?.filter(exam => mode === "all" || exam.mode === mode);
+  // Les séries d’entraînement ne sont plus proposées : seulement les simulations au format de l’examen.
+  const visible = exams?.filter(exam => exam.mode === "simulation");
   return <section aria-labelledby="series" className="series">
     <div className="series-head">
       <h2 id="series">{title}</h2>
-      {!fixedMode && <div className="series-filter" role="group" aria-label="Type de série">
-        {([["all", "Toutes"], ["training", "Entraînements"], ["simulation", "Simulations"]] as const).map(([value, label]) =>
-          <button key={value} type="button" aria-pressed={mode === value} onClick={() => setMode(value)}>{label}</button>)}
-      </div>}
     </div>
     {error && <p role="alert">{error}</p>}
     {!exams && !error && <p className="student-hint">Recherche des séries…</p>}

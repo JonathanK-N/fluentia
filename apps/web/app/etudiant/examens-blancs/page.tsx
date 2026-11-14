@@ -22,6 +22,6 @@ export default function MockExamsPage() {
         <Link className="plain pill" href={part.href}>{part.live ? "Simulation chronométrée" : "Studio d’entraînement"}<Icon name="chevron" size={14} /></Link>
       </li>)}</ul>
     </section>
-    <Catalogue mode="simulation" title="Simulations disponibles" emptyText="Aucune simulation complète n’est publiée pour le moment. Elles apparaîtront ici après leur relecture pédagogique." />
+    <Catalogue title="Simulations disponibles" emptyText="Aucune simulation complète n’est publiée pour le moment. Elles apparaîtront ici après leur relecture pédagogique." />
   </>;
 }
