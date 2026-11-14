@@ -4,8 +4,7 @@ import Link from "next/link";
 import { Icon, type IconName } from "../../../components/app-shell/icons";
 import { api } from "../../../lib/student-api";
 import { useSession } from "../../../lib/session";
-import { skillLabel } from "../../../features/student/content";
-import { Bar, Notice, PageHero, SectionTitle, Summary } from "../../../features/student/ui";
+import { Notice, PageHero, SectionTitle, Summary } from "../../../features/student/ui";
 
 export type SkillLevel = { skill: "reading" | "listening" | "writing" | "speaking"; tests: number; level: string | null; last_score: number | null; last_unit: string | null };
 export type Progress = {
@@ -16,7 +15,6 @@ export type Progress = {
   skills: SkillLevel[];
   explored: { seen: number; total: number };
 };
-const order = ["non_calibree", "A1", "A2", "B1", "B2", "C1", "C2"];
 const plural = (n: number, word: string) => `${n} ${word}${n > 1 ? "s" : ""}`;
 
 const SKILLS: Record<SkillLevel["skill"], { label: string; the: string; of: string; href: string; icon: IconName }> = {
@@ -48,7 +46,6 @@ export default function ProgressPage() {
   const [data, setData] = useState<Progress | null>(null);
   const [error, setError] = useState("");
   useEffect(() => { api<Progress>("progress/").then(setData).catch(e => setError(e.message)); }, [profile]);
-  const categories = [...(data?.categories ?? [])].sort((a, b) => a.skill.localeCompare(b.skill) || order.indexOf(a.difficulty) - order.indexOf(b.difficulty));
   const skills = data?.skills ?? [];
   const next = data ? focus(skills) : null;
   const judged = skills.filter(s => s.tests >= ENOUGH && s.level);
@@ -84,17 +81,6 @@ export default function ProgressPage() {
           <Link className="button button-secondary tile-link" href={info.href}>{s.tests ? "S’entraîner" : "Commencer"}<Icon name="arrow" size={14} /></Link>
         </article>;
       })}</div>
-      {!!categories.length && <>
-        <SectionTitle title="Par difficulté" note="Difficultés proposées par les auteurs, sans calibration" />
-        <section className="student-card" aria-label="Réussite par difficulté" style={{ marginTop: 0 }}>
-          <ul className="bar-list">{categories.map(c => <Bar key={c.skill + c.difficulty} label={`${skillLabel(c.skill)} · ${c.difficulty === "non_calibree" ? "Difficulté non calibrée" : c.difficulty}`} value={c.answered ? c.correct / c.answered * 100 : 0} detail={`${c.correct} / ${c.answered}`} />)}</ul>
-          <details style={{ marginTop: "1rem" }}><summary>Afficher le tableau détaillé</summary>
-            <div className="table-scroll"><table><caption className="sr-only">Réponses correctes par difficulté proposée</caption><thead><tr><th scope="col">Compétence</th><th scope="col">Difficulté</th><th scope="col">Correctes</th><th scope="col">Répondues</th></tr></thead>
-              <tbody>{categories.map(c => <tr key={c.skill + c.difficulty}><th scope="row">{skillLabel(c.skill)}</th><td>{c.difficulty === "non_calibree" ? "Non calibrée" : c.difficulty}</td><td>{c.correct}</td><td>{c.answered}</td></tr>)}</tbody></table></div>
-          </details>
-          <p className="student-hint" style={{ marginTop: "1rem" }}>Les questions non répondues comptent dans les totaux d’examen, pas dans cette répartition. {data.disclaimer}</p>
-        </section>
-      </>}
     </>}
   </>;
 }
