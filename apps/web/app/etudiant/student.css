@@ -911,3 +911,6 @@ html[data-exam-focus] .shell-content.student-space:has(.seance-qcm) { padding-bo
 
 /* Rédaction, présentation du sujet : consigne et lancement sur toute la largeur. */
 .writing-intro { display: grid; gap: 1rem; }
+
+/* Rédaction en plein écran : le sujet en gras, bien lisible. */
+.oral-message .writing-prompt { font-size: 1rem !important; font-weight: 700; line-height: 1.5; color: var(--text); }

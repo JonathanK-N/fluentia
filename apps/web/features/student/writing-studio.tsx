@@ -167,7 +167,7 @@ export function WritingStudio({ task, subject: chosen, corrector }: { task: Writ
           <span className="oral-message-icon" aria-hidden="true"><Icon name="pen" size={16} /></span>
           <div>
             <small>Consigne · sujet {subject + 1}</small>
-            <p>{current.prompt}</p>
+            <p className="writing-prompt">{current.prompt}</p>
             {current.documents && <div className="writing-documents">{current.documents.map(doc => <article key={doc.label}><h3>{doc.label}</h3><p>{doc.text}</p></article>)}</div>}
           </div>
         </div>
