@@ -21,7 +21,6 @@ export function DocumentImage({ src, text, compact = false }: { src: string; tex
     </button>
     {/* Un clic n’importe où sur le document agrandi le referme ; Échap aussi. */}
     <dialog ref={dialog} className="doc-viewer doc-viewer-fit" aria-label="Document agrandi" onClose={() => setOpen(false)} onClick={() => setOpen(false)}>
-      <button type="button" className="doc-close" onClick={() => setOpen(false)}><Icon name="shrink" size={14} />Réduire</button>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       {open && <img src={src} alt={text} />}
     </dialog>

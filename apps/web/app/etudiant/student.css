@@ -876,3 +876,20 @@ html[data-exam-focus] .shell-content.student-space:has(.seance) { padding-bottom
   .seance .question-card .doc-figure, .seance .question-card .student-passage { flex: none; min-height: 0; }
   .seance .question-card .doc-open img { height: auto; max-height: 45vh; }
 }
+
+/* Ajustements : numéros au milieu de leur colonne, question sur toute la largeur, boutons en bas, document agrandi sans cadre. */
+.seance-frame { grid-template-columns: clamp(4.5rem, 14vw, 16rem) minmax(0, 1fr); }
+.seance-rail { padding-inline: 0.5rem; }
+.seance .seance-body { max-width: none; margin: 0; padding: 0.9rem clamp(1rem, 2.5vw, 2rem) 0; }
+.seance .seance-head { text-align: left; }
+.seance .question-card { padding-bottom: 1.25rem; }
+.seance-footer { flex: none; display: flex; justify-content: space-between; gap: 0.75rem; margin: 0; padding: 0.75rem 0 1rem; border-top: 0; }
+.seance-zoom { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.2rem; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+.seance-zoom button { min-width: 2.2rem; min-height: 32px; padding: 0 0.45rem; border: 0; border-radius: 8px; background: transparent; color: var(--text); font: inherit; font-size: 0.8rem; font-weight: 700; cursor: pointer; }
+.seance-zoom button:hover:not(:disabled) { background: var(--lavender); color: var(--indigo); }
+.seance-zoom button:disabled { opacity: 0.35; cursor: default; }
+.seance-zoom span { min-width: 3rem; text-align: center; font-size: 0.74rem; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
+.doc-viewer-fit[open] { background: transparent; box-shadow: none; border: 0; }
+.doc-viewer-fit::backdrop { background: transparent; }
+.doc-viewer-fit img { box-shadow: 0 12px 40px rgb(15 21 48 / 0.35); border-radius: 6px; }
+@media (max-width: 760px), (max-height: 560px) { .seance .seance-body { padding-bottom: 0; } }

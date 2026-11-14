@@ -16,6 +16,8 @@ import { exitFullscreen, enterFullscreen } from "../../../../lib/fullscreen";
 
 // Préfixe des indices du corrigé, affichés dans « Où le trouver ».
 const HINT = "Indice dans le texte : ";
+const ZOOMS = [0.8, 0.9, 1, 1.1, 1.25, 1.4, 1.6];
+const ZOOM_KEY = "fluentia:zoom-seance";
 
 export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
   const {id} = use(params);
@@ -26,6 +28,16 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const [confirm, setConfirm] = useState(false);
+  // Taille de la question (texte, document et choix), gardée sur cet appareil.
+  const [zoom, setZoom] = useState(1);
+  useEffect(() => {
+    try { const saved = Number(localStorage.getItem(ZOOM_KEY)); if (ZOOMS.includes(saved)) setZoom(saved); } catch { /* stockage indisponible */ }
+  }, []);
+  function zoomBy(step: number) {
+    const next = ZOOMS[Math.min(ZOOMS.length - 1, Math.max(0, ZOOMS.indexOf(zoom) + step))]!;
+    setZoom(next);
+    try { localStorage.setItem(ZOOM_KEY, String(next)); } catch { /* stockage indisponible */ }
+  }
   const [quitting, setQuitting] = useState(false);
   const [remaining, setRemaining] = useState(0);
   const [spoken, setSpoken] = useState("");
@@ -257,11 +269,16 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
               <span className="session-progress" aria-hidden="true"><span style={{ width: `${total ? answeredCount / total * 100 : 0}%` }} /></span>
               <ul className="map-legend" aria-hidden="true"><li data-state="answered">Répondue</li><li data-state="seen">Vue</li><li>Pas encore vue</li></ul>
             </div>
+            <div className="seance-zoom" role="group" aria-label="Taille du texte">
+              <button type="button" onClick={() => zoomBy(-1)} disabled={zoom <= ZOOMS[0]!} aria-label="Réduire le texte">A−</button>
+              <span aria-live="polite">{Math.round(zoom * 100)} %</span>
+              <button type="button" onClick={() => zoomBy(1)} disabled={zoom >= ZOOMS[ZOOMS.length - 1]!} aria-label="Agrandir le texte">A+</button>
+            </div>
             <Button className="map-finish" disabled={busy || remaining === 0} onClick={() => setConfirm(true)}>Terminer la séance</Button>
           </div>
           <p role="status" className="sr-only">{message}</p>
           <p className="sr-only" aria-live="polite">{spoken}</p>
-          <div className="seance-main">
+          <div className="seance-main" style={{ zoom }}>
             {question && <section className="student-card question-card" id={`q-${question.id}`} key={question.id} aria-labelledby="question-titre">
               <div className="question-head"><h2 id="question-titre" ref={headingRef} tabIndex={-1}>Question {question.position} <span className="question-of">/ {total}</span></h2><span className="pill question-points">{question.points} pt{question.points > 1 ? "s" : ""}</span></div>
               {listening && (question.audio_available ? <AudioPlayer attemptId={id} questionId={question.id} /> : <p role="alert">Le document audio n’est pas disponible pour cette version.</p>)}
@@ -275,17 +292,17 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
                   {state && <Icon name={state === "right" ? "check" : "close"} size={16} className="choice-mark" />}
                 </label>; })}
               </fieldset>}
-              <nav className="question-nav" aria-label="Navigation entre les questions">
-                <Button variant="secondary" disabled={index === 0} onClick={() => go(index - 1)}><Icon name="back" size={15} />Retour</Button>
-                {index < shown.length - 1
-                  ? <Button onClick={() => go(index + 1)}>Question suivante<Icon name="arrow" size={15} /></Button>
-                  : <Button disabled={busy || remaining === 0} onClick={() => setConfirm(true)}>Terminer<Icon name="check" size={15} /></Button>}
-              </nav>
             </section>}
             {confirm && <section className="student-card" aria-label="Confirmation de soumission"><h2>Prêt à découvrir le corrigé ?</h2><p>{answeredCount} réponses enregistrées sur {total}. Les questions sans réponse comptent pour zéro. Après la soumission, les réponses seront définitives.</p>
               <div className="student-nav" style={{ margin: 0 }}><Button loading={busy} onClick={submit}>Confirmer la soumission</Button> <Button variant="secondary" disabled={busy} onClick={() => setConfirm(false)}>Continuer la séance</Button></div>
             </section>}
           </div>
+          {question && <nav className="question-nav seance-footer" aria-label="Navigation entre les questions">
+            <Button variant="secondary" disabled={index === 0} onClick={() => go(index - 1)}><Icon name="back" size={15} />Retour</Button>
+            {index < shown.length - 1
+              ? <Button onClick={() => go(index + 1)}>Question suivante<Icon name="arrow" size={15} /></Button>
+              : <Button disabled={busy || remaining === 0} onClick={() => setConfirm(true)}>Terminer<Icon name="check" size={15} /></Button>}
+          </nav>}
         </div>
       </div>
     </div>}
