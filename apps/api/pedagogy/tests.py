@@ -1,6 +1,7 @@
 """Recette du lot 03 sur bases jetables, sans validation pédagogique réelle."""
 
 import io
+from datetime import timedelta
 import tempfile
 import wave
 import math
@@ -510,6 +511,22 @@ class PedagogyTests(TestCase):
         self.assertEqual(response.data["groups"][0]["attempts"], 1)
         self.client.force_authenticate(self.other)
         self.assertEqual(self.client.get("/api/v1/progress/").data["groups"], [])
+
+    def test_progress_reports_last_writing_and_speaking_notes(self):
+        from .models import SpeakingSession, WritingCorrection
+        self.client.force_authenticate(self.student)
+        empty = self.client.get("/api/v1/progress/").data
+        self.assertEqual(empty["writing"], {"count": 0, "last_score": None, "last_level": None})
+        self.assertIsNone(empty["speaking"]["attempts_left"])
+        old = WritingCorrection.objects.create(user=self.student, text="a", provider="openai", result={"score": 9, "level": "B1"})
+        new = WritingCorrection.objects.create(user=self.student, text="b", provider="openai", result={"score": 14, "level": "C1"})
+        WritingCorrection.objects.filter(pk=old.pk).update(created_at=new.created_at - timedelta(minutes=5))
+        WritingCorrection.objects.create(user=self.student, text="c", provider="demo", result={"score": 20, "level": "C2", "demo": True})
+        SpeakingSession.objects.create(user=self.student, mode="practice", provider="openai", status=SpeakingSession.Status.FINISHED, result={"score": 11, "level": "B2"})
+        SpeakingSession.objects.create(user=self.student, mode="practice", provider="openai", status=SpeakingSession.Status.FAILED)
+        data = self.client.get("/api/v1/progress/").data
+        self.assertEqual(data["writing"], {"count": 2, "last_score": 14, "last_level": "C1"})  # la démo ne compte pas
+        self.assertEqual((data["speaking"]["count"], data["speaking"]["last_score"]), (1, 11))
 
     def test_original_seed_idempotent_and_never_published(self):
         call_command("seed_original_bank", stdout=io.StringIO())

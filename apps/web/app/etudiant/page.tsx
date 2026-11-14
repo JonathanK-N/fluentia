@@ -28,9 +28,17 @@ export default function HomePage() {
   }, [profile]);
   const groups = progress?.groups ?? [];
   const done = groups.reduce((sum, g) => sum + g.attempts, 0);
-  const questions = groups.reduce((sum, g) => sum + g.questions, 0);
-  const correct = groups.reduce((sum, g) => sum + g.correct, 0);
-  const rate = questions ? Math.round(correct / questions * 100) : 0;
+  // Réussite par épreuve : les questions sans réponse comptent comme fausses, comme à l’examen.
+  const rateOf = (skill: string) => {
+    const mine = groups.filter(g => g.skill === skill);
+    const asked = mine.reduce((sum, g) => sum + g.questions, 0);
+    return asked ? Math.round(mine.reduce((sum, g) => sum + g.correct, 0) / asked * 100) : null;
+  };
+  const reading = rateOf("reading"), listening = rateOf("listening");
+  const writing = progress?.writing, speaking = progress?.speaking;
+  const note = (graded?: { last_score: number | null; last_level: string | null }) =>
+    graded?.last_score != null ? `${graded.last_score}/20${graded.last_level ? ` · ${graded.last_level}` : ""}` : "—";
+  const corrections = (count: number, word: string) => count ? `${count} ${word}${count > 1 ? "s" : ""} corrigée${count > 1 ? "s" : ""} · dernière note` : `Aucune ${word} corrigée pour l’instant`;
   // Séances dont le chrono tourne encore : une séance au délai dépassé ne se reprend plus.
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => { const timer = window.setInterval(() => setNow(Date.now()), 30_000); return () => window.clearInterval(timer); }, []);
@@ -62,10 +70,11 @@ export default function HomePage() {
     {profile && !profile.email_verified && <div style={{ marginTop: "1rem" }}><Notice icon="flag">Votre adresse e-mail n’est pas encore vérifiée. <Link href="/etudiant/compte">Ouvrir mon profil</Link></Notice></div>}
     <SectionTitle title="Votre bilan" />
     <Summary label="Votre bilan" items={[
-      { label: "Séries terminées", value: pending ?? done, hint: "Tentatives envoyées" },
-      { label: "Taux de réussite", value: pending ?? (questions ? `${rate} %` : "—"), hint: "Sur les réponses envoyées", meter: rate },
-      { label: "Questions vues", value: pending ?? questions, hint: "Questions sautées incluses" },
-      { label: "Séances ouvertes", value: !profile ? "—" : loading ? "…" : open.length, hint: "À clôturer avant l’échéance" },
+      { label: "Séries terminées", value: pending ?? done, hint: "Lecture et Écoute envoyées" },
+      { label: "Réussite Lecture · Écoute", value: pending ?? `${reading ?? "—"} % · ${listening ?? "—"} %`.replaceAll("— %", "—"), hint: "Questions sans réponse comptées fausses" },
+      { label: "Rédaction", value: pending ?? note(writing), hint: pending ? "" : corrections(writing?.count ?? 0, "rédaction") },
+      { label: "Oral", value: pending ?? (speaking?.attempts_left != null ? `${speaking.attempts_left} essais sur ${speaking.attempts_total}` : note(speaking)),
+        hint: pending ? "" : speaking?.attempts_left != null ? (speaking.last_score != null ? `Dernière note : ${note(speaking)}` : "Restants sur votre formule Premium") : corrections(speaking?.count ?? 0, "tâche") },
     ]} />
     <div id="epreuves"><SectionTitle title="Choisir une épreuve" note="Les 4 épreuves du TCF, au format de l’examen" /></div>
     <SkillCards />
