@@ -815,3 +815,14 @@ html[data-exam-focus][data-exam-menu] .shell-sidebar { display: flex !important;
 html[data-exam-focus][data-exam-menu] .shell-fold { display: none; }
 .seance-menu[aria-expanded="true"] { background: var(--side-active); }
 .result-transcript { max-height: none; }
+
+/* Mes résultats : une carte par épreuve avec son niveau moyen */
+.series-grid.skill-levels { grid-template-columns: repeat(auto-fit, minmax(min(100%, 12.5rem), 1fr)); }
+.skill-levels .series-card { display: grid; align-content: start; gap: 0.5rem; }
+.skill-levels .series-card-top { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.skill-levels h3 { margin: 0.25rem 0 0; }
+.skill-level { display: flex; align-items: baseline; gap: 0.5rem; margin: 0; }
+.skill-level strong { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+.skill-level span { font-size: 0.78rem; color: var(--muted); }
+.skill-levels .button { justify-self: start; margin-top: 0.25rem; }
+.aside-link { display: inline-flex; align-items: center; gap: 0.3rem; margin-top: 0.6rem; font-weight: 600; color: var(--accent); }

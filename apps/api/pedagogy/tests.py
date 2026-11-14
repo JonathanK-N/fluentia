@@ -529,6 +529,10 @@ class PedagogyTests(TestCase):
         data = self.client.get("/api/v1/progress/").data
         # (A1 + C1 + B2) / 3 = (0 + 4 + 3) / 3 = 2,3 : B1 ; la démo ne compte pas.
         self.assertEqual(data["level"], {"level": "B1", "tests": 3})
+        by_skill = {s["skill"]: (s["tests"], s["level"], s["last_score"], s["last_unit"]) for s in data["skills"]}
+        self.assertEqual(by_skill["writing"], (1, "C1", 14, "/20"))
+        self.assertEqual(by_skill["speaking"], (1, "B2", 11, "/20"))
+        self.assertEqual(by_skill[exam.skill][:2], (1, "A1"))
         self.assertEqual(data["explored"]["seen"], 1)
         self.assertGreaterEqual(data["explored"]["total"], 1)
 
