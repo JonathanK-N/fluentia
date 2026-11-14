@@ -826,3 +826,53 @@ html[data-exam-focus][data-exam-menu] .shell-fold { display: none; }
 .skill-level span { font-size: 0.78rem; color: var(--muted); }
 .skill-levels .button { justify-self: start; margin-top: 0.25rem; }
 .aside-link { display: inline-flex; align-items: center; gap: 0.3rem; margin-top: 0.6rem; font-weight: 600; color: var(--accent); }
+
+/* Séance Lecture / Écoute : colonne des 39 questions tout à gauche, question entière visible sans défiler. */
+.seance { display: flex; flex-direction: column; height: 100dvh; }
+html[data-exam-focus] .shell-content.student-space:has(.seance) { padding-bottom: 0; }
+.seance-frame { flex: 1; min-height: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); }
+.seance-rail { --map-answered: var(--indigo); --map-seen: var(--mint); --map-seen-border: #8fd3c3; padding: 0.5rem 1.1rem; background: var(--surface); border-right: 1px solid var(--border); overflow: hidden; }
+.rail-map { display: flex; flex-direction: column; gap: 2px; height: 100%; margin: 0; padding: 0; list-style: none; }
+.rail-map li { flex: 1 1 0; min-height: 0; display: flex; align-items: center; justify-content: center; }
+.rail-map button { position: relative; display: grid; place-items: center; width: 2.1rem; height: 100%; max-height: 1.75rem; min-height: 0; padding: 0; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font: inherit; font-size: 0.68rem; font-weight: 600; line-height: 1; cursor: pointer; transition: background var(--duration), border-color var(--duration); }
+.rail-map button:hover { border-color: var(--control-border); }
+.rail-map button[data-state="answered"] { background: var(--map-answered); border-color: var(--map-answered); color: #fff; }
+.rail-map button[data-state="seen"] { background: var(--map-seen); border-color: var(--map-seen-border); }
+.rail-map button[aria-current="step"] { box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px var(--text); }
+/* Question affichée : pointée par deux petites flèches. */
+.rail-map button[aria-current="step"]::before, .rail-map button[aria-current="step"]::after { position: absolute; top: 50%; transform: translateY(-50%); color: var(--indigo); font-size: 0.7rem; font-weight: 700; }
+.rail-map button[aria-current="step"]::before { content: "→"; right: calc(100% + 4px); }
+.rail-map button[aria-current="step"]::after { content: "←"; left: calc(100% + 4px); }
+.seance .seance-body { display: flex; flex-direction: column; min-height: 0; width: 100%; max-width: 1000px; margin-inline: auto; padding: 0.9rem clamp(1rem, 3vw, 2rem); overflow: hidden; }
+.seance .seance-head { flex: none; margin-bottom: 0.6rem; }
+.seance .seance-status { position: static; flex: none; margin-bottom: 0.75rem; padding: 0.6rem 1rem; }
+.seance .seance-status .map-legend { margin: 0.1rem 0 0; }
+.seance .seance-status .map-finish { width: auto; }
+.seance-main { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 0.75rem; overflow-y: auto; }
+.seance .question-card { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; margin: 0; padding: 1rem 1.25rem; }
+.seance .question-head { flex: none; margin-bottom: 0.6rem; }
+.seance .question-card .audio-player { flex: none; margin-block: 0 0.6rem; }
+.seance .question-card .doc-figure { flex: 1 1 0; min-height: 7rem; display: flex; margin: 0 0 0.6rem; }
+.seance .question-card .doc-open { flex: 1; min-height: 0; }
+.seance .question-card .doc-open img { width: 100%; height: 100%; max-height: none; object-fit: contain; }
+.seance .question-card .student-passage { flex: 1 1 0; min-height: 5rem; overflow-y: auto; margin-bottom: 0.6rem; }
+.seance .question-card fieldset { flex: none; margin-bottom: 0.6rem; }
+.seance .question-card .student-choice { padding: 0.5rem 0.9rem; margin-block: 0.35rem; }
+.seance .question-card .question-nav { flex: none; margin-top: auto; padding-top: 0.7rem; }
+/* Document agrandi : un clic le referme. */
+.doc-viewer-fit[open] { display: grid; place-items: center; width: 96vw; height: 94vh; padding: 0; background: rgb(17 23 51 / 92%); cursor: zoom-out; }
+.doc-viewer-fit img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.doc-viewer-fit .doc-close { position: absolute; top: 0.75rem; right: 0.75rem; display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.4rem 0.8rem; border: 0; border-radius: 999px; background: rgb(255 255 255 / 92%); color: #111733; font: inherit; font-size: 0.75rem; font-weight: 600; cursor: pointer; }
+/* Petits écrans : la page défile normalement et les questions passent en ligne au-dessus. */
+@media (max-width: 760px), (max-height: 560px) {
+  .seance { height: auto; }
+  .seance-frame { display: block; }
+  .seance-rail { padding: 0.5rem 1rem; border-right: 0; border-bottom: 1px solid var(--border); overflow-x: auto; }
+  .rail-map { flex-direction: row; height: auto; gap: 4px; }
+  .rail-map li { flex: none; }
+  .rail-map button { height: 2rem; max-height: none; }
+  .rail-map button[aria-current="step"]::before, .rail-map button[aria-current="step"]::after { content: none; }
+  .seance .seance-body, .seance-main { overflow: visible; }
+  .seance .question-card .doc-figure, .seance .question-card .student-passage { flex: none; min-height: 0; }
+  .seance .question-card .doc-open img { height: auto; max-height: 45vh; }
+}

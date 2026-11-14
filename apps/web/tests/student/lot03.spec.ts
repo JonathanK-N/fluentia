@@ -58,7 +58,7 @@ test("lecture complète : 39 questions, sauvegarde et correction sur PostgreSQL"
   await page.getByRole("button", {name: "Commencer"}).click();
   // Une question à la fois : on répond, puis « Suivant ».
   await expect(page.getByRole("radio")).toHaveCount(4);
-  const map = page.getByRole("navigation", {name: "Vue d’ensemble"});
+  const map = page.getByRole("navigation", {name: "Questions de la séance"});
   for (let index = 1; index <= 39; index++) {
     await expect(page.getByRole("heading", {name: `Question ${index} / 39`, exact: true})).toBeVisible();
     await page.getByRole("radio", {name: "Samedi à dix heures", exact: true}).check();
@@ -79,7 +79,7 @@ test("lecture complète : 39 questions, sauvegarde et correction sur PostgreSQL"
   // Refaire la série : nouvelle tentative vierge sur la même version.
   await page.getByRole("button", {name: "Refaire la série"}).click();
   await expect(page.getByRole("heading", {name: "Question 1 / 39", exact: true})).toBeVisible();
-  await expect(page.locator(".question-map button[data-state=answered]")).toHaveCount(0);
+  await expect(page.locator(".rail-map button[data-state=answered]")).toHaveCount(0);
 });
 
 test("simulation orale : 39 questions ouvertes, navigation libre et réécoute", async ({page}, info) => {
@@ -89,8 +89,8 @@ test("simulation orale : 39 questions ouvertes, navigation libre et réécoute",
   await page.getByRole("article").filter({has: page.getByRole("heading", {name: "Écoute complète de recette — 39 questions", exact: true})}).getByRole("link", {name: /Démarrer la série/}).click();
   await page.getByRole("button", {name: "Commencer"}).click();
   // Les 39 questions sont accessibles d’emblée, avec leurs choix.
-  const map = page.getByRole("navigation", {name: "Vue d’ensemble"});
-  await expect(map.locator(".question-map button:enabled")).toHaveCount(39);
+  const map = page.getByRole("navigation", {name: "Questions de la séance"});
+  await expect(map.locator(".rail-map button:enabled")).toHaveCount(39);
   await expect(page.getByRole("radio")).toHaveCount(4);
   await map.getByRole("button", {name: /^Question 39,/}).click();
   await expect(page.getByRole("heading", {name: "Question 39 / 39", exact: true})).toBeVisible();
@@ -195,9 +195,8 @@ test("import Excel : série avec images, relecture par une autre personne, publi
   expect(await image.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThanOrEqual(1200);
   await learner.getByRole("button", {name: "Agrandir le document"}).click();
   await expect(learner.getByRole("dialog", {name: "Document agrandi"})).toBeVisible();
-  await learner.getByRole("button", {name: "Agrandir encore"}).click();
-  await expect(learner.getByText("Zoom 150 %")).toBeVisible();
-  await learner.keyboard.press("Escape");
+  // Un clic sur le document agrandi le referme.
+  await learner.getByRole("dialog", {name: "Document agrandi"}).getByRole("img").click();
   await expect(learner.getByRole("dialog", {name: "Document agrandi"})).toBeHidden();
   await learner.screenshot({path: info.outputPath("question-image.png"), fullPage: true});
 });
