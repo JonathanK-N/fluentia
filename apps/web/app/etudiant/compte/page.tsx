@@ -36,7 +36,7 @@ function Connected({ profile, busy, act, setMessage }: { profile: Profile; busy:
     </section>
     {!profile.email_verified && <div className="app-notice verify-notice"><Icon name="flag" size={18} /><p>Vérifiez votre adresse e-mail pour commencer un exercice.</p>
       <Button variant="secondary" disabled={busy} onClick={() => act(async () => { const data = await api<{ detail: string }>("auth/verification/resend/", "POST"); setMessage(data.detail); return null; })}>Renvoyer le lien de vérification</Button></div>}
-    <SectionTitle title="Mon abonnement" />
+    <div id="abonnement" className="anchor-target"><SectionTitle title="Mon abonnement" /></div>
     <Summary label="Mon abonnement" items={[
       { label: "Temps restant", value: sub.status === "premium" ? days : "—", hint: sub.status === "premium" ? "Avant la fin du Premium" : "Aucun Premium en cours" },
       { label: "Valable jusqu’au", value: sub.premium_until ? longDate(sub.premium_until) : "—", hint: sub.status === "premium" ? sub.plan_label ?? "Premium actif" : sub.status === "expired" ? "Premium terminé" : "Formule gratuite" },

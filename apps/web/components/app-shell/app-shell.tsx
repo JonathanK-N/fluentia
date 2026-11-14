@@ -2,10 +2,11 @@
 /** Coque applicative : navigation latérale sombre, en-tête de page et menu qui pousse le contenu. */
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { Icon, type IconName } from "./icons";
 import { SessionProvider, initials, useSession } from "../../lib/session";
+import { api } from "../../lib/student-api";
 import { useFoldable } from "../../lib/foldable";
 import "./app-shell.css";
 
@@ -72,15 +73,85 @@ function isActive(pathname: string, item: Item) {
   return item.exact ? pathname === item.href : pathname === item.href || pathname.startsWith(item.href + "/");
 }
 
-function UserCard({ onNavigate }: { onNavigate: () => void }) {
-  const { profile, ready } = useSession();
-  return <div className="shell-user">
+const accountLinks: Item[] = [
+  { href: "/etudiant/compte", label: "Mon profil", icon: "user" },
+  { href: "/etudiant/compte#abonnement", label: "Mon abonnement", icon: "trophy" },
+  { href: "/etudiant/progression", label: "Mes résultats", icon: "trend" },
+  { href: "/etudiant/support", label: "Centre d’aide", icon: "help" },
+];
+
+/** Carte du compte en bas du menu : un clic ouvre le menu du compte (profil, abonnement, déconnexion). */
+function UserCard({ onNavigate, folded }: { onNavigate: () => void; folded: boolean }) {
+  const { profile, ready, setProfile } = useSession();
+  const router = useRouter();
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+  const [place, setPlace] = useState<CSSProperties>({});
+  const [leaving, setLeaving] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const menuId = useId();
+  useEffect(() => { setOpen(false); }, [pathname]);
+  useEffect(() => {
+    if (!open) return;
+    menuRef.current?.querySelector<HTMLElement>("a, button")?.focus();
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") { setOpen(false); buttonRef.current?.focus(); } };
+    const onPointer = (event: PointerEvent) => {
+      const target = event.target as Node;
+      if (!menuRef.current?.contains(target) && !buttonRef.current?.contains(target)) setOpen(false);
+    };
+    const onResize = () => setOpen(false);
+    window.addEventListener("keydown", onKey);
+    document.addEventListener("pointerdown", onPointer);
+    window.addEventListener("resize", onResize);
+    return () => { window.removeEventListener("keydown", onKey); document.removeEventListener("pointerdown", onPointer); window.removeEventListener("resize", onResize); };
+  }, [open]);
+  if (!ready || !profile) return <div className="shell-user">
     <span className="shell-avatar" aria-hidden="true">{ready ? initials(profile) : ""}</span>
     <div>
-      <strong>{!ready ? "Session…" : profile ? profile.display_name || "Mon profil" : "Invité"}</strong>
-      {ready && (profile ? <span>{profile.email}</span> : <Link href="/etudiant/compte" onClick={onNavigate}>Se connecter</Link>)}
+      <strong>{ready ? "Invité" : "Session…"}</strong>
+      {ready && <Link href="/etudiant/compte" onClick={onNavigate}>Se connecter</Link>}
     </div>
   </div>;
+  const name = profile.display_name || "Mon profil";
+  const badge = { premium: "Membre Premium", expired: "Premium expiré", free: "Formule gratuite" }[profile.subscription.status];
+  function toggle() {
+    const rect = buttonRef.current?.getBoundingClientRect();
+    // Menu posé au-dessus de la carte (ou à sa droite quand le menu latéral est replié), hors de la zone qui défile.
+    if (rect) setPlace(folded
+      ? { left: rect.right + 8, bottom: Math.max(8, window.innerHeight - rect.bottom) }
+      : { left: rect.left, width: rect.width, bottom: window.innerHeight - rect.top + 8 });
+    setOpen(value => !value);
+  }
+  async function logout() {
+    setLeaving(true);
+    try { await api("auth/logout/", "POST"); setProfile(null); setOpen(false); onNavigate(); router.push("/etudiant/compte"); }
+    catch { /* session déjà fermée ou réseau coupé : le profil sera relu au prochain affichage */ }
+    finally { setLeaving(false); }
+  }
+  return <>
+    <button ref={buttonRef} type="button" className="shell-user shell-user-button" aria-expanded={open} aria-controls={menuId} onClick={toggle}
+      title={folded ? name : undefined}>
+      <span className="shell-avatar" aria-hidden="true">{initials(profile)}</span>
+      <div><strong>{name}</strong><span>{profile.email}</span></div>
+      <Icon name="chevron" size={16} className="shell-user-chevron" />
+      <span className="sr-only">Ouvrir le menu du compte</span>
+    </button>
+    {open && <div ref={menuRef} id={menuId} className="account-menu" style={place}>
+      <div className="account-menu-head">
+        <strong>{name}</strong><span>{profile.email}</span>
+        <span className="account-menu-badge" data-status={profile.subscription.status}><Icon name="trophy" size={12} />{badge}</span>
+      </div>
+      <ul>
+        {accountLinks.map(item => <li key={item.href}><Link href={item.href} className="account-menu-item" onClick={() => { setOpen(false); onNavigate(); }}>
+          <Icon name={item.icon} size={16} /><span>{item.label}</span>
+        </Link></li>)}
+      </ul>
+      <button type="button" className="account-menu-item account-menu-logout" disabled={leaving} onClick={logout}>
+        <Icon name="logout" size={16} /><span>{leaving ? "Déconnexion…" : "Se déconnecter"}</span>
+      </button>
+    </div>}
+  </>;
 }
 
 function EditorialLock({ signedIn }: { signedIn: boolean }) {
@@ -138,7 +209,7 @@ function Shell({ variant, children }: { variant: "student" | "edition"; children
       </button>
       <Brand variant={variant} />
     </div>
-    <aside id="shell-sidebar" className="shell-sidebar" onClick={event => { if (folded && !(event.target as HTMLElement).closest("a, button")) fold(false); }}>
+    <aside id="shell-sidebar" className="shell-sidebar" onClick={event => { if (folded && !(event.target as HTMLElement).closest("a, button, .account-menu")) fold(false); }}>
       <div className="shell-sidebar-head">
         <Brand variant={variant} />
         <button type="button" className="shell-fold" aria-expanded={!folded} aria-controls="shell-sidebar" onClick={() => fold(!folded)}
@@ -160,7 +231,7 @@ function Shell({ variant, children }: { variant: "student" | "edition"; children
           })}</ul>
         </div>)}
       </nav>
-      <UserCard onNavigate={close} />
+      <UserCard onNavigate={close} folded={folded} />
     </aside>
     <div className="shell-main">
       <main id="contenu" tabIndex={-1} className="shell-content student-space">
