@@ -828,8 +828,8 @@ html[data-exam-focus][data-exam-menu] .shell-fold { display: none; }
 .aside-link { display: inline-flex; align-items: center; gap: 0.3rem; margin-top: 0.6rem; font-weight: 600; color: var(--accent); }
 
 /* Séance Lecture / Écoute : colonne des 39 questions tout à gauche, question entière visible sans défiler. */
-.seance { display: flex; flex-direction: column; height: 100dvh; }
-html[data-exam-focus] .shell-content.student-space:has(.seance) { padding-bottom: 0; }
+.seance-qcm { display: flex; flex-direction: column; height: 100dvh; }
+html[data-exam-focus] .shell-content.student-space:has(.seance-qcm) { padding-bottom: 0; }
 .seance-frame { flex: 1; min-height: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); }
 .seance-rail { --map-answered: var(--indigo); --map-seen: var(--mint); --map-seen-border: #8fd3c3; padding: 0.5rem 1.1rem; background: var(--surface); border-right: 1px solid var(--border); overflow: hidden; }
 .rail-map { display: flex; flex-direction: column; gap: 2px; height: 100%; margin: 0; padding: 0; list-style: none; }
@@ -843,46 +843,46 @@ html[data-exam-focus] .shell-content.student-space:has(.seance) { padding-bottom
 .rail-map button[aria-current="step"]::before, .rail-map button[aria-current="step"]::after { position: absolute; top: 50%; transform: translateY(-50%); color: var(--indigo); font-size: 0.7rem; font-weight: 700; }
 .rail-map button[aria-current="step"]::before { content: "→"; right: calc(100% + 4px); }
 .rail-map button[aria-current="step"]::after { content: "←"; left: calc(100% + 4px); }
-.seance .seance-body { display: flex; flex-direction: column; min-height: 0; width: 100%; max-width: 1000px; margin-inline: auto; padding: 0.9rem clamp(1rem, 3vw, 2rem); overflow: hidden; }
-.seance .seance-head { flex: none; margin-bottom: 0.6rem; }
-.seance .seance-status { position: static; flex: none; margin-bottom: 0.75rem; padding: 0.6rem 1rem; }
-.seance .seance-status .map-legend { margin: 0.1rem 0 0; }
-.seance .seance-status .map-finish { width: auto; }
+.seance-qcm .seance-body { display: flex; flex-direction: column; min-height: 0; width: 100%; max-width: 1000px; margin-inline: auto; padding: 0.9rem clamp(1rem, 3vw, 2rem); overflow: hidden; }
+.seance-qcm .seance-head { flex: none; margin-bottom: 0.6rem; }
+.seance-qcm .seance-status { position: static; flex: none; margin-bottom: 0.75rem; padding: 0.6rem 1rem; }
+.seance-qcm .seance-status .map-legend { margin: 0.1rem 0 0; }
+.seance-qcm .seance-status .map-finish { width: auto; }
 .seance-main { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 0.75rem; overflow-y: auto; }
-.seance .question-card { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; margin: 0; padding: 1rem 1.25rem; }
-.seance .question-head { flex: none; margin-bottom: 0.6rem; }
-.seance .question-card .audio-player { flex: none; margin-block: 0 0.6rem; }
-.seance .question-card .doc-figure { flex: 1 1 0; min-height: 7rem; display: flex; margin: 0 0 0.6rem; }
-.seance .question-card .doc-open { flex: 1; min-height: 0; }
-.seance .question-card .doc-open img { width: 100%; height: 100%; max-height: none; object-fit: contain; }
-.seance .question-card .student-passage { flex: 1 1 0; min-height: 5rem; overflow-y: auto; margin-bottom: 0.6rem; }
-.seance .question-card fieldset { flex: none; margin-bottom: 0.6rem; }
-.seance .question-card .student-choice { padding: 0.5rem 0.9rem; margin-block: 0.35rem; }
-.seance .question-card .question-nav { flex: none; margin-top: auto; padding-top: 0.7rem; }
+.seance-qcm .question-card { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; margin: 0; padding: 1rem 1.25rem; }
+.seance-qcm .question-head { flex: none; margin-bottom: 0.6rem; }
+.seance-qcm .question-card .audio-player { flex: none; margin-block: 0 0.6rem; }
+.seance-qcm .question-card .doc-figure { flex: 1 1 0; min-height: 7rem; display: flex; margin: 0 0 0.6rem; }
+.seance-qcm .question-card .doc-open { flex: 1; min-height: 0; }
+.seance-qcm .question-card .doc-open img { width: 100%; height: 100%; max-height: none; object-fit: contain; }
+.seance-qcm .question-card .student-passage { flex: 1 1 0; min-height: 5rem; overflow-y: auto; margin-bottom: 0.6rem; }
+.seance-qcm .question-card fieldset { flex: none; margin-bottom: 0.6rem; }
+.seance-qcm .question-card .student-choice { padding: 0.5rem 0.9rem; margin-block: 0.35rem; }
+.seance-qcm .question-card .question-nav { flex: none; margin-top: auto; padding-top: 0.7rem; }
 /* Document agrandi : un clic le referme. */
 .doc-viewer-fit[open] { display: grid; place-items: center; width: 96vw; height: 94vh; padding: 0; background: rgb(17 23 51 / 92%); cursor: zoom-out; }
 .doc-viewer-fit img { max-width: 100%; max-height: 100%; object-fit: contain; }
 .doc-viewer-fit .doc-close { position: absolute; top: 0.75rem; right: 0.75rem; display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.4rem 0.8rem; border: 0; border-radius: 999px; background: rgb(255 255 255 / 92%); color: #111733; font: inherit; font-size: 0.75rem; font-weight: 600; cursor: pointer; }
 /* Petits écrans : la page défile normalement et les questions passent en ligne au-dessus. */
 @media (max-width: 760px), (max-height: 560px) {
-  .seance { height: auto; }
+  .seance-qcm { height: auto; }
   .seance-frame { display: block; }
   .seance-rail { padding: 0.5rem 1rem; border-right: 0; border-bottom: 1px solid var(--border); overflow-x: auto; }
   .rail-map { flex-direction: row; height: auto; gap: 4px; }
   .rail-map li { flex: none; }
   .rail-map button { height: 2rem; max-height: none; }
   .rail-map button[aria-current="step"]::before, .rail-map button[aria-current="step"]::after { content: none; }
-  .seance .seance-body, .seance-main { overflow: visible; }
-  .seance .question-card .doc-figure, .seance .question-card .student-passage { flex: none; min-height: 0; }
-  .seance .question-card .doc-open img { height: auto; max-height: 45vh; }
+  .seance-qcm .seance-body, .seance-main { overflow: visible; }
+  .seance-qcm .question-card .doc-figure, .seance-qcm .question-card .student-passage { flex: none; min-height: 0; }
+  .seance-qcm .question-card .doc-open img { height: auto; max-height: 45vh; }
 }
 
 /* Ajustements : numéros au milieu de leur colonne, question sur toute la largeur, boutons en bas, document agrandi sans cadre. */
 .seance-frame { grid-template-columns: clamp(4.5rem, 14vw, 16rem) minmax(0, 1fr); }
 .seance-rail { padding-inline: 0.5rem; }
-.seance .seance-body { max-width: none; margin: 0; padding: 0.9rem clamp(1rem, 2.5vw, 2rem) 0; }
-.seance .seance-head { text-align: left; }
-.seance .question-card { padding-bottom: 1.25rem; }
+.seance-qcm .seance-body { max-width: none; margin: 0; padding: 0.9rem clamp(1rem, 2.5vw, 2rem) 0; }
+.seance-qcm .seance-head { text-align: left; }
+.seance-qcm .question-card { padding-bottom: 1.25rem; }
 .seance-footer { flex: none; display: flex; justify-content: space-between; gap: 0.75rem; margin: 0; padding: 0.75rem 0 1rem; border-top: 0; }
 .seance-zoom { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.2rem; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
 .seance-zoom button { min-width: 2.2rem; min-height: 32px; padding: 0 0.45rem; border: 0; border-radius: 8px; background: transparent; color: var(--text); font: inherit; font-size: 0.8rem; font-weight: 700; cursor: pointer; }
@@ -892,7 +892,7 @@ html[data-exam-focus] .shell-content.student-space:has(.seance) { padding-bottom
 .doc-viewer-fit[open] { background: transparent; box-shadow: none; border: 0; }
 .doc-viewer-fit::backdrop { background: transparent; }
 .doc-viewer-fit img { box-shadow: 0 12px 40px rgb(15 21 48 / 0.35); border-radius: 6px; }
-@media (max-width: 760px), (max-height: 560px) { .seance .seance-body { padding-bottom: 0; } }
+@media (max-width: 760px), (max-height: 560px) { .seance-qcm .seance-body { padding-bottom: 0; } }
 
 /* Légende sous les numéros ; document agrandi centré dans l’écran. */
 .seance-rail { display: flex; flex-direction: column; gap: 0.6rem; }
@@ -904,7 +904,10 @@ html[data-exam-focus] .shell-content.student-space:has(.seance) { padding-bottom
 
 /* Zoom A− / A+ : seulement le texte (document écrit, question, choix) ; 80 % = taille habituelle. */
 .seance-main { --text-zoom: 0.8; }
-.seance .question-card .student-passage { font-size: calc(1.08rem * var(--text-zoom)) !important; }
-.seance .question-card legend { font-size: calc(1.12rem * var(--text-zoom)); }
-.seance .question-card .student-choice { font-size: calc(1.08rem * var(--text-zoom)); }
-.seance .question-card details p { font-size: calc(1.08rem * var(--text-zoom)); }
+.seance-qcm .question-card .student-passage { font-size: calc(1.08rem * var(--text-zoom)) !important; }
+.seance-qcm .question-card legend { font-size: calc(1.12rem * var(--text-zoom)); }
+.seance-qcm .question-card .student-choice { font-size: calc(1.08rem * var(--text-zoom)); }
+.seance-qcm .question-card details p { font-size: calc(1.08rem * var(--text-zoom)); }
+
+/* Rédaction, présentation du sujet : consigne et lancement sur toute la largeur. */
+.writing-intro { display: grid; gap: 1rem; }

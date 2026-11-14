@@ -218,7 +218,7 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
         })}
       </ol>
     </>}
-    {active && attempt && <div className="seance">
+    {active && attempt && <div className="seance seance-qcm">
       <header className="seance-bar">
         <div className="seance-brand">
           <Image src="/branding/01_Logos_PNG/fluentia-symbole-transparent-256.png" alt="" width={30} height={30} unoptimized />

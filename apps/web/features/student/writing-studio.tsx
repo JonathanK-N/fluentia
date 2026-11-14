@@ -9,7 +9,6 @@ import { Icon } from "../../components/app-shell/icons";
 import { api, type ModelAnswer } from "../../lib/student-api";
 import { useSession } from "../../lib/session";
 import { countWords, draftKey as subjectDraftKey, sentTo, type WritingTask } from "./content";
-import { FoldableAside } from "./foldable-aside";
 import { Ring, SeanceBar, SeanceHead, Timer } from "./seance";
 
 const criteria = ["J’ai respecté le type de texte et le destinataire.", "J’ai traité tous les points de la consigne.", "Mes idées sont organisées avec des connecteurs.", "J’ai varié le vocabulaire et évité les répétitions.", "J’ai relu l’accord, la conjugaison et la ponctuation."];
@@ -26,7 +25,7 @@ function clearIfRequested(task: WritingTask, subject: number) {
   return subject;
 }
 
-export function WritingStudio({ task, subject: chosen, others = [], corrector }: { task: WritingTask; subject: number; others?: { slug: string; number: number; title: string }[]; corrector: string }) {
+export function WritingStudio({ task, subject: chosen, corrector }: { task: WritingTask; subject: number; others?: { slug: string; number: number; title: string }[]; corrector: string }) {
   // D’abord la page du sujet ; « Commencer » ouvre la séance plein écran.
   const [started, setStarted] = useState(false);
   const [menu, setMenu] = useState(false);
@@ -123,11 +122,8 @@ export function WritingStudio({ task, subject: chosen, others = [], corrector }:
         <p className="status-text notice-text">Votre brouillon est enregistré sur cet appareil. {corrector ? `Quand vous demandez une correction, votre texte est envoyé ${sentTo(corrector)} pour être corrigé automatiquement.` : "La correction automatique n’est pas disponible pour le moment."}</p>
       </section>
     </div>
-    <div className="section-title"><h2>Sujet {subject + 1} · {current.title}</h2>
-      <Link className="subject-change" href={list}><Icon name="back" size={14} />Changer de sujet</Link>
-    </div>
-    <div className="studio">
-      <div style={{ display: "grid", gap: "1rem" }}>
+    <div className="section-title"><h2>Sujet {subject + 1} · {current.title}</h2></div>
+    <div className="writing-intro">
         <section className="prompt-card" aria-labelledby="sujet">
           <h2 id="sujet" className="student-eyebrow">Consigne</h2>
           <p>{current.prompt}</p>
@@ -141,17 +137,6 @@ export function WritingStudio({ task, subject: chosen, others = [], corrector }:
           </div>
           <Button onClick={() => setStarted(true)}><Icon name="pen" size={18} />{text ? "Reprendre" : "Commencer"}</Button>
         </section>
-      </div>
-      <FoldableAside className="studio-aside" label="Repères pour la rédaction" tab="Repères">
-        <section className="student-card card-muted" aria-labelledby="conseils">
-          <div className="studio-card-head"><h2 id="conseils">Conseils</h2></div>
-          <ul className="checklist">{task.advice.map(item => <li key={item}>{item}</li>)}</ul>
-        </section>
-        <nav className="student-card" aria-labelledby="autres-taches">
-          <div className="studio-card-head"><h2 id="autres-taches">Autres tâches</h2></div>
-          <ul className="activity-list">{others.map(t => <li key={t.slug}><Link href={`/etudiant/expression-ecrite/${t.slug}`}>Tâche {t.number} — {t.title}</Link><Icon name="chevron" size={16} /></li>)}</ul>
-        </nav>
-      </FoldableAside>
     </div>
   </>;
 
