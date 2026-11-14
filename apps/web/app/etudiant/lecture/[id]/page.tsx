@@ -16,8 +16,7 @@ import { exitFullscreen, enterFullscreen } from "../../../../lib/fullscreen";
 
 // Préfixe des indices du corrigé, affichés dans « Où le trouver ».
 const HINT = "Indice dans le texte : ";
-const ZOOMS = [0.8, 0.9, 1, 1.1, 1.25, 1.4, 1.6];
-const ZOOM_KEY = "fluentia:zoom-seance";
+const ZOOMS = [0.8, 0.9, 1, 1.1, 1.25];
 
 export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
   const {id} = use(params);
@@ -28,15 +27,10 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const [confirm, setConfirm] = useState(false);
-  // Taille de la question (texte, document et choix), gardée sur cet appareil.
-  const [zoom, setZoom] = useState(1);
-  useEffect(() => {
-    try { const saved = Number(localStorage.getItem(ZOOM_KEY)); if (ZOOMS.includes(saved)) setZoom(saved); } catch { /* stockage indisponible */ }
-  }, []);
+  // Taille de la question (texte, document et choix) : chaque séance commence à 80 %.
+  const [zoom, setZoom] = useState(ZOOMS[0]!);
   function zoomBy(step: number) {
-    const next = ZOOMS[Math.min(ZOOMS.length - 1, Math.max(0, ZOOMS.indexOf(zoom) + step))]!;
-    setZoom(next);
-    try { localStorage.setItem(ZOOM_KEY, String(next)); } catch { /* stockage indisponible */ }
+    setZoom(ZOOMS[Math.min(ZOOMS.length - 1, Math.max(0, ZOOMS.indexOf(zoom) + step))]!);
   }
   const [quitting, setQuitting] = useState(false);
   const [remaining, setRemaining] = useState(0);
@@ -251,6 +245,7 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
             return <li key={item.id}><button type="button" data-state={state} aria-current={item.id === question?.id ? "step" : undefined} onClick={() => go(position)}
               aria-label={`Question ${item.position}, ${state === "answered" ? "répondue" : state === "seen" ? "vue sans réponse" : "pas encore vue"}`}>{item.position}</button></li>;
           })}</ul>
+          <ul className="map-legend rail-legend" aria-hidden="true"><li data-state="answered">Répondue</li><li data-state="seen">Vue</li><li>Pas encore vue</li></ul>
         </nav>
         <div className="seance-body">
           <div className="seance-head">
@@ -267,7 +262,6 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
             <div className="seance-saved">
               <p><span>Réponses sauvegardées{busy ? " · enregistrement…" : ""}</span><strong>{answeredCount} / {total}</strong></p>
               <span className="session-progress" aria-hidden="true"><span style={{ width: `${total ? answeredCount / total * 100 : 0}%` }} /></span>
-              <ul className="map-legend" aria-hidden="true"><li data-state="answered">Répondue</li><li data-state="seen">Vue</li><li>Pas encore vue</li></ul>
             </div>
             <div className="seance-zoom" role="group" aria-label="Taille du texte">
               <button type="button" onClick={() => zoomBy(-1)} disabled={zoom <= ZOOMS[0]!} aria-label="Réduire le texte">A−</button>
@@ -289,7 +283,7 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
                 {question.choices.map((choice, rank) => { const verdict = verdicts[question.id]; const state = verdict?.choice === choice.id ? (verdict.correct ? "right" : "wrong") : undefined; return <label className="student-choice" data-verdict={state} key={choice.id}>
                   <input type="radio" name={question.id} value={choice.id} disabled={busy && answers[question.id] !== choice.id} checked={answers[question.id] === choice.id} onChange={() => save(question.id, choice.id)} />
                   <span className="choice-letter" aria-hidden="true">{"ABCD"[rank]}</span>{choice.label}
-                  {state && <Icon name={state === "right" ? "check" : "close"} size={16} className="choice-mark" />}
+                  {state === "right" && <Icon name="check" size={16} className="choice-mark" />}
                 </label>; })}
               </fieldset>}
             </section>}
@@ -300,7 +294,7 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
           {question && <nav className="question-nav seance-footer" aria-label="Navigation entre les questions">
             <Button variant="secondary" disabled={index === 0} onClick={() => go(index - 1)}><Icon name="back" size={15} />Retour</Button>
             {index < shown.length - 1
-              ? <Button onClick={() => go(index + 1)}>Question suivante<Icon name="arrow" size={15} /></Button>
+              ? <Button onClick={() => go(index + 1)}>Suivant<Icon name="arrow" size={15} /></Button>
               : <Button disabled={busy || remaining === 0} onClick={() => setConfirm(true)}>Terminer<Icon name="check" size={15} /></Button>}
           </nav>}
         </div>

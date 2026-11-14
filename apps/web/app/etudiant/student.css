@@ -893,3 +893,11 @@ html[data-exam-focus] .shell-content.student-space:has(.seance) { padding-bottom
 .doc-viewer-fit::backdrop { background: transparent; }
 .doc-viewer-fit img { box-shadow: 0 12px 40px rgb(15 21 48 / 0.35); border-radius: 6px; }
 @media (max-width: 760px), (max-height: 560px) { .seance .seance-body { padding-bottom: 0; } }
+
+/* Légende sous les numéros ; document agrandi centré dans l’écran. */
+.seance-rail { display: flex; flex-direction: column; gap: 0.6rem; }
+.seance-rail .rail-map { flex: 1; min-height: 0; height: auto; }
+.rail-legend { flex: none; display: grid; gap: 0.3rem; justify-content: center; margin: 0; padding: 0.5rem 0 0.25rem; border-top: 1px solid var(--border); font-size: 0.68rem; }
+.doc-viewer-fit[open] { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; width: 100vw; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 0; }
+.doc-viewer-fit img { width: auto; height: auto; max-width: 92vw; max-height: 90dvh; }
+@media (max-width: 760px), (max-height: 560px) { .seance-rail { flex-direction: row; align-items: center; } .rail-legend { display: none; } }
