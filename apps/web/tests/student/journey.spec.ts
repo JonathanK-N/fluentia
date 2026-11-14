@@ -95,7 +95,7 @@ test("inscription, courriel, session, lecture persistante et résultat privé su
   expect((await new AxeBuilder({page}).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations).toEqual([]);
   await page.emulateMedia({colorScheme: "light"});
   await page.getByRole("button", {name: "Terminer la séance"}).click();
-  await page.getByRole("button", {name: "Confirmer la soumission"}).click();
+  await page.getByRole("button", {name: "Terminer et voir la correction"}).click();
   await expect(page.getByRole("heading", {name: "Séance terminée : place au bilan.", exact: true})).toBeVisible();
   await expect(page.getByText("1 réponse juste sur 1", {exact: true})).toBeVisible();
   await expect(page.locator(".bilan-box", {hasText: "Bonne réponse"}).getByText("Les pièces à remplacer", {exact: true})).toBeVisible();

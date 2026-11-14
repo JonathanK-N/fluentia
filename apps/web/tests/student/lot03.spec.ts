@@ -45,7 +45,7 @@ test("oral entraînement : média privé, lecteur, transcription et résultat", 
   expect((await new AxeBuilder({page}).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations).toEqual([]);
   await page.screenshot({path: info.outputPath("oral-entrainement.png"), fullPage: true});
   await page.getByRole("button", {name: "Terminer la séance"}).click();
-  await page.getByRole("button", {name: "Confirmer la soumission"}).click();
+  await page.getByRole("button", {name: "Terminer et voir la correction"}).click();
   await expect(page.getByText("1 réponse juste sur 1", {exact: true})).toBeVisible();
   await page.getByRole("link", {name: "Mes résultats", exact: true}).click();
   await expect(page.getByRole("heading", {name: "Écoute", exact: true})).toBeVisible();
@@ -71,7 +71,7 @@ test("lecture complète : 39 questions, sauvegarde et correction sur PostgreSQL"
   await page.reload();
   await expect(map.locator("button[data-state=answered]")).toHaveCount(39);
   await page.getByRole("button", {name: "Terminer la séance"}).click();
-  await page.getByRole("button", {name: "Confirmer la soumission"}).click();
+  await page.getByRole("button", {name: "Terminer et voir la correction"}).click();
   await expect(page.getByText("39 réponses justes sur 39", {exact: true})).toBeVisible();
   await expect(page.locator(".bilan-question")).toHaveCount(39);
   await expect(page.getByText("Afficher le texte")).toHaveCount(39);
@@ -108,7 +108,7 @@ test("simulation orale : 39 questions ouvertes, navigation libre et réécoute",
     if (index < 39) await page.getByRole("button", {name: "Suivant"}).click();
   }
   await page.getByRole("button", {name: "Terminer la séance"}).click();
-  await page.getByRole("button", {name: "Confirmer la soumission"}).click();
+  await page.getByRole("button", {name: "Terminer et voir la correction"}).click();
   await expect(page.getByText("39 réponses justes sur 39", {exact: true})).toBeVisible();
   await page.screenshot({path: info.outputPath("oral-complet-resultats.png"), fullPage: true});
 });

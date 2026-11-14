@@ -26,7 +26,8 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
-  const [confirm, setConfirm] = useState(false);
+  // Fin de séance : « Quitter » et « Terminer » ouvrent la même fenêtre ; seul le texte change.
+  const [ending, setEnding] = useState(false);
   // Taille du texte (document écrit, question et choix ; l’image garde sa place) : chaque séance commence à 80 %.
   const [zoom, setZoom] = useState(ZOOMS[0]!);
   function zoomBy(step: number) {
@@ -106,7 +107,7 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
   }
   async function submit() {
     setBusy(true); setError("");
-    try { await api(`attempts/${id}/submit/`, "POST"); setConfirm(false); await load(); }
+    try { await api(`attempts/${id}/submit/`, "POST"); await load(); }
     catch (e) { setError((e as Error).message); await load().catch(() => {}); }
     finally { setBusy(false); }
   }
@@ -146,7 +147,7 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
   function go(target: number) {
     const next = shown[target];
     if (!next) return;
-    navigated.current = true; setConfirm(false); setCurrentId(next.id);
+    navigated.current = true; setCurrentId(next.id);
   }
   return <>
     {!active && !results && <div className="page-head"><div>
@@ -224,14 +225,14 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
           <strong>Fluentia</strong><span aria-hidden="true" className="seance-sep" /><span>Séance · {listening ? "Écoute" : "Lecture"}</span>
         </div>
         <Dialog.Root open={quitting} onOpenChange={open => { if (!busy) setQuitting(open); }}>
-          <Dialog.Trigger className="seance-quit"><Icon name="close" size={14} />Quitter la séance</Dialog.Trigger>
+          <Dialog.Trigger className="seance-quit" onClick={() => setEnding(false)}><Icon name="close" size={14} />Quitter la séance</Dialog.Trigger>
           <Dialog.Portal>
             <Dialog.Overlay className="dialog-overlay" />
             <Dialog.Content className="dialog-content quit-dialog">
-              <Dialog.Title>Quitter la séance ?</Dialog.Title>
-              <Dialog.Description>{answeredCount} réponse{answeredCount > 1 ? "s" : ""} enregistrée{answeredCount > 1 ? "s" : ""} sur {total}. En quittant, vos réponses sont envoyées et vous passez à la correction. Les questions sans réponse comptent pour zéro.</Dialog.Description>
+              <Dialog.Title>{ending ? "Terminer la séance ?" : "Quitter la séance ?"}</Dialog.Title>
+              <Dialog.Description>{answeredCount} réponse{answeredCount > 1 ? "s" : ""} enregistrée{answeredCount > 1 ? "s" : ""} sur {total}. {ending ? "En terminant" : "En quittant"}, vos réponses sont envoyées et vous passez à la correction. Les questions sans réponse comptent pour zéro.</Dialog.Description>
               <div className="quit-actions">
-                <Button loading={busy} onClick={async () => { await submit(); setQuitting(false); }}>Quitter et voir la correction</Button>
+                <Button loading={busy} onClick={async () => { await submit(); setQuitting(false); }}>{ending ? "Terminer et voir la correction" : "Quitter et voir la correction"}</Button>
                 <Dialog.Close asChild><Button variant="secondary" disabled={busy}>Continuer la séance</Button></Dialog.Close>
               </div>
             </Dialog.Content>
@@ -268,7 +269,7 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
               <span aria-live="polite">{Math.round(zoom * 100)} %</span>
               <button type="button" onClick={() => zoomBy(1)} disabled={zoom >= ZOOMS[ZOOMS.length - 1]!} aria-label="Agrandir le texte">A+</button>
             </div>
-            <Button className="map-finish" disabled={busy || remaining === 0} onClick={() => setConfirm(true)}>Terminer la séance</Button>
+            <Button className="map-finish" disabled={busy || remaining === 0} onClick={() => { setEnding(true); setQuitting(true); }}>Terminer la séance</Button>
           </div>
           <p role="status" className="sr-only">{message}</p>
           <p className="sr-only" aria-live="polite">{spoken}</p>
@@ -287,15 +288,12 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
                 </label>; })}
               </fieldset>}
             </section>}
-            {confirm && <section className="student-card" aria-label="Confirmation de soumission"><h2>Prêt à découvrir le corrigé ?</h2><p>{answeredCount} réponses enregistrées sur {total}. Les questions sans réponse comptent pour zéro. Après la soumission, les réponses seront définitives.</p>
-              <div className="student-nav" style={{ margin: 0 }}><Button loading={busy} onClick={submit}>Confirmer la soumission</Button> <Button variant="secondary" disabled={busy} onClick={() => setConfirm(false)}>Continuer la séance</Button></div>
-            </section>}
           </div>
           {question && <nav className="question-nav seance-footer" aria-label="Navigation entre les questions">
             <Button variant="secondary" disabled={index === 0} onClick={() => go(index - 1)}><Icon name="back" size={15} />Retour</Button>
             {index < shown.length - 1
               ? <Button onClick={() => go(index + 1)}>Suivant<Icon name="arrow" size={15} /></Button>
-              : <Button disabled={busy || remaining === 0} onClick={() => setConfirm(true)}>Terminer<Icon name="check" size={15} /></Button>}
+              : <Button disabled={busy || remaining === 0} onClick={() => { setEnding(true); setQuitting(true); }}>Terminer<Icon name="check" size={15} /></Button>}
           </nav>}
         </div>
       </div>
