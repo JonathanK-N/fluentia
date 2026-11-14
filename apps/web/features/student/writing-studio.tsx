@@ -11,7 +11,6 @@ import { useSession } from "../../lib/session";
 import { countWords, draftKey as subjectDraftKey, sentTo, type WritingTask } from "./content";
 import { Ring, SeanceBar, SeanceHead, Timer } from "./seance";
 
-const criteria = ["J’ai respecté le type de texte et le destinataire.", "J’ai traité tous les points de la consigne.", "Mes idées sont organisées avec des connecteurs.", "J’ai varié le vocabulaire et évité les répétitions.", "J’ai relu l’accord, la conjugaison et la ponctuation."];
 
 const MIN_WORDS = 20;
 
@@ -41,7 +40,6 @@ export function WritingStudio({ task, subject: chosen, corrector }: { task: Writ
   const key = draftKey(task, subject);
   const [text, setText] = useState("");
   const [saved, setSaved] = useState("");
-  const [checks, setChecks] = useState<boolean[]>(criteria.map(() => false));
   const [remaining, setRemaining] = useState(task.minutes * 60);
   const [running, setRunning] = useState(false);
   const { profile, ready } = useSession();
@@ -52,7 +50,7 @@ export function WritingStudio({ task, subject: chosen, corrector }: { task: Writ
   const [answering, setAnswering] = useState(false);
   const [restarting, setRestarting] = useState(false);
   const loaded = useRef("");
-  useEffect(() => { setText(read(key)); loaded.current = key; setSaved(""); setChecks(criteria.map(() => false)); setCorrectionError(""); setAnswer(null); setShowAnswer(false); }, [key]);
+  useEffect(() => { setText(read(key)); loaded.current = key; setSaved(""); setCorrectionError(""); setAnswer(null); setShowAnswer(false); }, [key]);
   useEffect(() => {
     if (loaded.current !== key) return;
     const timer = setTimeout(() => { if (write(key, text)) setSaved(text ? "Brouillon enregistré sur cet appareil." : ""); }, 600);
@@ -91,7 +89,7 @@ export function WritingStudio({ task, subject: chosen, corrector }: { task: Writ
   function restart() {
     setText(""); write(key, ""); setSaved("");
     setCorrectionError(""); setShowAnswer(false);
-    setChecks(criteria.map(() => false)); setRunning(false); setRemaining(task.minutes * 60);
+    setRunning(false); setRemaining(task.minutes * 60);
     setRestarting(false);
   }
   // Séance plein écran, comme l’Oral, la Lecture et l’Écoute : le menu du site est masqué.
@@ -105,9 +103,7 @@ export function WritingStudio({ task, subject: chosen, corrector }: { task: Writ
     if (menu) document.documentElement.dataset.examMenu = "";
     else delete document.documentElement.dataset.examMenu;
   }, [menu]);
-  const list = `/etudiant/expression-ecrite/${task.slug}`;
   const total = task.minutes * 60;
-  const done = checks.filter(Boolean).length;
   const tone = !words ? undefined : status === "Dans la cible" ? "mint" : "warn";
 
   if (!started) return <>
@@ -182,14 +178,6 @@ export function WritingStudio({ task, subject: chosen, corrector }: { task: Writ
           <p className="student-hint" id="compteur" aria-live="polite">{words} mot{words > 1 ? "s" : ""} · cible {task.min}–{task.max}{saved ? ` · ${saved}` : ""}</p>
         </div>
 
-        <details className="oral-consigne">
-          <summary><Icon name="chevron" size={14} />Auto-évaluation <span className="pill">{done} / {criteria.length}</span></summary>
-          <ul className="checklist">{criteria.map((label, index) => <li key={label}><label><input type="checkbox" checked={checks[index]} onChange={e => setChecks(values => values.map((v, i) => i === index ? e.target.checked : v))} />{label}</label></li>)}</ul>
-        </details>
-        <details className="oral-consigne">
-          <summary><Icon name="chevron" size={14} />Conseils pour cette tâche</summary>
-          <ul className="checklist">{task.advice.map(item => <li key={item}>{item}</li>)}</ul>
-        </details>
 
         {showAnswer && answer && <section className="oral-message writing-answer" aria-labelledby="proposition-titre">
           <span className="oral-message-icon" aria-hidden="true"><Icon name="book" size={16} /></span>
@@ -225,7 +213,7 @@ export function WritingStudio({ task, subject: chosen, corrector }: { task: Writ
               <Button loading={correcting} disabled={!ready || !corrector || !current.id || words < MIN_WORDS} onClick={requestCorrection}>Corriger mon texte<Icon name="arrow" size={16} /></Button>
             </>}
         </div>
-        <p className="student-hint writing-note">{words < MIN_WORDS ? `Écrivez au moins ${MIN_WORDS} mots pour demander une correction. ` : ""}{corrector ? `Votre texte est envoyé ${sentTo(corrector)} pour être corrigé automatiquement.` : "La correction automatique n’est pas disponible pour le moment."} <Link href={list}>Changer de sujet</Link></p>
+        <p className="student-hint writing-note">{words < MIN_WORDS ? `Écrivez au moins ${MIN_WORDS} mots pour demander une correction. ` : ""}{corrector ? `Votre texte est envoyé ${sentTo(corrector)} pour être corrigé automatiquement.` : "La correction automatique n’est pas disponible pour le moment."}</p>
       </section>
     </div>
   </div>;
