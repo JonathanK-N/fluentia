@@ -28,17 +28,6 @@ export default function HomePage() {
   }, [profile]);
   const groups = progress?.groups ?? [];
   const done = groups.reduce((sum, g) => sum + g.attempts, 0);
-  // Réussite par épreuve : les questions sans réponse comptent comme fausses, comme à l’examen.
-  const rateOf = (skill: string) => {
-    const mine = groups.filter(g => g.skill === skill);
-    const asked = mine.reduce((sum, g) => sum + g.questions, 0);
-    return asked ? Math.round(mine.reduce((sum, g) => sum + g.correct, 0) / asked * 100) : null;
-  };
-  const reading = rateOf("reading"), listening = rateOf("listening");
-  const writing = progress?.writing, speaking = progress?.speaking;
-  const note = (graded?: { last_score: number | null; last_level: string | null }) =>
-    graded?.last_score != null ? `${graded.last_score}/20${graded.last_level ? ` · ${graded.last_level}` : ""}` : "—";
-  const corrections = (count: number, word: string) => count ? `${count} ${word}${count > 1 ? "s" : ""} corrigée${count > 1 ? "s" : ""} · dernière note` : `Aucune ${word} corrigée pour l’instant`;
   // Séances dont le chrono tourne encore : une séance au délai dépassé ne se reprend plus.
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => { const timer = window.setInterval(() => setNow(Date.now()), 30_000); return () => window.clearInterval(timer); }, []);
@@ -71,10 +60,9 @@ export default function HomePage() {
     <SectionTitle title="Votre bilan" />
     <Summary label="Votre bilan" items={[
       { label: "Séries terminées", value: pending ?? done, hint: "Lecture et Écoute envoyées" },
-      { label: "Réussite Lecture · Écoute", value: pending ?? `${reading ?? "—"} % · ${listening ?? "—"} %`.replaceAll("— %", "—"), hint: "Questions sans réponse comptées fausses" },
-      { label: "Rédaction", value: pending ?? note(writing), hint: pending ? "" : corrections(writing?.count ?? 0, "rédaction") },
-      { label: "Oral", value: pending ?? (speaking?.attempts_left != null ? `${speaking.attempts_left} essais sur ${speaking.attempts_total}` : note(speaking)),
-        hint: pending ? "" : speaking?.attempts_left != null ? (speaking.last_score != null ? `Dernière note : ${note(speaking)}` : "Restants sur votre formule Premium") : corrections(speaking?.count ?? 0, "tâche") },
+      { label: "Niveau moyen", value: pending ?? progress?.level.level ?? "—",
+        hint: pending ? "" : progress?.level.tests ? `Moyenne de ${progress.level.tests} test${progress.level.tests > 1 ? "s" : ""}, toutes épreuves · estimation non officielle` : "Faites un premier test pour l’estimer" },
+      { label: "Séries consultées", value: pending ?? `${progress?.explored.seen ?? 0} sur ${progress?.explored.total ?? 0}`, hint: "Séries et sujets ouverts, toutes épreuves" },
     ]} />
     <div id="epreuves"><SectionTitle title="Choisir une épreuve" note="Les 4 épreuves du TCF, au format de l’examen" /></div>
     <SkillCards />

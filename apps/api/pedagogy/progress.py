@@ -4,9 +4,8 @@ from rest_framework import serializers
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from accounts.views import SecureView
-from exams.models import Attempt, Answer
-from accounts.subscription import speaking_allowance
-from .models import SpeakingSession, WritingCorrection
+from exams.models import Attempt, Answer, Exam
+from .models import SpeakingSession, TaskSubject, WritingCorrection
 
 
 class ProgressGroupSerializer(serializers.Serializer):
@@ -25,15 +24,14 @@ class CategorySerializer(serializers.Serializer):
     correct = serializers.IntegerField()
 
 
-class GradedSerializer(serializers.Serializer):
-    count = serializers.IntegerField()
-    last_score = serializers.IntegerField(allow_null=True)
-    last_level = serializers.CharField(allow_null=True)
+class LevelSerializer(serializers.Serializer):
+    level = serializers.CharField(allow_null=True)
+    tests = serializers.IntegerField()
 
 
-class SpeakingProgressSerializer(GradedSerializer):
-    attempts_left = serializers.IntegerField(allow_null=True)
-    attempts_total = serializers.IntegerField(allow_null=True)
+class ExploredSerializer(serializers.Serializer):
+    seen = serializers.IntegerField()
+    total = serializers.IntegerField()
 
 
 class ProgressSerializer(serializers.Serializer):
@@ -41,15 +39,25 @@ class ProgressSerializer(serializers.Serializer):
     disclaimer = serializers.CharField()
     groups = ProgressGroupSerializer(many=True)
     categories = CategorySerializer(many=True)
-    writing = GradedSerializer()
-    speaking = SpeakingProgressSerializer()
+    level = LevelSerializer()
+    explored = ExploredSerializer()
 
 
-def graded(results):
-    """Nombre de corrections notées et dernière note sur 20 (les résultats sont triés du plus récent au plus ancien)."""
-    notes = [r for r in results if isinstance(r, dict) and isinstance(r.get("score"), int) and not r.get("demo")]
-    last = notes[0] if notes else {}
-    return {"count": len(notes), "last_score": last.get("score"), "last_level": last.get("level")}
+LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"]
+
+
+def level_of_rate(correct, questions):
+    """Lecture ou Écoute : part de bonnes réponses ramenée à six paliers égaux, de A1 (moins de 16,7 %) à C2 (83,4 % et plus).
+
+    Repère interne : le TCF répartit ses scores 100-699 en six niveaux de largeur égale.
+    """
+    return min(5, int(6 * correct / questions)) if questions else None
+
+
+def corrected_levels(results):
+    """Niveaux des corrections de Rédaction ou d’Oral par l’IA (les corrections de démonstration ne comptent pas)."""
+    return [LEVELS.index(r["level"]) for r in results
+            if isinstance(r, dict) and r.get("level") in LEVELS and not r.get("demo")]
 
 
 class ProgressView(SecureView):
@@ -106,19 +114,28 @@ class ProgressView(SecureView):
                 "disclaimer": "Indicateurs internes sur vos tentatives soumises. Difficultés proposées, sans calibration ni score TCF/NCLC.",
                 "groups": groups,
                 "categories": categories,
-                "writing": self.writing(request.user),
-                "speaking": self.speaking(request.user),
+                "level": self.level(request.user, attempts),
+                "explored": self.explored(request.user),
             }
         )
 
     @staticmethod
-    def writing(user):
-        results = WritingCorrection.objects.filter(user=user, status=WritingCorrection.Status.DONE).order_by("-created_at").values_list("result", flat=True)
-        return graded(results)
+    def level(user, attempts):
+        """Moyenne des niveaux de tous les tests envoyés : séries de Lecture et d’Écoute, Rédactions et tâches d’Oral corrigées."""
+        steps = [level_of_rate(a.correct_count or 0, a.question_count) for a in attempts.only("correct_count", "question_count")]
+        steps = [step for step in steps if step is not None]
+        steps += corrected_levels(WritingCorrection.objects.filter(user=user, status=WritingCorrection.Status.DONE).values_list("result", flat=True))
+        steps += corrected_levels(SpeakingSession.objects.filter(user=user, status=SpeakingSession.Status.FINISHED).values_list("result", flat=True))
+        return {"level": LEVELS[int(sum(steps) / len(steps) + 0.5)] if steps else None, "tests": len(steps)}
 
     @staticmethod
-    def speaking(user):
-        results = SpeakingSession.objects.filter(user=user, status=SpeakingSession.Status.FINISHED).order_by("-started_at").values_list("result", flat=True)
-        allowance = speaking_allowance(user)
-        left, total = allowance if allowance else (None, None)
-        return {**graded(results), "attempts_left": left, "attempts_total": total}
+    def explored(user):
+        """Séries et sujets ouverts au moins une fois, sur tout ce qui est proposé aujourd’hui (les 4 épreuves)."""
+        exams = set(Exam.objects.filter(is_published=True).values_list("id", flat=True))
+        subjects = set(TaskSubject.objects.filter(task_set__is_active=True).values_list("id", flat=True))
+        seen_exams = set(Attempt.objects.filter(user=user).values_list("exam_id", flat=True)) & exams
+        seen_subjects = (
+            set(WritingCorrection.objects.filter(user=user).values_list("subject_id", flat=True))
+            | set(SpeakingSession.objects.filter(user=user).exclude(status=SpeakingSession.Status.FAILED).values_list("subject_id", flat=True))
+        ) & subjects
+        return {"seen": len(seen_exams) + len(seen_subjects), "total": len(exams) + len(subjects)}

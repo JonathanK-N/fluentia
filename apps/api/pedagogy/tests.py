@@ -512,21 +512,25 @@ class PedagogyTests(TestCase):
         self.client.force_authenticate(self.other)
         self.assertEqual(self.client.get("/api/v1/progress/").data["groups"], [])
 
-    def test_progress_reports_last_writing_and_speaking_notes(self):
+    def test_progress_reports_average_level_and_explored_series(self):
         from .models import SpeakingSession, WritingCorrection
+        from .progress import level_of_rate
+        self.assertEqual([level_of_rate(c, 100) for c in (0, 16, 17, 50, 83, 84, 100)], [0, 0, 1, 3, 4, 5, 5])
+        exam = self.exam()
         self.client.force_authenticate(self.student)
         empty = self.client.get("/api/v1/progress/").data
-        self.assertEqual(empty["writing"], {"count": 0, "last_score": None, "last_level": None})
-        self.assertIsNone(empty["speaking"]["attempts_left"])
-        old = WritingCorrection.objects.create(user=self.student, text="a", provider="openai", result={"score": 9, "level": "B1"})
-        new = WritingCorrection.objects.create(user=self.student, text="b", provider="openai", result={"score": 14, "level": "C1"})
-        WritingCorrection.objects.filter(pk=old.pk).update(created_at=new.created_at - timedelta(minutes=5))
-        WritingCorrection.objects.create(user=self.student, text="c", provider="demo", result={"score": 20, "level": "C2", "demo": True})
+        self.assertEqual(empty["level"], {"level": None, "tests": 0})
+        self.assertEqual(empty["explored"]["seen"], 0)
+        attempt = create_attempt(user=self.student, exam=exam)
+        submit_attempt(user=self.student, attempt_id=attempt.pk)  # aucune réponse : A1
+        WritingCorrection.objects.create(user=self.student, text="a", provider="openai", result={"score": 14, "level": "C1"})
+        WritingCorrection.objects.create(user=self.student, text="b", provider="demo", result={"score": 20, "level": "C2", "demo": True})
         SpeakingSession.objects.create(user=self.student, mode="practice", provider="openai", status=SpeakingSession.Status.FINISHED, result={"score": 11, "level": "B2"})
-        SpeakingSession.objects.create(user=self.student, mode="practice", provider="openai", status=SpeakingSession.Status.FAILED)
         data = self.client.get("/api/v1/progress/").data
-        self.assertEqual(data["writing"], {"count": 2, "last_score": 14, "last_level": "C1"})  # la démo ne compte pas
-        self.assertEqual((data["speaking"]["count"], data["speaking"]["last_score"]), (1, 11))
+        # (A1 + C1 + B2) / 3 = (0 + 4 + 3) / 3 = 2,3 : B1 ; la démo ne compte pas.
+        self.assertEqual(data["level"], {"level": "B1", "tests": 3})
+        self.assertEqual(data["explored"]["seen"], 1)
+        self.assertGreaterEqual(data["explored"]["total"], 1)
 
     def test_original_seed_idempotent_and_never_published(self):
         call_command("seed_original_bank", stdout=io.StringIO())

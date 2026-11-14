@@ -7,13 +7,12 @@ import { useSession } from "../../../lib/session";
 import { skillLabel } from "../../../features/student/content";
 import { Bar, Notice, PageHero, SectionTitle, Summary } from "../../../features/student/ui";
 
-type Graded = { count: number; last_score: number | null; last_level: string | null };
 export type Progress = {
   disclaimer: string;
   groups: { skill: string; mode: string; attempts: number; correct: number; questions: number; percentage: number }[];
   categories: { skill: string; difficulty: string; answered: number; correct: number }[];
-  writing: Graded;
-  speaking: Graded & { attempts_left: number | null; attempts_total: number | null };
+  level: { level: string | null; tests: number };
+  explored: { seen: number; total: number };
 };
 const order = ["non_calibree", "A1", "A2", "B1", "B2", "C1", "C2"];
 const plural = (n: number, word: string) => `${n} ${word}${n > 1 ? "s" : ""}`;
