@@ -386,6 +386,35 @@ class TaskListView(SecureView):
         return Response(active_tasks(skill))
 
 
+class DoneSubjectsView(SecureView):
+    """Dernier passage terminé de chaque sujet, pour « Reprendre » et « Ma dernière correction » dans la liste des sujets."""
+
+    permission_classes = [IsAuthenticated]
+    throttle_classes = []
+
+    @extend_schema(responses=OpenApiTypes.OBJECT)
+    def get(self, request, skill):
+        if skill == "writing":
+            done = WritingCorrection.objects.filter(user=request.user, status=WritingCorrection.Status.DONE, subject__isnull=False)
+            rows = done.order_by("-created_at").values("pk", "subject_id", "created_at", "result")
+        elif skill == "speaking":
+            done = SpeakingSession.objects.filter(user=request.user, status=SpeakingSession.Status.FINISHED, subject__isnull=False)
+            rows = done.order_by("-started_at").values("pk", "subject_id", "started_at", "result")
+        else:
+            raise ValidationError({"skill": "writing ou speaking."})
+        latest = {}
+        for row in rows:  # du plus récent au plus ancien : le premier de chaque sujet est le dernier passage
+            if row["subject_id"] not in latest:
+                result = row["result"] or {}
+                latest[row["subject_id"]] = {
+                    "id": row["pk"],
+                    "subject_id": row["subject_id"],
+                    "date": row.get("created_at") or row.get("started_at"),
+                    "level": result.get("level") if isinstance(result, dict) else None,
+                }
+        return Response(list(latest.values()))
+
+
 def writing_subject(subject_id):
     return get_object_or_404(TaskSubject, pk=subject_id, task_set__skill="writing", task_set__is_active=True)
 

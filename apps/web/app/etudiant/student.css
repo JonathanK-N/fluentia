@@ -923,3 +923,8 @@ html[data-exam-focus] .shell-content.student-space:has(.seance-qcm) { padding-bo
 .series-last small { grid-column: 1; font-weight: 500; color: var(--text); opacity: 0.75; }
 .series-last svg { grid-column: 2; grid-row: 1 / span 2; }
 .series-last:hover { border-color: var(--mint-ink); }
+
+/* Liste des sujets (Rédaction, Oral) : sujet déjà fait, lien vers la dernière correction au-dessus de « Reprendre ». */
+.subject-actions { display: grid; gap: 0.45rem; justify-items: stretch; min-width: 12rem; }
+.subject-actions .button { justify-content: center; }
+@media (max-width: 640px) { .subject-actions { grid-column: 1 / -1; min-width: 0; } }

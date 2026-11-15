@@ -507,3 +507,27 @@ class AbandonTests(SpeakingClient):
             response = client.post(f"/api/v1/speaking/sessions/{second.data['id']}/abandon/", {"seconds": 45},
                                    format="json", HTTP_X_CSRFTOKEN=client.csrf)
         self.assertEqual((response.data["status"], response.data["seconds"]), ("finished", 45))
+
+
+class DoneSubjectsTests(TestCase):
+    def test_lists_the_last_finished_pass_of_each_subject_for_its_author_only(self):
+        from .models import WritingCorrection
+        student = User.objects.create_user(username="fait", email="fait@example.test")
+        other = User.objects.create_user(username="autre", email="autre@example.test")
+        speaking = TaskSubject.objects.filter(task_set__skill="speaking", task_set__is_active=True).order_by("task_number", "position")
+        writing = TaskSubject.objects.filter(task_set__skill="writing", task_set__is_active=True).order_by("task_number", "position")
+        oral, text = speaking.first(), writing.first()
+        SpeakingSession.objects.create(user=student, subject=oral, mode="practice", provider="openai", status="finished", result={"level": "B1"})
+        last_oral = SpeakingSession.objects.create(user=student, subject=oral, mode="practice", provider="openai", status="finished", result={"level": "B2"})
+        SpeakingSession.objects.create(user=student, subject=speaking.last(), mode="practice", provider="openai", status="failed")
+        WritingCorrection.objects.create(user=student, subject=text, text="a", provider="openai", result={"level": "C1"})
+        WritingCorrection.objects.create(user=student, subject=writing.last(), text="b", provider="openai", status="running")
+        client = APIClient()
+        client.force_authenticate(student)
+        rows = client.get("/api/v1/tasks/speaking/done/").data
+        self.assertEqual([(r["subject_id"], r["id"], r["level"]) for r in rows], [(oral.pk, last_oral.pk, "B2")])
+        rows = client.get("/api/v1/tasks/writing/done/").data
+        self.assertEqual([(r["subject_id"], r["level"]) for r in rows], [(text.pk, "C1")])
+        client.force_authenticate(other)
+        self.assertEqual(client.get("/api/v1/tasks/writing/done/").data, [])
+        self.assertEqual(client.get("/api/v1/tasks/reading/done/").status_code, 400)

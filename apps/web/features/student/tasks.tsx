@@ -5,6 +5,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Icon } from "../../components/app-shell/icons";
 import { api } from "../../lib/student-api";
+import { useSession } from "../../lib/session";
 import { formatDuration, readDraft, type SpeakingTask, type WritingTask } from "./content";
 import { SpeakingStudio } from "./speaking-studio";
 import { WritingStudio } from "./writing-studio";
@@ -22,6 +23,9 @@ export function useTasks<K extends Kind>(kind: K) {
   }, [kind]);
   return { data, error };
 }
+
+// Dernier passage terminé d’un sujet : lien vers sa correction et bouton « Reprendre » en vert.
+type DoneSubject = { id: number; subject_id: number; date: string; level: string | null };
 
 const base = (kind: Kind) => kind === "writing" ? "/etudiant/expression-ecrite" : "/etudiant/expression-orale";
 
@@ -74,6 +78,16 @@ function SubjectPicker({ kind, task }: { kind: Kind; task: WritingTask | Speakin
     : `Durée : ${formatDuration((task as SpeakingTask).seconds)}${(task as SpeakingTask).prepSeconds ? `, précédée de ${(task as SpeakingTask).prepSeconds / 60} minutes de préparation` : ", sans préparation"}.`;
   const [drafts, setDrafts] = useState<boolean[]>([]);
   useEffect(() => { if (writing) setDrafts(task.subjects.map((_, index) => Boolean(readDraft(task.slug, index).trim()))); }, [writing, task]);
+  const { profile } = useSession();
+  const [done, setDone] = useState<Record<number, DoneSubject>>({});
+  useEffect(() => {
+    if (!profile) { setDone({}); return; }
+    let active = true;
+    api<DoneSubject[]>(`tasks/${kind}/done/`)
+      .then(rows => { if (active) setDone(Object.fromEntries(rows.map(row => [row.subject_id, row]))); })
+      .catch(() => { /* sans historique, la liste reste utilisable */ });
+    return () => { active = false; };
+  }, [kind, profile]);
   return <>
     <div className="home-top home-top-single">
       <section className="hero-card" aria-labelledby="tache-titre">
@@ -84,16 +98,23 @@ function SubjectPicker({ kind, task }: { kind: Kind; task: WritingTask | Speakin
     </div>
     <div className="section-title"><h2>Choisissez votre sujet</h2><span className="student-hint">{task.subjects.length} sujet{task.subjects.length > 1 ? "s" : ""}</span></div>
     <ol className="subject-list">
-      {task.subjects.map((item, index) => <li key={item.id ?? item.title} className="subject-row">
+      {task.subjects.map((item, index) => { const last = item.id ? done[item.id] : undefined; return <li key={item.id ?? item.title} className="subject-row" data-done={last ? "true" : undefined}>
         <span className="subject-number" aria-hidden="true">{index + 1}</span>
         <div className="subject-text">
-          <h3>{item.title}{drafts[index] && <span className="subject-badge">Brouillon en cours</span>}</h3>
+          <h3>{item.title}{last && <span className="series-done"><Icon name="check" size={12} />Déjà fait</span>}{drafts[index] && <span className="subject-badge">Brouillon en cours</span>}</h3>
           <p>{item.prompt}</p>
         </div>
-        <Link className="button button-primary tile-link" href={`${base(kind)}/${task.slug}?sujet=${item.id}`}>
-          {drafts[index] ? "Reprendre" : "Commencer"}<span className="sr-only"> : {item.title}</span><Icon name="arrow" size={15} />
-        </Link>
-      </li>)}
+        <div className="subject-actions">
+          {last && <Link className="series-last" href={`${base(kind)}/correction/${last.id}`}>
+            <span>Ma dernière correction</span>
+            <small>{last.level ? `${last.level} · ` : ""}{new Date(last.date).toLocaleDateString("fr-CA", { day: "numeric", month: "long" })}</small>
+            <Icon name="arrow" size={13} />
+          </Link>}
+          <Link className={`button tile-link ${last ? "button-again" : "button-primary"}`} href={`${base(kind)}/${task.slug}?sujet=${item.id}`}>
+            {last ? <Icon name="refresh" size={15} /> : null}{last || drafts[index] ? "Reprendre" : "Commencer"}<span className="sr-only"> : {item.title}</span>{last ? null : <Icon name="arrow" size={15} />}
+          </Link>
+        </div>
+      </li>; })}
     </ol>
   </>;
 }
