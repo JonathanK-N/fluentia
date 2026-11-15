@@ -4,6 +4,9 @@ import { describe, expect, it, vi } from "vitest";
 import { addUsage, audioToText, emptyUsage, notFrench, readEvent, upsertTurn, type ExaminerHandlers, type RealtimeEvent, type Turn, type Usage } from "../lib/examiner";
 import { ExaminerSession } from "../features/student/examiner-session";
 
+// L’écran se rend hors de Next : un routeur factice suffit (« Quitter » ouvre la correction).
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
+
 function collect() {
   const turns: Turn[] = [], activities: string[] = [], errors: string[] = [];
   let usage: Usage = emptyUsage();

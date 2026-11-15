@@ -1,6 +1,7 @@
 "use client";
 /** Passage d’une tâche d’Oral face à l’examinateur IA : préparation, conversation vocale, conclusion, transcription. */
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { Button } from "../../components/ui/primitives";
@@ -75,8 +76,9 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
   const fail = useCallback((message: string) => { abandon(); release(); setError(message); setPhase("error"); }, [abandon, release]);
 
   // `cut` : la connexion a été coupée en cours d’échange ; ce qui a été dit est gardé, sans phrase d’au revoir.
+  // Renvoie true quand l’échange est bien enregistré sur le serveur.
   const finish = useCallback(async (cut = false) => {
-    if (finishing.current || !session) return;
+    if (finishing.current || !session) return false;
     finishing.current = true;
     openId.current = null;
     // Le chrono s’arrête maintenant : la phrase de fin de l’examinateur n’est pas comptée.
@@ -91,11 +93,15 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
         seconds, transcript, usage: { ...usage.current, transcription_seconds: Math.min(7200, usage.current.transcription_seconds) },
       });
       setSummary({ seconds: saved.seconds, secondsLeft: saved.seconds_left, attemptsLeft: saved.attempts_left ?? null });
+      exitFullscreen();
+      setPhase("done");
+      return true;
     } catch {
       setSummary({ seconds, secondsLeft: -1, attemptsLeft: null });
+      exitFullscreen();
+      setPhase("done");
+      return false;
     }
-    exitFullscreen();
-    setPhase("done");
   }, [release, session, task.number]);
   const finishRef = useRef(finish);
   useEffect(() => { finishRef.current = finish; }, [finish]);
@@ -246,6 +252,16 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
   const demo = session?.demo;
 
   function leave() { abandon(); release(); exitFullscreen(); onExit(); }
+  // « Quitter la séance » quitte vraiment : si le candidat a déjà parlé, l’échange est enregistré (sans la phrase
+  // de conclusion de l’examinateur) et on ouvre sa correction ; sinon la séance est abandonnée sans rien compter.
+  const router = useRouter();
+  const spoke = (phase === "live" && counting) || phase === "closing";
+  async function quit() {
+    setQuitting(false);
+    // Conclusion déjà en cours : l’enregistrement continue seul, on quitte tout de suite.
+    if (!spoke || phase === "closing") { leave(); return; }
+    if (session && await finish(true)) router.push(`/etudiant/expression-orale/correction/${session.id}`);
+  }
   function restart() {
     setError(""); setTurns([]); turnsRef.current = []; usage.current = emptyUsage();
     finishing.current = false; startedAt.current = 0; setCounting(false);
@@ -280,10 +296,12 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
             <Dialog.Overlay className="dialog-overlay" />
             <Dialog.Content className="dialog-content quit-dialog">
               <Dialog.Title>Quitter la séance ?</Dialog.Title>
-              <Dialog.Description>La tâche s’arrête maintenant : le temps déjà parlé est compté et vous pourrez relire votre échange.</Dialog.Description>
+              <Dialog.Description>{spoke
+                ? "La tâche s’arrête maintenant : ce que vous avez dit est enregistré, le temps déjà parlé est compté et vous passez à la correction."
+                : "Vous n’avez pas encore parlé : la séance s’arrête sans être comptée."}</Dialog.Description>
               <div className="quit-actions">
-                <Button onClick={() => { setQuitting(false); finish(); }}>Terminer la tâche</Button>
-                <Dialog.Close asChild><Button variant="secondary">Continuer</Button></Dialog.Close>
+                <Button onClick={quit}>{spoke ? "Quitter et voir la correction" : "Quitter la séance"}</Button>
+                <Dialog.Close asChild><Button variant="secondary">Continuer la séance</Button></Dialog.Close>
               </div>
             </Dialog.Content>
           </Dialog.Portal>
