@@ -38,16 +38,6 @@ const editionGroups: Group[] = [
     { href: "/edition/import", label: "Importer une série", icon: "upload" },
     { href: "/edition/examens", label: "Examens TCF", icon: "exam" },
   ] },
-  { title: "Banque pédagogique", items: [
-    { href: "/edition#banque", label: "Versions de la banque", icon: "library" },
-    { href: "/edition#editeur", label: "Éditeur de question", icon: "pen" },
-    { href: "/edition#relecture", label: "Relecture humaine", icon: "review" },
-  ] },
-  { title: "Diffusion", items: [
-    { href: "/edition#medias", label: "Médias audio", icon: "headphones" },
-    { href: "/edition#publication", label: "Publication", icon: "send" },
-    { href: "/edition#transfert", label: "Import JSON (avancé)", icon: "copy" },
-  ] },
   { title: "Raccourcis", items: [
     { href: "/etudiant", label: "Espace étudiant", icon: "grid", exact: true },
     { href: "/admin/", label: "Administration Django", icon: "sliders", external: true },
@@ -66,7 +56,7 @@ const extraTitles: [RegExp, string][] = [
   [/^\/etudiant\/lecture\//, "Lecture"],
   [/^\/etudiant\/ecoute\//, "Écoute"],
   [/^\/etudiant\/verifier/, "Vérification de l’adresse"],
-  [/^\/edition/, "Banque pédagogique"],
+  [/^\/edition/, "Espace éditorial"],
 ];
 
 function isActive(pathname: string, item: Item) {

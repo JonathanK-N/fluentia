@@ -113,7 +113,7 @@ test("simulation orale : 39 questions ouvertes, navigation libre et réécoute",
   await page.screenshot({path: info.outputPath("oral-complet-resultats.png"), fullPage: true});
 });
 
-test("interface éditoriale : création, demande de relecture et historique", async ({page}, info) => {
+test("espace éditorial : l’accueil ouvre l’import des séries, avec les protections de page", async ({page}) => {
   await page.goto("/etudiant/compte");
   await page.getByLabel("Adresse e-mail", {exact: true}).fill("bank-editor@example.test");
   await page.getByLabel("Mot de passe", {exact: true}).fill("Edition!Fixture-7294");
@@ -122,30 +122,8 @@ test("interface éditoriale : création, demande de relecture et historique", as
   const response = await page.goto("/edition");
   expect(response?.headers()["x-frame-options"]).toBe("DENY");
   expect(response?.headers()["content-security-policy"]).toContain("frame-ancestors 'none'");
-  await expect(page.getByRole("heading", {name: "Créer une question originale"})).toBeVisible();
-  await page.getByLabel("Question", {exact: true}).fill(`Question originale de recette ${info.project.name}`);
-  await page.getByLabel("Texte de lecture", {exact: true}).fill("La réunion commence mardi à neuf heures.");
-  for (let index = 1; index <= 4; index++) await page.getByLabel(`Choix ${index}`, {exact: true}).fill(["Mardi à neuf heures", "Lundi soir", "Samedi matin", "Vendredi midi"][index - 1]);
-  await page.getByLabel("Explication", {exact: true}).fill("Le jour et l'heure sont annoncés explicitement.");
-  await page.getByLabel("Provenance et autorisation", {exact: true}).fill("Fixture originale de recette, sans validation humaine réelle.");
-  await page.getByRole("button", {name: "Enregistrer le brouillon"}).click();
-  await expect(page.getByRole("status")).toContainText("Brouillon enregistré");
-  await page.getByRole("button", {name: "Enregistrer la décision"}).click();
-  await expect(page.getByRole("status")).toContainText("Transition enregistrée");
-  await expect(page.getByRole("heading", {name: "Version 1 · review", exact: true})).toBeVisible();
-  const wave = Buffer.alloc(8044);
-  wave.write("RIFF", 0); wave.writeUInt32LE(8036, 4); wave.write("WAVE", 8); wave.write("fmt ", 12);
-  wave.writeUInt32LE(16, 16); wave.writeUInt16LE(1, 20); wave.writeUInt16LE(1, 22);
-  wave.writeUInt32LE(8000, 24); wave.writeUInt32LE(16000, 28); wave.writeUInt16LE(2, 32); wave.writeUInt16LE(16, 34);
-  wave.write("data", 36); wave.writeUInt32LE(8000, 40);
-  for (let index = 0; index < 4000; index++) wave.writeInt16LE(Math.round(1000 * Math.sin(2 * Math.PI * 440 * index / 8000)), 44 + index * 2);
-  await page.getByLabel("Titre du média", {exact: true}).fill("Signal original de recette UI");
-  await page.getByLabel("Document WAV", {exact: true}).setInputFiles({name: "fixture-ui.wav", mimeType: "audio/wav", buffer: wave});
-  await page.getByLabel("Transcription", {exact: true}).fill("Signal de recette synthétique ; aucune parole pédagogique validée.");
-  await page.getByLabel("Provenance du média et droits", {exact: true}).fill("Signal PCM créé dans le test automatisé, pas un contenu tiers.");
-  await page.getByRole("button", {name: "Importer le média privé", exact: true}).click();
-  await expect(page.getByRole("status")).toContainText("Média privé enregistré");
-  await page.screenshot({path: info.outputPath("banque-editoriale.png"), fullPage: true});
+  await expect(page).toHaveURL(/\/edition\/import$/);
+  await expect(page.getByRole("link", {name: "Examens TCF"})).toBeVisible();
 });
 
 async function staff(page: Page, email: string) {
