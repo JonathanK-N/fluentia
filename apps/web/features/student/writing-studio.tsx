@@ -138,7 +138,23 @@ export function WritingStudio({ task, subject: chosen, corrector }: { task: Writ
 
   return <div className="seance">
     <SeanceBar label="Rédaction" menuOpen={menu} onMenu={() => setMenu(value => !value)}>
-      <button type="button" className="seance-quit" onClick={() => { setRunning(false); setMenu(false); setStarted(false); }}><Icon name="close" size={14} />Quitter la séance</button>
+      {/* Quitter demande confirmation, comme en Lecture et en Écoute ; le brouillon reste sur l’appareil. */}
+      <Dialog.Root>
+        <Dialog.Trigger className="seance-quit"><Icon name="close" size={14} />Quitter la séance</Dialog.Trigger>
+        <Dialog.Portal>
+          <Dialog.Overlay className="dialog-overlay" />
+          <Dialog.Content className="dialog-content quit-dialog">
+            <Dialog.Title>Quitter la séance ?</Dialog.Title>
+            <Dialog.Description>
+              {text ? `Votre brouillon de ${words} mot${words > 1 ? "s" : ""} reste enregistré sur cet appareil : vous pourrez le reprendre plus tard.` : "Vous n’avez encore rien écrit."} Le minuteur s’arrête.
+            </Dialog.Description>
+            <div className="quit-actions">
+              <Button onClick={() => { setRunning(false); setMenu(false); setStarted(false); }}>Quitter la séance</Button>
+              <Dialog.Close asChild><Button variant="secondary">Continuer la séance</Button></Dialog.Close>
+            </div>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
     </SeanceBar>
     <div className="seance-body oral-body writing-body">
       <SeanceHead
