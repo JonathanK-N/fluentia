@@ -993,3 +993,11 @@ html[data-exam-focus] .shell-content.student-space:has(.seance-qcm) { padding-bo
 .mock-editor-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.4rem; }
 .mock-card .mock-parts small em { color: var(--warning); font-style: normal; }
 @media (max-width: 640px) { .mock-editor-row { grid-template-columns: minmax(0, 1fr); } }
+
+/* Bilan de l’Examen TCF : deux cartes par ligne, et chaque tâche tient sur sa ligne sans déborder. */
+.mock-results { grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); }
+.mock-results > li { min-width: 0; }
+.student-space .mock-result-head h3 { min-width: 0; }
+.mock-level { flex: none; }
+.mock-task-results li { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
+.student-space .mock-task-results a.mock-link, .mock-task-results small { white-space: nowrap; }
