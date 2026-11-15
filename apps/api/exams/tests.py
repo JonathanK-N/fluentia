@@ -106,6 +106,22 @@ class ExamEngineTests(TestCase):
             self.client.get(f"/api/v1/attempts/{aid}/results/").status_code, 200
         )
 
+    def test_latest_lists_only_the_last_finished_attempt_of_each_series(self):
+        first = self.start()
+        self.client.post(f"/api/v1/attempts/{first}/submit/")
+        second = self.start()
+        self.client.put(
+            f"/api/v1/attempts/{second}/answers/",
+            {"question_id": str(self.question.id), "choice_id": str(self.correct.id)},
+            format="json",
+        )
+        self.client.post(f"/api/v1/attempts/{second}/submit/")
+        self.start()  # séance en cours : jamais dans la liste
+        rows = self.client.get("/api/v1/attempts/?latest=1").data["results"]
+        self.assertEqual([row["id"] for row in rows], [second])
+        self.assertEqual((rows[0]["correct_count"], rows[0]["question_count"]), (1, 1))
+        self.assertEqual(len(self.client.get("/api/v1/attempts/").data["results"]), 3)
+
     def test_foreign_attempt_forbidden(self):
         aid = self.start()
         self.client.force_authenticate(user=self.other)

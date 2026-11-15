@@ -1,6 +1,6 @@
 """Catalogue public limité et tentatives privées protégées par la session Django."""
 
-from django.db.models import Count, Sum
+from django.db.models import Count, OuterRef, Subquery, Sum
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema, OpenApiParameter
@@ -218,6 +218,16 @@ class MyAttemptsView(generics.ListAPIView):
     serializer_class = AttemptSerializer
     pagination_class = CataloguePagination
 
+    @extend_schema(parameters=[OpenApiParameter("latest", bool, description="Seulement la dernière séance terminée de chaque série.")])
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
     def get_queryset(self):
         expire_overdue(self.request.user)
-        return Attempt.objects.filter(user=self.request.user).order_by("-started_at")
+        attempts = Attempt.objects.filter(user=self.request.user).select_related("exam")
+        if self.request.query_params.get("latest") == "1":
+            # Catalogue : la dernière séance terminée de chaque série, pour « Reprendre » et « Ma dernière correction ».
+            done = attempts.filter(status=Attempt.Status.SUBMITTED)
+            last = done.filter(exam=OuterRef("exam")).order_by("-submitted_at").values("pk")[:1]
+            attempts = done.filter(pk=Subquery(last))
+        return attempts.order_by("-started_at")

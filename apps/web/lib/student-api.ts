@@ -37,6 +37,7 @@ export type Exam = { id: string; title: string; description: string; skill: stri
 export type Question = { id: string; position: number; statement: string; reading_passage: string; image_available: boolean; image_text: string; points: number; audio_available: boolean; audio_state: string; audio_ends_at?: string; transcript?: string; choices: {id: string; label: string}[] };
 export type Attempt = {id: string; exam_id: string; status: string; skill: string; mode: string; exam_title: string; expires_at: string; server_now: string; questions?: Question[]; answers: {question_id: string; choice_id: string}[]};
 export type AttemptSummary = Pick<Attempt, "id" | "status" | "expires_at" | "skill" | "mode" | "exam_title">;
+export type FinishedAttempt = AttemptSummary & { exam_id: string; submitted_at: string; correct_count: number; question_count: number; score: number | null; max_score: number | null };
 export type Results = { correct_count: number; question_count: number; percentage: number; score: number; max_score: number; disclaimer: string; details: {question_id: string; selected_choice_id: string | null; correct_choice_id: string; explanation: string; points: number; statement: string; reading_passage: string; image_available: boolean; image_text: string; choices: {id: string; position: number; label: string}[]; selected_label: string | null; correct_label: string; transcript?: string}[] };
 
 // « tcf_score » : note du barème officiel des anciennes corrections d’oral, qui avaient aussi une note Fluentia.
