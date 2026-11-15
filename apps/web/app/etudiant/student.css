@@ -928,3 +928,8 @@ html[data-exam-focus] .shell-content.student-space:has(.seance-qcm) { padding-bo
 .subject-actions { display: grid; gap: 0.45rem; justify-items: stretch; min-width: 12rem; }
 .subject-actions .button { justify-content: center; }
 @media (max-width: 640px) { .subject-actions { grid-column: 1 / -1; min-width: 0; } }
+
+/* Minuteur rond : le texte reste dans le cercle (« Dès que vous parlez » passe sur deux lignes centrées). */
+.examiner-timer { width: 7rem; }
+.examiner-timer span { max-width: 74%; text-align: center; gap: 0.1rem; }
+.examiner-timer small:first-child { font-size: 0.5rem; letter-spacing: 0.03em; line-height: 1.15; }
