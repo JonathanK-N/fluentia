@@ -541,7 +541,9 @@ def speaking_spent_today():
     pour celles en cours (leur coût n’est connu qu’à la fin)."""
     since = timezone.now() - timedelta(days=1)
     recent = SpeakingSession.objects.filter(started_at__gte=since, provider="openai")
-    spent = recent.filter(status=SpeakingSession.Status.FINISHED).aggregate(total=Sum("estimated_cost_usd"))["total"] or Decimal(0)
+    # Terminées et quittées sans parler : les séances échouées tôt valent 0, celles quittées en silence ont un coût noté.
+    ended = recent.filter(status__in=[SpeakingSession.Status.FINISHED, SpeakingSession.Status.FAILED])
+    spent = ended.aggregate(total=Sum("estimated_cost_usd"))["total"] or Decimal(0)
     running = recent.filter(status__in=[SpeakingSession.Status.PENDING, SpeakingSession.Status.LIVE]).aggregate(total=Sum("seconds"))["total"] or 0
     return spent + speaking.estimated_cost_ceiling(running)
 
@@ -692,7 +694,13 @@ class SpeakingAbandonView(SecureView):
             if "seconds" in body.validated_data:
                 elapsed = min(elapsed, body.validated_data["seconds"])
             saved.ended_at = now
-            if elapsed <= self.FREE_SECONDS:
+            if body.validated_data["silent"]:
+                # Quittée sans avoir rien dit : ni enregistrée, ni corrigée, ni décomptée. Le coût de l’examinateur
+                # reste noté pour le plafond de dépense du site (speaking_spent_today).
+                saved.status = SpeakingSession.Status.FAILED
+                if saved.provider != "demo":
+                    saved.estimated_cost_usd = speaking.estimated_cost_ceiling(min(saved.seconds, elapsed))
+            elif elapsed <= self.FREE_SECONDS:
                 saved.status = SpeakingSession.Status.FAILED
             else:
                 saved.status = SpeakingSession.Status.FINISHED

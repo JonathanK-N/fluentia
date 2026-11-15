@@ -309,6 +309,8 @@ class SpeakingFinishSerializer(StrictSerializer):
 class SpeakingAbandonSerializer(StrictSerializer):
     # Temps de parole déjà compté par le chrono du site ; absent (ancienne version du site) : le temps écoulé.
     seconds = serializers.IntegerField(min_value=0, max_value=7200, required=False)
+    # Le candidat n’a rien dit : séance ni enregistrée ni corrigée, et pas décomptée de son quota.
+    silent = serializers.BooleanField(required=False, default=False)
 
 
 class SpeakingFinishedSerializer(serializers.Serializer):

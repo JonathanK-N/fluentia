@@ -509,6 +509,17 @@ class AbandonTests(SpeakingClient):
         self.assertEqual((response.data["status"], response.data["seconds"]), ("finished", 45))
 
 
+    def test_a_session_left_without_a_word_is_neither_counted_nor_corrected(self):
+        client = self.client_for(self.student)
+        opened = self.open(self.task1, client=client)
+        started = SpeakingSession.objects.get().started_at
+        with patch("pedagogy.views.timezone.now", return_value=started + timedelta(seconds=90)):
+            response = client.post(f"/api/v1/speaking/sessions/{opened.data['id']}/abandon/", {"seconds": 80, "silent": True},
+                                   format="json", HTTP_X_CSRFTOKEN=client.csrf)
+        self.assertEqual((response.data["status"], response.data["seconds_left"]), ("failed", 600))
+        self.assertEqual(self.client_for(self.student).get("/api/v1/tasks/speaking/done/").data, [])
+        self.assertEqual(self.open(self.task1, client=client).status_code, 201)  # l’essai de la tâche 1 reste disponible
+
 class DoneSubjectsTests(TestCase):
     def test_lists_the_last_finished_pass_of_each_subject_for_its_author_only(self):
         from .models import WritingCorrection

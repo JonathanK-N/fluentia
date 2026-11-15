@@ -53,6 +53,8 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
   const turnsRef = useRef<Turn[]>([]);
   // Le chrono ne démarre qu’après la lecture du sujet, quand le candidat commence à parler.
   const [counting, setCounting] = useState(false);
+  // Le candidat a vraiment parlé (au moins une phrase transcrite) : le chrono, lui, part même s’il se tait.
+  const [spoke, setSpoke] = useState(false);
   const startedAt = useRef(0);
   const finishing = useRef(false);
 
@@ -63,13 +65,14 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
   }, []);
   // Séance ouverte côté serveur et pas encore terminée : à abandonner si l’étudiant part ou si la connexion échoue.
   const openId = useRef<number | null>(null);
-  const abandon = useCallback(() => {
+  // `silent` : le candidat n’a rien dit ; la séance n’est ni enregistrée, ni corrigée, ni décomptée.
+  const abandon = useCallback((silent = false) => {
     const id = openId.current;
     if (id === null || finishing.current) return;
     openId.current = null;
     // Seul le temps déjà compté par le chrono est décompté : un examinateur qui n’a jamais pu commencer ne coûte rien.
     const seconds = startedAt.current ? Math.round((Date.now() - startedAt.current) / 1000) : 0;
-    api(`speaking/sessions/${id}/abandon/`, "POST", { seconds }).catch(() => {});
+    api(`speaking/sessions/${id}/abandon/`, "POST", silent ? { seconds, silent } : { seconds }).catch(() => {});
   }, []);
   useEffect(() => () => { abandon(); release(); exitFullscreen(); }, [abandon, release]);
 
@@ -159,6 +162,7 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
         if (finishing.current && turn.role === "examiner" && turn.text
           && turnsRef.current.some(t => t.id !== turn.id && t.role === "examiner" && t.text === turn.text)) return;
         turnsRef.current = upsertTurn(turnsRef.current, turn); setTurns(turnsRef.current);
+        if (turn.role === "candidate" && turn.text.trim()) setSpoke(true);
       },
       onUsage: (part: Partial<Usage>) => { usage.current = addUsage(usage.current, part); },
       onError: (message: string) => setError(message),
@@ -252,19 +256,20 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
   const demo = session?.demo;
 
   function leave() { abandon(); release(); exitFullscreen(); onExit(); }
-  // « Quitter la séance » quitte vraiment : si le candidat a déjà parlé, l’échange est enregistré (sans la phrase
-  // de conclusion de l’examinateur) et on ouvre sa correction ; sinon la séance est abandonnée sans rien compter.
+  // « Quitter la séance » quitte vraiment. Si le candidat a parlé, l’échange est enregistré (sans la phrase de
+  // conclusion de l’examinateur) et on ouvre sa correction. S’il n’a rien dit, la séance n’est ni enregistrée ni
+  // corrigée, et elle n’est pas décomptée.
   const router = useRouter();
-  const spoke = (phase === "live" && counting) || phase === "closing";
   async function quit() {
     setQuitting(false);
+    if (!spoke) { abandon(true); release(); exitFullscreen(); onExit(); return; }
     // Conclusion déjà en cours : l’enregistrement continue seul, on quitte tout de suite.
-    if (!spoke || phase === "closing") { leave(); return; }
+    if (phase === "closing") { leave(); return; }
     if (session && await finish(true)) router.push(`/etudiant/expression-orale/correction/${session.id}`);
   }
   function restart() {
     setError(""); setTurns([]); turnsRef.current = []; usage.current = emptyUsage();
-    finishing.current = false; startedAt.current = 0; setCounting(false);
+    finishing.current = false; startedAt.current = 0; setCounting(false); setSpoke(false);
     talking.current = false; examinerSpoke.current = false; nudge.current = undefined;
     setSession(null); setSummary(null); setCutShort(false); setPhase("intro");
   }
@@ -298,7 +303,7 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
               <Dialog.Title>Quitter la séance ?</Dialog.Title>
               <Dialog.Description>{spoke
                 ? "La tâche s’arrête maintenant : ce que vous avez dit est enregistré, le temps déjà parlé est compté et vous passez à la correction."
-                : "Vous n’avez pas encore parlé : la séance s’arrête sans être comptée."}</Dialog.Description>
+                : "Vous n’avez encore rien dit : vous quittez sans que la séance soit enregistrée ni corrigée, et elle n’est pas décomptée."}</Dialog.Description>
               <div className="quit-actions">
                 <Button onClick={quit}>{spoke ? "Quitter et voir la correction" : "Quitter la séance"}</Button>
                 <Dialog.Close asChild><Button variant="secondary">Continuer la séance</Button></Dialog.Close>
