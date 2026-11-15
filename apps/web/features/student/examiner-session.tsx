@@ -55,6 +55,7 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
   const [counting, setCounting] = useState(false);
   // Le candidat a vraiment parlé (au moins une phrase transcrite) : le chrono, lui, part même s’il se tait.
   const [spoke, setSpoke] = useState(false);
+  const spokeRef = useRef(false);
   const startedAt = useRef(0);
   const finishing = useRef(false);
 
@@ -65,11 +66,14 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
   }, []);
   // Séance ouverte côté serveur et pas encore terminée : à abandonner si l’étudiant part ou si la connexion échoue.
   const openId = useRef<number | null>(null);
-  // `silent` : le candidat n’a rien dit ; la séance n’est ni enregistrée, ni corrigée, ni décomptée.
-  const abandon = useCallback((silent = false) => {
+  // Sans aucune phrase du candidat, la séance n’est ni enregistrée, ni corrigée, ni décomptée (`silent`).
+  // Ensuite `finishing` passe à vrai : couper la connexion déclenche `onLost`, qui ne doit plus rien enregistrer.
+  const abandon = useCallback(() => {
     const id = openId.current;
     if (id === null || finishing.current) return;
     openId.current = null;
+    finishing.current = true;
+    const silent = !spokeRef.current;
     // Seul le temps déjà compté par le chrono est décompté : un examinateur qui n’a jamais pu commencer ne coûte rien.
     const seconds = startedAt.current ? Math.round((Date.now() - startedAt.current) / 1000) : 0;
     api(`speaking/sessions/${id}/abandon/`, "POST", silent ? { seconds, silent } : { seconds }).catch(() => {});
@@ -162,7 +166,7 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
         if (finishing.current && turn.role === "examiner" && turn.text
           && turnsRef.current.some(t => t.id !== turn.id && t.role === "examiner" && t.text === turn.text)) return;
         turnsRef.current = upsertTurn(turnsRef.current, turn); setTurns(turnsRef.current);
-        if (turn.role === "candidate" && turn.text.trim()) setSpoke(true);
+        if (turn.role === "candidate" && turn.text.trim()) { spokeRef.current = true; setSpoke(true); }
       },
       onUsage: (part: Partial<Usage>) => { usage.current = addUsage(usage.current, part); },
       onError: (message: string) => setError(message),
@@ -170,7 +174,7 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
       // Connexion coupée : si le candidat a déjà parlé, ce qu’il a dit est gardé et corrigé ; sinon rien n’est décompté.
       onLost: () => {
         if (finishing.current) return;
-        if (startedAt.current) finishRef.current(true);
+        if (spokeRef.current) finishRef.current(true);
         else fail(`La connexion avec l’examinateur a été coupée. ${NOT_COUNTED}`);
       },
     };
@@ -262,14 +266,14 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
   const router = useRouter();
   async function quit() {
     setQuitting(false);
-    if (!spoke) { abandon(true); release(); exitFullscreen(); onExit(); return; }
+    if (!spoke) { leave(); return; }
     // Conclusion déjà en cours : l’enregistrement continue seul, on quitte tout de suite.
     if (phase === "closing") { leave(); return; }
     if (session && await finish(true)) router.push(`/etudiant/expression-orale/correction/${session.id}`);
   }
   function restart() {
     setError(""); setTurns([]); turnsRef.current = []; usage.current = emptyUsage();
-    finishing.current = false; startedAt.current = 0; setCounting(false); setSpoke(false);
+    finishing.current = false; startedAt.current = 0; setCounting(false); setSpoke(false); spokeRef.current = false;
     talking.current = false; examinerSpoke.current = false; nudge.current = undefined;
     setSession(null); setSummary(null); setCutShort(false); setPhase("intro");
   }
