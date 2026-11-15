@@ -984,3 +984,12 @@ html[data-exam-focus] .shell-content.student-space:has(.seance-qcm) { padding-bo
   .mock-next { grid-template-columns: minmax(0, 1fr); }
   .mock-next-icon { display: none; }
 }
+
+/* Espace éditorial : formulaire d’un Examen TCF. */
+.student-space .mock-editor h2 { margin: 0; font-size: 1.1rem; }
+.mock-editor-row { display: grid; grid-template-columns: minmax(0, 1fr) 10rem; gap: 1rem; }
+.mock-editor-part { margin: 0; padding: 1rem; border: 1px solid var(--border); border-radius: var(--radius); }
+.mock-editor-part legend { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0 0.4rem; font-weight: 700; font-size: 0.9rem; }
+.mock-editor-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.4rem; }
+.mock-card .mock-parts small em { color: var(--warning); font-style: normal; }
+@media (max-width: 640px) { .mock-editor-row { grid-template-columns: minmax(0, 1fr); } }

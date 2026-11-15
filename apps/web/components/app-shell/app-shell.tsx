@@ -36,6 +36,7 @@ const studentGroups: Group[] = [
 const editionGroups: Group[] = [
   { title: "Séries", items: [
     { href: "/edition/import", label: "Importer une série", icon: "upload" },
+    { href: "/edition/examens", label: "Examens TCF", icon: "exam" },
   ] },
   { title: "Banque pédagogique", items: [
     { href: "/edition#banque", label: "Versions de la banque", icon: "library" },
@@ -56,6 +57,7 @@ const editionGroups: Group[] = [
 /** Raccourcis visibles dans l’espace étudiant pour les comptes de l’équipe éditoriale. */
 const adminGroup: Group = { title: "Administration", items: [
   { href: "/edition/import", label: "Importer une série", icon: "upload" },
+  { href: "/edition/examens", label: "Examens TCF", icon: "exam" },
   { href: "/edition", label: "Banque pédagogique", icon: "library", exact: true },
   { href: "/admin/", label: "Administration Django", icon: "sliders", external: true },
 ] };

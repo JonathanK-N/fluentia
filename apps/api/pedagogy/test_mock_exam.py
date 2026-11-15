@@ -131,3 +131,36 @@ class MockExamTests(SpeakingClient):
         run = MockExamRun.objects.create(user=self.student, exam=self.exam)
         other = type(self.student).objects.create_user(username="autre-eleve", email="autre-eleve@example.test")
         self.assertEqual(self.client_for(other).get(f"/api/v1/mock-exam-runs/{run.pk}/").status_code, 404)
+
+
+class MockExamEditorTests(MockExamTests):
+    def editor_client(self):
+        editor = type(self.student).objects.create_user(username="editeur-examen", email="editeur@example.test", is_staff=True, is_superuser=True)
+        return self.client_for(editor)
+
+    def send(self, client, method, path, data=None):
+        return getattr(client, method)(f"/api/v1/bank/mock-exams/{path}", data or {}, format="json", HTTP_X_CSRFTOKEN=client.csrf)
+
+    def test_editors_compose_publish_and_withdraw_an_exam(self):
+        client = self.editor_client()
+        listing = client.get("/api/v1/bank/mock-exams/").data
+        self.assertIn(str(self.listening.pk), [o["id"] for o in listing["options"]["listening"]])
+        self.assertIn(self.task2.pk, [o["id"] for o in listing["options"]["speaking_2"]])
+        # Publier sans les 4 épreuves est refusé ; un sujet de la mauvaise tâche aussi.
+        self.assertEqual(self.send(client, "post", "", {"title": "Examen TCF 2", "is_published": True}).status_code, 400)
+        self.assertEqual(self.send(client, "post", "", {"title": "Examen TCF 2", "writing_1": self.writing[1].pk}).status_code, 400)
+        draft = self.send(client, "post", "", {"title": "Examen TCF 2", "listening": str(self.listening.pk)})
+        self.assertEqual((draft.status_code, draft.data["complete"]), (201, False))
+        fields = {"reading": str(self.reading.pk), **{f"writing_{n}": self.writing[n - 1].pk for n in (1, 2, 3)},
+                  "speaking_1": self.task1.pk, "speaking_2": self.task2.pk, "speaking_3": self.task3.pk, "is_published": True}
+        published = self.send(client, "put", f"{draft.data['id']}/", fields)
+        self.assertEqual((published.status_code, published.data["complete"], published.data["is_published"]), (200, True, True))
+        self.assertIn("Examen TCF 2", [e["title"] for e in self.get("mock-exams/").data])
+        # Un examen déjà passé ne se supprime pas : on le retire de la publication.
+        MockExamRun.objects.create(user=self.student, exam_id=draft.data["id"])
+        self.assertEqual(self.send(client, "delete", f"{draft.data['id']}/").status_code, 409)
+        self.assertEqual(self.send(client, "put", f"{draft.data['id']}/", {"is_published": False}).status_code, 200)
+        self.assertNotIn("Examen TCF 2", [e["title"] for e in self.get("mock-exams/").data])
+
+    def test_students_cannot_edit_exams(self):
+        self.assertEqual(self.get("bank/mock-exams/").status_code, 403)

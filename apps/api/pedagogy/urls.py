@@ -1,5 +1,5 @@
 from django.urls import path
-from . import mock_exam
+from . import mock_exam, mock_exam_editor
 from .views import (
     BankListView,
     BankDetailView,
@@ -47,6 +47,8 @@ urlpatterns = [
     path("bank/images/<uuid:image_id>/", BankImageView.as_view()),
     path("tasks/<str:skill>/", TaskListView.as_view()),
     path("tasks/<str:skill>/done/", DoneSubjectsView.as_view()),
+    path("bank/mock-exams/", mock_exam_editor.MockExamEditorView.as_view()),
+    path("bank/mock-exams/<int:exam_id>/", mock_exam_editor.MockExamEditorDetailView.as_view()),
     path("mock-exams/", mock_exam.MockExamListView.as_view()),
     path("mock-exams/<int:exam_id>/runs/", mock_exam.MockExamStartView.as_view()),
     path("mock-exam-runs/<int:run_id>/", mock_exam.MockExamRunView.as_view()),
