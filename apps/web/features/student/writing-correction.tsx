@@ -227,15 +227,16 @@ function Feedback({ result }: { result: Partial }) {
   return <>
     {result.summary ? <p className="result-summary">{result.summary}</p> : <Waiting />}
     {explanation ? <p className="result-explanation">{explanation}</p> : result.summary && <Waiting />}
-    <h3>À corriger</h3>
+    {/* Sans erreur relevée, la rubrique « À corriger » disparaît. */}
     {result.errors
-      ? result.errors.length
-        ? <ul className="correction-errors">{result.errors.map((e, index) => <li key={index}>
+      ? result.errors.length > 0 && <>
+        <h3>À corriger</h3>
+        <ul className="correction-errors">{result.errors.map((e, index) => <li key={index}>
           <span><del>{e.original}</del><Icon name="arrow" size={13} aria-hidden="true" /><ins>{e.correction}</ins></span>
           <small>{e.explanation}</small>
         </li>)}</ul>
-        : <p className="student-hint">Aucune erreur importante relevée.</p>
-      : <Waiting />}
+      </>
+      : <><h3>À corriger</h3><Waiting /></>}
     <h3>Pour progresser</h3>
     {result.advice ? <ul className="checklist">{result.advice.map(item => <li key={item}>{item}</li>)}</ul> : <Waiting />}
     {result.disclaimer && <p className="student-hint">{result.disclaimer}</p>}
