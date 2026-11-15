@@ -56,9 +56,8 @@ const editionGroups: Group[] = [
 
 /** Raccourcis visibles dans l’espace étudiant pour les comptes de l’équipe éditoriale. */
 const adminGroup: Group = { title: "Administration", items: [
-  { href: "/edition/import", label: "Importer une série", icon: "upload" },
-  { href: "/edition/examens", label: "Examens TCF", icon: "exam" },
-  { href: "/edition", label: "Banque pédagogique", icon: "library", exact: true },
+  // Une seule entrée : l’espace éditorial a son propre menu (import, Examens TCF, banque pédagogique).
+  { href: "/edition/import", label: "Espace éditorial", icon: "library" },
   { href: "/admin/", label: "Administration Django", icon: "sliders", external: true },
 ] };
 
