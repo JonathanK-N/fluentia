@@ -690,11 +690,12 @@ p {
   position: fixed;
   inset: 0;
   background: #030e20b8;
-  z-index: 20;
+  /* Au-dessus de l’écran plein écran de l’Oral (.examiner-layer, 60) et du menu du compte. */
+  z-index: 80;
 }
 .dialog-content {
   position: fixed;
-  z-index: 21;
+  z-index: 81;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
