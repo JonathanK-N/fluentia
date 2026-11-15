@@ -55,7 +55,8 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
     clockOffset.current = Date.parse(data.server_now) - Date.now();
     setAttempt(data);
     if (!pending.current && answerSnapshot === answerVersion.current) setAnswers(Object.fromEntries(data.answers.map(a => [a.question_id, a.choice_id])));
-    if (data.status === "submitted") setResults(await api<Results>(`attempts/${id}/results/`));
+    // Examen TCF en cours : pas de corrigé avant le bilan (la page renvoie vers l’examen).
+    if (data.status === "submitted" && !data.mock_exam_run) setResults(await api<Results>(`attempts/${id}/results/`));
   }, [id]);
   useEffect(() => { load().catch(e => setError(e.message)); }, [load]);
   useEffect(() => {
@@ -127,7 +128,10 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
     return () => { delete document.documentElement.dataset.examFocus; };
   }, [active]);
   // Sortie du plein écran seulement une fois la tentative terminée, pas pendant le chargement.
-  useEffect(() => { if (finished) exitFullscreen(); }, [finished]);
+  const examRun = attempt?.mock_exam_run;
+  useEffect(() => { if (finished && !examRun) exitFullscreen(); }, [finished, examRun]);
+  // Épreuve d’un Examen TCF terminée : retour à l’examen, qui propose l’épreuve suivante.
+  useEffect(() => { if (finished && examRun) router.replace(`/etudiant/examens-blancs/examen/${examRun}`); }, [finished, examRun, router]);
   // Questions consultées : gardées sur cet appareil pour la reprise de la tentative.
   useEffect(() => {
     try { setVisited(JSON.parse(localStorage.getItem(`fluentia:consultees:${id}`) ?? "{}")); } catch { /* stockage indisponible */ }
@@ -230,9 +234,9 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
             <Dialog.Overlay className="dialog-overlay" />
             <Dialog.Content className="dialog-content quit-dialog">
               <Dialog.Title>{ending ? "Terminer la séance ?" : "Quitter la séance ?"}</Dialog.Title>
-              <Dialog.Description>{answeredCount} réponse{answeredCount > 1 ? "s" : ""} enregistrée{answeredCount > 1 ? "s" : ""} sur {total}. {ending ? "En terminant" : "En quittant"}, vos réponses sont envoyées et vous passez à la correction. Les questions sans réponse comptent pour zéro.</Dialog.Description>
+              <Dialog.Description>{answeredCount} réponse{answeredCount > 1 ? "s" : ""} enregistrée{answeredCount > 1 ? "s" : ""} sur {total}. {ending ? "En terminant" : "En quittant"}, vos réponses sont envoyées et vous passez {examRun ? "à l’épreuve suivante de l’examen" : "à la correction"}. Les questions sans réponse comptent pour zéro.</Dialog.Description>
               <div className="quit-actions">
-                <Button loading={busy} onClick={async () => { await submit(); setQuitting(false); }}>{ending ? "Terminer et voir la correction" : "Quitter et voir la correction"}</Button>
+                <Button loading={busy} onClick={async () => { await submit(); setQuitting(false); }}>{examRun ? (ending ? "Terminer l’épreuve" : "Quitter l’épreuve") : ending ? "Terminer et voir la correction" : "Quitter et voir la correction"}</Button>
                 <Dialog.Close asChild><Button variant="secondary" disabled={busy}>Continuer la séance</Button></Dialog.Close>
               </div>
             </Dialog.Content>

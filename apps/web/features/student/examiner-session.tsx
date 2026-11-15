@@ -30,7 +30,11 @@ const ACTIVITY: Record<Activity, string> = {
   waiting: "À vous",
 };
 
-export function ExaminerSession({ task, subject, examiner, onExit }: { task: SpeakingTask; subject: Subject; examiner: string; onExit: () => void }) {
+/** `runId` : tâche passée dans un Examen TCF. La séance y est rattachée, aucune correction n’est proposée et
+ * `onDone` est appelé dès que la tâche est enregistrée ; `onSkip` permet de passer une tâche impossible à faire. */
+export function ExaminerSession({ task, subject, examiner, onExit, runId, onDone, onSkip }: {
+  task: SpeakingTask; subject: Subject; examiner: string; onExit: () => void; runId?: number; onDone?: () => void; onSkip?: () => void;
+}) {
   const [phase, setPhase] = useState<Phase>("intro");
   const [error, setError] = useState("");
   const [session, setSession] = useState<SpeakingSession | null>(null);
@@ -209,7 +213,7 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
     }
     let opened: SpeakingSession;
     try {
-      opened = await api<SpeakingSession>("speaking/sessions/", "POST", { subject_id: subject.id, mode: "practice" });
+      opened = await api<SpeakingSession>("speaking/sessions/", "POST", runId ? { subject_id: subject.id, mode: "simulation", run_id: runId } : { subject_id: subject.id, mode: "practice" });
     } catch (e) {
       const status = e instanceof ApiError ? e.status : 0;
       return fail(status === 403 || status === 429 || status === 503 ? (e as Error).message : "La session n’a pas pu être ouverte. Réessayez dans un instant.");
@@ -231,6 +235,9 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
     if (phase === "prep") startQuestions(session);
     else if (phase === "live") finish();
   }, [left, phase, session, startQuestions, finish]);
+
+  // Examen TCF : la tâche est enregistrée, l’examen passe à la suite sans montrer de correction.
+  useEffect(() => { if (runId && phase === "done" && summary && summary.secondsLeft !== -1) onDone?.(); }, [runId, phase, summary, onDone]);
 
   function toggleMute() {
     const next = !muted;
@@ -269,7 +276,7 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
     if (!spoke) { leave(); return; }
     // Conclusion déjà en cours : l’enregistrement continue seul, on quitte tout de suite.
     if (phase === "closing") { leave(); return; }
-    if (session && await finish(true)) router.push(`/etudiant/expression-orale/correction/${session.id}`);
+    if (session && await finish(true) && !runId) router.push(`/etudiant/expression-orale/correction/${session.id}`);
   }
   function restart() {
     setError(""); setTurns([]); turnsRef.current = []; usage.current = emptyUsage();
@@ -394,6 +401,7 @@ export function ExaminerSession({ task, subject, examiner, onExit }: { task: Spe
           </>}
           {phase === "error" && <>
             <Button variant="secondary" onClick={leave}>Quitter</Button>
+            {onSkip && <Button variant="secondary" onClick={() => { release(); exitFullscreen(); onSkip(); }}>Passer cette tâche</Button>}
             <Button onClick={restart}><Icon name="refresh" size={16} />Réessayer</Button>
           </>}
         </div>

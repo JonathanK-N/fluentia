@@ -94,6 +94,9 @@ class AttemptView(APIView):
     def get(self, request, attempt_id):
         attempt = get_attempt(attempt_id=attempt_id, user=request.user)
         payload = AttemptSerializer(attempt).data
+        # Séance d’un Examen TCF en cours : à la fin, retour à l’examen au lieu du corrigé.
+        from pedagogy.mock_exam import unfinished_run_of
+        payload["mock_exam_run"] = unfinished_run_of(attempt)
         payload["server_now"] = timezone.now().isoformat()
         payload["answers"] = list(attempt.answers.values("question_id", "choice_id"))
         if attempt.status == Attempt.Status.ACTIVE:
@@ -133,6 +136,10 @@ def live_verdict(answer, user):
     Le réglage du profil décide pour toutes les séries : le désactiver remet l’étudiant
     en conditions d’examen, où rien n’est révélé avant la fin.
     """
+    from pedagogy.mock_exam import in_unfinished_run
+    attempt_id = getattr(answer, "attempt_id", None)
+    if attempt_id and in_unfinished_run(attempt=attempt_id):  # Examen TCF : rien n’est révélé avant le bilan
+        return None
     profile = StudentProfile.objects.filter(user=user).first()
     if profile is not None and not profile.live_correction:
         return None
@@ -174,6 +181,9 @@ class AttemptResultsView(APIView):
             return Response(
                 {"detail": "Résultats disponibles après soumission."}, status=409
             )
+        from pedagogy.mock_exam import UNFINISHED, in_unfinished_run
+        if in_unfinished_run(attempt=attempt):
+            return Response({"detail": UNFINISHED}, status=409)
         answers = {a.question_id: a for a in attempt.answers.select_related("choice")}
         payload = result_payload(attempt)
         payload["details"] = [

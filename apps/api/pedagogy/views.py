@@ -27,7 +27,7 @@ from accounts.views import SecureView
 from exams.serializers import ExamListSerializer
 from exams.views import CataloguePagination
 from .models import BankItem, ImageAsset, SpeakingSession, TaskSubject, WritingCorrection
-from . import speaking, speaking_correction
+from . import mock_exam, speaking, speaking_correction
 from .correction import NCLC_GOAL, WORD, AnswerIncomplete, CorrectionUnavailable, correct, nclc, provider, stored_answer
 from . import series as workflow
 
@@ -470,7 +470,10 @@ def stream_events(saved):
         yield json.dumps({"done": True, "result": result.validated_data, "remaining": corrections_left(saved.user)}, ensure_ascii=False) + "\n"
     finally:
         if not finished:  # échec ou page fermée en cours de route
-            saved.delete()
+            if saved.run_id:  # texte d’un Examen TCF : il reste, sa correction pourra être relancée depuis le bilan
+                WritingCorrection.objects.filter(pk=saved.pk, status=WritingCorrection.Status.RUNNING).update(status=WritingCorrection.Status.PENDING)
+            else:
+                saved.delete()
 
 
 class CorrectionStreamView(SecureView):
@@ -479,6 +482,8 @@ class CorrectionStreamView(SecureView):
 
     @extend_schema(request=None, responses={(200, "application/x-ndjson"): OpenApiTypes.STR})
     def post(self, request, correction_id):
+        if mock_exam.in_unfinished_run(correction=get_object_or_404(WritingCorrection, pk=correction_id, user=request.user)):
+            return Response({"detail": mock_exam.UNFINISHED}, status=409)
         started = WritingCorrection.objects.filter(
             pk=correction_id, user=request.user, status=WritingCorrection.Status.PENDING, subject__isnull=False
         ).update(status=WritingCorrection.Status.RUNNING)
@@ -513,6 +518,8 @@ class WritingCorrectionDetailView(SecureView):
     @extend_schema(responses=OpenApiTypes.OBJECT)
     def get(self, request, correction_id):
         saved = get_object_or_404(WritingCorrection.objects.select_related("subject"), pk=correction_id, user=request.user)
+        if mock_exam.in_unfinished_run(correction=saved):
+            return Response({"detail": mock_exam.UNFINISHED}, status=409)
         if saved.status == WritingCorrection.Status.RUNNING and saved.created_at < timezone.now() - STALLED_AFTER:
             # Correction coupée net (redémarrage du serveur) : elle n’aboutira plus, on la retire et elle n’est pas comptée.
             saved.delete()
@@ -593,9 +600,16 @@ class SpeakingSessionView(SecureView):
     def post(self, request):
         data = SpeakingRequestSerializer(data=request.data)
         data.is_valid(raise_exception=True)
-        subject = get_object_or_404(
-            TaskSubject, pk=data.validated_data["subject_id"], task_set__skill="speaking", task_set__is_active=True
-        )
+        run_id = data.validated_data.get("run_id")
+        if run_id:
+            # Examen TCF : le sujet de la tâche en cours, même s’il n’est pas dans le jeu actif.
+            subject = get_object_or_404(TaskSubject, pk=data.validated_data["subject_id"], task_set__skill="speaking")
+            run = mock_exam.speaking_run(request, run_id, subject)
+        else:
+            run = None
+            subject = get_object_or_404(
+                TaskSubject, pk=data.validated_data["subject_id"], task_set__skill="speaking", task_set__is_active=True
+            )
         try:
             speaking.provider()
         except speaking.SpeakingUnavailable as error:
@@ -628,6 +642,9 @@ class SpeakingSessionView(SecureView):
                 )
             else:
                 saved = self.limited_by_minutes(request, subject, data, talk)
+            if run is not None:
+                saved.run = run
+                saved.save(update_fields=["run"])
         try:
             opened = speaking.provider()["session"](subject, request.user)
         except speaking.SpeakingUnavailable as error:
@@ -786,6 +803,8 @@ class SpeakingCorrectionDetailView(SecureView):
         saved = get_object_or_404(
             SpeakingSession.objects.select_related("subject"), pk=session_id, user=request.user, status=SpeakingSession.Status.FINISHED
         )
+        if mock_exam.in_unfinished_run(session=saved):
+            return Response({"detail": mock_exam.UNFINISHED}, status=409)
         if saved.correction_status == "running" and (saved.ended_at or saved.started_at) < timezone.now() - STALLED_AFTER:
             # Correction coupée net (redémarrage du serveur) : on pourra la relancer.
             saved.correction_status = "pending"
@@ -818,6 +837,8 @@ class SpeakingCorrectionStreamView(SecureView):
 
     @extend_schema(request=None, responses={(200, "application/x-ndjson"): OpenApiTypes.STR})
     def post(self, request, session_id):
+        if mock_exam.in_unfinished_run(session=get_object_or_404(SpeakingSession, pk=session_id, user=request.user)):
+            return Response({"detail": mock_exam.UNFINISHED}, status=409)
         # Une seule correction à la fois par séance : « pending » (ou jamais corrigée) → « running ».
         started = SpeakingSession.objects.filter(
             pk=session_id, user=request.user, status=SpeakingSession.Status.FINISHED, subject__isnull=False, correction_status__in=["", "pending"]

@@ -148,3 +148,25 @@ def submit_attempt(*, attempt_id, user) -> Attempt:
     if error:
         raise ValidationError({"attempt": error})
     return attempt
+
+
+def close_expired(*, attempt_id, user) -> Attempt:
+    """Examen TCF : une séance dont le chrono est écoulé est notée avec les réponses déjà enregistrées.
+
+    Hors examen, une séance expirée reste sans note ; dans l’examen, l’épreuve suivante doit pouvoir commencer
+    et le bilan final compte ce qui a été répondu à temps, comme le jour du test."""
+    with transaction.atomic():
+        attempt = _locked_attempt(attempt_id, user)
+        _expire(attempt)
+        if attempt.status != Attempt.Status.EXPIRED:
+            return attempt
+        right = Answer.objects.filter(attempt=attempt, choice__is_correct=True)
+        attempt.correct_count = right.count()
+        attempt.question_count = attempt.exam.questions.count()
+        attempt.score = right.aggregate(total=Sum("question__points"))["total"] or 0
+        attempt.max_score = attempt.exam.questions.aggregate(total=Sum("points"))["total"] or 0
+        # Juste avant la fin du chrono : une séance envoyée l’est toujours avant son échéance.
+        attempt.submitted_at = max(attempt.started_at, attempt.expires_at - timedelta(milliseconds=1))
+        attempt.status = Attempt.Status.SUBMITTED
+        attempt.save(update_fields=["correct_count", "question_count", "score", "max_score", "submitted_at", "status"])
+        return attempt

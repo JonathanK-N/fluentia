@@ -933,3 +933,54 @@ html[data-exam-focus] .shell-content.student-space:has(.seance-qcm) { padding-bo
 .examiner-timer { width: 7rem; }
 .examiner-timer span { max-width: 74%; text-align: center; gap: 0.1rem; }
 .examiner-timer small:first-child { font-size: 0.5rem; letter-spacing: 0.03em; line-height: 1.15; }
+
+/* Examen TCF : cases des examens, page d’un passage (épreuves, épreuve suivante, bilan) et Rédaction en 3 tâches. */
+.series-running { padding: 0.2rem 0.65rem; border-radius: 999px; font-size: 0.7rem; font-weight: 700; background: var(--warn-bg); color: var(--warning); }
+.mock-parts { display: grid; gap: 0.45rem; margin: 0.2rem 0 0; padding: 0; list-style: none; flex: 1; }
+.mock-parts li { display: flex; align-items: center; gap: 0.6rem; }
+.mock-parts strong { display: block; font-size: 0.84rem; }
+.mock-parts small { display: block; font-size: 0.74rem; color: var(--muted); }
+.mock-part-icon { display: grid; place-items: center; flex: none; width: 2rem; height: 2rem; border-radius: 9px; background: var(--lavender); color: var(--indigo); }
+.mock-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); gap: 0.75rem; margin: 1.25rem 0; padding: 0; list-style: none; }
+.mock-step { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto auto; column-gap: 0.7rem; align-items: center; padding: 0.9rem 1rem; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--border); }
+.mock-step-number { grid-row: 1 / span 2; display: grid; place-items: center; width: 2.2rem; height: 2.2rem; border-radius: 50%; background: var(--lavender); color: var(--indigo); font-weight: 700; }
+.mock-step-text strong { display: block; font-size: 0.88rem; }
+.mock-step-text strong small { font-weight: 500; color: var(--muted); }
+.mock-step-text > small { display: block; font-size: 0.75rem; color: var(--muted); }
+.mock-step-status { grid-column: 2; justify-self: start; margin-top: 0.3rem; padding: 0.1rem 0.55rem; border-radius: 999px; font-size: 0.68rem; font-weight: 700; background: var(--bg); color: var(--muted); }
+.mock-step[data-status="done"] .mock-step-number { background: var(--success); color: var(--surface); }
+.mock-step[data-status="done"] .mock-step-status { background: var(--mint); color: var(--mint-ink); }
+.mock-step[data-status="running"] .mock-step-status { background: var(--warn-bg); color: var(--warning); }
+.mock-step[aria-current] { border-color: var(--indigo); box-shadow: inset 0 0 0 1px var(--indigo); }
+.mock-next { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 1.1rem; }
+.mock-next-icon { display: grid; place-items: center; width: 3.4rem; height: 3.4rem; border-radius: 16px; background: var(--side-bg); color: #fff; }
+.mock-next small { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--indigo); }
+.student-space .mock-next h2 { margin: 0.2rem 0 0.3rem; font-size: 1.1rem; }
+.student-space .mock-next p { margin: 0; font-size: 0.85rem; color: var(--muted); }
+.mock-next-actions { display: grid; gap: 0.5rem; }
+.mock-next-actions .button { justify-content: center; }
+.mock-bilan { margin-top: 1.5rem; }
+.mock-overall { display: flex; align-items: center; gap: 1.2rem; margin-top: 0; }
+.mock-overall-level { display: grid; place-items: center; flex: none; width: 4.5rem; height: 4.5rem; border-radius: 50%; background: var(--side-bg); color: #fff; font-size: 1.6rem; font-weight: 700; }
+.student-space .mock-overall h3 { margin: 0 0 0.25rem; font-size: 1.1rem; }
+.student-space .mock-overall p { margin: 0; font-size: 0.85rem; color: var(--muted); }
+.mock-results { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: 0.75rem; margin: 0.75rem 0 0; padding: 0; list-style: none; }
+.mock-results > li { margin: 0; display: grid; align-content: start; gap: 0.4rem; }
+.mock-result-head { display: flex; align-items: center; gap: 0.6rem; }
+.student-space .mock-result-head h3 { margin: 0; flex: 1; font-size: 1rem; }
+.mock-level { padding: 0.2rem 0.7rem; border-radius: 999px; background: var(--lavender); color: var(--indigo); font-weight: 700; font-size: 0.85rem; }
+.student-space .mock-results .student-hint { margin: 0; }
+.student-space a.mock-link { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.8rem; font-weight: 600; }
+.mock-task-results { display: grid; gap: 0.35rem; margin: 0.2rem 0 0; padding: 0.6rem 0 0; list-style: none; border-top: 1px solid var(--border); }
+.mock-task-results li { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; font-size: 0.8rem; }
+.mock-task-results li > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mock-task-results small { color: var(--muted); white-space: nowrap; }
+.mock-writing-tabs { margin: 0 auto 1rem; }
+.mock-writing-tabs button { display: grid; justify-items: center; padding: 0.35rem 1rem; border: 0; border-radius: 999px; background: none; color: var(--text); font: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
+.mock-writing-tabs button small { font-size: 0.66rem; font-weight: 500; opacity: 0.75; }
+.mock-writing-tabs button:not([aria-current]):hover { background: var(--lavender); }
+.mock-writing-start { display: grid; justify-items: center; gap: 1rem; padding: 2rem 1rem; text-align: center; }
+@media (max-width: 760px) {
+  .mock-next { grid-template-columns: minmax(0, 1fr); }
+  .mock-next-icon { display: none; }
+}

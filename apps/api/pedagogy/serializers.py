@@ -263,6 +263,8 @@ class ModelAnswerSerializer(serializers.Serializer):
 class SpeakingRequestSerializer(StrictSerializer):
     subject_id = serializers.IntegerField(min_value=1)
     mode = serializers.ChoiceField(choices=["practice", "simulation"])
+    # Tâche passée dans un Examen TCF : la séance y est rattachée et corrigée à la fin de l’examen.
+    run_id = serializers.IntegerField(min_value=1, required=False)
 
 
 class SpeakingSessionSerializer(serializers.Serializer):
