@@ -25,11 +25,11 @@ it("présente les quatre épreuves, les deux offres et des liens d’inscription
   expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Préparez le TCF Canada");
   for (const title of ["Compréhension orale", "Compréhension écrite", "Expression écrite", "Expression orale"])
     expect(screen.getByRole("heading", { level: 3, name: title })).toBeInTheDocument();
-  expect(screen.getByText("19,99 $")).toBeInTheDocument();
+  expect(screen.getByText("22,99 $ US")).toBeInTheDocument();
   expect(screen.getByText("0 $", { selector: ".plan-price strong" })).toBeInTheDocument();
   const signups = screen.getAllByRole("link", { name: /Créer mon compte gratuit/ });
   expect(signups.length).toBeGreaterThan(1);
   for (const link of signups) expect(link).toHaveAttribute("href", "/etudiant/compte#inscription");
-  expect(screen.getByRole("link", { name: "Passer à Premium" }).getAttribute("href")).toMatch(/^mailto:support@fluentia\.ca/);
+  expect(screen.getByRole("link", { name: "Passer à Premium" })).toHaveAttribute("href", "/etudiant/compte#abonnement");
   expect(screen.queryByText(/en développement|à confirmer|en préparation/i)).toBeNull();
 });

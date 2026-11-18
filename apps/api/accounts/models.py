@@ -116,3 +116,28 @@ class EmailVerification(models.Model):
             },
         )
         return token
+
+
+class Payment(models.Model):
+    """Paiement d’une formule Premium par Stripe Checkout ; gardé même si le compte est supprimé (comptabilité)."""
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "En attente"
+        PAID = "paid", "Payé"
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="payments")
+    email = models.EmailField()
+    plan = models.CharField("formule", max_length=12, choices=Subscription.Plan.choices)
+    amount = models.PositiveIntegerField("montant en cents")
+    currency = models.CharField(max_length=3, default="usd")
+    stripe_session = models.CharField(max_length=255, unique=True)
+    status = models.CharField(max_length=12, choices=Status.choices, default=Status.PENDING)
+    created_at = models.DateTimeField(auto_now_add=True)
+    paid_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "paiement"
+
+    def __str__(self):
+        return f"{self.email} · {self.get_plan_display()} · {self.amount / 100:.2f} {self.currency.upper()}"

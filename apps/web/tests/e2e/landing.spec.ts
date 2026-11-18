@@ -40,7 +40,7 @@ test("FAQ au clavier, offres et accessibilité", async ({ page }) => {
   await page.keyboard.press("Space");
   await expect(page.locator(".faq-list details[open]")).toHaveCount(0);
   await expect(page.locator(".plan-card")).toHaveCount(2);
-  await expect(page.getByText("19,99 $", { exact: true })).toBeVisible();
+  await expect(page.getByText("22,99 $ US", { exact: true })).toBeVisible();
   expect(await page.locator("form,input,iframe,audio,video,canvas").count()).toBe(0);
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
 });

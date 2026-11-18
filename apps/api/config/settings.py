@@ -93,6 +93,11 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 if os.getenv("DJANGO_NUM_PROXIES"):
     REST_FRAMEWORK["NUM_PROXIES"] = int(os.getenv("DJANGO_NUM_PROXIES"))
 
+# --- Paiement Premium par Stripe Checkout (cartes, en dollars américains) ---
+# Clé secrète (sk_test_… en essai, sk_live_… en production) et secret de signature du point de terminaison webhook.
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
+STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
+
 # --- Courriel transactionnel (vérification des adresses) ---
 EMAIL_HOST = os.getenv("EMAIL_HOST", "localhost")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))

@@ -23,7 +23,13 @@ export default function TermsPage() {
     </Section>
 
     <Section title="4. Formules et Premium">
-      <p>Une partie du service est gratuite. La formule Premium donne accès à l’Oral avec l’examinateur IA, avec un nombre d’essais lié à la formule choisie. Le prix, la durée et le nombre d’essais de chaque formule sont indiqués au moment de l’achat. Les corrections automatiques peuvent être limitées par jour pour garantir un service fiable à tous.</p>
+      <p>Une partie du service est gratuite. Premium donne accès à l’Oral avec l’examinateur IA, avec un nombre de tâches d’oral lié à la formule choisie :</p>
+      <ul>
+        <li>2 semaines : 12,99 $ US, 15 tâches d’oral ;</li>
+        <li>1 mois : 22,99 $ US, 25 tâches d’oral ;</li>
+        <li>2 mois : 37,99 $ US, 40 tâches d’oral.</li>
+      </ul>
+      <p>Les prix sont en dollars américains. Le paiement est unique, par carte de crédit, sur la page sécurisée de Stripe : rien ne se renouvelle automatiquement. Une formule achetée pendant un Premium en cours s’ajoute à la fin de celui-ci. Les tâches d’oral non utilisées à la fin de la période ne sont pas reportées. Les corrections automatiques peuvent être limitées par jour pour garantir un service fiable à tous.</p>
     </Section>
 
     <Section title="5. Utilisation acceptable">

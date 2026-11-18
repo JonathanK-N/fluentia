@@ -13,7 +13,7 @@ export default function PrivacyPage() {
       <ul>
         <li><strong>Votre compte :</strong> adresse e-mail, prénom ou nom d’usage et mot de passe (conservé uniquement sous forme chiffrée).</li>
         <li><strong>Votre entraînement :</strong> réponses aux questions, scores, textes de Rédaction, transcription écrite de vos échanges d’Oral, corrections, résultats d’Examen TCF et programme d’étude.</li>
-        <li><strong>Votre abonnement :</strong> formule, dates de début et de fin, essais d’Oral utilisés.</li>
+        <li><strong>Votre abonnement :</strong> formule, dates de début et de fin, essais d’Oral utilisés, et l’historique de vos paiements (formule, montant, date). Votre numéro de carte n’est jamais transmis à Fluentia.</li>
         <li><strong>Des données techniques :</strong> adresse IP et type d’appareil, pour sécuriser votre compte, limiter les abus et vous prévenir d’une connexion depuis un nouvel appareil.</li>
       </ul>
       <p>Pendant l’Oral, votre voix est transmise en direct à l’examinateur IA pour la conversation. Fluentia ne conserve pas l’enregistrement audio : seule la transcription écrite est gardée pour vous corriger.</p>
@@ -34,6 +34,7 @@ export default function PrivacyPage() {
       <ul>
         <li><strong>OpenAI (États-Unis) :</strong> vos textes de Rédaction, votre voix pendant l’Oral et sa transcription, pour la conversation avec l’examinateur et la correction. Pour les corrections, nous demandons à OpenAI de ne pas conserver les échanges ; OpenAI peut toutefois garder des données un temps limité pour la sécurité de son service, selon ses propres conditions.</li>
         <li><strong>Railway :</strong> hébergement du site et de la base de données.</li>
+        <li><strong>Stripe (États-Unis) :</strong> paiement des formules Premium. Vous saisissez votre carte directement sur la page sécurisée de Stripe.</li>
         <li><strong>Resend (États-Unis) :</strong> envoi des courriels du service.</li>
       </ul>
       <p>Avant de vous corriger, le site vous indique toujours à qui votre texte ou votre voix est envoyé.</p>

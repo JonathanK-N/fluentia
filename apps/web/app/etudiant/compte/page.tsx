@@ -44,9 +44,7 @@ function Connected({ profile, busy, act, setMessage }: { profile: Profile; busy:
       { label: "Essais d’oral", value: sub.speaking_attempts_left !== null ? `${sub.speaking_attempts_left} sur ${sub.speaking_attempts}` : "—", hint: sub.status === "premium" ? "Une tâche = un essai, jusqu’à la fin de la formule" : "Une tâche 1 offerte sans Premium" },
       { label: "Identifiant", value: <span className="summary-email">{profile.email}</span>, hint: "Adresse de connexion" },
     ]} />
-    <div className="student-nav" style={{ marginTop: "1rem" }}>
-      <Button onClick={() => setMessage("Le paiement en ligne ouvrira prochainement. En attendant, l’équipe Fluentia active le Premium sur demande depuis l’administration.")}><Icon name="refresh" size={16} />{sub.status === "free" ? "Passer au Premium" : "Renouveler mon Premium"}</Button>
-    </div>
+    <PremiumOffers renewing={sub.status !== "free"} active={sub.status === "premium"} setMessage={setMessage} />
     <section className="student-card settings-card" aria-labelledby="reglages">
       <div className="card-title"><span className="skill-chip"><Icon name="sliders" size={18} /></span><h2 id="reglages">Réglages d’entraînement</h2></div>
       <p>Pendant les QCM, la correction en direct indique tout de suite si votre réponse est juste. Désactivez-la pour vous mettre en conditions d’examen : rien n’est révélé avant la fin.</p>
@@ -57,6 +55,42 @@ function Connected({ profile, busy, act, setMessage }: { profile: Profile; busy:
     </section>
     <DeleteAccount onDeleted={() => act(async () => null, "Votre compte et toutes vos données ont été supprimés.")} />
   </>;
+}
+
+type Offer = { plan: string; name: string; amount: number; currency: string; days: number; speaking_attempts: number };
+const dollars = (cents: number) => `${(cents / 100).toLocaleString("fr-CA", { minimumFractionDigits: 2 })} $ US`;
+
+/** Formules Premium payées par carte sur la page sécurisée de Stripe ; Fluentia ne voit jamais le numéro de carte. */
+function PremiumOffers({ renewing, active, setMessage }: { renewing: boolean; active: boolean; setMessage: (value: string) => void }) {
+  const [offers, setOffers] = useState<Offer[] | null>(null);
+  const [available, setAvailable] = useState(true);
+  const [paying, setPaying] = useState<string | null>(null);
+  useEffect(() => {
+    api<{ offers: Offer[]; available: boolean }>("auth/billing/offers/").then(data => { setOffers(data.offers); setAvailable(data.available); }).catch(() => setOffers([]));
+  }, []);
+  async function pay(plan: string) {
+    setPaying(plan); setMessage("");
+    try { const { url } = await api<{ url: string }>("auth/billing/checkout/", "POST", { plan }); window.location.assign(url); }
+    catch (e) { setMessage((e as Error).message); setPaying(null); }
+  }
+  if (!offers?.length) return null;
+  return <section className="premium-offers" aria-labelledby="formules">
+    <h3 id="formules">{renewing ? "Renouveler mon Premium" : "Passer au Premium"}</h3>
+    <p className="student-hint">Paiement unique par carte de crédit, en dollars américains, sur la page sécurisée de Stripe. Rien ne se renouvelle automatiquement.{active ? " Une nouvelle formule s’ajoute à la fin de votre Premium en cours." : ""}</p>
+    <div className="premium-grid">{offers.map(offer => <article key={offer.plan} className="premium-offer" data-featured={offer.plan === "1_mois" || undefined}>
+      {offer.plan === "1_mois" && <span className="plan-badge">Le plus choisi</span>}
+      <h4>{offer.name}</h4>
+      <p className="premium-price">{dollars(offer.amount)}</p>
+      <ul>
+        <li><Icon name="check" size={14} />{offer.days} jours d’accès Premium</li>
+        <li><Icon name="check" size={14} />{offer.speaking_attempts} tâches d’oral avec l’examinateur IA</li>
+      </ul>
+      <Button variant={offer.plan === "1_mois" ? "primary" : "secondary"} loading={paying === offer.plan} disabled={!available || paying !== null} onClick={() => pay(offer.plan)}>
+        Payer {dollars(offer.amount)}<span className="sr-only"> pour {offer.name}</span>
+      </Button>
+    </article>)}</div>
+    {!available && <p className="student-hint">Le paiement en ligne ouvre très bientôt.</p>}
+  </section>;
 }
 
 /** Droit à l’effacement : le compte et toutes ses données partent, après confirmation par le mot de passe. */
@@ -105,6 +139,24 @@ export default function AccountPage() {
   const [error, setError] = useState("");
   // Les liens « Créer mon compte » de l’accueil pointent vers #inscription.
   useEffect(() => { if (window.location.hash === "#inscription") setMode("register"); }, []);
+  // Retour de Stripe (?paiement=<séance> ou ?paiement=annule) : on confirme le paiement, puis on nettoie l’adresse.
+  useEffect(() => {
+    const session = new URLSearchParams(window.location.search).get("paiement");
+    if (!session) return;
+    window.history.replaceState(window.history.state, "", `${window.location.pathname}${window.location.hash}`);
+    if (session === "annule") { setMessage("Paiement annulé : aucun montant n’a été débité."); return; }
+    setMessage("Confirmation de votre paiement…");
+    (async () => {
+      for (let attempt = 0; attempt < 6; attempt++) {
+        try {
+          const data = await api<{ status: string }>(`auth/billing/checkout/${encodeURIComponent(session)}/`);
+          if (data.status === "paid") { await refresh(); setMessage("Paiement reçu, merci ! Votre Premium est activé."); return; }
+        } catch { /* nouvel essai dans un instant */ }
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+      setMessage("Votre paiement est en cours de confirmation. Rechargez la page dans quelques minutes ; écrivez-nous si le Premium n’apparaît pas.");
+    })();
+  }, [refresh]);
   async function act(work: () => Promise<Profile | null>, done?: string) {
     setBusy(true); setError(""); setMessage("");
     try {

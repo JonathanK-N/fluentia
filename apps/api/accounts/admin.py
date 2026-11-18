@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 
 from . import emails
-from .models import Subscription
+from .models import Payment, Subscription
 
 
 class EmailLoginForm(AdminAuthenticationForm):
@@ -55,3 +55,25 @@ class FluentiaUserAdmin(UserAdmin):
 if admin.site.is_registered(User):
     admin.site.unregister(User)
 admin.site.register(User, FluentiaUserAdmin)
+
+
+@admin.register(Payment)
+class PaymentAdmin(admin.ModelAdmin):
+    """Paiements Stripe, en lecture seule : les remboursements se font dans le tableau de bord Stripe."""
+
+    list_display = ["email", "plan", "montant", "status", "created_at", "paid_at"]
+    list_filter = ["status", "plan"]
+    search_fields = ["email", "stripe_session"]
+
+    @admin.display(description="Montant")
+    def montant(self, payment):
+        return f"{payment.amount / 100:.2f} {payment.currency.upper()}"
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False

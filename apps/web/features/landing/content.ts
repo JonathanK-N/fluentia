@@ -3,7 +3,8 @@
 export const SIGNUP = "/etudiant/compte#inscription";
 export const LOGIN = "/etudiant/compte";
 export const SUPPORT_EMAIL = "support@fluentia.ca";
-export const PREMIUM_REQUEST = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent("Abonnement Premium Fluentia")}`;
+// Paiement en ligne par carte (Stripe) depuis « Mon abonnement ».
+export const PREMIUM_REQUEST = "/etudiant/compte#abonnement";
 
 export const highlights = [
   { value: "4", label: "épreuves du TCF Canada" },
@@ -108,14 +109,15 @@ export const plans = [
   },
   {
     name: "Premium",
-    price: "19,99 $",
-    period: "par mois",
+    price: "22,99 $ US",
+    period: "pour 1 mois",
     description: "Pour s’entraîner à l’oral comme le jour de l’examen.",
     features: [
       "Tout le contenu du compte gratuit",
-      "Les 3 tâches orales avec l’examinateur IA",
-      "25 tâches orales par mois (15 en formule 2 semaines, 40 en formule 2 mois)",
-      "Transcription de chaque conversation",
+      "Les 3 tâches orales avec l’examinateur IA, et la transcription de chaque conversation",
+      "2 semaines : 12,99 $ US · 15 tâches orales",
+      "1 mois : 22,99 $ US · 25 tâches orales",
+      "2 mois : 37,99 $ US · 40 tâches orales",
     ],
     cta: { label: "Passer à Premium", href: PREMIUM_REQUEST },
     featured: true,
@@ -151,6 +153,6 @@ export const faqs = [
   {
     question: "Comment fonctionne l’abonnement Premium ?",
     answer:
-      `Premium coûte 19,99 $ par mois (taxes en sus) et ne se renouvelle pas automatiquement : vous recevez un rappel avant la fin de votre période. Pour l’activer, écrivez-nous à ${SUPPORT_EMAIL}.`,
+      "Choisissez une formule de 2 semaines (12,99 $ US), 1 mois (22,99 $ US) ou 2 mois (37,99 $ US) dans Mon abonnement, puis payez par carte de crédit sur la page sécurisée de Stripe. Le paiement est unique : rien ne se renouvelle automatiquement, et vous recevez un rappel avant la fin de votre période.",
   },
 ] as const;

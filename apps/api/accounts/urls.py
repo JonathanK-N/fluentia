@@ -1,4 +1,5 @@
 from django.urls import path
+from . import billing
 from .views import (
     CsrfView,
     RegisterView,
@@ -23,4 +24,8 @@ urlpatterns = [
     path("password/forgot/", PasswordForgotView.as_view()),
     path("password/reset/", PasswordResetView.as_view()),
     path("account/delete/", DeleteAccountView.as_view()),
+    path("billing/offers/", billing.OffersView.as_view()),
+    path("billing/checkout/", billing.CheckoutView.as_view()),
+    path("billing/checkout/<str:session_id>/", billing.CheckoutStatusView.as_view()),
+    path("billing/webhook/", billing.WebhookView.as_view()),
 ]
