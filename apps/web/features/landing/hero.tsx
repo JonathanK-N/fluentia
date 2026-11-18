@@ -16,8 +16,8 @@ export function Hero() {
             Préparez le TCF Canada <span>comme le jour de l’examen.</span>
           </h1>
           <p className="home-lead">
-            Les quatre épreuves au format officiel, des rédactions corrigées par l’IA et un examinateur
-            qui vous parle, vous écoute et vous relance à l’oral.
+            Les quatre épreuves au format officiel, des rédactions corrigées par l’IA, un examinateur
+            qui vous parle et vous relance à l’oral, et des Examens TCF complets avec bilan.
           </p>
           <div className="home-actions">
             <Link href={SIGNUP} className="button button-primary">

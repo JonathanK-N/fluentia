@@ -11,7 +11,7 @@ export function Pricing() {
           <div className="home-heading home-heading-center">
             <p className="eyebrow">Tarifs</p>
             <h2 id="pricing-title">Commencez gratuitement. Passez à Premium pour l’oral.</h2>
-            <p>Prix en dollars américains (USD). Paiement unique par carte, sans renouvellement automatique.</p>
+            <p>Prix en dollars américains (USD). Paiement unique et sécurisé par carte de crédit avec Stripe, sans renouvellement automatique.</p>
           </div>
         </Reveal>
         <div className="plan-grid">

@@ -9,7 +9,7 @@ export const PREMIUM_REQUEST = "/etudiant/compte#abonnement";
 export const highlights = [
   { value: "4", label: "épreuves du TCF Canada" },
   { value: "3", label: "tâches orales face à l’examinateur" },
-  { value: "60 min", label: "chrono officiel à l’écrit" },
+  { value: "4 en 1", label: "Examen TCF complet, avec bilan" },
   { value: "0 $", label: "pour commencer" },
 ] as const;
 
@@ -20,7 +20,7 @@ export const exams = [
     format: "39 questions · 35 min",
     href: "/etudiant/comprehension-orale",
     detail: "Annonces, dialogues, extraits radio : entraînez votre oreille aux documents de l’épreuve.",
-    features: ["Séries chronométrées au format officiel", "Réécoute et transcription en entraînement", "Corrigé expliqué question par question"],
+    features: ["Séries chronométrées au format officiel", "Réécoute libre, transcription dans le corrigé", "Score sur 699 points et corrigé expliqué"],
   },
   {
     id: "lecture",
@@ -28,7 +28,7 @@ export const exams = [
     format: "39 questions · 60 min",
     href: "/etudiant/comprehension-ecrite",
     detail: "Du document du quotidien au texte argumentatif, repérez l’information utile plus vite.",
-    features: ["Documents variés, du niveau A1 au C2", "Séries chronométrées au format officiel", "Corrigé expliqué question par question"],
+    features: ["Documents variés, du niveau A1 au C2", "Séries chronométrées au format officiel", "Score sur 699 points et corrigé expliqué"],
   },
   {
     id: "redaction",
@@ -36,7 +36,7 @@ export const exams = [
     format: "3 tâches · 60 min",
     href: "/etudiant/expression-ecrite",
     detail: "Message, récit, argumentation : rédigez dans les conditions de l’examen.",
-    features: ["Compteur de mots et brouillon sauvegardé", "Note sur 20 et quatre critères corrigés par l’IA", "Modèle de réponse pour comparer"],
+    features: ["Compteur de mots et brouillon sauvegardé", "Niveau, note sur 20 et NCLC estimés par l’IA", "Erreurs corrigées et version améliorée de votre texte"],
   },
   {
     id: "parole",
@@ -44,7 +44,7 @@ export const exams = [
     format: "3 tâches · 12 min",
     href: "/etudiant/expression-orale",
     detail: "Parlez à un examinateur IA qui vous écoute, vous répond et vous relance.",
-    features: ["Conversation vocale en temps réel", "Préparation chronométrée pour la tâche 2", "Transcription complète à relire"],
+    features: ["Conversation vocale en temps réel", "Préparation chronométrée pour la tâche 2", "Correction : niveau, note sur 20 et NCLC"],
   },
 ] as const;
 
@@ -87,9 +87,9 @@ export const sampleConversation = [
 
 export const steps = [
   ["Créez votre compte", "Gratuit, en deux minutes. Confirmez votre adresse e-mail et c’est parti."],
-  ["Entraînez-vous", "Séries de compréhension, rédactions corrigées : travaillez chaque épreuve au format officiel."],
-  ["Passez l’oral", "Prenez la parole face à l’examinateur IA, tâche par tâche, avec votre micro."],
-  ["Suivez votre progression", "Vos scores, vos corrections et vos transcriptions au même endroit."],
+  ["Entraînez-vous", "Séries de compréhension et rédactions corrigées par l’IA. Reprenez une série quand vous voulez et relisez votre dernière correction."],
+  ["Passez l’oral", "Prenez la parole face à l’examinateur IA, tâche par tâche, avec votre micro, puis lisez votre correction."],
+  ["Faites un Examen TCF complet", "Les 4 épreuves enchaînées en conditions réelles, puis un bilan avec votre niveau global. Vos résultats restent dans Mes résultats."],
 ] as const;
 
 export const plans = [
@@ -114,10 +114,12 @@ export const plans = [
     description: "Pour s’entraîner à l’oral comme le jour de l’examen.",
     features: [
       "Tout le contenu du compte gratuit",
-      "Les 3 tâches orales avec l’examinateur IA, et la transcription de chaque conversation",
+      "Les 3 tâches orales avec l’examinateur IA, corrigées avec leur transcription",
+      "Examens TCF complets : les 4 épreuves enchaînées, avec bilan",
       "2 semaines : 12,99 $ US · 15 tâches orales",
       "1 mois : 22,99 $ US · 25 tâches orales",
       "2 mois : 37,99 $ US · 40 tâches orales",
+      "Paiement par carte de crédit, sécurisé par Stripe : un seul paiement, rien ne se renouvelle",
     ],
     cta: { label: "Passer à Premium", href: PREMIUM_REQUEST },
     featured: true,
@@ -138,12 +140,17 @@ export const faqs = [
   {
     question: "Comment se passe l’oral avec l’examinateur IA ?",
     answer:
-      "Vous choisissez une tâche, autorisez votre micro, puis vous parlez comme face à un examinateur. Il vous répond à voix haute, vous relance et conclut à la fin du temps officiel. Pour la tâche 2, deux minutes de préparation avec prise de notes précèdent l’échange. Vous retrouvez ensuite la transcription complète.",
+      "Vous choisissez une tâche, autorisez votre micro, puis vous parlez comme face à un examinateur. Il vous répond à voix haute, vous relance et conclut à la fin du temps officiel. Pour la tâche 2, deux minutes de préparation avec prise de notes précèdent l’échange. Vous recevez ensuite votre correction (niveau, note sur 20, NCLC et conseils) avec la transcription complète.",
   },
   {
     question: "Que devient ma voix ?",
     answer:
-      "Pendant la conversation, votre voix est transmise en direct au service d’IA vocale qui joue l’examinateur. Fluentia n’enregistre pas l’audio : seule la transcription écrite est conservée dans votre espace.",
+      "Pendant la conversation, votre voix est transmise en direct au service d’IA vocale qui joue l’examinateur. Fluentia n’enregistre pas l’audio : seule la transcription écrite est conservée dans votre espace. Tous les détails sont dans notre politique de confidentialité.",
+  },
+  {
+    question: "Qu’est-ce que l’Examen TCF de Fluentia ?",
+    answer:
+      "Un examen blanc complet : Écoute, Lecture, Rédaction et Oral, dans l’ordre du test et chacun avec son chrono. Vous pouvez faire une pause entre deux épreuves et reprendre plus tard. Aucune correction n’apparaît pendant l’examen : à la fin, un bilan vous donne votre niveau pour chaque épreuve et votre niveau global estimé, avec le détail de chaque correction.",
   },
   {
     question: "De quel équipement ai-je besoin ?",
@@ -154,5 +161,10 @@ export const faqs = [
     question: "Comment fonctionne l’abonnement Premium ?",
     answer:
       "Choisissez une formule de 2 semaines (12,99 $ US), 1 mois (22,99 $ US) ou 2 mois (37,99 $ US) dans Mon abonnement, puis payez par carte de crédit sur la page sécurisée de Stripe. Le paiement est unique : rien ne se renouvelle automatiquement, et vous recevez un rappel avant la fin de votre période.",
+  },
+  {
+    question: "Puis-je supprimer mon compte ?",
+    answer:
+      "Oui, à tout moment, depuis Mon profil → Supprimer mon compte. Votre compte et toutes vos données d’entraînement sont effacés immédiatement et définitivement.",
   },
 ] as const;
