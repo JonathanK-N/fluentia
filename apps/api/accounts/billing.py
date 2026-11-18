@@ -100,7 +100,8 @@ def activate(session):
     if session.get("payment_status") != "paid":
         return None
     with transaction.atomic():
-        payment = Payment.objects.select_for_update().select_related("user").filter(stripe_session=session.get("id")).first()
+        # Verrou sur le paiement seul : PostgreSQL refuse FOR UPDATE sur la jointure d’un compte facultatif.
+        payment = Payment.objects.select_for_update(of=("self",)).select_related("user").filter(stripe_session=session.get("id")).first()
         if payment is None or payment.status == Payment.Status.PAID:
             return payment
         if session.get("amount_total") != payment.amount or session.get("currency") != payment.currency:
