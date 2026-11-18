@@ -64,7 +64,8 @@ class BillingTests(TestCase):
         self.assertEqual(response.data["url"], "https://checkout.stripe.com/c/pay/x")
         sent = call.call_args.kwargs["data"]
         self.assertEqual((sent["line_items[0][price_data][unit_amount]"], sent["line_items[0][price_data][currency]"]), ("1299", "usd"))
-        self.assertEqual((sent["payment_method_types[0]"], sent["customer_email"]), ("card", "acheteur@example.test"))
+        self.assertEqual(sent["customer_email"], "acheteur@example.test")
+        self.assertNotIn("payment_method_types[0]", sent)  # refusé par Stripe : réglé dans le tableau de bord
         self.assertTrue(sent["success_url"].startswith("https://fluentia.test/etudiant/compte?paiement={CHECKOUT_SESSION_ID}"))
         self.assertEqual(Payment.objects.get().status, Payment.Status.PENDING)
 

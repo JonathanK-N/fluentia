@@ -7,6 +7,8 @@
 3. Le Premium démarre aussitôt, ou prolonge celui en cours ; la formule achetée donne ses essais d’oral.
 
 Aucun numéro de carte ne passe par Fluentia : tout est saisi sur la page de Stripe.
+Les moyens de paiement proposés (cartes de crédit) se choisissent dans le tableau de bord Stripe :
+Paramètres → Moyens de paiement ; l’API ne les impose plus.
 """
 
 import hashlib
@@ -76,7 +78,6 @@ def open_checkout(user, plan):
     session = stripe("POST", "checkout/sessions", {
         "mode": "payment",
         "locale": "fr",
-        "payment_method_types[0]": "card",
         "customer_email": user.email,
         "client_reference_id": str(user.pk),
         "metadata[plan]": plan,
