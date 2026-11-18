@@ -11,7 +11,7 @@ import {
 } from "../../components/ui/primitives";
 import { Dialog } from "../../components/ui/dialog";
 import { SkillIcon } from "../../components/ui/skill-icon";
-import { brand, competencies } from "../../lib/brand";
+import { competencies } from "../../lib/brand";
 const skills = [
   competencies[1],
   competencies[0],
@@ -408,7 +408,7 @@ export function StudentDashboard() {
         </main>
       </div>
       <footer className="student-footer">
-        © {new Date().getFullYear()} Fluentia · {brand.owner}
+        © {new Date().getFullYear()} Fluentia
         <span>Pilote de présentation · Aucun score officiel</span>
       </footer>
     </div>

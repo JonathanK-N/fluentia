@@ -19,6 +19,8 @@ export default function SupportPage() {
       <li><Link href="/etudiant/compte">Gérer mon profil et ma vérification</Link><Icon name="user" /></li>
       <li><Link href="/etudiant/plan">Organiser mon programme</Link><Icon name="calendar" /></li>
       <li><a href={officialSource} target="_blank" rel="noreferrer">Format officiel du TCF Canada</a><Icon name="arrow" /></li>
+      <li><Link href="/confidentialite">Politique de confidentialité</Link><Icon name="eye" /></li>
+      <li><Link href="/conditions">Conditions d’utilisation</Link><Icon name="book" /></li>
     </ul>}>
       Les réponses aux questions fréquentes sur les exercices, les simulations et votre compte.
     </PageHero>

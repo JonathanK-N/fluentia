@@ -10,6 +10,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.db import IntegrityError, transaction
+from django.db.models import ProtectedError
 from django.db.models import F
 from django.middleware.csrf import get_token
 from django.utils import timezone
@@ -30,6 +31,7 @@ from . import subscription as premium
 from .serializers import (
     AccountSerializer,
     CsrfSerializer,
+    DeleteAccountSerializer,
     LoginSerializer,
     MessageSerializer,
     PasswordForgotSerializer,
@@ -303,3 +305,30 @@ class PasswordResetView(SecureView):
                 )
         emails.send("password_changed", user, url=emails.link("/etudiant/mot-de-passe"), when=emails.day_and_time(timezone.now()))
         return Response({"detail": "Mot de passe modifié. Vous pouvez vous connecter avec le nouveau mot de passe."})
+
+
+class DeleteAccountView(SecureView):
+    """Droit à l’effacement (Loi 25) : le compte et toutes ses données d’apprentissage sont supprimés.
+
+    Séances, réponses, textes, échanges d’oral, corrections, examens, programme et abonnement partent avec
+    le compte. Un compte de l’équipe éditoriale se supprime depuis l’administration, pour ne pas casser
+    l’historique de relecture des contenus."""
+
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(request=DeleteAccountSerializer, responses=MessageSerializer)
+    def post(self, request):
+        data = DeleteAccountSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        user = request.user
+        if not user.check_password(data.validated_data["password"]):
+            raise ValidationError({"password": ["Mot de passe incorrect."]})
+        if user.is_staff:
+            return Response({"detail": "Un compte de l’équipe éditoriale se supprime depuis l’administration."}, status=403)
+        try:
+            with transaction.atomic():
+                logout(request)
+                user.delete()
+        except ProtectedError:
+            return Response({"detail": "Ce compte est lié à des contenus publiés : écrivez à support@fluentia.ca pour le supprimer."}, status=409)
+        return Response({"detail": "Votre compte et vos données ont été supprimés."})

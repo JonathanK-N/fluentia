@@ -1001,3 +1001,9 @@ html[data-exam-focus] .shell-content.student-space:has(.seance-qcm) { padding-bo
 .mock-level { flex: none; }
 .mock-task-results li { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
 .student-space .mock-task-results a.mock-link, .mock-task-results small { white-space: nowrap; }
+
+/* Mon profil : suppression du compte, action définitive signalée en rouge. */
+.danger-card .skill-chip { background: color-mix(in srgb, var(--danger) 12%, transparent); color: var(--danger); }
+.student-space .button.danger-button { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 45%, var(--border)); }
+.student-space .button-primary.danger-button { background: var(--danger); border-color: var(--danger); color: #fff; }
+.student-space .button.danger-button:hover { box-shadow: 0 0 0 4px color-mix(in srgb, var(--danger) 14%, transparent); }

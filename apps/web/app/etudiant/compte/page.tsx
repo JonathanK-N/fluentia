@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import * as Dialog from "@radix-ui/react-dialog";
 import { useEffect, useState, type FormEvent, type MouseEvent } from "react";
 import { Button } from "../../../components/ui/primitives";
 import { Icon } from "../../../components/app-shell/icons";
@@ -54,7 +55,46 @@ function Connected({ profile, busy, act, setMessage }: { profile: Profile; busy:
         <Switch id="reglage-son" label="Signal sonore" hint="Un son pour chaque bonne ou mauvaise réponse" icon="volume" checked={profile.preferences.answer_sound} disabled={busy || !profile.preferences.live_correction} onChange={value => prefer("answer_sound", value)} />
       </div>
     </section>
+    <DeleteAccount onDeleted={() => act(async () => null, "Votre compte et toutes vos données ont été supprimés.")} />
   </>;
+}
+
+/** Droit à l’effacement : le compte et toutes ses données partent, après confirmation par le mot de passe. */
+function DeleteAccount({ onDeleted }: { onDeleted: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  async function confirm(event: FormEvent) {
+    event.preventDefault();
+    setBusy(true); setError("");
+    try { await api("auth/account/delete/", "POST", { password }); setOpen(false); onDeleted(); }
+    catch (e) { setError((e as Error).message); }
+    finally { setBusy(false); }
+  }
+  return <section className="student-card danger-card" aria-labelledby="suppression">
+    <div className="card-title"><span className="skill-chip"><Icon name="trash" size={18} /></span><h2 id="suppression">Supprimer mon compte</h2></div>
+    <p>Votre compte et toutes vos données sont effacés définitivement : séances, réponses, textes, échanges d’oral, corrections, programme et abonnement.</p>
+    <Dialog.Root open={open} onOpenChange={value => { setOpen(value); setPassword(""); setError(""); }}>
+      <Dialog.Trigger asChild><Button variant="secondary" className="danger-button"><Icon name="trash" size={15} />Supprimer mon compte</Button></Dialog.Trigger>
+      <Dialog.Portal>
+        <Dialog.Overlay className="dialog-overlay" />
+        <Dialog.Content className="dialog-content quit-dialog">
+          <Dialog.Title>Supprimer définitivement votre compte ?</Dialog.Title>
+          <Dialog.Description>Cette action est irréversible. Entrez votre mot de passe pour confirmer.</Dialog.Description>
+          <form className="student-form" onSubmit={confirm}>
+            <label htmlFor="suppression-mdp">Mot de passe</label>
+            <PasswordInput id="suppression-mdp" autoComplete="current-password" required value={password} onChange={e => setPassword(e.target.value)} />
+            {error && <p role="alert">{error}</p>}
+            <div className="quit-actions">
+              <Button type="submit" className="danger-button" loading={busy} disabled={!password}>Supprimer définitivement</Button>
+              <Dialog.Close asChild><Button variant="secondary" disabled={busy}>Garder mon compte</Button></Dialog.Close>
+            </div>
+          </form>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  </section>;
 }
 
 export default function AccountPage() {
@@ -119,6 +159,7 @@ export default function AccountPage() {
         </label>
         {mode === "register" && <label>Confirmer le mot de passe<PasswordInput name="confirmation" autoComplete="new-password" minLength={12} maxLength={128} required /></label>}
         {mode === "register" && <p className="student-hint">Au moins 12 caractères. Évitez les mots de passe courants et vos informations personnelles.</p>}
+        {mode === "register" && <p className="student-hint">En créant un compte, vous acceptez les <Link href="/conditions">conditions d’utilisation</Link> et la <Link href="/confidentialite">politique de confidentialité</Link>.</p>}
         <Button type="submit" loading={busy}>{mode === "login" ? "Se connecter" : "Créer mon compte"}</Button>
       </form>
       {status}

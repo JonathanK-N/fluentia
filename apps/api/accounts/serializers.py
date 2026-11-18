@@ -82,3 +82,8 @@ def check_password(password, user):
         validate_password(password, user=user)
     except DjangoValidationError as exc:
         raise serializers.ValidationError({"password": exc.messages}) from exc
+
+
+class DeleteAccountSerializer(serializers.Serializer):
+    # Le mot de passe confirme que c’est bien la personne qui supprime son compte.
+    password = serializers.CharField(write_only=True, max_length=128, trim_whitespace=False)

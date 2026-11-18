@@ -2,7 +2,6 @@
 /** Pied de page et destinations réellement disponibles. Propriétaire : Jonathan Kakesa. */
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { brand } from "../../lib/brand";
 import { Logo } from "../../components/branding/logo";
 export function Footer() {
   const pathname = usePathname();
@@ -12,9 +11,12 @@ export function Footer() {
     return (
       <footer className="site-footer container">
         <span>
-          © {new Date().getFullYear()} Fluentia · {brand.owner}
+          © {new Date().getFullYear()} Fluentia
         </span>
-        <span>Maîtriser aujourd’hui. Avancer demain.</span>
+        <span className="footer-legal">
+          <Link href="/confidentialite">Confidentialité</Link>
+          <Link href="/conditions">Conditions d’utilisation</Link>
+        </span>
       </footer>
     );
   return (
@@ -48,11 +50,16 @@ export function Footer() {
               <a href="mailto:support@fluentia.ca">support@fluentia.ca</a>
             </p>
             <p>Une question sur votre compte ou sur Premium ? Écrivez-nous.</p>
+            <p>
+              <Link href="/confidentialite">Politique de confidentialité</Link>
+              <br />
+              <Link href="/conditions">Conditions d’utilisation</Link>
+            </p>
           </div>
         </div>
         <div className="footer-bottom">
           <span>
-            © {new Date().getFullYear()} Fluentia · {brand.owner}
+            © {new Date().getFullYear()} Fluentia
           </span>
           <span>
             Préparation indépendante, sans lien avec France Éducation

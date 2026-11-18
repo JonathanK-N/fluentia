@@ -14,13 +14,15 @@ const nextConfig = {
     ];
   },
   async headers() {
-    return ["/etudiant/:path*", "/edition/:path*"].map(source => ({ source, headers: [
+    // HSTS : le navigateur n’ouvre plus le site qu’en HTTPS pendant un an (sans les sous-domaines, sans préchargement).
+    const https = { source: "/:path*", headers: [{ key: "Strict-Transport-Security", value: "max-age=31536000" }] };
+    return [https, ...["/etudiant/:path*", "/edition/:path*"].map(source => ({ source, headers: [
       { key: "Cache-Control", value: "private, no-store" },
       { key: "Referrer-Policy", value: "no-referrer" },
       { key: "X-Frame-Options", value: "DENY" },
       { key: "X-Content-Type-Options", value: "nosniff" },
       { key: "Content-Security-Policy", value: "frame-ancestors 'none'; base-uri 'self'; form-action 'self'" },
-    ] }));
+    ] }))];
   },
 };
 export default nextConfig;

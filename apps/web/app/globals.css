@@ -973,3 +973,6 @@ thead {
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* Liens légaux du pied de page simple. */
+.footer-legal { display: inline-flex; flex-wrap: wrap; gap: 0.4rem 1rem; }

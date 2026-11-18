@@ -20,7 +20,7 @@ export function Header() {
         <nav className="desktop-nav" aria-label="Navigation principale">
           <Link href="/#epreuves">Les épreuves</Link>
           <Link href="/#examinateur">L’oral avec l’IA</Link>
-          <Link href="/design-system">Design system</Link>
+          <Link href="/#tarifs">Tarifs</Link>
           <Link href="/etudiant">Espace étudiant</Link>
         </nav>
         <div className="header-actions">
@@ -33,8 +33,8 @@ export function Header() {
               <Link onClick={closeMenu} href="/#examinateur">
                 L’oral avec l’IA
               </Link>
-              <Link onClick={closeMenu} href="/design-system">
-                Design system
+              <Link onClick={closeMenu} href="/#tarifs">
+                Tarifs
               </Link>
               <Link onClick={closeMenu} href="/etudiant">Espace étudiant</Link>
             </nav>
