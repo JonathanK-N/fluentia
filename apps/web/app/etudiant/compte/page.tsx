@@ -60,6 +60,18 @@ function Connected({ profile, busy, act, setMessage }: { profile: Profile; busy:
 type Offer = { plan: string; name: string; amount: number; currency: string; days: number; speaking_attempts: number };
 const dollars = (cents: number) => `${(cents / 100).toLocaleString("fr-CA", { minimumFractionDigits: 2 })} $ US`;
 
+/** Tout ce que chaque formule donne, en plus de sa durée et de ses tâches d’oral. */
+const PREMIUM_ACCESS = [
+  "Les 3 tâches de l’oral, chronométrées comme le jour de l’examen",
+  "Correction de l’oral avec la transcription de vos réponses",
+  "Examens TCF complets : les 4 épreuves enchaînées, avec bilan",
+  "Compréhension orale et écrite : toutes les séries, avec corrigés",
+  "Expression écrite corrigée par l’IA (jusqu’à 10 par jour)",
+  "Score sur 699 et niveau NCLC estimés à chaque épreuve",
+  "Suivi de progression et historique de vos corrections",
+  "Un seul paiement, sans renouvellement automatique",
+];
+
 /** Formules Premium payées par carte sur la page sécurisée de Stripe ; Fluentia ne voit jamais le numéro de carte. */
 function PremiumOffers({ renewing, active, setMessage }: { renewing: boolean; active: boolean; setMessage: (value: string) => void }) {
   const [offers, setOffers] = useState<Offer[] | null>(null);
@@ -82,8 +94,9 @@ function PremiumOffers({ renewing, active, setMessage }: { renewing: boolean; ac
       <h4>{offer.name}</h4>
       <p className="premium-price">{dollars(offer.amount)}</p>
       <ul>
-        <li><Icon name="check" size={14} />{offer.days} jours d’accès Premium</li>
-        <li><Icon name="check" size={14} />{offer.speaking_attempts} tâches d’oral avec l’examinateur IA</li>
+        <li><Icon name="check" size={14} /><strong>{offer.days} jours d’accès Premium</strong></li>
+        <li><Icon name="check" size={14} /><strong>{offer.speaking_attempts} tâches d’oral avec l’examinateur IA</strong></li>
+        {PREMIUM_ACCESS.map(item => <li key={item}><Icon name="check" size={14} />{item}</li>)}
       </ul>
       <Button variant={offer.plan === "1_mois" ? "primary" : "secondary"} loading={paying === offer.plan} disabled={!available || paying !== null} onClick={() => pay(offer.plan)}>
         Payer {dollars(offer.amount)}<span className="sr-only"> pour {offer.name}</span>

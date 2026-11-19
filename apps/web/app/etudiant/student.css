@@ -1018,6 +1018,8 @@ html[data-exam-focus] .shell-content.student-space:has(.seance-qcm) { padding-bo
 .student-space .premium-offer h4 { margin: 0; font-size: 1rem; }
 .premium-price { margin: 0; font-size: 1.5rem; font-weight: 700; }
 .premium-offer ul { display: grid; gap: 0.35rem; margin: 0 0 0.4rem; padding: 0; list-style: none; font-size: 0.84rem; }
-.premium-offer li { display: flex; align-items: center; gap: 0.4rem; }
+.premium-offer li { display: flex; align-items: flex-start; gap: 0.4rem; line-height: 1.35; }
+.premium-offer li svg { margin-top: 0.15rem; }
+.premium-offer li strong { font-weight: 600; }
 .premium-offer li svg { color: var(--success); flex: none; }
 .premium-offer .button { justify-content: center; }

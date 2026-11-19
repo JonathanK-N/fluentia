@@ -10,7 +10,7 @@ export function Hero() {
         <div className="home-hero-copy">
           <p className="home-pill">
             <span aria-hidden="true" className="home-pill-dot" />
-            Nouveau : l’oral avec un examinateur IA vocal
+            Nouveau : l’Examen TCF complet, avec bilan
           </p>
           <h1 id="hero-title">
             Préparez le TCF Canada <span>comme le jour de l’examen.</span>
@@ -27,7 +27,7 @@ export function Hero() {
               Découvrir l’oral
             </a>
           </div>
-          <p className="home-reassure">Gratuit pour commencer · Sans carte bancaire · En français, sur tous vos appareils</p>
+          <p className="home-reassure">Gratuit pour commencer, sans carte bancaire · Premium payé par carte de crédit, sécurisé par Stripe, sans renouvellement · En français, sur tous vos appareils</p>
         </div>
         <SessionPreview />
       </div>
