@@ -77,6 +77,7 @@ function PremiumOffers({ renewing, active, setMessage }: { renewing: boolean; ac
   const [offers, setOffers] = useState<Offer[] | null>(null);
   const [available, setAvailable] = useState(true);
   const [paying, setPaying] = useState<string | null>(null);
+  const [chosen, setChosen] = useState("1_mois");
   useEffect(() => {
     api<{ offers: Offer[]; available: boolean }>("auth/billing/offers/").then(data => { setOffers(data.offers); setAvailable(data.available); }).catch(() => setOffers([]));
   }, []);
@@ -89,7 +90,8 @@ function PremiumOffers({ renewing, active, setMessage }: { renewing: boolean; ac
   return <section className="premium-offers" aria-labelledby="formules">
     <h3 id="formules">{renewing ? "Renouveler mon Premium" : "Passer au Premium"}</h3>
     <p className="student-hint">Paiement unique par carte de crédit, en dollars américains, sur la page sécurisée de Stripe. Rien ne se renouvelle automatiquement.{active ? " Une nouvelle formule s’ajoute à la fin de votre Premium en cours." : ""}</p>
-    <div className="premium-grid">{offers.map(offer => <article key={offer.plan} className="premium-offer" data-featured={offer.plan === "1_mois" || undefined}>
+    <div className="premium-grid">{offers.map(offer => <article key={offer.plan} className="premium-offer" data-featured={offer.plan === chosen || undefined}
+      onClick={() => setChosen(offer.plan)} onFocusCapture={() => setChosen(offer.plan)}>
       {offer.plan === "1_mois" && <span className="plan-badge">Le plus choisi</span>}
       <h4>{offer.name}</h4>
       <p className="premium-price">{dollars(offer.amount)}</p>
@@ -98,7 +100,7 @@ function PremiumOffers({ renewing, active, setMessage }: { renewing: boolean; ac
         <li><Icon name="check" size={14} /><strong>{offer.speaking_attempts} tâches d’oral avec l’examinateur IA</strong></li>
         {PREMIUM_ACCESS.map(item => <li key={item}><Icon name="check" size={14} />{item}</li>)}
       </ul>
-      <Button variant={offer.plan === "1_mois" ? "primary" : "secondary"} loading={paying === offer.plan} disabled={!available || paying !== null} onClick={() => pay(offer.plan)}>
+      <Button variant={offer.plan === chosen ? "primary" : "secondary"} loading={paying === offer.plan} disabled={!available || paying !== null} onClick={() => pay(offer.plan)}>
         Payer {dollars(offer.amount)}<span className="sr-only"> pour {offer.name}</span>
       </Button>
     </article>)}</div>
