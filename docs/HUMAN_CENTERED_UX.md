@@ -12,7 +12,7 @@ La branche temporaire actuelle est issue de ce dev consolidé et validé. La PR 
 
 ## Analyse de la référence
 
-La [vue publique Pack Ayoub](https://packayoub.com/dashboard) a été lue en mode invité via le Web ; sa hiérarchie visuelle a aussi été observée dans l’onglet déjà ouvert. Aucun formulaire, contenu d’exercice ou paramètre de compte n’a été utilisé. Aucune donnée personnelle ni capture du compte de référence n’est copiée dans le dépôt.
+La vue publique de la version précédente de la plateforme a été lue en mode invité via le Web ; sa hiérarchie visuelle a aussi été observée dans l’onglet déjà ouvert. Aucun formulaire, contenu d’exercice ou paramètre de compte n’a été utilisé. Aucune donnée personnelle ni capture du compte de référence n’est copiée dans le dépôt.
 
 Principes retenus : rubriques pédagogiques regroupées dans une navigation dédiée, accès direct aux quatre compétences, indicateurs rassemblés et première action visible. Adaptations Fluentia : distinguer clairement absence de données et progression mesurée, proposer une action aux nouveaux étudiants, rendre les libellés entièrement français et conserver une seule priorité par zone. Nous ne reprenons ni marque, contenus, visuels, code ou données du site de référence. L’audit ne constitue pas une validation de ses parcours authentifiés.
 

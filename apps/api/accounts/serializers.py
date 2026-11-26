@@ -50,8 +50,13 @@ class PreferencesSerializer(serializers.Serializer):
 
 class SubscriptionSerializer(serializers.Serializer):
     status = serializers.ChoiceField(choices=["free", "premium", "expired"], read_only=True)
+    plan = serializers.CharField(read_only=True, allow_null=True)
+    plan_label = serializers.CharField(read_only=True, allow_null=True)
     premium_until = serializers.DateTimeField(read_only=True, allow_null=True)
     days_remaining = serializers.IntegerField(read_only=True)
+    # Essais d’oral de la période en cours (une tâche = un essai) ; null sans Premium actif.
+    speaking_attempts_left = serializers.IntegerField(read_only=True, allow_null=True)
+    speaking_attempts = serializers.IntegerField(read_only=True, allow_null=True)
 
 
 class AccountSerializer(serializers.Serializer):
@@ -77,3 +82,8 @@ def check_password(password, user):
         validate_password(password, user=user)
     except DjangoValidationError as exc:
         raise serializers.ValidationError({"password": exc.messages}) from exc
+
+
+class DeleteAccountSerializer(serializers.Serializer):
+    # Le mot de passe confirme que c’est bien la personne qui supprime son compte.
+    password = serializers.CharField(write_only=True, max_length=128, trim_whitespace=False)

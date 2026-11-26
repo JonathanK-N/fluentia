@@ -32,23 +32,23 @@ export const epreuves: Record<EpreuveId, Epreuve> = {
   },
   listening: {
     id: "listening", number: "02", name: "Écoute", subtitle: "Compréhension orale", icon: "headphones",
-    lead: "Annonces, dialogues, extraits radio : entraînez votre oreille, chaque document se réécoute librement, et la transcription vous attend en entraînement.",
+    lead: "Annonces, dialogues, extraits radio : entraînez votre oreille, chaque document se réécoute librement, et la transcription vous attend dans le corrigé.",
     notice: "Ces séries sont des entraînements non officiels.",
     brief: [
       { label: "Questions", value: "39", hint: "QCM · 4 choix, 1 seule bonne réponse" },
       { label: "Chrono", value: "35 min", hint: "Durée indicative" },
-      { label: "Écoute", value: "Illimitée", hint: "Réécoutez chaque document autant que nécessaire" },
+      { label: "Barème", value: "699 pts", hint: "De 3 à 33 points par question, du niveau A1 au C2" },
     ],
     reflexes: [
       { title: "Lire les choix avant", text: "Parcourez les propositions pendant que le document se charge." },
       { title: "Réécouter avec méthode", text: "Une première écoute pour l’idée générale, une deuxième pour vérifier le détail." },
-      { title: "La transcription après", text: "En entraînement, comparez ce que vous avez compris avec le texte." },
+      { title: "La transcription après", text: "Dans le corrigé, comparez ce que vous avez compris avec le texte." },
     ],
   },
   writing: {
     id: "writing", number: "03", name: "Rédaction", subtitle: "Expression écrite", icon: "pen",
     lead: "Trois tâches à rédiger : un message, un récit, puis une argumentation à partir de deux documents. Votre brouillon est sauvegardé sur cet appareil.",
-    notice: "La correction détaillée par un évaluateur arrivera dans une prochaine version ; aucune note n’est simulée.",
+    notice: "Ces sujets sont des entraînements non officiels. La correction par l’IA donne une note indicative, critère par critère.",
     brief: [
       { label: "Tâches", value: "3", hint: "Message, récit, argumentation" },
       { label: "Chrono", value: "60 min", hint: "Durée indicative" },
@@ -62,12 +62,12 @@ export const epreuves: Record<EpreuveId, Epreuve> = {
   },
   speaking: {
     id: "speaking", number: "04", name: "Oral", subtitle: "Expression orale", icon: "mic",
-    lead: "Trois tâches à l’oral : un entretien, une interaction, puis un point de vue. Enregistrez-vous, réécoutez chaque prise et progressez.",
-    notice: "Vos enregistrements restent dans votre navigateur. L’évaluation par un examinateur arrivera dans une prochaine version.",
+    lead: "Trois tâches à l’oral : un entretien, une interaction, puis un point de vue, face à un examinateur IA qui vous écoute, vous répond et vous relance.",
+    notice: "Votre voix est transmise en direct à l’examinateur IA ; Fluentia n’enregistre pas l’audio et conserve seulement la transcription.",
     brief: [
       { label: "Tâches", value: "3", hint: "Entretien, interaction, point de vue" },
       { label: "Chrono", value: "12 min", hint: "Durée indicative" },
-      { label: "Enregistrement", value: "Local", hint: "Rien n’est envoyé au serveur" },
+      { label: "Examinateur", value: "IA vocale", hint: "Conversation en temps réel, transcription à relire" },
     ],
     reflexes: [
       { title: "Développer", text: "Deux ou trois phrases par réponse, avec un exemple concret." },

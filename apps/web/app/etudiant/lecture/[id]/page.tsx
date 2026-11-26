@@ -11,12 +11,12 @@ import { playVerdict, primeSound } from "../../../../lib/feedback-sound";
 import { AudioPlayer } from "../../../../components/student/audio-player";
 import { Icon } from "../../../../components/app-shell/icons";
 import { Summary } from "../../../../features/student/ui";
-import { FoldableAside } from "../../../../features/student/foldable-aside";
 import { DocumentImage } from "../../../../features/student/document-image";
 import { exitFullscreen, enterFullscreen } from "../../../../lib/fullscreen";
 
 // Préfixe des indices du corrigé, affichés dans « Où le trouver ».
 const HINT = "Indice dans le texte : ";
+const ZOOMS = [0.8, 0.9, 1, 1.1, 1.25];
 
 export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
   const {id} = use(params);
@@ -26,14 +26,19 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
-  const [confirm, setConfirm] = useState(false);
+  // Fin de séance : « Quitter » et « Terminer » ouvrent la même fenêtre ; seul le texte change.
+  const [ending, setEnding] = useState(false);
+  // Taille du texte (document écrit, question et choix ; l’image garde sa place) : chaque séance commence à 80 %.
+  const [zoom, setZoom] = useState(ZOOMS[0]!);
+  function zoomBy(step: number) {
+    setZoom(ZOOMS[Math.min(ZOOMS.length - 1, Math.max(0, ZOOMS.indexOf(zoom) + step))]!);
+  }
   const [quitting, setQuitting] = useState(false);
   const [remaining, setRemaining] = useState(0);
   const [spoken, setSpoken] = useState("");
   const [verdicts, setVerdicts] = useState<Record<string, {correct: boolean; choice: string}>>({});
   const [currentId, setCurrentId] = useState<string | null>(null);
   const [visited, setVisited] = useState<Record<string, true>>({});
-  const [fullscreen, setFullscreen] = useState(false);
   const { profile } = useSession();
   const router = useRouter();
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -50,7 +55,8 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
     clockOffset.current = Date.parse(data.server_now) - Date.now();
     setAttempt(data);
     if (!pending.current && answerSnapshot === answerVersion.current) setAnswers(Object.fromEntries(data.answers.map(a => [a.question_id, a.choice_id])));
-    if (data.status === "submitted") setResults(await api<Results>(`attempts/${id}/results/`));
+    // Examen TCF en cours : pas de corrigé avant le bilan (la page renvoie vers l’examen).
+    if (data.status === "submitted" && !data.mock_exam_run) setResults(await api<Results>(`attempts/${id}/results/`));
   }, [id]);
   useEffect(() => { load().catch(e => setError(e.message)); }, [load]);
   useEffect(() => {
@@ -102,7 +108,7 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
   }
   async function submit() {
     setBusy(true); setError("");
-    try { await api(`attempts/${id}/submit/`, "POST"); setConfirm(false); await load(); }
+    try { await api(`attempts/${id}/submit/`, "POST"); await load(); }
     catch (e) { setError((e as Error).message); await load().catch(() => {}); }
     finally { setBusy(false); }
   }
@@ -122,12 +128,10 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
     return () => { delete document.documentElement.dataset.examFocus; };
   }, [active]);
   // Sortie du plein écran seulement une fois la tentative terminée, pas pendant le chargement.
-  useEffect(() => { if (finished) exitFullscreen(); }, [finished]);
-  useEffect(() => {
-    const sync = () => setFullscreen(Boolean(document.fullscreenElement));
-    sync(); document.addEventListener("fullscreenchange", sync);
-    return () => document.removeEventListener("fullscreenchange", sync);
-  }, []);
+  const examRun = attempt?.mock_exam_run;
+  useEffect(() => { if (finished && !examRun) exitFullscreen(); }, [finished, examRun]);
+  // Épreuve d’un Examen TCF terminée : retour à l’examen, qui propose l’épreuve suivante.
+  useEffect(() => { if (finished && examRun) router.replace(`/etudiant/examens-blancs/examen/${examRun}`); }, [finished, examRun, router]);
   // Questions consultées : gardées sur cet appareil pour la reprise de la tentative.
   useEffect(() => {
     try { setVisited(JSON.parse(localStorage.getItem(`fluentia:consultees:${id}`) ?? "{}")); } catch { /* stockage indisponible */ }
@@ -142,12 +146,12 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
       try { localStorage.setItem(`fluentia:consultees:${id}`, JSON.stringify(next)); } catch { /* stockage indisponible */ }
       return next;
     });
-    if (navigated.current) { navigated.current = false; window.scrollTo({top: 0}); headingRef.current?.focus(); }
+    if (navigated.current) { navigated.current = false; headingRef.current?.focus({preventScroll: true}); }
   }, [active, question, id]);
   function go(target: number) {
     const next = shown[target];
     if (!next) return;
-    navigated.current = true; setConfirm(false); setCurrentId(next.id);
+    navigated.current = true; setCurrentId(next.id);
   }
   return <>
     {!active && !results && <div className="page-head"><div>
@@ -218,51 +222,62 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
         })}
       </ol>
     </>}
-    {active && attempt && <div className="seance">
+    {active && attempt && <div className="seance seance-qcm">
       <header className="seance-bar">
         <div className="seance-brand">
           <Image src="/branding/01_Logos_PNG/fluentia-symbole-transparent-256.png" alt="" width={30} height={30} unoptimized />
           <strong>Fluentia</strong><span aria-hidden="true" className="seance-sep" /><span>Séance · {listening ? "Écoute" : "Lecture"}</span>
         </div>
         <Dialog.Root open={quitting} onOpenChange={open => { if (!busy) setQuitting(open); }}>
-          <Dialog.Trigger className="seance-quit"><Icon name="close" size={14} />Quitter la séance</Dialog.Trigger>
+          <Dialog.Trigger className="seance-quit" onClick={() => setEnding(false)}><Icon name="close" size={14} />Quitter la séance</Dialog.Trigger>
           <Dialog.Portal>
             <Dialog.Overlay className="dialog-overlay" />
             <Dialog.Content className="dialog-content quit-dialog">
-              <Dialog.Title>Quitter la séance ?</Dialog.Title>
-              <Dialog.Description>{answeredCount} réponse{answeredCount > 1 ? "s" : ""} enregistrée{answeredCount > 1 ? "s" : ""} sur {total}. En quittant, vos réponses sont envoyées et vous passez à la correction. Les questions sans réponse comptent pour zéro.</Dialog.Description>
+              <Dialog.Title>{ending ? "Terminer la séance ?" : "Quitter la séance ?"}</Dialog.Title>
+              <Dialog.Description>{answeredCount} réponse{answeredCount > 1 ? "s" : ""} enregistrée{answeredCount > 1 ? "s" : ""} sur {total}. {ending ? "En terminant" : "En quittant"}, vos réponses sont envoyées et vous passez {examRun ? "à l’épreuve suivante de l’examen" : "à la correction"}. Les questions sans réponse comptent pour zéro.</Dialog.Description>
               <div className="quit-actions">
-                <Button loading={busy} onClick={async () => { await submit(); setQuitting(false); }}>Quitter et voir la correction</Button>
+                <Button loading={busy} onClick={async () => { await submit(); setQuitting(false); }}>{examRun ? (ending ? "Terminer l’épreuve" : "Quitter l’épreuve") : ending ? "Terminer et voir la correction" : "Quitter et voir la correction"}</Button>
                 <Dialog.Close asChild><Button variant="secondary" disabled={busy}>Continuer la séance</Button></Dialog.Close>
               </div>
             </Dialog.Content>
           </Dialog.Portal>
         </Dialog.Root>
       </header>
-      <div className="seance-body">
-        <div className="seance-head">
-          <p className="seance-chips"><span className="seance-chip">Épreuve {listening ? "02" : "01"}</span><span className="seance-chip" data-tone="warn">{attempt.mode === "simulation" ? "Simulation non officielle" : "Entraînement non officiel"}</span></p>
-          <h1>{listening ? "Écoutez, choisissez, avancez." : "Lisez, choisissez, avancez."}</h1>
-          <p>{attempt.exam_title}</p>
-        </div>
-        {error && <p role="alert">{error}</p>}
-        <div className="seance-status">
-          <div className="seance-timer">
-            <span className="seance-timer-icon" aria-hidden="true"><Icon name="timer" size={18} /></span>
-            <p><small>Chrono indicatif</small><strong aria-label={`${Math.floor(remaining / 60)} minutes ${remaining % 60} secondes restantes`}>{String(Math.floor(remaining / 60)).padStart(2, "0")}:{String(remaining % 60).padStart(2, "0")}</strong></p>
+      <div className="seance-frame">
+        <nav className="seance-rail" aria-label="Questions de la séance">
+          <ul className="rail-map">{shown.map((item, position) => {
+            const state = answers[item.id] ? "answered" : visited[item.id] ? "seen" : undefined;
+            return <li key={item.id}><button type="button" data-state={state} aria-current={item.id === question?.id ? "step" : undefined} onClick={() => go(position)}
+              aria-label={`Question ${item.position}, ${state === "answered" ? "répondue" : state === "seen" ? "vue sans réponse" : "pas encore vue"}`}>{item.position}</button></li>;
+          })}</ul>
+          <ul className="map-legend rail-legend" aria-hidden="true"><li data-state="answered">Répondue</li><li data-state="seen">Vue</li><li>Pas encore vue</li></ul>
+        </nav>
+        <div className="seance-body">
+          <div className="seance-head">
+            <p className="seance-chips"><span className="seance-chip">Épreuve {listening ? "02" : "01"}</span></p>
+            <h1>{listening ? "Écoutez, choisissez, avancez." : "Lisez, choisissez, avancez."}</h1>
+            <p>{attempt.exam_title}</p>
           </div>
-          <div className="seance-saved">
-            <p><span>Réponses sauvegardées{busy ? " · enregistrement…" : ""}</span><strong>{answeredCount} / {total}</strong></p>
-            <span className="session-progress" aria-hidden="true"><span style={{ width: `${total ? answeredCount / total * 100 : 0}%` }} /></span>
+          {error && <p role="alert">{error}</p>}
+          <div className="seance-status">
+            <div className="seance-timer">
+              <span className="seance-timer-icon" aria-hidden="true"><Icon name="timer" size={18} /></span>
+              <p><small>Chrono indicatif</small><strong aria-label={`${Math.floor(remaining / 60)} minutes ${remaining % 60} secondes restantes`}>{String(Math.floor(remaining / 60)).padStart(2, "0")}:{String(remaining % 60).padStart(2, "0")}</strong></p>
+            </div>
+            <div className="seance-saved">
+              <p><span>Réponses sauvegardées{busy ? " · enregistrement…" : ""}</span><strong>{answeredCount} / {total}</strong></p>
+              <span className="session-progress" aria-hidden="true"><span style={{ width: `${total ? answeredCount / total * 100 : 0}%` }} /></span>
+            </div>
+            <div className="seance-zoom" role="group" aria-label="Taille du texte">
+              <button type="button" onClick={() => zoomBy(-1)} disabled={zoom <= ZOOMS[0]!} aria-label="Réduire le texte">A−</button>
+              <span aria-live="polite">{Math.round(zoom * 100)} %</span>
+              <button type="button" onClick={() => zoomBy(1)} disabled={zoom >= ZOOMS[ZOOMS.length - 1]!} aria-label="Agrandir le texte">A+</button>
+            </div>
+            <Button className="map-finish" disabled={busy || remaining === 0} onClick={() => { setEnding(true); setQuitting(true); }}>Terminer la séance</Button>
           </div>
-          <button type="button" className="session-tool" aria-pressed={fullscreen} onClick={() => fullscreen ? exitFullscreen() : enterFullscreen()}>
-            <Icon name={fullscreen ? "shrink" : "expand"} size={15} />Mode focus
-          </button>
-        </div>
-        <p role="status" className="sr-only">{message}</p>
-        <p className="sr-only" aria-live="polite">{spoken}</p>
-        <div className="attempt-layout">
-          <div>
+          <p role="status" className="sr-only">{message}</p>
+          <p className="sr-only" aria-live="polite">{spoken}</p>
+          <div className="seance-main" style={{ ["--text-zoom" as string]: zoom }}>
             {question && <section className="student-card question-card" id={`q-${question.id}`} key={question.id} aria-labelledby="question-titre">
               <div className="question-head"><h2 id="question-titre" ref={headingRef} tabIndex={-1}>Question {question.position} <span className="question-of">/ {total}</span></h2><span className="pill question-points">{question.points} pt{question.points > 1 ? "s" : ""}</span></div>
               {listening && (question.audio_available ? <AudioPlayer attemptId={id} questionId={question.id} /> : <p role="alert">Le document audio n’est pas disponible pour cette version.</p>)}
@@ -273,36 +288,17 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
                 {question.choices.map((choice, rank) => { const verdict = verdicts[question.id]; const state = verdict?.choice === choice.id ? (verdict.correct ? "right" : "wrong") : undefined; return <label className="student-choice" data-verdict={state} key={choice.id}>
                   <input type="radio" name={question.id} value={choice.id} disabled={busy && answers[question.id] !== choice.id} checked={answers[question.id] === choice.id} onChange={() => save(question.id, choice.id)} />
                   <span className="choice-letter" aria-hidden="true">{"ABCD"[rank]}</span>{choice.label}
-                  {state && <Icon name={state === "right" ? "check" : "close"} size={16} className="choice-mark" />}
+                  {state === "right" && <Icon name="check" size={16} className="choice-mark" />}
                 </label>; })}
               </fieldset>}
-              <nav className="question-nav" aria-label="Navigation entre les questions">
-                <Button variant="secondary" disabled={index === 0} onClick={() => go(index - 1)}><Icon name="back" size={15} />Retour</Button>
-                {index < shown.length - 1
-                  ? <Button onClick={() => go(index + 1)}>Question suivante<Icon name="arrow" size={15} /></Button>
-                  : <Button disabled={busy || remaining === 0} onClick={() => setConfirm(true)}>Terminer<Icon name="check" size={15} /></Button>}
-              </nav>
-            </section>}
-            {confirm && <section className="student-card" aria-label="Confirmation de soumission"><h2>Prêt à découvrir le corrigé ?</h2><p>{answeredCount} réponses enregistrées sur {total}. Les questions sans réponse comptent pour zéro. Après la soumission, les réponses seront définitives.</p>
-              <div className="student-nav" style={{ margin: 0 }}><Button loading={busy} onClick={submit}>Confirmer la soumission</Button> <Button variant="secondary" disabled={busy} onClick={() => setConfirm(false)}>Continuer la séance</Button></div>
             </section>}
           </div>
-          <FoldableAside className="attempt-aside" label="Suivi de la séance" tab="Vue d’ensemble">
-            <nav className="student-card map-card" aria-labelledby="vue-ensemble">
-              <div className="map-head"><h2 id="vue-ensemble">Vue d’ensemble</h2><p>{answeredCount}/{total} répondues</p></div>
-              <ul className="question-map">{shown.map((item, position) => {
-                const state = answers[item.id] ? "answered" : visited[item.id] ? "seen" : undefined;
-                return <li key={item.id}><button type="button" data-state={state} aria-current={item.id === question?.id ? "step" : undefined} onClick={() => go(position)}
-                  aria-label={`Question ${item.position}, ${state === "answered" ? "répondue" : state === "seen" ? "vue sans réponse" : "pas encore vue"}`}>{item.position}</button></li>;
-              })}</ul>
-              <ul className="map-legend" aria-hidden="true"><li data-state="answered">Répondue</li><li data-state="seen">Vue</li><li>Pas encore vue</li></ul>
-              <Button className="map-finish" disabled={busy || remaining === 0} onClick={() => setConfirm(true)}>Terminer la séance</Button>
-            </nav>
-            <div className="student-card seance-tip">
-              <p className="badge-warn"><Icon name="clock" size={13} />Bon à savoir</p>
-              <p>{listening ? "Appuyez sur ▶ pour écouter le document : vous pouvez le réécouter autant de fois que vous le souhaitez." : attempt.mode === "simulation" ? "En simulation, gardez un œil sur le chrono : chaque question compte." : "En entraînement, prenez le temps de relire : le corrigé explique chaque réponse."}</p>
-            </div>
-          </FoldableAside>
+          {question && <nav className="question-nav seance-footer" aria-label="Navigation entre les questions">
+            <Button variant="secondary" disabled={index === 0} onClick={() => go(index - 1)}><Icon name="back" size={15} />Retour</Button>
+            {index < shown.length - 1
+              ? <Button onClick={() => go(index + 1)}>Suivant<Icon name="arrow" size={15} /></Button>
+              : <Button disabled={busy || remaining === 0} onClick={() => { setEnding(true); setQuitting(true); }}>Terminer<Icon name="check" size={15} /></Button>}
+          </nav>}
         </div>
       </div>
     </div>}

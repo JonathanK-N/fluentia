@@ -1,15 +1,12 @@
 "use client";
 /** Studio d’expression orale : le sujet, puis la tâche passée face à l’examinateur IA. */
-import Link from "next/link";
 import { useState } from "react";
 import { Button } from "../../components/ui/primitives";
 import { Icon } from "../../components/app-shell/icons";
-import { formatDuration, type SpeakingTask } from "./content";
-import { FoldableAside } from "./foldable-aside";
+import { formatDuration, sentTo, type SpeakingTask } from "./content";
 import { ExaminerSession } from "./examiner-session";
 
-export function SpeakingStudio({ task, others, examiner = "" }: { task: SpeakingTask; others: { slug: string; number: number; title: string }[]; examiner?: string }) {
-  const [subject, setSubject] = useState(0);
+export function SpeakingStudio({ task, subject, examiner = "" }: { task: SpeakingTask; subject: number; others: { slug: string; number: number; title: string }[]; examiner?: string }) {
   const [withExaminer, setWithExaminer] = useState(false);
   const current = task.subjects[subject]!;
 
@@ -22,16 +19,11 @@ export function SpeakingStudio({ task, others, examiner = "" }: { task: Speaking
       </section>
       <section className="status-card" aria-labelledby="bon-a-savoir">
         <div className="status-head"><h2 id="bon-a-savoir" className="badge-warn"><Icon name="clock" size={14} />Bon à savoir</h2></div>
-        <p className="status-text notice-text">Pendant la conversation, votre voix est envoyée à {examiner || "l’examinateur"} pour être comprise et transcrite. Fluentia conserve uniquement la transcription.</p>
+        <p className="status-text notice-text">Pendant la conversation, votre voix est envoyée {sentTo(examiner)} pour être comprise et transcrite. Fluentia conserve uniquement la transcription.</p>
       </section>
     </div>
-    <div className="section-title"><h2>Votre sujet</h2>
-      {task.subjects.length > 1 && <div className="series-filter" role="group" aria-label="Choisir un sujet">
-        {task.subjects.map((item, index) => <button key={item.title} type="button" aria-pressed={subject === index} onClick={() => setSubject(index)}>{item.title}</button>)}
-      </div>}
-    </div>
-    <div className="studio">
-      <div style={{ display: "grid", gap: "1rem" }}>
+    <div className="section-title"><h2>Sujet {subject + 1} · {current.title}</h2></div>
+    <div className="writing-intro">
         <section className="prompt-card" aria-labelledby="sujet">
           <h2 id="sujet" className="student-eyebrow">Sujet</h2>
           <p>{current.prompt}</p>
@@ -45,17 +37,6 @@ export function SpeakingStudio({ task, others, examiner = "" }: { task: Speaking
           <Button onClick={() => setWithExaminer(true)}><Icon name="mic" size={18} />Commencer</Button>
         </section>
         {withExaminer && <ExaminerSession task={task} subject={current} examiner={examiner} onExit={() => setWithExaminer(false)} />}
-      </div>
-      <FoldableAside className="studio-aside" label="Repères pour l’oral" tab="Repères">
-        <section className="student-card card-muted" aria-labelledby="conseils">
-          <div className="studio-card-head"><h2 id="conseils">Conseils</h2></div>
-          <ul className="checklist">{task.advice.map(item => <li key={item}>{item}</li>)}</ul>
-        </section>
-        <nav className="student-card" aria-labelledby="autres-taches">
-          <div className="studio-card-head"><h2 id="autres-taches">Autres tâches</h2></div>
-          <ul className="activity-list">{others.map(t => <li key={t.slug}><Link href={`/etudiant/expression-orale/${t.slug}`}>Tâche {t.number} — {t.title}</Link><Icon name="chevron" size={16} /></li>)}</ul>
-        </nav>
-      </FoldableAside>
     </div>
   </>;
 }

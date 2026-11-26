@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { Button } from "../../../components/ui/primitives";
 import { api } from "../../../lib/student-api";
+import { FORGOT_EMAIL, PasswordInput } from "../../../features/student/password-input";
 
 export default function PasswordPage() {
   const [link, setLink] = useState<{ uid: string; token: string } | null>(null);
@@ -12,6 +13,7 @@ export default function PasswordPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
+  const [email, setEmail] = useState("");
 
   useEffect(() => {
     // Le lien arrive dans le fragment (#) : il n’est jamais envoyé au serveur ni conservé dans l’historique.
@@ -20,6 +22,7 @@ export default function PasswordPage() {
       const uid = values.get("uid"), token = values.get("token");
       if (uid && token) { setLink({ uid, token }); setDone(false); setMessage(""); setError(""); }
       if (window.location.hash) window.history.replaceState(null, "", window.location.pathname);
+      try { setEmail(sessionStorage.getItem(FORGOT_EMAIL) ?? ""); sessionStorage.removeItem(FORGOT_EMAIL); } catch { /* stockage indisponible */ }
       setReady(true);
     };
     read();
@@ -52,14 +55,14 @@ export default function PasswordPage() {
     <h2 className="page-title">{link ? "Choisissez un nouveau mot de passe" : "Mot de passe oublié"}</h2>
     {link && !done && <form onSubmit={reset} className="student-form">
       <p>Le lien reçu par e-mail est valable 60 minutes et ne peut servir qu’une fois.</p>
-      <label>Nouveau mot de passe<input name="password" type="password" autoComplete="new-password" minLength={12} maxLength={128} required /></label>
-      <label>Confirmer le mot de passe<input name="confirmation" type="password" autoComplete="new-password" minLength={12} maxLength={128} required /></label>
+      <label>Nouveau mot de passe<PasswordInput name="password" autoComplete="new-password" minLength={12} maxLength={128} required /></label>
+      <label>Confirmer le mot de passe<PasswordInput name="confirmation" autoComplete="new-password" minLength={12} maxLength={128} required /></label>
       <p className="student-hint">Au moins 12 caractères. Évitez les mots de passe courants et vos informations personnelles.</p>
       <Button type="submit" loading={busy}>Enregistrer le nouveau mot de passe</Button>
     </form>}
     {!link && !done && <form onSubmit={request} className="student-form">
       <p>Indiquez l’adresse de votre compte : nous vous enverrons un lien pour choisir un nouveau mot de passe.</p>
-      <label>Adresse e-mail<input name="email" type="email" autoComplete="email" maxLength={254} required /></label>
+      <label>Adresse e-mail<input name="email" type="email" autoComplete="email" maxLength={254} required defaultValue={email} key={email} /></label>
       <Button type="submit" loading={busy}>Recevoir le lien</Button>
     </form>}
     <p role="status">{message}</p>

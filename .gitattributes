@@ -1,0 +1,4 @@
+# Les scripts lancés dans les conteneurs Linux doivent garder des fins de ligne Unix (LF),
+# sinon « sh » échoue au démarrage (Railway, Docker).
+*.sh text eol=lf
+Dockerfile text eol=lf

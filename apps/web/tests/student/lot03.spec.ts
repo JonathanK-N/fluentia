@@ -28,7 +28,7 @@ async function student(page: Page, suffix: string) {
 test("oral entraînement : média privé, lecteur, transcription et résultat", async ({page}, info) => {
   await student(page, info.project.name + "-oral");
   await page.goto("/etudiant/comprehension-orale");
-  await page.getByRole("article").filter({has: page.getByRole("heading", {name: "Écoute de recette — annonce", exact: true})}).getByRole("link", {name: /Démarrer la série/}).click();
+  await page.getByRole("article").filter({has: page.getByRole("heading", {name: "Écoute de recette — annonce", exact: true})}).getByRole("link", {name: /(Démarrer|Reprendre) la série/}).click();
   await page.getByRole("button", {name: "Commencer"}).click();
   await expect(page.getByRole("heading", {name: "Écoutez, choisissez, avancez."})).toBeVisible();
   // Le document se charge dès l’affichage de la question ; ▶ le lance.
@@ -45,7 +45,7 @@ test("oral entraînement : média privé, lecteur, transcription et résultat", 
   expect((await new AxeBuilder({page}).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations).toEqual([]);
   await page.screenshot({path: info.outputPath("oral-entrainement.png"), fullPage: true});
   await page.getByRole("button", {name: "Terminer la séance"}).click();
-  await page.getByRole("button", {name: "Confirmer la soumission"}).click();
+  await page.getByRole("button", {name: "Terminer et voir la correction"}).click();
   await expect(page.getByText("1 réponse juste sur 1", {exact: true})).toBeVisible();
   await page.getByRole("link", {name: "Mes résultats", exact: true}).click();
   await expect(page.getByRole("heading", {name: "Écoute", exact: true})).toBeVisible();
@@ -54,11 +54,11 @@ test("oral entraînement : média privé, lecteur, transcription et résultat", 
 
 test("lecture complète : 39 questions, sauvegarde et correction sur PostgreSQL", async ({page}, info) => {
   await student(page, info.project.name + "-reading");
-  await page.getByRole("article").filter({has: page.getByRole("heading", {name: "Lecture complète de recette — 39 questions", exact: true})}).getByRole("link", {name: /Démarrer la série/}).click();
+  await page.getByRole("article").filter({has: page.getByRole("heading", {name: "Lecture complète de recette — 39 questions", exact: true})}).getByRole("link", {name: /(Démarrer|Reprendre) la série/}).click();
   await page.getByRole("button", {name: "Commencer"}).click();
   // Une question à la fois : on répond, puis « Suivant ».
   await expect(page.getByRole("radio")).toHaveCount(4);
-  const map = page.getByRole("navigation", {name: "Vue d’ensemble"});
+  const map = page.getByRole("navigation", {name: "Questions de la séance"});
   for (let index = 1; index <= 39; index++) {
     await expect(page.getByRole("heading", {name: `Question ${index} / 39`, exact: true})).toBeVisible();
     await page.getByRole("radio", {name: "Samedi à dix heures", exact: true}).check();
@@ -71,7 +71,7 @@ test("lecture complète : 39 questions, sauvegarde et correction sur PostgreSQL"
   await page.reload();
   await expect(map.locator("button[data-state=answered]")).toHaveCount(39);
   await page.getByRole("button", {name: "Terminer la séance"}).click();
-  await page.getByRole("button", {name: "Confirmer la soumission"}).click();
+  await page.getByRole("button", {name: "Terminer et voir la correction"}).click();
   await expect(page.getByText("39 réponses justes sur 39", {exact: true})).toBeVisible();
   await expect(page.locator(".bilan-question")).toHaveCount(39);
   await expect(page.getByText("Afficher le texte")).toHaveCount(39);
@@ -79,18 +79,18 @@ test("lecture complète : 39 questions, sauvegarde et correction sur PostgreSQL"
   // Refaire la série : nouvelle tentative vierge sur la même version.
   await page.getByRole("button", {name: "Refaire la série"}).click();
   await expect(page.getByRole("heading", {name: "Question 1 / 39", exact: true})).toBeVisible();
-  await expect(page.locator(".question-map button[data-state=answered]")).toHaveCount(0);
+  await expect(page.locator(".rail-map button[data-state=answered]")).toHaveCount(0);
 });
 
 test("simulation orale : 39 questions ouvertes, navigation libre et réécoute", async ({page}, info) => {
   test.setTimeout(150_000);
   await student(page, info.project.name + "-simulation");
   await page.goto("/etudiant/comprehension-orale");
-  await page.getByRole("article").filter({has: page.getByRole("heading", {name: "Écoute complète de recette — 39 questions", exact: true})}).getByRole("link", {name: /Démarrer la série/}).click();
+  await page.getByRole("article").filter({has: page.getByRole("heading", {name: "Écoute complète de recette — 39 questions", exact: true})}).getByRole("link", {name: /(Démarrer|Reprendre) la série/}).click();
   await page.getByRole("button", {name: "Commencer"}).click();
   // Les 39 questions sont accessibles d’emblée, avec leurs choix.
-  const map = page.getByRole("navigation", {name: "Vue d’ensemble"});
-  await expect(map.locator(".question-map button:enabled")).toHaveCount(39);
+  const map = page.getByRole("navigation", {name: "Questions de la séance"});
+  await expect(map.locator(".rail-map button:enabled")).toHaveCount(39);
   await expect(page.getByRole("radio")).toHaveCount(4);
   await map.getByRole("button", {name: /^Question 39,/}).click();
   await expect(page.getByRole("heading", {name: "Question 39 / 39", exact: true})).toBeVisible();
@@ -108,12 +108,12 @@ test("simulation orale : 39 questions ouvertes, navigation libre et réécoute",
     if (index < 39) await page.getByRole("button", {name: "Suivant"}).click();
   }
   await page.getByRole("button", {name: "Terminer la séance"}).click();
-  await page.getByRole("button", {name: "Confirmer la soumission"}).click();
+  await page.getByRole("button", {name: "Terminer et voir la correction"}).click();
   await expect(page.getByText("39 réponses justes sur 39", {exact: true})).toBeVisible();
   await page.screenshot({path: info.outputPath("oral-complet-resultats.png"), fullPage: true});
 });
 
-test("interface éditoriale : création, demande de relecture et historique", async ({page}, info) => {
+test("espace éditorial : l’accueil ouvre l’import des séries, avec les protections de page", async ({page}) => {
   await page.goto("/etudiant/compte");
   await page.getByLabel("Adresse e-mail", {exact: true}).fill("bank-editor@example.test");
   await page.getByLabel("Mot de passe", {exact: true}).fill("Edition!Fixture-7294");
@@ -122,30 +122,8 @@ test("interface éditoriale : création, demande de relecture et historique", as
   const response = await page.goto("/edition");
   expect(response?.headers()["x-frame-options"]).toBe("DENY");
   expect(response?.headers()["content-security-policy"]).toContain("frame-ancestors 'none'");
-  await expect(page.getByRole("heading", {name: "Créer une question originale"})).toBeVisible();
-  await page.getByLabel("Question", {exact: true}).fill(`Question originale de recette ${info.project.name}`);
-  await page.getByLabel("Texte de lecture", {exact: true}).fill("La réunion commence mardi à neuf heures.");
-  for (let index = 1; index <= 4; index++) await page.getByLabel(`Choix ${index}`, {exact: true}).fill(["Mardi à neuf heures", "Lundi soir", "Samedi matin", "Vendredi midi"][index - 1]);
-  await page.getByLabel("Explication", {exact: true}).fill("Le jour et l'heure sont annoncés explicitement.");
-  await page.getByLabel("Provenance et autorisation", {exact: true}).fill("Fixture originale de recette, sans validation humaine réelle.");
-  await page.getByRole("button", {name: "Enregistrer le brouillon"}).click();
-  await expect(page.getByRole("status")).toContainText("Brouillon enregistré");
-  await page.getByRole("button", {name: "Enregistrer la décision"}).click();
-  await expect(page.getByRole("status")).toContainText("Transition enregistrée");
-  await expect(page.getByRole("heading", {name: "Version 1 · review", exact: true})).toBeVisible();
-  const wave = Buffer.alloc(8044);
-  wave.write("RIFF", 0); wave.writeUInt32LE(8036, 4); wave.write("WAVE", 8); wave.write("fmt ", 12);
-  wave.writeUInt32LE(16, 16); wave.writeUInt16LE(1, 20); wave.writeUInt16LE(1, 22);
-  wave.writeUInt32LE(8000, 24); wave.writeUInt32LE(16000, 28); wave.writeUInt16LE(2, 32); wave.writeUInt16LE(16, 34);
-  wave.write("data", 36); wave.writeUInt32LE(8000, 40);
-  for (let index = 0; index < 4000; index++) wave.writeInt16LE(Math.round(1000 * Math.sin(2 * Math.PI * 440 * index / 8000)), 44 + index * 2);
-  await page.getByLabel("Titre du média", {exact: true}).fill("Signal original de recette UI");
-  await page.getByLabel("Document WAV", {exact: true}).setInputFiles({name: "fixture-ui.wav", mimeType: "audio/wav", buffer: wave});
-  await page.getByLabel("Transcription", {exact: true}).fill("Signal de recette synthétique ; aucune parole pédagogique validée.");
-  await page.getByLabel("Provenance du média et droits", {exact: true}).fill("Signal PCM créé dans le test automatisé, pas un contenu tiers.");
-  await page.getByRole("button", {name: "Importer le média privé", exact: true}).click();
-  await expect(page.getByRole("status")).toContainText("Média privé enregistré");
-  await page.screenshot({path: info.outputPath("banque-editoriale.png"), fullPage: true});
+  await expect(page).toHaveURL(/\/edition\/import$/);
+  await expect(page.getByRole("link", {name: "Examens TCF"})).toBeVisible();
 });
 
 async function staff(page: Page, email: string) {
@@ -187,7 +165,7 @@ test("import Excel : série avec images, relecture par une autre personne, publi
 
   const learner = await (await browser.newContext()).newPage();
   await student(learner, info.project.name + "-image");
-  await learner.getByRole("article").filter({has: learner.getByRole("heading", {name: "Documents en image — démonstration", exact: true})}).getByRole("link", {name: /Démarrer la série/}).click();
+  await learner.getByRole("article").filter({has: learner.getByRole("heading", {name: "Documents en image — démonstration", exact: true})}).getByRole("link", {name: /(Démarrer|Reprendre) la série/}).click();
   await learner.getByRole("button", {name: "Commencer"}).click();
   await expect(learner.getByRole("heading", {name: "Question 1 / 2", exact: true})).toBeVisible();
   const image = learner.getByRole("img", {name: /Lettre de Julien Moreau/});
@@ -195,9 +173,8 @@ test("import Excel : série avec images, relecture par une autre personne, publi
   expect(await image.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThanOrEqual(1200);
   await learner.getByRole("button", {name: "Agrandir le document"}).click();
   await expect(learner.getByRole("dialog", {name: "Document agrandi"})).toBeVisible();
-  await learner.getByRole("button", {name: "Agrandir encore"}).click();
-  await expect(learner.getByText("Zoom 150 %")).toBeVisible();
-  await learner.keyboard.press("Escape");
+  // Un clic sur le document agrandi le referme.
+  await learner.getByRole("dialog", {name: "Document agrandi"}).getByRole("img").click();
   await expect(learner.getByRole("dialog", {name: "Document agrandi"})).toBeHidden();
   await learner.screenshot({path: info.outputPath("question-image.png"), fullPage: true});
 });

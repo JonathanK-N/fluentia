@@ -350,6 +350,9 @@ class TaskSubject(models.Model):
     speak_seconds = models.PositiveIntegerField(null=True, blank=True)
     cues = models.JSONField(default=list, blank=True)
 
+    def __str__(self):
+        return f"{self.task_set.title} · tâche {self.task_number} · {self.title}"
+
     class Meta:
         ordering = ["task_number", "position"]
         constraints = [
@@ -367,6 +370,8 @@ class WritingCorrection(models.Model):
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="writing_corrections")
     subject = models.ForeignKey(TaskSubject, null=True, on_delete=models.SET_NULL, related_name="corrections")
+    # Texte écrit pendant un Examen TCF : corrigé seulement à la fin de l’examen.
+    run = models.ForeignKey("MockExamRun", null=True, blank=True, on_delete=models.SET_NULL, related_name="writing")
     class Status(models.TextChoices):
         PENDING = "pending", "En attente"
         RUNNING = "running", "En cours"
@@ -398,6 +403,8 @@ class SpeakingSession(models.Model):
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="speaking_sessions")
     subject = models.ForeignKey(TaskSubject, null=True, on_delete=models.SET_NULL, related_name="speaking_sessions")
+    # Tâche passée pendant un Examen TCF : corrigée seulement à la fin de l’examen.
+    run = models.ForeignKey("MockExamRun", null=True, blank=True, on_delete=models.SET_NULL, related_name="speaking")
     mode = models.CharField(max_length=16, choices=Mode.choices)
     provider = models.CharField(max_length=32)
     model = models.CharField(max_length=64, blank=True)
@@ -408,6 +415,8 @@ class SpeakingSession(models.Model):
     seconds = models.PositiveIntegerField(default=0)
     transcript = models.JSONField(default=list, blank=True)
     result = models.JSONField(null=True, blank=True)
+    # Correction de la séance terminée : « pending » à la fin de la tâche, « running » pendant la lecture, « done » ensuite.
+    correction_status = models.CharField(max_length=16, blank=True, default="")
     # Jetons rapportés par la session vocale ; vide si le navigateur n’a rien transmis.
     usage = models.JSONField(default=dict, blank=True)
     estimated_cost_usd = models.DecimalField(max_digits=10, decimal_places=6, default=0)
@@ -427,3 +436,88 @@ class ModelAnswer(models.Model):
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["subject", "provider"], name="one_model_answer_per_provider")]
+
+
+def _subject_choices(skill, number):
+    return {"task_set__skill": skill, "task_number": number}
+
+
+class MockExam(models.Model):
+    """« Examen TCF » composé dans l’administration : les 4 épreuves, passées dans l’ordre du test.
+
+    Écoute puis Lecture (séries QCM chronométrées), Rédaction (3 sujets, 60 minutes pour les trois),
+    puis Oral (3 sujets avec l’examinateur IA)."""
+
+    WRITING_MINUTES = 60
+
+    title = models.CharField("titre", max_length=180, help_text="Par exemple « Examen TCF 1 ».")
+    position = models.PositiveSmallIntegerField("ordre", default=1)
+    is_published = models.BooleanField("publié", default=False, help_text="Visible des étudiants dans Simulations TCF.")
+    listening = models.ForeignKey(
+        "exams.Exam", verbose_name="Écoute", null=True, on_delete=models.SET_NULL, related_name="+",
+        limit_choices_to={"skill": "listening", "is_published": True},
+    )
+    reading = models.ForeignKey(
+        "exams.Exam", verbose_name="Lecture", null=True, on_delete=models.SET_NULL, related_name="+",
+        limit_choices_to={"skill": "reading", "is_published": True},
+    )
+    writing_1 = models.ForeignKey(TaskSubject, verbose_name="Rédaction · tâche 1", null=True, on_delete=models.SET_NULL, related_name="+", limit_choices_to=_subject_choices("writing", 1))
+    writing_2 = models.ForeignKey(TaskSubject, verbose_name="Rédaction · tâche 2", null=True, on_delete=models.SET_NULL, related_name="+", limit_choices_to=_subject_choices("writing", 2))
+    writing_3 = models.ForeignKey(TaskSubject, verbose_name="Rédaction · tâche 3", null=True, on_delete=models.SET_NULL, related_name="+", limit_choices_to=_subject_choices("writing", 3))
+    speaking_1 = models.ForeignKey(TaskSubject, verbose_name="Oral · tâche 1", null=True, on_delete=models.SET_NULL, related_name="+", limit_choices_to=_subject_choices("speaking", 1))
+    speaking_2 = models.ForeignKey(TaskSubject, verbose_name="Oral · tâche 2", null=True, on_delete=models.SET_NULL, related_name="+", limit_choices_to=_subject_choices("speaking", 2))
+    speaking_3 = models.ForeignKey(TaskSubject, verbose_name="Oral · tâche 3", null=True, on_delete=models.SET_NULL, related_name="+", limit_choices_to=_subject_choices("speaking", 3))
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["position", "id"]
+        verbose_name = "Examen TCF"
+        verbose_name_plural = "Examens TCF"
+
+    def __str__(self):
+        return self.title
+
+    def writing_subjects(self):
+        return [self.writing_1, self.writing_2, self.writing_3]
+
+    def speaking_subjects(self):
+        return [self.speaking_1, self.speaking_2, self.speaking_3]
+
+    def complete(self):
+        """Les 4 épreuves sont choisies : sinon l’examen n’est pas proposé aux étudiants."""
+        return all([self.listening, self.reading, *self.writing_subjects(), *self.speaking_subjects()])
+
+    def clean(self):
+        errors = {}
+        if self.listening and self.listening.skill != "listening":
+            errors["listening"] = "Choisissez une série d’Écoute."
+        if self.reading and self.reading.skill != "reading":
+            errors["reading"] = "Choisissez une série de Lecture."
+        for skill, subjects in (("writing", self.writing_subjects()), ("speaking", self.speaking_subjects())):
+            for number, subject in enumerate(subjects, start=1):
+                if subject and (subject.task_set.skill != skill or subject.task_number != number):
+                    errors[f"{skill}_{number}"] = f"Choisissez un sujet de la tâche {number}."
+        if self.is_published and not self.complete():
+            errors["is_published"] = "Choisissez les 4 épreuves avant de publier l’examen."
+        if errors:
+            raise ValidationError(errors)
+
+
+class MockExamRun(models.Model):
+    """Passage d’un Examen TCF par un étudiant ; reprend là où il s’est arrêté, corrigé à la fin."""
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="mock_exam_runs")
+    exam = models.ForeignKey(MockExam, on_delete=models.CASCADE, related_name="runs")
+    started_at = models.DateTimeField(auto_now_add=True)
+    finished_at = models.DateTimeField(null=True, blank=True)
+    listening_attempt = models.ForeignKey("exams.Attempt", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    reading_attempt = models.ForeignKey("exams.Attempt", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    writing_started_at = models.DateTimeField(null=True, blank=True)
+    writing_submitted_at = models.DateTimeField(null=True, blank=True)
+    # Tâches d’Oral passées sans examinateur (plus d’essais, service indisponible) : elles comptent pour zéro.
+    speaking_skipped = models.JSONField(default=list, blank=True)
+
+    class Meta:
+        ordering = ["-started_at"]
+        verbose_name = "passage d’Examen TCF"
+        verbose_name_plural = "passages d’Examen TCF"

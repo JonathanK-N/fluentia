@@ -1,9 +1,11 @@
 """API éditoriale privée et médias servis sous contrôle de la tentative."""
 
 import json
+import logging
 import re
 
 from datetime import datetime, timedelta, timezone as dt_timezone
+from decimal import Decimal
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -20,14 +22,17 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
-from accounts.subscription import is_premium
+from accounts.subscription import is_premium, speaking_allowance
 from accounts.views import SecureView
 from exams.serializers import ExamListSerializer
 from exams.views import CataloguePagination
 from .models import BankItem, ImageAsset, SpeakingSession, TaskSubject, WritingCorrection
-from . import speaking
+from . import mock_exam, speaking, speaking_correction
+from .branding import branded_image
 from .correction import NCLC_GOAL, WORD, AnswerIncomplete, CorrectionUnavailable, correct, nclc, provider, stored_answer
 from . import series as workflow
+
+logger = logging.getLogger(__name__)
 from .importer import SKILLS, ImportRejected, build_template, import_series
 from .tasks import active_tasks
 from .serializers import (
@@ -53,6 +58,7 @@ from .serializers import (
     SpeakingSessionSerializer,
     SpeakingFinishSerializer,
     SpeakingFinishedSerializer,
+    SpeakingAbandonSerializer,
 )
 from .services import (
     create_item,
@@ -338,7 +344,8 @@ class SeriesActionView(EditorView):
 
 
 def image_response(asset):
-    response = HttpResponse(read_image(asset), content_type=asset.content_type)
+    # L’ancien filigrane des documents est remplacé par le logo Fluentia (voir branding.py).
+    response = HttpResponse(branded_image(asset, read_image(asset)), content_type=asset.content_type)
     response["Cache-Control"] = "private, max-age=3600"
     response["X-Content-Type-Options"] = "nosniff"
     return response
@@ -381,6 +388,35 @@ class TaskListView(SecureView):
         return Response(active_tasks(skill))
 
 
+class DoneSubjectsView(SecureView):
+    """Dernier passage terminé de chaque sujet, pour « Reprendre » et « Ma dernière correction » dans la liste des sujets."""
+
+    permission_classes = [IsAuthenticated]
+    throttle_classes = []
+
+    @extend_schema(responses=OpenApiTypes.OBJECT)
+    def get(self, request, skill):
+        if skill == "writing":
+            done = WritingCorrection.objects.filter(user=request.user, status=WritingCorrection.Status.DONE, subject__isnull=False)
+            rows = done.order_by("-created_at").values("pk", "subject_id", "created_at", "result")
+        elif skill == "speaking":
+            done = SpeakingSession.objects.filter(user=request.user, status=SpeakingSession.Status.FINISHED, subject__isnull=False)
+            rows = done.order_by("-started_at").values("pk", "subject_id", "started_at", "result")
+        else:
+            raise ValidationError({"skill": "writing ou speaking."})
+        latest = {}
+        for row in rows:  # du plus récent au plus ancien : le premier de chaque sujet est le dernier passage
+            if row["subject_id"] not in latest:
+                result = row["result"] or {}
+                latest[row["subject_id"]] = {
+                    "id": row["pk"],
+                    "subject_id": row["subject_id"],
+                    "date": row.get("created_at") or row.get("started_at"),
+                    "level": result.get("level") if isinstance(result, dict) else None,
+                }
+        return Response(list(latest.values()))
+
+
 def writing_subject(subject_id):
     return get_object_or_404(TaskSubject, pk=subject_id, task_set__skill="writing", task_set__is_active=True)
 
@@ -399,17 +435,20 @@ class WritingCorrectionView(SecureView):
         text = text.validated_data["text"]
         if len(WORD.findall(text)) < self.MIN_WORDS:
             raise ValidationError({"text": [f"Écrivez au moins {self.MIN_WORDS} mots avant de demander une correction."]})
-        if corrections_left(request.user) <= 0:
-            limit = settings.WRITING_CORRECTION_DAILY_LIMIT
-            raise Throttled(detail=f"Vous avez utilisé vos {limit} corrections des dernières 24 heures. Réessayez demain.")
         try:
             provider("correct")
         except CorrectionUnavailable as error:
             return Response({"detail": str(error)}, status=503)
-        # La correction elle-même arrive sur sa page, au fil de l’eau (CorrectionStreamView).
-        saved = WritingCorrection.objects.create(
-            user=request.user, subject=subject, text=text, status=WritingCorrection.Status.PENDING, provider=settings.WRITING_CORRECTOR
-        )
+        with transaction.atomic():
+            # Verrou par compte : deux envois simultanés ne peuvent pas dépasser la limite du jour.
+            get_user_model().objects.select_for_update().get(pk=request.user.pk)
+            if corrections_left(request.user) <= 0:
+                limit = settings.WRITING_CORRECTION_DAILY_LIMIT
+                raise Throttled(detail=f"Vous avez utilisé vos {limit} corrections des dernières 24 heures. Réessayez demain.")
+            # La correction elle-même arrive sur sa page, au fil de l’eau (CorrectionStreamView).
+            saved = WritingCorrection.objects.create(
+                user=request.user, subject=subject, text=text, status=WritingCorrection.Status.PENDING, provider=settings.WRITING_CORRECTOR
+            )
         return Response({"id": saved.pk, "remaining": corrections_left(request.user)}, status=201)
 
 
@@ -433,7 +472,10 @@ def stream_events(saved):
         yield json.dumps({"done": True, "result": result.validated_data, "remaining": corrections_left(saved.user)}, ensure_ascii=False) + "\n"
     finally:
         if not finished:  # échec ou page fermée en cours de route
-            saved.delete()
+            if saved.run_id:  # texte d’un Examen TCF : il reste, sa correction pourra être relancée depuis le bilan
+                WritingCorrection.objects.filter(pk=saved.pk, status=WritingCorrection.Status.RUNNING).update(status=WritingCorrection.Status.PENDING)
+            else:
+                saved.delete()
 
 
 class CorrectionStreamView(SecureView):
@@ -442,6 +484,8 @@ class CorrectionStreamView(SecureView):
 
     @extend_schema(request=None, responses={(200, "application/x-ndjson"): OpenApiTypes.STR})
     def post(self, request, correction_id):
+        if mock_exam.in_unfinished_run(correction=get_object_or_404(WritingCorrection, pk=correction_id, user=request.user)):
+            return Response({"detail": mock_exam.UNFINISHED}, status=409)
         started = WritingCorrection.objects.filter(
             pk=correction_id, user=request.user, status=WritingCorrection.Status.PENDING, subject__isnull=False
         ).update(status=WritingCorrection.Status.RUNNING)
@@ -452,6 +496,9 @@ class CorrectionStreamView(SecureView):
         response = StreamingHttpResponse(stream_events(saved), content_type="application/x-ndjson; charset=utf-8")
         response["X-Accel-Buffering"] = "no"  # pas de mise en tampon par un proxy
         return response
+
+
+STALLED_AFTER = timedelta(minutes=5)
 
 
 def corrections_left(user):
@@ -473,6 +520,12 @@ class WritingCorrectionDetailView(SecureView):
     @extend_schema(responses=OpenApiTypes.OBJECT)
     def get(self, request, correction_id):
         saved = get_object_or_404(WritingCorrection.objects.select_related("subject"), pk=correction_id, user=request.user)
+        if mock_exam.in_unfinished_run(correction=saved):
+            return Response({"detail": mock_exam.UNFINISHED}, status=409)
+        if saved.status == WritingCorrection.Status.RUNNING and saved.created_at < timezone.now() - STALLED_AFTER:
+            # Correction coupée net (redémarrage du serveur) : elle n’aboutira plus, on la retire et elle n’est pas comptée.
+            saved.delete()
+            return Response({"detail": "La correction a été interrompue."}, status=410)
         subject, following = saved.subject, None
         if subject is not None:
             siblings = list(TaskSubject.objects.filter(task_set_id=subject.task_set_id).order_by("task_number", "position"))
@@ -492,6 +545,18 @@ class WritingCorrectionDetailView(SecureView):
         })
 
 
+def speaking_spent_today():
+    """Dépense de l’oral sur 24 h glissantes, tout le site : coût mesuré des séances terminées, plafond prudent
+    pour celles en cours (leur coût n’est connu qu’à la fin)."""
+    since = timezone.now() - timedelta(days=1)
+    recent = SpeakingSession.objects.filter(started_at__gte=since, provider="openai")
+    # Terminées et quittées sans parler : les séances échouées tôt valent 0, celles quittées en silence ont un coût noté.
+    ended = recent.filter(status__in=[SpeakingSession.Status.FINISHED, SpeakingSession.Status.FAILED])
+    spent = ended.aggregate(total=Sum("estimated_cost_usd"))["total"] or Decimal(0)
+    running = recent.filter(status__in=[SpeakingSession.Status.PENDING, SpeakingSession.Status.LIVE]).aggregate(total=Sum("seconds"))["total"] or 0
+    return spent + speaking.estimated_cost_ceiling(running)
+
+
 def speaking_seconds_left(user):
     """Minutes d’oral du jour comptées en base sur 24 h glissantes ; une session échouée ne compte pas."""
     since = timezone.now() - timedelta(days=1)
@@ -502,6 +567,12 @@ def speaking_seconds_left(user):
         or 0
     )
     return max(0, settings.SPEAKING_DAILY_MINUTES * 60 - used)
+
+
+def attempts_left(user):
+    """Essais d’oral restants sur l’abonnement Premium ; None sans Premium (le quota est alors en minutes)."""
+    allowance = speaking_allowance(user)
+    return allowance[0] if allowance else None
 
 
 def free_trial_left(user, subject):
@@ -515,9 +586,15 @@ def free_trial_left(user, subject):
     )
 
 
+def duration(seconds):
+    """« 3 min 05 », « 4 min 30 », « 2 min »."""
+    minutes, rest = divmod(int(seconds), 60)
+    return f"{minutes} min {rest:02d}" if rest else f"{minutes} min"
+
+
 class SpeakingSessionView(SecureView):
     permission_classes = [IsAuthenticated]
-    # La limite est comptée en base, en minutes par jour : elle protège le coût de la voix en direct.
+    # Limite comptée en base : essais de l’abonnement Premium, ou minutes par jour sans Premium.
     throttle_classes = []
     MIN_SECONDS = 60
 
@@ -525,13 +602,24 @@ class SpeakingSessionView(SecureView):
     def post(self, request):
         data = SpeakingRequestSerializer(data=request.data)
         data.is_valid(raise_exception=True)
-        subject = get_object_or_404(
-            TaskSubject, pk=data.validated_data["subject_id"], task_set__skill="speaking", task_set__is_active=True
-        )
+        run_id = data.validated_data.get("run_id")
+        if run_id:
+            # Examen TCF : le sujet de la tâche en cours, même s’il n’est pas dans le jeu actif.
+            subject = get_object_or_404(TaskSubject, pk=data.validated_data["subject_id"], task_set__skill="speaking")
+            run = mock_exam.speaking_run(request, run_id, subject)
+        else:
+            run = None
+            subject = get_object_or_404(
+                TaskSubject, pk=data.validated_data["subject_id"], task_set__skill="speaking", task_set__is_active=True
+            )
         try:
             speaking.provider()
         except speaking.SpeakingUnavailable as error:
             return Response({"detail": str(error)}, status=503)
+        budget = settings.SPEAKING_DAILY_BUDGET_USD
+        if budget > 0 and speaking_spent_today() + speaking.estimated_cost_ceiling(speaking.talk_seconds(subject) or 0) > budget:
+            logger.warning("Plafond de dépense de l’oral atteint (%s $ sur 24 h)", budget)
+            return Response({"detail": "L’oral avec examinateur est momentanément indisponible. Réessayez un peu plus tard."}, status=503)
         with transaction.atomic():
             # Verrou par compte : deux onglets ne peuvent pas dépasser la limite ni rejouer l’essai gratuit.
             get_user_model().objects.select_for_update().get(pk=request.user.pk)
@@ -541,17 +629,24 @@ class SpeakingSessionView(SecureView):
                     "L’oral avec examinateur est réservé aux comptes Premium. "
                     "Votre essai gratuit de la tâche 1 a déjà été utilisé, ou ce sujet n’en fait pas partie."
                 )
-            left = speaking_seconds_left(request.user)
-            if left < self.MIN_SECONDS:
-                minutes = settings.SPEAKING_DAILY_MINUTES
-                raise Throttled(detail=f"Vous avez utilisé vos {minutes} minutes d’oral des dernières 24 heures. Réessayez demain.")
-            saved = SpeakingSession.objects.create(
-                user=request.user,
-                subject=subject,
-                mode=data.validated_data["mode"],
-                provider=settings.SPEAKING_PROVIDER,
-                seconds=min(subject.speak_seconds or left, left),
-            )
+            talk = speaking.talk_seconds(subject)
+            # Premium : un nombre d’essais pour toute la période (15, 25 ou 40 selon la formule), sans limite par jour.
+            allowance = speaking_allowance(request.user)
+            if allowance is not None:
+                if allowance[0] <= 0:
+                    raise Throttled(detail=(
+                        f"Vous avez utilisé les {allowance[1]} essais d’oral de votre abonnement. "
+                        "Renouvelez votre Premium pour en obtenir de nouveaux."
+                    ))
+                saved = SpeakingSession.objects.create(
+                    user=request.user, subject=subject, mode=data.validated_data["mode"],
+                    provider=settings.SPEAKING_PROVIDER, seconds=talk or settings.SPEAKING_DAILY_MINUTES * 60,
+                )
+            else:
+                saved = self.limited_by_minutes(request, subject, data, talk)
+            if run is not None:
+                saved.run = run
+                saved.save(update_fields=["run"])
         try:
             opened = speaking.provider()["session"](subject, request.user)
         except speaking.SpeakingUnavailable as error:
@@ -570,9 +665,71 @@ class SpeakingSessionView(SecureView):
                 "voice": opened["voice"],
                 "seconds": saved.seconds,
                 "prep_seconds": subject.prep_seconds or 0,
+                "opening": speaking.opening(subject),
             }).data,
             status=201,
         )
+
+    def limited_by_minutes(self, request, subject, data, talk):
+        """Sans Premium (essai gratuit, ou oral ouvert à tous en test) : minutes d’oral sur 24 h glissantes."""
+        left = speaking_seconds_left(request.user)
+        if left < self.MIN_SECONDS:
+            minutes = settings.SPEAKING_DAILY_MINUTES
+            raise Throttled(detail=f"Vous avez utilisé vos {minutes} minutes d’oral des dernières 24 heures. Réessayez demain.")
+        # Une tâche se passe toujours en entier, dans son temps officiel : jamais raccourcie par le quota.
+        if talk and left < talk:
+            raise Throttled(detail=(
+                f"Il vous reste {duration(left)} d’oral aujourd’hui, et cette tâche dure {duration(talk)}. "
+                "Choisissez une tâche plus courte, ou réessayez demain."
+            ))
+        return SpeakingSession.objects.create(
+            user=request.user, subject=subject, mode=data.validated_data["mode"],
+            provider=settings.SPEAKING_PROVIDER, seconds=talk or left,
+        )
+
+
+class SpeakingAbandonView(SecureView):
+    """Séance quittée sans être terminée (connexion échouée, page fermée) : pas de correction.
+
+    Abandonnée dans les premières secondes, elle n’a presque rien coûté : elle ne compte ni dans le quota ni
+    comme essai gratuit. Plus tard, le temps de parole déjà compté par le chrono est décompté (ou, sans lui,
+    le temps écoulé), pour qu’on ne puisse pas parler puis se faire rembourser ses minutes en quittant la page.
+    Une séance où l’examinateur n’a jamais pu commencer (chrono à zéro) ne coûte donc rien."""
+
+    permission_classes = [IsAuthenticated]
+    throttle_classes = []
+    FREE_SECONDS = 20
+
+    @extend_schema(request=SpeakingAbandonSerializer, responses=SpeakingFinishedSerializer)
+    def post(self, request, session_id):
+        body = SpeakingAbandonSerializer(data=request.data or {})
+        body.is_valid(raise_exception=True)
+        with transaction.atomic():
+            saved = get_object_or_404(SpeakingSession.objects.select_for_update(), pk=session_id, user=request.user)
+            if saved.status not in (SpeakingSession.Status.PENDING, SpeakingSession.Status.LIVE):
+                return Response({"detail": "Cette session est déjà terminée."}, status=409)
+            now = timezone.now()
+            elapsed = max(0, int((now - saved.started_at).total_seconds()))
+            if "seconds" in body.validated_data:
+                elapsed = min(elapsed, body.validated_data["seconds"])
+            saved.ended_at = now
+            if body.validated_data["silent"]:
+                # Quittée sans avoir rien dit : ni enregistrée, ni corrigée, ni décomptée. Le coût de l’examinateur
+                # reste noté pour le plafond de dépense du site (speaking_spent_today).
+                saved.status = SpeakingSession.Status.FAILED
+                if saved.provider != "demo":
+                    saved.estimated_cost_usd = speaking.estimated_cost_ceiling(min(saved.seconds, elapsed))
+            elif elapsed <= self.FREE_SECONDS:
+                saved.status = SpeakingSession.Status.FAILED
+            else:
+                saved.status = SpeakingSession.Status.FINISHED
+                saved.seconds = min(saved.seconds, elapsed)
+                if saved.provider != "demo":
+                    saved.estimated_cost_usd = speaking.estimated_cost_ceiling(saved.seconds)
+            saved.save(update_fields=["status", "ended_at", "seconds", "estimated_cost_usd"])
+        return Response(SpeakingFinishedSerializer({
+            "id": saved.pk, "status": saved.status, "seconds": saved.seconds, "seconds_left": speaking_seconds_left(request.user), "attempts_left": attempts_left(request.user),
+        }).data)
 
 
 class SpeakingFinishView(SecureView):
@@ -595,6 +752,7 @@ class SpeakingFinishView(SecureView):
             saved.seconds = min(saved.seconds, max(data.validated_data["seconds"], elapsed))
             saved.transcript = data.validated_data["transcript"]
             saved.status, saved.ended_at = SpeakingSession.Status.FINISHED, now
+            saved.correction_status = "pending"  # corrigée à l’ouverture de sa page
             saved.usage = data.validated_data.get("usage") or {}
             if saved.provider == "demo":
                 saved.estimated_cost_usd = 0
@@ -602,10 +760,98 @@ class SpeakingFinishView(SecureView):
                 # Coût mesuré quand la session l’a rapporté ; sinon le plafond prudent.
                 measured = speaking.measured_cost(saved.model, saved.usage)
                 saved.estimated_cost_usd = measured if measured is not None else speaking.estimated_cost_ceiling(saved.seconds)
-            saved.save(update_fields=["seconds", "transcript", "status", "ended_at", "usage", "estimated_cost_usd"])
+            saved.save(update_fields=["seconds", "transcript", "status", "ended_at", "usage", "estimated_cost_usd", "correction_status"])
         return Response(SpeakingFinishedSerializer({
-            "id": saved.pk, "status": saved.status, "seconds": saved.seconds, "seconds_left": speaking_seconds_left(request.user),
+            "id": saved.pk, "status": saved.status, "seconds": saved.seconds, "seconds_left": speaking_seconds_left(request.user), "attempts_left": attempts_left(request.user),
         }).data)
+
+
+def speaking_page_status(saved):
+    """État de la correction vu par la page : une séance terminée sans correction se corrige à l’ouverture."""
+    return saved.correction_status or ("pending" if saved.status == SpeakingSession.Status.FINISHED else "")
+
+
+def speaking_stream(saved):
+    """Lignes JSON : corrections partielles, puis la correction finale ou une erreur. En cas d’échec, on pourra relancer."""
+    finished, last = False, {}
+    try:
+        try:
+            for last in speaking_correction.grade(saved):
+                yield json.dumps({"partial": last}, ensure_ascii=False) + "\n"
+        except CorrectionUnavailable as error:
+            yield json.dumps({"error": str(error), "status": 503}, ensure_ascii=False) + "\n"
+            return
+        result = CorrectionSerializer(data=last)
+        if not result.is_valid():
+            yield json.dumps({"error": "La correction reçue est incomplète. Réessayez dans un instant.", "status": 502}, ensure_ascii=False) + "\n"
+            return
+        saved.result, saved.correction_status = result.validated_data, "done"
+        saved.save(update_fields=["result", "correction_status"])
+        finished = True
+        yield json.dumps({"done": True, "result": result.validated_data}, ensure_ascii=False) + "\n"
+    finally:
+        if not finished:  # échec ou page fermée : la séance reste, sa correction pourra être relancée
+            SpeakingSession.objects.filter(pk=saved.pk, correction_status="running").update(correction_status="pending")
+
+
+class SpeakingCorrectionDetailView(SecureView):
+    """Page de correction d’une tâche d’Oral : relisible par son auteur seulement, avec le sujet suivant."""
+
+    permission_classes = [IsAuthenticated]
+    throttle_classes = []
+
+    @extend_schema(responses=OpenApiTypes.OBJECT)
+    def get(self, request, session_id):
+        saved = get_object_or_404(
+            SpeakingSession.objects.select_related("subject"), pk=session_id, user=request.user, status=SpeakingSession.Status.FINISHED
+        )
+        if mock_exam.in_unfinished_run(session=saved):
+            return Response({"detail": mock_exam.UNFINISHED}, status=409)
+        if saved.correction_status == "running" and (saved.ended_at or saved.started_at) < timezone.now() - STALLED_AFTER:
+            # Correction coupée net (redémarrage du serveur) : on pourra la relancer.
+            saved.correction_status = "pending"
+            saved.save(update_fields=["correction_status"])
+        subject, following = saved.subject, None
+        if subject is not None:
+            siblings = list(TaskSubject.objects.filter(task_set_id=subject.task_set_id).order_by("task_number", "position"))
+            index = next(i for i, item in enumerate(siblings) if item.pk == subject.pk)
+            following = siblings[index + 1] if index + 1 < len(siblings) else None
+        transcript = [turn for turn in saved.transcript if str(turn.get("text", "")).strip()]
+        return Response({
+            "id": saved.pk,
+            "status": speaking_page_status(saved),
+            "created_at": saved.started_at,
+            "text": speaking_correction.candidate_text(saved.transcript),
+            "transcript": transcript,
+            "seconds": saved.seconds,
+            "result": saved.result,
+            "nclc": nclc(saved.result.get("tcf_score", saved.result["score"])) if saved.result else None,
+            "nclc_goal": NCLC_GOAL,
+            "remaining": None,
+            "subject": subject_link(subject) | {"prompt": subject.prompt, "cues": subject.cues, "min_words": None, "max_words": None} if subject else None,
+            "next": subject_link(following) if following else None,
+        })
+
+
+class SpeakingCorrectionStreamView(SecureView):
+    permission_classes = [IsAuthenticated]
+    throttle_classes = []
+
+    @extend_schema(request=None, responses={(200, "application/x-ndjson"): OpenApiTypes.STR})
+    def post(self, request, session_id):
+        if mock_exam.in_unfinished_run(session=get_object_or_404(SpeakingSession, pk=session_id, user=request.user)):
+            return Response({"detail": mock_exam.UNFINISHED}, status=409)
+        # Une seule correction à la fois par séance : « pending » (ou jamais corrigée) → « running ».
+        started = SpeakingSession.objects.filter(
+            pk=session_id, user=request.user, status=SpeakingSession.Status.FINISHED, subject__isnull=False, correction_status__in=["", "pending"]
+        ).update(correction_status="running")
+        if not started:
+            get_object_or_404(SpeakingSession, pk=session_id, user=request.user)
+            return Response({"detail": "Cette correction est déjà en cours ou terminée."}, status=409)
+        saved = SpeakingSession.objects.select_related("subject", "user").get(pk=session_id)
+        response = StreamingHttpResponse(speaking_stream(saved), content_type="application/x-ndjson; charset=utf-8")
+        response["X-Accel-Buffering"] = "no"
+        return response
 
 
 class ModelAnswerView(SecureView):

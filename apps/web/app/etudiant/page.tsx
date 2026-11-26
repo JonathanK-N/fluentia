@@ -28,10 +28,12 @@ export default function HomePage() {
   }, [profile]);
   const groups = progress?.groups ?? [];
   const done = groups.reduce((sum, g) => sum + g.attempts, 0);
-  const questions = groups.reduce((sum, g) => sum + g.questions, 0);
-  const correct = groups.reduce((sum, g) => sum + g.correct, 0);
-  const rate = questions ? Math.round(correct / questions * 100) : 0;
-  const open = attempts.filter(a => a.status === "active");
+  // Séances dont le chrono tourne encore : une séance au délai dépassé ne se reprend plus.
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => { const timer = window.setInterval(() => setNow(Date.now()), 30_000); return () => window.clearInterval(timer); }, []);
+  const open = attempts.filter(a => a.status === "active" && new Date(a.expires_at).getTime() > now);
+  const minutesLeft = open.length ? Math.max(1, Math.ceil(Math.min(...open.map(a => new Date(a.expires_at).getTime() - now)) / 60_000)) : null;
+  const soon = minutesLeft !== null && minutesLeft <= 10;
   const firstName = profile?.display_name?.split(" ")[0];
   const pending = !profile ? "—" : progress ? null : "…";
   return <>
@@ -48,19 +50,19 @@ export default function HomePage() {
         </div>
       </section>
       <section className="status-card" aria-labelledby="en-cours">
-        <div className="status-head"><h2 id="en-cours">En cours</h2>{open.length > 0 && <span className="badge-warn"><Icon name="clock" size={14} />Échéance proche</span>}</div>
+        <div className="status-head"><h2 id="en-cours">En cours</h2>{soon && <span className="badge-warn"><Icon name="clock" size={14} />Il reste {minutesLeft} min</span>}</div>
         <p className="status-value"><strong>{profile && !loading ? open.length : "—"}</strong> {open.length > 1 ? "séances ouvertes" : "séance ouverte"}</p>
-        <p className="status-text">{!profile ? "Connectez-vous pour retrouver vos séances." : open.length ? "À terminer avant la fin du délai pour qu’elle soit comptabilisée." : "Aucune séance en attente : lancez une épreuve quand vous êtes prêt."}</p>
+        <p className="status-text">{!profile ? "Connectez-vous pour retrouver vos séances." : minutesLeft !== null ? `Envoyez-la avant la fin du chrono pour qu’elle compte : il reste ${minutesLeft} min${open.length > 1 ? " à la plus proche" : ""}.` : "Aucune séance en attente : lancez une épreuve quand vous êtes prêt."}</p>
         <Image className="status-mark" src="/branding/01_Logos_PNG/fluentia-symbole-transparent-256.png" alt="" width={56} height={56} unoptimized />
       </section>
     </div>
     {profile && !profile.email_verified && <div style={{ marginTop: "1rem" }}><Notice icon="flag">Votre adresse e-mail n’est pas encore vérifiée. <Link href="/etudiant/compte">Ouvrir mon profil</Link></Notice></div>}
     <SectionTitle title="Votre bilan" />
     <Summary label="Votre bilan" items={[
-      { label: "Séries terminées", value: pending ?? done, hint: "Tentatives envoyées" },
-      { label: "Taux de réussite", value: pending ?? (questions ? `${rate} %` : "—"), hint: "Sur les réponses envoyées", meter: rate },
-      { label: "Questions vues", value: pending ?? questions, hint: "Questions sautées incluses" },
-      { label: "Séances ouvertes", value: !profile ? "—" : loading ? "…" : open.length, hint: "À clôturer avant l’échéance" },
+      { label: "Séries terminées", value: pending ?? done, hint: "Lecture et Écoute envoyées" },
+      { label: "Niveau moyen", value: pending ?? progress?.level.level ?? "—",
+        hint: pending ? "" : progress?.level.tests ? `Moyenne de ${progress.level.tests} test${progress.level.tests > 1 ? "s" : ""}, toutes épreuves · estimation non officielle` : "Faites un premier test pour l’estimer" },
+      { label: "Séries consultées", value: pending ?? `${progress?.explored.seen ?? 0} sur ${progress?.explored.total ?? 0}`, hint: "Séries et sujets ouverts, toutes épreuves" },
     ]} />
     <div id="epreuves"><SectionTitle title="Choisir une épreuve" note="Les 4 épreuves du TCF, au format de l’examen" /></div>
     <SkillCards />

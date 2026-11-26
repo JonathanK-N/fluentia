@@ -1,4 +1,5 @@
 from django.urls import path
+from . import mock_exam, mock_exam_editor
 from .views import (
     BankListView,
     BankDetailView,
@@ -18,12 +19,16 @@ from .views import (
     BankImageView,
     QuestionImageView,
     TaskListView,
+    DoneSubjectsView,
     WritingCorrectionView,
     ModelAnswerView,
     WritingCorrectionDetailView,
     CorrectionStreamView,
     SpeakingSessionView,
+    SpeakingCorrectionDetailView,
+    SpeakingCorrectionStreamView,
     SpeakingFinishView,
+    SpeakingAbandonView,
 )
 from .progress import ProgressView
 
@@ -41,12 +46,25 @@ urlpatterns = [
     path("bank/series/<uuid:series_id>/<str:action>/", SeriesActionView.as_view()),
     path("bank/images/<uuid:image_id>/", BankImageView.as_view()),
     path("tasks/<str:skill>/", TaskListView.as_view()),
+    path("tasks/<str:skill>/done/", DoneSubjectsView.as_view()),
+    path("bank/mock-exams/", mock_exam_editor.MockExamEditorView.as_view()),
+    path("bank/mock-exams/<int:exam_id>/", mock_exam_editor.MockExamEditorDetailView.as_view()),
+    path("mock-exams/", mock_exam.MockExamListView.as_view()),
+    path("mock-exams/<int:exam_id>/runs/", mock_exam.MockExamStartView.as_view()),
+    path("mock-exam-runs/<int:run_id>/", mock_exam.MockExamRunView.as_view()),
+    path("mock-exam-runs/<int:run_id>/qcm/<str:step>/", mock_exam.MockExamQcmView.as_view()),
+    path("mock-exam-runs/<int:run_id>/writing/", mock_exam.MockExamWritingView.as_view()),
+    path("mock-exam-runs/<int:run_id>/speaking/", mock_exam.MockExamSpeakingView.as_view()),
+    path("mock-exam-runs/<int:run_id>/speaking/skip/", mock_exam.MockExamSkipView.as_view()),
     path("tasks/writing/subjects/<int:subject_id>/correction/", WritingCorrectionView.as_view()),
     path("tasks/writing/subjects/<int:subject_id>/model-answer/", ModelAnswerView.as_view()),
     path("tasks/writing/corrections/<int:correction_id>/", WritingCorrectionDetailView.as_view()),
     path("tasks/writing/corrections/<int:correction_id>/stream/", CorrectionStreamView.as_view()),
     path("speaking/sessions/", SpeakingSessionView.as_view()),
     path("speaking/sessions/<int:session_id>/finish/", SpeakingFinishView.as_view()),
+    path("speaking/sessions/<int:session_id>/abandon/", SpeakingAbandonView.as_view()),
+    path("speaking/sessions/<int:session_id>/", SpeakingCorrectionDetailView.as_view()),
+    path("speaking/sessions/<int:session_id>/correction/", SpeakingCorrectionStreamView.as_view()),
     path("bank/<uuid:item_id>/", BankDetailView.as_view()),
     path("bank/<uuid:item_id>/transition/", TransitionView.as_view()),
     path("bank/<uuid:item_id>/versions/", ForkView.as_view()),

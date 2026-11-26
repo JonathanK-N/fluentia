@@ -106,6 +106,22 @@ class ExamEngineTests(TestCase):
             self.client.get(f"/api/v1/attempts/{aid}/results/").status_code, 200
         )
 
+    def test_latest_lists_only_the_last_finished_attempt_of_each_series(self):
+        first = self.start()
+        self.client.post(f"/api/v1/attempts/{first}/submit/")
+        second = self.start()
+        self.client.put(
+            f"/api/v1/attempts/{second}/answers/",
+            {"question_id": str(self.question.id), "choice_id": str(self.correct.id)},
+            format="json",
+        )
+        self.client.post(f"/api/v1/attempts/{second}/submit/")
+        self.start()  # séance en cours : jamais dans la liste
+        rows = self.client.get("/api/v1/attempts/?latest=1").data["results"]
+        self.assertEqual([row["id"] for row in rows], [second])
+        self.assertEqual((rows[0]["correct_count"], rows[0]["question_count"]), (1, 1))
+        self.assertEqual(len(self.client.get("/api/v1/attempts/").data["results"]), 3)
+
     def test_foreign_attempt_forbidden(self):
         aid = self.start()
         self.client.force_authenticate(user=self.other)
@@ -141,3 +157,21 @@ class ExamEngineTests(TestCase):
         self.assertEqual(
             self.client.post(f"/api/v1/attempts/{aid}/submit/").status_code, 400
         )
+
+    def test_starting_the_same_series_again_resumes_the_running_session(self):
+        aid = self.start()
+        again = self.client.post(f"/api/v1/exams/{self.exam.id}/attempts/")
+        self.assertEqual((again.status_code, again.data["id"]), (200, aid))
+        self.assertEqual(Attempt.objects.filter(user=self.user).count(), 1)
+
+    def test_overdue_sessions_are_closed_and_not_resumed(self):
+        aid = self.start()
+        Attempt.objects.filter(pk=aid).update(
+            started_at=timezone.now() - timedelta(seconds=121),
+            expires_at=timezone.now() - timedelta(seconds=1),
+        )
+        listed = self.client.get("/api/v1/attempts/").data["results"]
+        self.assertEqual([(a["id"], a["status"]) for a in listed], [(aid, "expired")])
+        fresh = self.client.post(f"/api/v1/exams/{self.exam.id}/attempts/")
+        self.assertEqual(fresh.status_code, 201)
+        self.assertNotEqual(fresh.data["id"], aid)

@@ -1,6 +1,7 @@
 """Recette du lot 03 sur bases jetables, sans validation pédagogique réelle."""
 
 import io
+from datetime import timedelta
 import tempfile
 import wave
 import math
@@ -510,6 +511,30 @@ class PedagogyTests(TestCase):
         self.assertEqual(response.data["groups"][0]["attempts"], 1)
         self.client.force_authenticate(self.other)
         self.assertEqual(self.client.get("/api/v1/progress/").data["groups"], [])
+
+    def test_progress_reports_average_level_and_explored_series(self):
+        from .models import SpeakingSession, WritingCorrection
+        from .progress import level_of_rate
+        self.assertEqual([level_of_rate(c, 100) for c in (0, 16, 17, 50, 83, 84, 100)], [0, 0, 1, 3, 4, 5, 5])
+        exam = self.exam()
+        self.client.force_authenticate(self.student)
+        empty = self.client.get("/api/v1/progress/").data
+        self.assertEqual(empty["level"], {"level": None, "tests": 0})
+        self.assertEqual(empty["explored"]["seen"], 0)
+        attempt = create_attempt(user=self.student, exam=exam)
+        submit_attempt(user=self.student, attempt_id=attempt.pk)  # aucune réponse : A1
+        WritingCorrection.objects.create(user=self.student, text="a", provider="openai", result={"score": 14, "level": "C1"})
+        WritingCorrection.objects.create(user=self.student, text="b", provider="demo", result={"score": 20, "level": "C2", "demo": True})
+        SpeakingSession.objects.create(user=self.student, mode="practice", provider="openai", status=SpeakingSession.Status.FINISHED, result={"score": 11, "level": "B2"})
+        data = self.client.get("/api/v1/progress/").data
+        # (A1 + C1 + B2) / 3 = (0 + 4 + 3) / 3 = 2,3 : B1 ; la démo ne compte pas.
+        self.assertEqual(data["level"], {"level": "B1", "tests": 3})
+        by_skill = {s["skill"]: (s["tests"], s["level"], s["last_score"], s["last_unit"]) for s in data["skills"]}
+        self.assertEqual(by_skill["writing"], (1, "C1", 14, "/20"))
+        self.assertEqual(by_skill["speaking"], (1, "B2", 11, "/20"))
+        self.assertEqual(by_skill[exam.skill][:2], (1, "A1"))
+        self.assertEqual(data["explored"]["seen"], 1)
+        self.assertGreaterEqual(data["explored"]["total"], 1)
 
     def test_original_seed_idempotent_and_never_published(self):
         call_command("seed_original_bank", stdout=io.StringIO())

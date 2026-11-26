@@ -15,6 +15,8 @@ from .models import (
     PublishedItem,
     ListeningAccess,
     ExamSeries,
+    MockExam,
+    MockExamRun,
 )
 from .services import transition, fork_item
 
@@ -130,3 +132,31 @@ class TaskSetAdmin(AuditAdmin):
     list_display = ["title", "skill", "state", "is_active", "editor", "reviewer", "published_at"]
     list_filter = ["skill", "state", "is_active"]
     inlines = [TaskSubjectInline]
+
+
+@admin.register(MockExam)
+class MockExamAdmin(admin.ModelAdmin):
+    """Examens TCF : les 4 épreuves choisies ici sont passées dans l’ordre par l’étudiant, puis corrigées à la fin."""
+
+    list_display = ["title", "position", "is_published", "listening", "reading"]
+    list_editable = ["position", "is_published"]
+    list_filter = ["is_published"]
+    fieldsets = [
+        (None, {"fields": ["title", "position", "is_published"]}),
+        ("1. Écoute et 2. Lecture", {"fields": ["listening", "reading"]}),
+        ("3. Rédaction", {"fields": ["writing_1", "writing_2", "writing_3"]}),
+        ("4. Oral", {"fields": ["speaking_1", "speaking_2", "speaking_3"]}),
+    ]
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        field = super().formfield_for_foreignkey(db_field, request, **kwargs)
+        if db_field.name.startswith(("writing_", "speaking_")):
+            field.queryset = field.queryset.select_related("task_set")
+        return field
+
+
+@admin.register(MockExamRun)
+class MockExamRunAdmin(AuditAdmin):
+    list_display = ["user", "exam", "started_at", "finished_at"]
+    list_filter = ["exam"]
+    search_fields = ["user__email"]

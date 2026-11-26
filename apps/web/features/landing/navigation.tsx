@@ -1,15 +1,16 @@
 "use client";
-/** Navigation Discover, sans faux parcours d’inscription. Propriétaire : Jonathan Kakesa. */
+/** Navigation de l’accueil. Propriétaire : Jonathan Kakesa. */
 import Link from "next/link";
 import { useRef } from "react";
 import { Logo } from "../../components/branding/logo";
 import { Button } from "../../components/ui/primitives";
 import { useMotionPreferences } from "../../components/layout/providers";
 const links = [
-  ["Fonctionnalités", "#fonctionnalites"],
-  ["Méthode", "#approche"],
-  ["Examens", "#examens"],
+  ["Épreuves", "#epreuves"],
+  ["Oral avec l’IA", "#examinateur"],
+  ["Fonctionnement", "#fonctionnement"],
   ["Tarifs", "#tarifs"],
+  ["FAQ", "#faq"],
 ] as const;
 export function LandingNavigation() {
   const menu = useRef<HTMLDetailsElement>(null);
@@ -62,9 +63,9 @@ export function LandingNavigation() {
           </Link>
           <Link
             className="button button-primary landing-signup"
-            href="/etudiant/compte"
+            href="/etudiant/compte#inscription"
           >
-            S’inscrire
+            Créer un compte
           </Link>
           <details
             className="landing-mobile-menu"
@@ -88,9 +89,6 @@ export function LandingNavigation() {
               ))}
               <Link href="/etudiant/compte" onClick={close}>
                 Connexion et inscription
-              </Link>
-              <Link href="/design-system" onClick={close}>
-                Design system
               </Link>
             </nav>
           </details>

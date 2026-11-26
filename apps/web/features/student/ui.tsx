@@ -24,7 +24,7 @@ export function PageHero({ chip, title, children, actions, asideTitle = "Bon à 
 
 /** Bandeau de bilan : cellules séparées dans un seul cadre. */
 export function Summary({ label, items }: { label: string; items: { label: string; value: ReactNode; hint: string; meter?: number }[] }) {
-  return <div className="summary" role="group" aria-label={label}>{items.map(item => <div className="summary-cell" key={item.label}>
+  return <div className="summary" role="group" aria-label={label} data-count={items.length}>{items.map(item => <div className="summary-cell" key={item.label}>
     <span>{item.label}</span>
     <strong>{item.value}</strong>
     {item.meter !== undefined && <span className="summary-meter" aria-hidden="true"><span style={{ width: `${Math.max(0, Math.min(100, item.meter))}%` }} /></span>}

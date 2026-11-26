@@ -22,6 +22,15 @@ export const skillTitle = (skill: string) => skill === "listening" ? "Compréhen
 export const attemptHref = (attempt: { id: string; skill: string }) => `/etudiant/${attempt.skill === "listening" ? "ecoute" : "lecture"}/${attempt.id}`;
 export const formatPoints = (points: number) => `${points} point${points > 1 ? "s" : ""}`;
 
+/** « à OpenAI », « au serveur Fluentia » : le destinataire de la voix, bien accordé. */
+export const sentToParts = (recipient: string): [string, string] =>
+  !recipient ? ["à", "l’examinateur"] : recipient.startsWith("le ") ? ["au", recipient.slice(3)] : ["à", recipient];
+export const sentTo = (recipient: string) => sentToParts(recipient).join(" ");
+
+/** Brouillon de Rédaction gardé sur l’appareil, par tâche et par sujet. */
+export const draftKey = (slug: string, subject: number) => `fluentia-ee-${slug}-${subject}`;
+export function readDraft(slug: string, subject: number) { try { return localStorage.getItem(draftKey(slug, subject)) ?? ""; } catch { return ""; } }
+
 export const formatDuration = (seconds: number) => {
   const minutes = Math.floor(seconds / 60), rest = seconds % 60;
   return `${String(minutes).padStart(2, "0")}:${String(rest).padStart(2, "0")}`;

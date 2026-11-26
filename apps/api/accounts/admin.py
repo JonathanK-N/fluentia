@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 
 from . import emails
-from .models import Subscription
+from .models import Payment, Subscription
 
 
 class EmailLoginForm(AdminAuthenticationForm):
@@ -22,10 +22,19 @@ admin.site.login_form = EmailLoginForm
 
 @admin.register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
-    list_display = ["user", "premium_until", "updated_at"]
+    list_display = ["user", "plan", "premium_until", "speaking_attempts_left", "updated_at"]
+    list_filter = ["plan"]
     search_fields = ["user__email"]
-    readonly_fields = ["updated_at"]
+    fields = ["user", "plan", "premium_until", "period_start", "speaking_attempts_left", "updated_at"]
+    readonly_fields = ["period_start", "speaking_attempts_left", "updated_at"]
     autocomplete_fields = ["user"]
+
+    @admin.display(description="Essais d’oral restants")
+    def speaking_attempts_left(self, sub):
+        from .subscription import speaking_allowance
+
+        allowance = speaking_allowance(sub.user) if sub.pk else None
+        return f"{allowance[0]} sur {allowance[1]}" if allowance else "—"
 
 
 @admin.action(description="Envoyer le courriel de bienvenue")
@@ -46,3 +55,25 @@ class FluentiaUserAdmin(UserAdmin):
 if admin.site.is_registered(User):
     admin.site.unregister(User)
 admin.site.register(User, FluentiaUserAdmin)
+
+
+@admin.register(Payment)
+class PaymentAdmin(admin.ModelAdmin):
+    """Paiements Stripe, en lecture seule : les remboursements se font dans le tableau de bord Stripe."""
+
+    list_display = ["email", "plan", "montant", "status", "created_at", "paid_at"]
+    list_filter = ["status", "plan"]
+    search_fields = ["email", "stripe_session"]
+
+    @admin.display(description="Montant")
+    def montant(self, payment):
+        return f"{payment.amount / 100:.2f} {payment.currency.upper()}"
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False

@@ -1,97 +1,170 @@
-/** Contenus et prix centralisés. Propriétaire : Jonathan Kakesa. */
-export const plans: readonly {
-  name: string;
-  description: string;
-  price: number | null;
-  features: readonly string[];
-}[] = [
+/** Contenus de l’accueil : épreuves, oral, étapes, offres et FAQ. Propriétaire : Jonathan Kakesa. */
+
+export const SIGNUP = "/etudiant/compte#inscription";
+export const LOGIN = "/etudiant/compte";
+export const SUPPORT_EMAIL = "support@fluentia.ca";
+// Paiement en ligne par carte (Stripe) depuis « Mon abonnement ».
+export const PREMIUM_REQUEST = "/etudiant/compte#abonnement";
+
+export const highlights = [
+  { value: "4", label: "épreuves du TCF Canada" },
+  { value: "3", label: "tâches orales face à l’examinateur" },
+  { value: "4 en 1", label: "Examen TCF complet, avec bilan" },
+  { value: "0 $", label: "pour commencer" },
+] as const;
+
+export const exams = [
   {
-    name: "Découverte",
-    description: "Trouver votre point de départ.",
-    price: null,
-    features: [
-      "Diagnostic envisagé",
-      "Découverte des compétences",
-      "Premiers repères",
-    ],
+    id: "ecoute",
+    title: "Compréhension orale",
+    format: "39 questions · 35 min",
+    href: "/etudiant/comprehension-orale",
+    detail: "Annonces, dialogues, extraits radio : entraînez votre oreille aux documents de l’épreuve.",
+    features: ["Séries chronométrées au format officiel", "Réécoute libre, transcription dans le corrigé", "Score sur 699 points et corrigé expliqué"],
   },
   {
-    name: "Essentiel",
-    description: "Installer une pratique régulière.",
-    price: null,
-    features: [
-      "Programme personnalisé envisagé",
-      "Entraînements guidés",
-      "Suivi de progression",
-    ],
+    id: "lecture",
+    title: "Compréhension écrite",
+    format: "39 questions · 60 min",
+    href: "/etudiant/comprehension-ecrite",
+    detail: "Du document du quotidien au texte argumentatif, repérez l’information utile plus vite.",
+    features: ["Documents variés, du niveau A1 au C2", "Séries chronométrées au format officiel", "Score sur 699 points et corrigé expliqué"],
   },
   {
-    name: "Accompagné",
-    description: "Donner plus de place à votre voix.",
-    price: null,
-    features: [
-      "Parcours Essentiel envisagé",
-      "Pratique orale avec Voice",
-      "Simulations et retours pédagogiques",
-    ],
-  },
-];
-export const faqs = [
-  {
-    question: "À qui s’adresse Fluentia ?",
-    answer:
-      "Fluentia est conçue pour les personnes qui préparent un projet au Québec et souhaitent travailler leur français en vue du TCF. Les contenus pédagogiques et parcours complets sont encore en développement.",
+    id: "redaction",
+    title: "Expression écrite",
+    format: "3 tâches · 60 min",
+    href: "/etudiant/expression-ecrite",
+    detail: "Message, récit, argumentation : rédigez dans les conditions de l’examen.",
+    features: ["Compteur de mots et brouillon sauvegardé", "Niveau, note sur 20 et NCLC estimés par l’IA", "Erreurs corrigées et version améliorée de votre texte"],
   },
   {
-    question: "Puis-je déjà créer un compte et m’entraîner ?",
-    answer:
-      "Oui. Créez votre compte depuis l’espace étudiant pour enregistrer vos réponses en compréhension écrite et orale, retrouver vos corrigés et suivre votre progression. Les studios d’expression fonctionnent dans votre navigateur ; les abonnements ne sont pas encore ouverts.",
-  },
-  {
-    question: "La démonstration Voice utilise-t-elle mon microphone ?",
-    answer:
-      "Non. Elle illustre des états visuels et textuels, sans enregistrement, écoute, lecture audio ou service d’intelligence artificielle connecté. Vous contrôlez chaque transition.",
-  },
-  {
-    question: "Fluentia garantit-elle un résultat au TCF ?",
-    answer:
-      "Non. Fluentia n’est ni un centre d’examen ni un organisme de certification. Les exemples de progression sont fictifs, sans conversion en score ou niveau officiel. Une préparation ne garantit aucun résultat.",
-  },
-  {
-    question: "Les tarifs affichés sont-ils définitifs ?",
-    answer:
-      "Les offres présentées sont des pistes de structure. Les prix et les conditions commerciales restent à approuver. Aucun achat, essai commercial ou paiement n’est proposé.",
-  },
-  {
-    question: "Puis-je consulter la page sans animations ?",
-    answer:
-      "Oui. Les préférences de mouvement réduit de votre appareil sont respectées. La commande Mouvement dans la navigation permet aussi de suspendre les animations ; les textes et les démonstrations restent accessibles.",
+    id: "parole",
+    title: "Expression orale",
+    format: "3 tâches · 12 min",
+    href: "/etudiant/expression-orale",
+    detail: "Parlez à un examinateur IA qui vous écoute, vous répond et vous relance.",
+    features: ["Conversation vocale en temps réel", "Préparation chronométrée pour la tâche 2", "Correction : niveau, note sur 20 et NCLC"],
   },
 ] as const;
-export const journey = [
-  [
-    "Diagnostic",
-    "Faire le point",
-    "Identifier les compétences à travailler et préciser votre objectif.",
-  ],
-  [
-    "Programme",
-    "Tracer votre chemin",
-    "Organiser un rythme de pratique adapté à votre quotidien.",
-  ],
-  [
-    "Entraînement",
-    "Passer à l’action",
-    "Écouter, lire, écrire et prendre la parole avec une intention claire.",
-  ],
-  [
-    "Simulation",
-    "Prendre vos repères",
-    "Vous familiariser avec les situations et contraintes d’un examen.",
-  ],
-  [
-    "Progression",
-    "Ajuster la suite",
-    "Relire vos acquis et choisir votre prochaine étape.",
-  ],
+
+export const speakingTasks = [
+  {
+    number: "Tâche 1",
+    title: "Entretien dirigé",
+    duration: "2 min",
+    detail: "L’examinateur mène l’entretien : vous vous présentez, il vous pose des questions sur votre parcours et vos projets.",
+  },
+  {
+    number: "Tâche 2",
+    title: "Exercice en interaction",
+    duration: "2 min de préparation · 5 min 30",
+    detail: "Il joue le personnage du sujet. À vous de poser les questions pour obtenir les informations utiles.",
+  },
+  {
+    number: "Tâche 3",
+    title: "Expression d’un point de vue",
+    duration: "4 min 30",
+    detail: "Vous défendez une opinion. Il vous écoute, puis vous relance pour vous faire préciser vos arguments.",
+  },
+] as const;
+
+export const examinerPromises = [
+  ["Il vous parle vraiment", "Une voix naturelle, en français, qui réagit à ce que vous dites."],
+  ["Il respecte le temps officiel", "Minuteur visible et conclusion polie à la fin de la tâche."],
+  ["Vous gardez une trace", "La transcription de l’échange reste disponible dans votre espace."],
+  ["Votre voix n’est pas enregistrée", "Seule la transcription est conservée, jamais l’audio."],
+] as const;
+
+/** Exemple affiché dans l’aperçu de l’accueil : une tâche 2, clairement présentée comme un exemple. */
+export const sampleConversation = [
+  { speaker: "examiner", text: "Bonjour. Je suis responsable d’un club de randonnée à Sherbrooke. Posez-moi vos questions." },
+  { speaker: "student", text: "Bonjour ! Les sorties ont lieu à quelle fréquence ?" },
+  { speaker: "examiner", text: "Deux samedis par mois, de mars à novembre. Vous marchez souvent ?" },
+  { speaker: "student", text: "Oui, un peu. Est-ce qu’il faut apporter son propre équipement ?" },
+  { speaker: "examiner", text: "Les bâtons sont prêtés. Prévoyez seulement de bonnes chaussures." },
+] as const;
+
+export const steps = [
+  ["Créez votre compte", "Gratuit, en deux minutes. Confirmez votre adresse e-mail et c’est parti."],
+  ["Entraînez-vous", "Séries de compréhension et rédactions corrigées par l’IA. Reprenez une série quand vous voulez et relisez votre dernière correction."],
+  ["Passez l’oral", "Prenez la parole face à l’examinateur IA, tâche par tâche, avec votre micro, puis lisez votre correction."],
+  ["Faites un Examen TCF complet", "Les 4 épreuves enchaînées en conditions réelles, puis un bilan avec votre niveau global. Vos résultats restent dans Mes résultats."],
+] as const;
+
+export const plans = [
+  {
+    name: "Gratuit",
+    price: "0 $",
+    period: "pour toujours",
+    description: "Pour découvrir Fluentia et travailler l’écrit.",
+    features: [
+      "Compréhension orale et écrite : séries et corrigés",
+      "Expression écrite avec correction par l’IA (jusqu’à 10 par jour)",
+      "Une tâche orale offerte avec l’examinateur IA",
+      "Suivi de votre progression",
+    ],
+    cta: { label: "Créer mon compte gratuit", href: SIGNUP },
+    featured: false,
+  },
+  {
+    name: "Premium",
+    price: "22,99 $ US",
+    period: "pour 1 mois",
+    description: "Pour s’entraîner à l’oral comme le jour de l’examen.",
+    features: [
+      "Tout le contenu du compte gratuit",
+      "Les 3 tâches orales avec l’examinateur IA, corrigées avec leur transcription",
+      "Examens TCF complets : les 4 épreuves enchaînées, avec bilan",
+      "2 semaines : 12,99 $ US · 15 tâches orales",
+      "1 mois : 22,99 $ US · 25 tâches orales",
+      "2 mois : 37,99 $ US · 40 tâches orales",
+      "Paiement par carte de crédit, sécurisé par Stripe : un seul paiement, rien ne se renouvelle",
+    ],
+    cta: { label: "Passer à Premium", href: PREMIUM_REQUEST },
+    featured: true,
+  },
+] as const;
+
+export const faqs = [
+  {
+    question: "Qu’est-ce que le TCF Canada ?",
+    answer:
+      "Le Test de connaissance du français pour le Canada évalue votre niveau en français pour les démarches d’immigration et de citoyenneté. Il comprend quatre épreuves : compréhension orale, compréhension écrite, expression écrite et expression orale. Les résultats sont exprimés en niveaux de compétence linguistique canadiens (NCLC).",
+  },
+  {
+    question: "Fluentia est-elle une préparation officielle ?",
+    answer:
+      "Non. Fluentia est une préparation indépendante, sans lien avec France Éducation international, qui conçoit le TCF. Nos séries sont des entraînements au format de l’examen ; aucune préparation ne garantit un résultat.",
+  },
+  {
+    question: "Comment se passe l’oral avec l’examinateur IA ?",
+    answer:
+      "Vous choisissez une tâche, autorisez votre micro, puis vous parlez comme face à un examinateur. Il vous répond à voix haute, vous relance et conclut à la fin du temps officiel. Pour la tâche 2, deux minutes de préparation avec prise de notes précèdent l’échange. Vous recevez ensuite votre correction (niveau, note sur 20, NCLC et conseils) avec la transcription complète.",
+  },
+  {
+    question: "Que devient ma voix ?",
+    answer:
+      "Pendant la conversation, votre voix est transmise en direct au service d’IA vocale qui joue l’examinateur. Fluentia n’enregistre pas l’audio : seule la transcription écrite est conservée dans votre espace. Tous les détails sont dans notre politique de confidentialité.",
+  },
+  {
+    question: "Qu’est-ce que l’Examen TCF de Fluentia ?",
+    answer:
+      "Un examen blanc complet : Écoute, Lecture, Rédaction et Oral, dans l’ordre du test et chacun avec son chrono. Vous pouvez faire une pause entre deux épreuves et reprendre plus tard. Aucune correction n’apparaît pendant l’examen : à la fin, un bilan vous donne votre niveau pour chaque épreuve et votre niveau global estimé, avec le détail de chaque correction.",
+  },
+  {
+    question: "De quel équipement ai-je besoin ?",
+    answer:
+      "Un ordinateur, une tablette ou un téléphone avec un navigateur récent (Chrome, Edge, Safari ou Firefox) et un micro. Un casque ou des écouteurs donnent une conversation plus fluide.",
+  },
+  {
+    question: "Comment fonctionne l’abonnement Premium ?",
+    answer:
+      "Choisissez une formule de 2 semaines (12,99 $ US), 1 mois (22,99 $ US) ou 2 mois (37,99 $ US) dans Mon abonnement, puis payez par carte de crédit sur la page sécurisée de Stripe. Le paiement est unique : rien ne se renouvelle automatiquement, et vous recevez un rappel avant la fin de votre période.",
+  },
+  {
+    question: "Puis-je supprimer mon compte ?",
+    answer:
+      "Oui, à tout moment, depuis Mon profil → Supprimer mon compte. Votre compte et toutes vos données d’entraînement sont effacés immédiatement et définitivement.",
+  },
 ] as const;

@@ -1,6 +1,6 @@
 """Catalogue public limité et tentatives privées protégées par la session Django."""
 
-from django.db.models import Count, Sum
+from django.db.models import Count, OuterRef, Subquery, Sum
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema, OpenApiParameter
@@ -21,7 +21,7 @@ from .serializers import (
     SaveAnswerResponseSerializer,
     ResultSerializer,
 )
-from .services import create_attempt, save_answer, submit_attempt, get_attempt
+from .services import expire_overdue, save_answer, start_attempt, submit_attempt, get_attempt
 from accounts.models import StudentProfile
 from accounts.permissions import VerifiedEmail
 
@@ -77,13 +77,14 @@ class StartAttemptView(APIView):
     permission_classes = [IsAuthenticated, VerifiedEmail]
     throttle_classes = [StartThrottle]
 
-    @extend_schema(request=None, responses={201: AttemptSerializer})
+    @extend_schema(request=None, responses={200: AttemptSerializer, 201: AttemptSerializer})
     def post(self, request, exam_id):
         if request.data:
             raise ValidationError("Le délai et l’examen sont définis par le serveur.")
         exam = get_object_or_404(Exam.objects.filter(is_published=True), pk=exam_id)
-        attempt = create_attempt(user=request.user, exam=exam)
-        return Response(AttemptSerializer(attempt).data, status=status.HTTP_201_CREATED)
+        # Séance de la même série encore ouverte : on la reprend (200) au lieu d’en ouvrir une autre (201).
+        attempt, created = start_attempt(user=request.user, exam=exam)
+        return Response(AttemptSerializer(attempt).data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
 
 
 class AttemptView(APIView):
@@ -93,6 +94,9 @@ class AttemptView(APIView):
     def get(self, request, attempt_id):
         attempt = get_attempt(attempt_id=attempt_id, user=request.user)
         payload = AttemptSerializer(attempt).data
+        # Séance d’un Examen TCF en cours : à la fin, retour à l’examen au lieu du corrigé.
+        from pedagogy.mock_exam import unfinished_run_of
+        payload["mock_exam_run"] = unfinished_run_of(attempt)
         payload["server_now"] = timezone.now().isoformat()
         payload["answers"] = list(attempt.answers.values("question_id", "choice_id"))
         if attempt.status == Attempt.Status.ACTIVE:
@@ -132,6 +136,10 @@ def live_verdict(answer, user):
     Le réglage du profil décide pour toutes les séries : le désactiver remet l’étudiant
     en conditions d’examen, où rien n’est révélé avant la fin.
     """
+    from pedagogy.mock_exam import in_unfinished_run
+    attempt_id = getattr(answer, "attempt_id", None)
+    if attempt_id and in_unfinished_run(attempt=attempt_id):  # Examen TCF : rien n’est révélé avant le bilan
+        return None
     profile = StudentProfile.objects.filter(user=user).first()
     if profile is not None and not profile.live_correction:
         return None
@@ -173,6 +181,9 @@ class AttemptResultsView(APIView):
             return Response(
                 {"detail": "Résultats disponibles après soumission."}, status=409
             )
+        from pedagogy.mock_exam import UNFINISHED, in_unfinished_run
+        if in_unfinished_run(attempt=attempt):
+            return Response({"detail": UNFINISHED}, status=409)
         answers = {a.question_id: a for a in attempt.answers.select_related("choice")}
         payload = result_payload(attempt)
         payload["details"] = [
@@ -217,5 +228,16 @@ class MyAttemptsView(generics.ListAPIView):
     serializer_class = AttemptSerializer
     pagination_class = CataloguePagination
 
+    @extend_schema(parameters=[OpenApiParameter("latest", bool, description="Seulement la dernière séance terminée de chaque série.")])
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
     def get_queryset(self):
-        return Attempt.objects.filter(user=self.request.user).order_by("-started_at")
+        expire_overdue(self.request.user)
+        attempts = Attempt.objects.filter(user=self.request.user).select_related("exam")
+        if self.request.query_params.get("latest") == "1":
+            # Catalogue : la dernière séance terminée de chaque série, pour « Reprendre » et « Ma dernière correction ».
+            done = attempts.filter(status=Attempt.Status.SUBMITTED)
+            last = done.filter(exam=OuterRef("exam")).order_by("-submitted_at").values("pk")[:1]
+            attempts = done.filter(pk=Subquery(last))
+        return attempts.order_by("-started_at")
