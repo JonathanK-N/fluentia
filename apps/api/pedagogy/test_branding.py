@@ -1,4 +1,4 @@
-"""Filigrane des documents : « www.packayoub.com » remplacé par le logo Fluentia au moment de servir l’image."""
+"""Filigrane des documents : l’ancienne mention de site remplacée par le logo Fluentia au moment de servir l’image."""
 
 import io
 import tempfile
@@ -18,7 +18,7 @@ def document(watermark=True, size=(1200, 900), background=(255, 255, 255)):
     for line in range(5):
         draw.rectangle((60, 120 + line * 110, 1140, 150 + line * 110), fill=(20, 20, 20))  # texte noir du document
     if watermark:
-        draw.rectangle((880, 840, 1170, 862), fill=WATERMARK_BLUE)  # ligne « www.packayoub.com »
+        draw.rectangle((880, 840, 1170, 862), fill=WATERMARK_BLUE)  # ligne de l’ancien filigrane
     return image
 
 

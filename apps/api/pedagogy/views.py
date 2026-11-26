@@ -344,7 +344,7 @@ class SeriesActionView(EditorView):
 
 
 def image_response(asset):
-    # Le filigrane Pack Ayoub des anciens documents est remplacé par le logo Fluentia (voir branding.py).
+    # L’ancien filigrane des documents est remplacé par le logo Fluentia (voir branding.py).
     response = HttpResponse(branded_image(asset, read_image(asset)), content_type=asset.content_type)
     response["Cache-Control"] = "private, max-age=3600"
     response["X-Content-Type-Options"] = "nosniff"

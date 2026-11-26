@@ -1,8 +1,8 @@
-"""Filigrane des documents : l’ancienne mention « www.packayoub.com » devient le logo Fluentia.
+"""Filigrane des documents : l’ancienne mention de site en bas des images devient le logo Fluentia.
 
 Les images des questions restent immuables en base (intégrité vérifiée par SHA-256) ; le remplacement
 se fait au moment de les servir, puis la version Fluentia est gardée en cache sur disque.
-Une image sans filigrane Pack Ayoub est renvoyée telle quelle.
+Une image sans cet ancien filigrane est renvoyée telle quelle.
 """
 
 import hashlib
@@ -83,7 +83,7 @@ def _background(image, box):
 
 
 def rebrand(payload, content_type):
-    """Renvoie l’image avec le logo Fluentia à la place du filigrane Pack Ayoub (ou l’image d’origine)."""
+    """Renvoie l’image avec le logo Fluentia à la place de l’ancien filigrane (ou l’image d’origine)."""
     from PIL import Image
 
     with Image.open(io.BytesIO(payload)) as source:

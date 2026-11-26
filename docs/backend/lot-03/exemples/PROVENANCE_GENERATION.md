@@ -1,6 +1,6 @@
 # Proposition audio originale — Brouillon
 
-Texte original proposé dans le lot 03. Audio synthétique français, sans imitation d’une personne réelle. Il contient l’annonce puis la question. Il ne provient ni de Pack Ayoub ni d’une banque d’épreuves officielle.
+Texte original proposé dans le lot 03. Audio synthétique français, sans imitation d’une personne réelle. Il contient l’annonce puis la question. Il ne provient d’aucune banque d’épreuves officielle.
 
 Génération locale dans la CI [40258745356](https://github.com/JonathanK-N/fluentia/actions/runs/40258745356), script au SHA `c46cc0c03e65174add67676fe28ebbf84b62cae4`, artefact `12624430293` « audio-original-brouillon ». Cet artefact a été produit même si le job a ensuite échoué sur un sélecteur du test de progression ; il n’est pas présenté comme une preuve de réussite globale de cette première CI.
 
