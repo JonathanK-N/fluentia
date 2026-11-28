@@ -22,6 +22,7 @@ from .serializers import (
     ResultSerializer,
 )
 from .services import expire_overdue, save_answer, start_attempt, submit_attempt, get_attempt
+from .estimate import qcm_estimate
 from accounts.models import StudentProfile
 from accounts.permissions import VerifiedEmail
 
@@ -147,6 +148,9 @@ def live_verdict(answer, user):
 
 
 def result_payload(attempt: Attempt) -> dict:
+    score = attempt.correct_count if attempt.score is None else attempt.score
+    max_score = attempt.question_count if attempt.max_score is None else attempt.max_score
+    estimate = qcm_estimate(attempt.exam.skill, score, max_score) or {}
     return {
         "attempt_id": str(attempt.pk),
         "status": attempt.status,
@@ -154,10 +158,14 @@ def result_payload(attempt: Attempt) -> dict:
         "question_count": attempt.question_count,
         "percentage": round(100 * attempt.correct_count / attempt.question_count, 1),
         # Tentatives antérieures au barème : un point par bonne réponse.
-        "score": attempt.correct_count if attempt.score is None else attempt.score,
-        "max_score": attempt.question_count if attempt.max_score is None else attempt.max_score,
+        "score": score,
+        "max_score": max_score,
+        # Estimation sur le barème du TCF Canada (score sur 699, niveau CECR, NCLC d’IRCC) : non officielle.
+        "tcf_score": estimate.get("tcf_score"),
+        "level": estimate.get("level"),
+        "nclc": estimate.get("nclc"),
         "official": False,
-        "disclaimer": "Résultat d’entraînement, non officiel. Aucune conversion TCF ou NCLC.",
+        "disclaimer": "Estimation non officielle d’après le barème du TCF Canada : niveau et NCLC indicatifs.",
     }
 
 

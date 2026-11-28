@@ -201,5 +201,5 @@ function Bilan({ bilan, onCorrected }: { bilan: MockBilan; onCorrected: () => vo
 
 function qcmDetail(part: MockBilan["listening"]) {
   if (!part.questions) return "Épreuve non passée · 0 point";
-  return `${part.correct}/${part.questions} bonnes réponses · ${part.score}/${part.max_score} points`;
+  return `${part.correct}/${part.questions} bonnes réponses · ${part.score}/${part.max_score} points${part.nclc ? ` · NCLC ${part.nclc}` : ""}`;
 }

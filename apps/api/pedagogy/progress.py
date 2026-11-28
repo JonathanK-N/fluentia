@@ -4,6 +4,7 @@ from rest_framework import serializers
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from accounts.views import SecureView
+from exams.estimate import qcm_estimate
 from exams.models import Attempt, Answer, Exam
 from .models import SpeakingSession, TaskSubject, WritingCorrection
 
@@ -55,12 +56,10 @@ class ProgressSerializer(serializers.Serializer):
 LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"]
 
 
-def level_of_rate(correct, questions):
-    """Lecture ou Écoute : part de bonnes réponses ramenée à six paliers égaux, de A1 (moins de 16,7 %) à C2 (83,4 % et plus).
-
-    Repère interne : le TCF répartit ses scores 100-699 en six niveaux de largeur égale.
-    """
-    return min(5, int(6 * correct / questions)) if questions else None
+def level_of_attempt(skill, score, max_score):
+    """Lecture ou Écoute : palier CECR (0 = A1 … 5 = C2) du score ramené sur 699, comme le bilan de la séance."""
+    estimate = qcm_estimate(skill, score, max_score)
+    return estimate["step"] if estimate else None
 
 
 def corrected_levels(results):
@@ -124,7 +123,7 @@ class ProgressView(SecureView):
         return Response(
             {
                 "official": False,
-                "disclaimer": "Indicateurs internes sur vos tentatives soumises. Difficultés proposées, sans calibration ni score TCF/NCLC.",
+                "disclaimer": "Indicateurs internes sur vos tentatives soumises. Niveaux estimés d’après le barème du TCF Canada, non officiels.",
                 "groups": groups,
                 "categories": categories,
                 **self.levels(request.user, attempts),
@@ -136,8 +135,10 @@ class ProgressView(SecureView):
     def levels(user, attempts):
         """Niveau moyen de tous les tests envoyés, puis par épreuve, avec la dernière note (du plus récent au plus ancien)."""
         tests = {"reading": [], "listening": [], "writing": [], "speaking": []}
-        for row in attempts.order_by("-submitted_at").values("exam__skill", "correct_count", "question_count"):
-            step = level_of_rate(row["correct_count"] or 0, row["question_count"])
+        for row in attempts.order_by("-submitted_at").values("exam__skill", "correct_count", "question_count", "score", "max_score"):
+            # Tentatives antérieures au barème : un point par bonne réponse.
+            score = row["correct_count"] if row["score"] is None else row["score"]
+            step = level_of_attempt(row["exam__skill"], score or 0, row["max_score"] or row["question_count"])
             if step is not None and row["exam__skill"] in tests:
                 tests[row["exam__skill"]].append((step, round(100 * (row["correct_count"] or 0) / row["question_count"])))
         tests["writing"] = corrected_levels(WritingCorrection.objects.filter(user=user, status=WritingCorrection.Status.DONE)

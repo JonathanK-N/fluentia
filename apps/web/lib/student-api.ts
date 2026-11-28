@@ -38,7 +38,7 @@ export type Question = { id: string; position: number; statement: string; readin
 export type Attempt = {id: string; exam_id: string; status: string; skill: string; mode: string; exam_title: string; expires_at: string; server_now: string; questions?: Question[]; answers: {question_id: string; choice_id: string}[]; mock_exam_run?: number | null};
 export type AttemptSummary = Pick<Attempt, "id" | "status" | "expires_at" | "skill" | "mode" | "exam_title">;
 export type FinishedAttempt = AttemptSummary & { exam_id: string; submitted_at: string; correct_count: number; question_count: number; score: number | null; max_score: number | null };
-export type Results = { correct_count: number; question_count: number; percentage: number; score: number; max_score: number; disclaimer: string; details: {question_id: string; selected_choice_id: string | null; correct_choice_id: string; explanation: string; points: number; statement: string; reading_passage: string; image_available: boolean; image_text: string; choices: {id: string; position: number; label: string}[]; selected_label: string | null; correct_label: string; transcript?: string}[] };
+export type Results = { correct_count: number; question_count: number; percentage: number; score: number; max_score: number; tcf_score: number | null; level: string | null; nclc: string | null; disclaimer: string; details: {question_id: string; selected_choice_id: string | null; correct_choice_id: string; explanation: string; points: number; statement: string; reading_passage: string; image_available: boolean; image_text: string; choices: {id: string; position: number; label: string}[]; selected_label: string | null; correct_label: string; transcript?: string}[] };
 
 // « tcf_score » : note du barème officiel des anciennes corrections d’oral, qui avaient aussi une note Fluentia.
 export type WritingCorrection = { demo: boolean; level: string; score: number; tcf_score?: number; summary: string; feedback?: string; criteria: { id: string; label: string; level?: string; score?: number; comment: string }[]; errors: { original: string; correction: string; explanation: string }[]; improved: string; advice: string[]; goal?: string; off_topic?: boolean; off_topic_reason?: string; disclaimer: string; remaining?: number; id?: number };
@@ -93,7 +93,7 @@ export async function postForm<T>(path: string, body: FormData): Promise<{ ok: b
 // Examen TCF : les 4 épreuves dans l’ordre, puis un bilan global.
 export type MockStepKey = "listening" | "reading" | "writing" | "speaking";
 export type MockExamCard = { id: number; title: string; parts: { key: MockStepKey; name: string; detail: string }[]; run: { id: number; finished: boolean; finished_at: string | null } | null };
-type MockQcm = { level: string; step: number; attempt_id: string | null; score: number; max_score: number; correct: number; questions: number };
+type MockQcm = { level: string; step: number; nclc: string | null; attempt_id: string | null; score: number; max_score: number; correct: number; questions: number };
 export type MockTask = { number: number; title: string; id: number | null; pending: boolean; level: string | null; score: number | null; skipped?: boolean };
 type MockCorrected = { tasks: MockTask[]; level?: string; step?: number; score?: number; nclc?: string };
 export type MockBilan = { overall: string | null; listening: MockQcm; reading: MockQcm; writing: MockCorrected; speaking: MockCorrected; pending: { kind: "writing" | "speaking"; id: number }[] };

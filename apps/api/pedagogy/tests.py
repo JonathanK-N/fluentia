@@ -526,8 +526,12 @@ class PedagogyTests(TestCase):
 
     def test_progress_reports_average_level_and_explored_series(self):
         from .models import SpeakingSession, WritingCorrection
-        from .progress import level_of_rate
-        self.assertEqual([level_of_rate(c, 100) for c in (0, 16, 17, 50, 83, 84, 100)], [0, 0, 1, 3, 4, 5, 5])
+        from exams.estimate import qcm_estimate
+        # Score ramené sur 699 : six paliers de 100 points, NCLC selon les tableaux d’IRCC.
+        self.assertEqual([qcm_estimate("reading", s, 699)["level"] for s in (0, 199, 200, 452, 599, 699)], ["A1", "A1", "A2", "B2", "C1", "C2"])
+        self.assertEqual([qcm_estimate("reading", s, 699)["nclc"] for s in (341, 342, 452, 453, 548, 549)], ["3 ou moins", "4", "6", "7", "9", "10+"])
+        self.assertEqual(qcm_estimate("listening", 458, 699)["nclc"], "7")
+        self.assertEqual(qcm_estimate("reading", 3, 6)["tcf_score"], 350)
         exam = self.exam()
         self.client.force_authenticate(self.student)
         empty = self.client.get("/api/v1/progress/").data

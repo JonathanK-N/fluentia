@@ -25,7 +25,9 @@ from exams.services import close_expired, start_attempt
 from . import speaking
 from .correction import CRITERIA, DISCLAIMER, WORD, nclc, recipient
 from .models import MockExam, MockExamRun, SpeakingSession, WritingCorrection
-from .progress import LEVELS, average, level_of_rate
+from exams.estimate import qcm_estimate
+
+from .progress import LEVELS, average
 from .tasks import FORMATS
 
 STEPS = [
@@ -133,10 +135,10 @@ def current_step(state):
 
 def qcm_part(attempt):
     if attempt is None or attempt.status != Attempt.Status.SUBMITTED or not attempt.question_count:
-        return {"level": "A1", "step": 0, "attempt_id": None, "score": 0, "max_score": 0, "correct": 0, "questions": 0}
-    step = level_of_rate(attempt.correct_count, attempt.question_count)
+        return {"level": "A1", "step": 0, "nclc": None, "attempt_id": None, "score": 0, "max_score": 0, "correct": 0, "questions": 0}
+    estimate = qcm_estimate(attempt.exam.skill, attempt.score or 0, attempt.max_score or attempt.question_count)
     return {
-        "level": LEVELS[step], "step": step, "attempt_id": str(attempt.pk),
+        "level": estimate["level"], "step": estimate["step"], "nclc": estimate["nclc"], "attempt_id": str(attempt.pk),
         "score": attempt.score or 0, "max_score": attempt.max_score or 0,
         "correct": attempt.correct_count, "questions": attempt.question_count,
     }

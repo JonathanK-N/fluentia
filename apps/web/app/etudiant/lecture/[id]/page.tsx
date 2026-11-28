@@ -171,7 +171,7 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
           <div className="bilan-hero-text">
             <p className="bilan-chips"><span>Épreuve {listening ? "02 · Écoute" : "01 · Lecture"}</span><span>{attempt.mode === "simulation" ? "Simulation non officielle" : "Entraînement non officiel"}</span></p>
             <h1 id="resultat">Séance terminée : place au bilan.</h1>
-            <p>Score d’entraînement, sans équivalence TCF ni NCLC. Repassez chaque question ci-dessous pour comprendre où chercher.</p>
+            <p>{results.level ? <>Niveau estimé <strong>{results.level}</strong> · <strong>NCLC {results.nclc}</strong>, d’après le barème du TCF Canada (estimation non officielle). </> : null}Repassez chaque question ci-dessous pour comprendre où chercher.</p>
             <div><Button className="bilan-retry" loading={busy} onClick={retry}><Icon name="refresh" size={15} />Refaire la série</Button></div>
           </div>
         </section>
@@ -183,7 +183,8 @@ export default function ReadingPage({params}: {params: Promise<{id: string}>}) {
       </div>
       <div className="section-title"><h2>Votre score en chiffres</h2></div>
       <Summary label="Votre score en chiffres" items={[
-        { label: "Points obtenus", value: results.score, hint: `Sur ${results.max_score} possibles` },
+        { label: "Niveau estimé", value: results.level ?? "—", hint: results.tcf_score != null ? `Score TCF estimé : ${results.tcf_score} / 699` : `${results.score} points sur ${results.max_score}` },
+        { label: "NCLC estimé", value: results.nclc ? `NCLC ${results.nclc}` : "—", hint: listening ? "Barème IRCC, compréhension orale" : "Barème IRCC, compréhension écrite" },
         { label: "Bonnes réponses", value: <>{results.correct_count}<small className="bilan-of"> / {results.question_count}</small></>, hint: "Questions justes" },
         { label: "Taux de réussite", value: `${results.percentage.toLocaleString("fr-CA")} %`, hint: `${results.correct_count} réponse${results.correct_count > 1 ? "s" : ""} juste${results.correct_count > 1 ? "s" : ""} sur ${results.question_count}`, meter: results.percentage },
       ]} />
