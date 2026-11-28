@@ -183,15 +183,8 @@ class Question(models.Model):
             ),
             models.CheckConstraint(
                 condition=Q(validation_status="draft")
-                | (
-                    Q(
-                        author__isnull=False,
-                        reviewer__isnull=False,
-                        reviewed_at__isnull=False,
-                    )
-                    & ~Q(author=F("reviewer"))
-                ),
-                name="validated_question_has_review",
+                | Q(author__isnull=False, reviewer__isnull=False, reviewed_at__isnull=False),
+                name="validated_question_reviewed",
             ),
         ]
 
@@ -204,14 +197,10 @@ class Question(models.Model):
             exam = Exam.objects.filter(pk=self.exam_id).first()
             if exam is None:
                 raise ValidationError({"exam": "Choisissez un examen existant."})
-            if (
-                not self.author_id
-                or not self.reviewer_id
-                or self.author_id == self.reviewer_id
-                or not self.reviewed_at
-            ):
+            # Relecteur distinct de l’auteur, sauf l’administrateur : vérifié lors de l’approbation (pedagogy.services).
+            if not self.author_id or not self.reviewer_id or not self.reviewed_at:
                 raise ValidationError(
-                    "Une validation exige un auteur et un relecteur distincts, avec date."
+                    "Une validation exige un auteur et un relecteur, avec date."
                 )
             if not self.explanation or (
                 exam.skill == Exam.Skill.READING

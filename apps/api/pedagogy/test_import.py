@@ -115,12 +115,10 @@ class ImportTests(TestCase):
         self.assertEqual(response.status_code, 201, response.data)
         self.assertEqual((response.data["size"], response.data["status"]), (39, "draft"))
         self.assertEqual(BankItem.objects.filter(state="draft").count(), 39)
-        # La personne qui importe ne peut pas approuver sa propre série.
+        # L’administrateur peut relire et publier seul la série qu’il a importée.
         self.post(self.editor, f"bank/series/{response.data['id']}/request_review/")
-        self.assertEqual(self.post(self.editor, f"bank/series/{response.data['id']}/approve/", {"note": "Moi.", "attest": True}).status_code, 400)
-        published = self.post(self.reviewer, f"bank/series/{response.data['id']}/approve/", {"note": "Relu.", "attest": True})
-        self.assertEqual(published.status_code, 200)
-        self.assertEqual(self.post(self.reviewer, f"bank/series/{response.data['id']}/publish/").status_code, 200)
+        self.assertEqual(self.post(self.editor, f"bank/series/{response.data['id']}/approve/", {"note": "Relu.", "attest": True}).status_code, 200)
+        self.assertEqual(self.post(self.editor, f"bank/series/{response.data['id']}/publish/").status_code, 200)
         exam = Exam.objects.get(pk=SeriesImport.objects.get().exam_id)
         self.assertEqual((exam.mode, exam.duration_seconds, exam.is_published), ("simulation", 3600, True))
         self.assertEqual(sum(q.points for q in exam.questions.all()), 699)
@@ -228,6 +226,15 @@ class ImportTests(TestCase):
         row[3] = None
         refused = self.upload("listening", self.zipped(workbook("listening", [row], {"Mode": "Entraînement"}), {"q1.wav": wav()}), "ecoute.zip")
         self.assertIn((2, "Transcription"), {(e["ligne"], e["colonne"]) for e in refused.data["errors"]})
+
+    def test_provenance_is_optional_and_listening_still_publishes(self):
+        row = [1, "A1", "q1.wav", "Bonjour, le train part à 8 h.", None, None, "À quelle heure ?", "7 h", "8 h", "9 h", "10 h", "B", "à 8 h"]
+        sheet = workbook("listening", [row], {"Mode": "Entraînement", "Provenance et droits": None})
+        response = self.upload("listening", self.zipped(sheet, {"q1.wav": wav()}), "ecoute.zip")
+        self.assertEqual(response.status_code, 201, response.data)
+        self.assertEqual(BankItem.objects.get().provenance, "Contenu original Fluentia.")
+        self.assertEqual(self.run_workflow(response.data["id"]).status_code, 200)
+        self.assertTrue(Exam.objects.get(pk=SeriesImport.objects.get().exam_id).is_published)
 
     def test_writing_subjects_replace_the_active_set_after_review(self):
         rows = [

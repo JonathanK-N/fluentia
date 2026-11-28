@@ -143,16 +143,10 @@ class BankItem(models.Model):
                 name="bank_correct_index_valid",
             ),
             models.CheckConstraint(
+                # L’administrateur peut relire son propre import : la personne distincte est vérifiée dans services.
                 condition=~Q(state__in=["approved", "published"])
-                | (
-                    Q(
-                        editor__isnull=False,
-                        reviewer__isnull=False,
-                        reviewed_at__isnull=False,
-                    )
-                    & ~Q(editor=F("reviewer"))
-                ),
-                name="bank_review_distinct",
+                | Q(editor__isnull=False, reviewer__isnull=False, reviewed_at__isnull=False),
+                name="bank_review_complete",
             ),
         ]
 

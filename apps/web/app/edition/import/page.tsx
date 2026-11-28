@@ -179,7 +179,7 @@ function SeriesCard({ item, open, busy, onToggle, onAction, onDelete }: { item: 
       {neverPublished && <Button variant="ghost" className="import-delete" disabled={busy} onClick={onDelete}><Icon name="trash" size={14} />Supprimer</Button>}
     </div>
     {item.status === "review" && <form className="import-review" onSubmit={event => { event.preventDefault(); onAction("approve", { note, attest }, "Série approuvée : elle peut être publiée."); }}>
-      <p><strong>Relecture par une deuxième personne.</strong> La personne qui a importé la série ne peut pas l’approuver.</p>
+      <p><strong>Relecture avant publication.</strong> Une autre personne relit la série ; l’administrateur peut aussi approuver ses propres imports.</p>
       <label>Note de relecture<textarea required value={note} onChange={e => setNote(e.target.value)} maxLength={10000} placeholder="Ce que vous avez vérifié : textes, choix, bonnes réponses, droits des documents…" /></label>
       <label className="import-attest"><input type="checkbox" checked={attest} onChange={e => setAttest(e.target.checked)} />J’atteste avoir relu toute la série (textes, choix, réponses, médias) et vérifié les droits des documents.</label>
       <div className="import-actions">

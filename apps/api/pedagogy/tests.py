@@ -8,6 +8,7 @@ import math
 import struct
 from unittest.mock import patch
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Permission
 from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
@@ -205,15 +206,26 @@ class PedagogyTests(TestCase):
         self.assertEqual(item.events.count(), 4)
 
     def test_self_approval_and_missing_attestation_forbidden(self):
-        item = create_item(self.editor, content())
-        item = transition(self.editor, item.pk, item.revision, "request_review")
-        for actor, attest in [(self.editor, True), (self.reviewer, False)]:
+        # Un éditeur qui n’est pas administrateur ne peut pas approuver sa propre question.
+        editor = get_user_model().objects.create_user(username="editeur-simple", is_staff=True)
+        editor.user_permissions.set(Permission.objects.filter(
+            content_type__app_label="pedagogy", codename__in=["add_bankitem", "change_bankitem", "review_bankitem"]))
+        editor = get_user_model().objects.get(pk=editor.pk)
+        item = create_item(editor, content())
+        item = transition(editor, item.pk, item.revision, "request_review")
+        for actor, attest in [(editor, True), (self.reviewer, False)]:
             with self.assertRaises(ValidationError):
                 transition(
                     actor, item.pk, item.revision, "approve", note="Test", attest=attest
                 )
         item.refresh_from_db()
         self.assertEqual(item.state, "review")
+
+    def test_the_administrator_can_approve_their_own_question(self):
+        item = create_item(self.editor, content())
+        item = transition(self.editor, item.pk, item.revision, "request_review")
+        item = transition(self.editor, item.pk, item.revision, "approve", note="Relu par l’administrateur.", attest=True)
+        self.assertEqual((item.state, item.reviewer_id), ("approved", self.editor.pk))
 
     def test_stale_edit_and_edit_during_review_rejected(self):
         item = create_item(self.editor, content())

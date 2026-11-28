@@ -28,6 +28,7 @@ LETTERS = "ABCD"
 QCM = ("reading", "listening")
 DURATIONS = {"reading": 60, "listening": 35}  # minutes, format de simulation
 MAX_ROWS = 100
+DEFAULT_PROVENANCE = "Contenu original Fluentia."
 MAX_ARCHIVE = 250_000_000
 
 CHOICES = ["Choix A", "Choix B", "Choix C", "Choix D", "Bonne réponse", "Indice"]
@@ -128,7 +129,7 @@ def build_template(skill):
     guide.column_dimensions["A"].width = 110
     guide.append([f"Modèle {SKILLS[skill]} — Fluentia"])
     guide["A1"].font = Font(bold=True, size=14, color=INDIGO)
-    guide.append(["1. Remplissez l’onglet « Série » (titre, provenance et droits des documents)."])
+    guide.append(["1. Remplissez l’onglet « Série » : le titre est obligatoire ; provenance, description et auteur sont facultatifs."])
     guide.append(["2. Remplissez l’onglet « Contenu », sans modifier la ligne des titres de colonnes."])
     for line in GUIDE[skill]:
         guide.append(["• " + line])
@@ -236,10 +237,10 @@ def read_series(book, skill, report):
     elif declared != skill:
         report.add(f"Ce fichier est un modèle {SKILLS[declared]}, pas {SKILLS[skill]}. Choisissez la bonne épreuve ou le bon fichier.", None, "Épreuve")
     report.raise_if_any()
+    if not values.get("Titre"):
+        report.add("« Titre » est obligatoire dans l’onglet « Série ».", None, "Titre")
     for label, limit in (("Titre", 180), ("Provenance et droits", 10000)):
-        if not values.get(label):
-            report.add(f"« {label} » est obligatoire dans l’onglet « Série ».", None, label)
-        elif len(values[label]) > limit:
+        if len(values.get(label, "")) > limit:
             report.add(f"« {label} » dépasse {limit} caractères.", None, label)
     mode = ""
     if skill in QCM:
@@ -248,7 +249,8 @@ def read_series(book, skill, report):
             report.add("Mode : choisissez Simulation ou Entraînement.", None, "Mode")
     return {
         "title": values.get("Titre", "")[:180], "mode": mode, "description": values.get("Description", ""),
-        "provenance": values.get("Provenance et droits", ""), "credit": values.get("Auteur ou autrice", "")[:250],
+        # Facultative : sans précision, les documents sont présentés comme des contenus originaux Fluentia.
+        "provenance": values.get("Provenance et droits") or DEFAULT_PROVENANCE, "credit": values.get("Auteur ou autrice", "")[:250],
     }
 
 

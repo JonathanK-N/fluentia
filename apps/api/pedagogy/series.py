@@ -1,4 +1,4 @@
-"""Circuit d’une série importée : relecture, approbation par une personne distincte, publication."""
+"""Circuit d’une série importée : relecture, approbation (par une autre personne ou par l’administrateur), publication."""
 
 import uuid
 from collections import Counter
@@ -88,8 +88,8 @@ def act_on_tasks(actor, task_set, action, note, attest):
     elif action in ("approve", "reject"):
         require(actor, "review_bankitem")
         expected = "review"
-        if not task_set.editor_id or task_set.editor_id == actor.pk or not note.strip():
-            raise ValidationError("Une relecture documentée par une personne distincte est requise.")
+        if not task_set.editor_id or (task_set.editor_id == actor.pk and not actor.is_superuser) or not note.strip():
+            raise ValidationError("Une relecture documentée, par une autre personne ou par l’administrateur, est requise.")
         if action == "approve" and attest is not True:
             raise ValidationError("Attestez la relecture réelle des sujets, des documents et de leurs droits.")
     else:

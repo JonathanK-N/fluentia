@@ -144,9 +144,10 @@ def transition(actor, item_id, revision, action, note="", attest=False):
     if action == "request_review" and item.state == "draft":
         item.state = "review"
     elif action in ["approve", "reject"] and item.state == "review":
-        if not item.editor_id or item.editor_id == actor.pk or not note.strip():
+        # L’administrateur peut approuver son propre import ; les autres éditeurs ont besoin d’une deuxième personne.
+        if not item.editor_id or (item.editor_id == actor.pk and not actor.is_superuser) or not note.strip():
             raise ValidationError(
-                "Une relecture documentée par une personne distincte est requise."
+                "Une relecture documentée, par une autre personne ou par l’administrateur, est requise."
             )
         if action == "approve":
             if attest is not True:
