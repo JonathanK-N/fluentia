@@ -46,7 +46,7 @@ export function Catalogue({ skill, title = "Vos séries", emptyText }: { skill?:
     <div className="series-grid">{visible?.map(exam => { const last = done[exam.id]; return <article className="series-card" data-done={last ? "true" : undefined} key={exam.id}>
       <div className="series-card-top">
         <span className="series-kind" data-mode={exam.mode}>{exam.mode === "simulation" ? "Simulation complète" : "Entraînement court"}</span>
-        {last ? <span className="series-done"><Icon name="check" size={12} />Déjà faite</span> : <span className="series-version">Version {exam.version}</span>}
+        {last && <span className="series-done"><Icon name="check" size={12} />Déjà faite</span>}
       </div>
       <h3>{exam.title}</h3>
       <p>{exam.description}</p>
