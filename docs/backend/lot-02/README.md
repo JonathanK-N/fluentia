@@ -64,6 +64,6 @@ Depuis `apps/web` : `npx playwright test --config=playwright.student.config.ts`,
 
 ## Contenus et suite
 
-Les trois textes originaux du seed lot 01 restent en brouillon et doivent être relus par des personnes qualifiées. Une proposition complémentaire figure dans [CONTENU_ORIGINAL.md](CONTENU_ORIGINAL.md). Le catalogue vide sur une base réelle non relue est un comportement volontaire, pas une panne. Aucune question propriétaire de Pack Ayoub n’est reprise.
+Les trois textes originaux du seed lot 01 restent en brouillon et doivent être relus par des personnes qualifiées. Une proposition complémentaire figure dans [CONTENU_ORIGINAL.md](CONTENU_ORIGINAL.md). Le catalogue vide sur une base réelle non relue est un comportement volontaire, pas une panne. Aucune question propriétaire d’une autre plateforme n’est reprise.
 
 Limites avant production : HSTS/TLS et proxy à valider, envoi e-mail réel avec reprise, récupération du mot de passe et changement du courriel, politique de rétention/effacement, cache distribué, audit de sécurité et charge. La compréhension orale, expression, IA, paiements, enseignants et PWA restent des lots distincts. Toute fusion du lot 02, promotion vers tests/main ou production exige une nouvelle décision explicite.

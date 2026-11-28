@@ -61,7 +61,7 @@ Exemple de sauvegarde : `{"question_id":"UUID", "choice_id":"UUID"}`.
 - La limite d'une seule bonne réponse est appliquée au niveau de la base ; un contrôle garantissant **au moins** une bonne réponse doit être ajouté avant publication.
 - Pas encore de journal d'audit métier, de quotas anti-abus ni de protection renforcée contre la copie de médias audio.
 - L'API est destinée à être protégée par le mécanisme d'authentification déjà en place ; une intégration CSRF/session de production est à finaliser.
-- Les questions fournies sont originales et illustratives, sans prétention d'être des sujets officiels ou des reproductions de Pack Ayoub.
+- Les questions fournies sont originales et illustratives, sans prétention d'être des sujets officiels ou des reproductions d'une autre plateforme.
 
 ## Cycle de validation
 
