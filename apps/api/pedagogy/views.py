@@ -28,7 +28,6 @@ from exams.serializers import ExamListSerializer
 from exams.views import CataloguePagination
 from .models import BankItem, ImageAsset, SpeakingSession, TaskSubject, WritingCorrection
 from . import mock_exam, speaking, speaking_correction
-from .branding import branded_image
 from .correction import NCLC_GOAL, WORD, AnswerIncomplete, CorrectionUnavailable, correct, nclc, provider, stored_answer
 from . import series as workflow
 
@@ -344,8 +343,7 @@ class SeriesActionView(EditorView):
 
 
 def image_response(asset):
-    # Le filigrane Pack Ayoub des anciens documents est remplacé par le logo Fluentia (voir branding.py).
-    response = HttpResponse(branded_image(asset, read_image(asset)), content_type=asset.content_type)
+    response = HttpResponse(read_image(asset), content_type=asset.content_type)
     response["Cache-Control"] = "private, max-age=3600"
     response["X-Content-Type-Options"] = "nosniff"
     return response
